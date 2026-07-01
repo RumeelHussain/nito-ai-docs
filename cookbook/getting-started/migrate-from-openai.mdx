@@ -1,0 +1,102 @@
+---
+title: Migrate from OpenAI
+description: Repoint your OpenAI SDK code at Nito by changing three things: base URL, key, and model ID.
+---
+
+## Goal
+
+Move existing OpenAI SDK code onto Nito without rewriting your application. When you finish, the same Chat Completions calls run against Nito's catalog.
+
+## Prerequisites
+
+- Code that already uses the OpenAI SDK (Python or TypeScript) or hits `POST /v1/chat/completions` directly.
+- A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
+- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+
+## The three changes
+
+Migration is a base-URL swap. You change exactly three things and leave the rest of your code alone:
+
+1. **Base URL** points at the Nito gateway plus `/v1`.
+2. **API key** becomes your `z_sk_` key.
+3. **Model ID** becomes a Nito catalog ID, not an OpenAI name like `gpt-4o`.
+
+## Step 1: Repoint the client
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="z_sk_your_key_here",              # was your OpenAI key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # was https://api.openai.com/v1
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",                          # was e.g. gpt-4o
+    messages=[
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "z_sk_your_key_here",              // was your OpenAI key
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // was https://api.openai.com/v1
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",                         // was e.g. gpt-4o
+  messages: [{ role: "user", content: "Say hello in one short sentence." }],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Step 2: Map your model names
+
+OpenAI model names do not exist on Nito. Fetch the live catalog and pick equivalents by capability:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+Select IDs at runtime from this list rather than pasting a name into your source, because the catalog is discovered from providers and changes over time.
+
+## Walkthrough
+
+Nito implements the OpenAI Chat Completions protocol, so `messages`, `temperature`, `top_p`, `max_tokens`, `tools`, `tool_choice`, streaming, and the `chat.completion` response shape all carry over unchanged. The SDK appends `/chat/completions` to your base URL, which is why the base URL must end in `/v1`.
+
+To select a privacy mode, add a suffix to the model ID (`grok-4.3:tee`). No request-body field controls privacy; it is purely the model string. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## What does not carry over
+
+- **The Responses API is not served.** `POST /v1/responses` returns `404` on Nito. If your code calls `client.responses.create(...)`, port it to `client.chat.completions.create(...)` first. Chat Completions is the supported surface.
+- **OpenAI model names.** `gpt-4o` and friends are not catalog IDs. Always substitute a Nito ID.
+- **End-to-end TEE and streaming together.** `:e2e-tee` does not stream. Use `:tee` if you need streaming with attestation.
+
+Do not assume OpenAI-specific behaviors that are not part of the Chat Completions contract. If a feature is not documented for Nito, treat it as unverified rather than importing OpenAI's semantics.
+
+## Next steps
+
+- See the drop-in details and caveats: [OpenAI SDK drop-in](/get-started/quickstart-openai-sdk).
+- Map names systematically: [OpenAI drop-in model mapping](/sdks/openai-drop-in/model-mapping).
+
+## Related
+
+- [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
+- [OpenAI drop-in compatibility notes](/sdks/openai-drop-in/compatibility-notes)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (/v1/responses -> 404), §2 (apiChatRequest fields), §5 (catalog discovery, model-ID suffix), §8 (z_sk_) -->

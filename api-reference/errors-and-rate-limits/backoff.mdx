@@ -1,0 +1,54 @@
+---
+title: Backoff
+description: Use exponential backoff with jitter, honor Retry-After, and understand the upstream circuit breaker.
+---
+
+When retrying a [retryable error](/api-reference/errors-and-rate-limits/retry-behavior), use exponential backoff with jitter and always honor `Retry-After` when present.
+
+## Recommended client backoff
+
+1. On a `429`, wait for the duration in the `Retry-After` header before retrying. Treat it as a floor.
+2. On a transient `502`/`503` without `Retry-After`, back off exponentially: roughly double the wait each attempt (for example 1s, 2s, 4s, 8s).
+3. Add random jitter to each wait so concurrent clients do not retry in lockstep.
+4. Cap the number of attempts and the maximum wait, then surface the error with its `X-Request-ID`.
+
+`Retry-After` takes precedence over your computed backoff. If the header says wait longer, wait longer.
+
+## Pseudocode
+
+```text
+attempt = 0
+while attempt < max_attempts:
+    response = send(request)
+    if response.ok:
+        return response
+    if not retryable(response.code):
+        raise response
+    if response.has("Retry-After"):
+        wait = response.retry_after_seconds
+    else:
+        wait = min(base * 2 ** attempt, max_wait)
+    sleep(wait + random_jitter())
+    attempt += 1
+```
+
+See [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior) for which codes are retryable.
+
+## Upstream circuit breaker
+
+The gateway runs a circuit breaker in front of upstream providers. When a provider trips the breaker, the gateway stops sending to it for a cooldown window rather than hammering a failing upstream.
+
+| Setting | Value |
+|---|---|
+| Failure threshold | 3 |
+| Cooldown | 30 seconds |
+
+This is server-side and automatic. While a provider is in cooldown you may see `unavailable` (`503`) or `provider_error` (`502`) responses; back off and retry as above, and the breaker will let traffic resume after the cooldown.
+
+## Related
+
+- [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (Retry-After), §9 config (PROVIDER_CIRCUIT_BREAKER threshold 3, cooldown 30s) -->

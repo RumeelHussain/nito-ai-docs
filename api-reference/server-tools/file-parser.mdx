@@ -1,0 +1,108 @@
+---
+title: File parser
+description: Extract text from documents server-side via the attachments parse and text-parser endpoints, with size and content caps.
+---
+
+The file parser extracts text from documents server-side. It is a REST endpoint, not a chat tool. There are two routes: `/api/v1/attachments/parse` (returns a rich envelope) and `/api/v1/augment/text-parser` (returns text plus a token estimate). Both use the same uploader and parser.
+
+Both require `multipart/form-data`. Images are rejected; send images directly to an image-capable model.
+
+## `POST /api/v1/attachments/parse`
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -F "file=@report.pdf" \
+  -F "trust_tier=anon" \
+  -F "parse_mode="
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+### Form fields
+
+| Field | Values | Notes |
+|---|---|---|
+| `file` | file upload | Required. The document to parse. |
+| `trust_tier` | `anon`, `private`, `tee` | Privacy tier for the parse. `e2e-tee` is not supported here. |
+| `parse_mode` | `""`, `server`, `auto` | Empty string is the default. |
+
+### Accepted file kinds
+
+`text`, `pdf`, `docx`, `pptx`, `xlsx`, `xls`. Images are rejected with a message to send them directly to an image-capable model.
+
+### Size cap
+
+The upload limit is 10 MiB. An oversize upload returns `413`.
+
+### Response
+
+| Field | Type | Notes |
+|---|---|---|
+| `text` | string | Extracted text. |
+| `mime_type` | string | Detected MIME type. |
+| `file_kind` | string | One of the accepted kinds above. |
+| `bytes` | int | Size of the uploaded file. |
+| `page_count` | int | Optional. Total pages (PDF). |
+| `parsed_pages` | int | Optional. Pages actually parsed. |
+| `truncated` | bool | Optional. Whether output was truncated by a cap. |
+| `warnings` | array | Non-fatal issues encountered during parsing. |
+
+```json
+{
+  "text": "...",
+  "mime_type": "application/pdf",
+  "file_kind": "pdf",
+  "bytes": 482113,
+  "page_count": 120,
+  "parsed_pages": 80,
+  "truncated": true,
+  "warnings": ["page limit reached"]
+}
+```
+
+### Parsing caps
+
+| Cap | Value |
+|---|---|
+| Output length | 300,000 characters |
+| PDF pages | 80 |
+| PDF parse timeout | 10 seconds |
+
+When a cap is hit, `truncated` is set and a `warnings` entry explains it. In the example above, a 120-page PDF parsed only its first 80 pages.
+
+## `POST /api/v1/augment/text-parser`
+
+Same upload and parser, but a different response shape and an extra field.
+
+| Field | Values | Notes |
+|---|---|---|
+| `file` | file upload | Required. |
+| `trust_tier` | `anon`, `private`, `tee` | As above. |
+| `parse_mode` | `""`, `server`, `auto` | As above. |
+| `response_format` | `json` (default), `text` | Output format. |
+
+The JSON response is:
+
+```json
+{ "text": "...", "tokens": 1234 }
+```
+
+`tokens` is an estimate (roughly characters divided by 4). The `text` response format returns the extracted text directly.
+
+## Billing
+
+A parse is billed as `z-protocol/document-parse`, one unit per request, in addition to any model usage. See [Tool pricing](/api-reference/server-tools/tool-pricing).
+
+## Notes
+
+- `e2e-tee` is not a valid `trust_tier` for parsing.
+- Chat can also parse documents inline (PDF/docx/pptx/xlsx/xls/text) via `file` content parts; this endpoint is the standalone equivalent.
+
+## Related
+
+- [Tool pricing](/api-reference/server-tools/tool-pricing)
+- [Tool errors](/api-reference/server-tools/tool-errors)
+- [Web search](/api-reference/server-tools/web-search)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §4 (apiAttachmentParseHandler, apiTextParserHandler, caps, response fields, z-protocol/document-parse), §1 (routes.go) -->

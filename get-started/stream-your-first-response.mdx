@@ -1,0 +1,119 @@
+---
+title: Stream your first response
+description: Turn on streaming and read Nito's token stream. Streaming is a first-class default, not an advanced topic.
+---
+
+Streaming sends the response back token by token as the model produces it, instead of making you wait for the whole answer. A token is a small chunk of text, often a word fragment, and a model generates them one after another. Without streaming you hold the connection open until the last token is done and then receive everything at once. With streaming you receive each token as it is produced, so a person reading the output sees it appear live, the way it does in a chat app. For anything a human reads in real time, streaming is what makes the experience feel fast. On Nito, streaming is a first-class part of the chat API: you turn it on with one field and read a stream of small JSON chunks.
+
+## Why streaming uses a different transport
+
+A normal request gives you one response and closes. Streaming needs the connection to stay open while many small messages flow back, so Nito uses Server-Sent Events (SSE: a simple, one-way text protocol where the server pushes messages over a long-lived HTTP connection, each message a line beginning with `data:`). You do not have to implement SSE yourself in the SDKs, but knowing the shape helps when you debug a raw stream or build your own client.
+
+## Turn it on
+
+Set `stream: true` on the same chat request you already know:
+
+<CodeGroup>
+
+```bash curl
+curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "stream": true,
+    "messages": [{ "role": "user", "content": "Write a haiku about privacy." }]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(api_key="z_sk_your_key_here", base_url="https://YOUR-NITO-BASE-URL/v1")
+
+stream = client.chat.completions.create(
+    model="grok-4.3",
+    messages=[{"role": "user", "content": "Write a haiku about privacy."}],
+    stream=True,
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="", flush=True)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://YOUR-NITO-BASE-URL/v1" });
+
+const stream = await client.chat.completions.create({
+  model: "grok-4.3",
+  messages: [{ role: "user", content: "Write a haiku about privacy." }],
+  stream: true,
+});
+for await (const chunk of stream) {
+  const delta = chunk.choices[0]?.delta?.content;
+  if (delta) process.stdout.write(delta);
+}
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The `-N` flag in the curl example disables curl's own buffering so you see tokens arrive as they come rather than all at once at the end. The SDKs handle the stream for you: you just iterate over the chunks, and each loop pass gives you the next delta.
+
+## What the stream looks like
+
+Each SSE event carries one chunk. Here is a complete short stream, start to finish:
+
+```
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Sealed "},"finish_reason":null}]}
+
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"and private"},"finish_reason":null}]}
+
+data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+How to read it:
+
+- Each chunk is a `chat.completion.chunk` object. The new text is in `choices[0].delta.content`. ("Delta" means the increment: just the new piece, not the whole answer so far.)
+- The first chunk usually carries `delta.role: "assistant"` and no content. The role is sent once, at the start. Concatenate `content` from the chunks that follow to rebuild the full reply.
+- The final content chunk has `finish_reason` set (for example `stop`). Earlier chunks have it as `null`. The four possible values are the same as for a non-streaming reply: `stop`, `length`, `tool_calls`, `error`.
+- The stream ends with the literal line `data: [DONE]`. Stop reading there. This is a sentinel, not JSON: do not try to parse it.
+- You may see periodic `: keep-alive` comment lines. SSE comments begin with a colon. These are heartbeats sent roughly every 15 seconds to hold the connection open during quiet stretches. Ignore them.
+
+## Getting usage from a stream
+
+Token usage is not in the normal content chunks, because the totals are only known once generation finishes. To receive it, ask for it with `stream_options`:
+
+```json
+{ "model": "grok-4.3", "stream": true, "stream_options": { "include_usage": true }, "messages": [ ... ] }
+```
+
+Nito then sends one extra chunk near the end with an empty `choices` array (`"choices": []`) and a populated `usage` object, just before `data: [DONE]`. So your reader should expect a final chunk that carries no content but does carry the token counts.
+
+## Errors mid-stream
+
+Streaming changes how errors arrive, and this trips people up. Once the stream has started, Nito has already sent HTTP status `200`, so it cannot then send a `4xx` or `5xx` status. Instead, if something fails partway through, Nito sends a chunk carrying a top-level `error` object and a final choice with `finish_reason: "error"`. The lesson: always inspect each chunk for an `error` field, not just the HTTP status. (If the failure happens before any byte is written, you do get a normal HTTP error instead, because no `200` has been sent yet.)
+
+## Common mistakes
+
+- **Parsing the stream as one JSON document.** It is many `data:` lines, not one object. Split on blank lines and parse each `data:` payload separately.
+- **Forgetting `[DONE]`.** Treat the literal `data: [DONE]` as the end signal; do not JSON-parse it.
+- **Expecting usage by default.** Add `stream_options.include_usage: true` to get the usage chunk; without it there is no usage in the stream.
+- **Ignoring mid-stream errors.** A `200` status does not guarantee success. Check each chunk for `error`.
+- **Streaming with `:e2e-tee`.** End-to-end encrypted TEE calls do not stream, by design. Use `:tee` if you want streaming together with attestation.
+
+## Related
+
+- [Streaming format reference](/api-reference/streaming-format)
+- [Make your first request](/get-started/make-your-first-request)
+- [Tool call streaming](/api-reference/streaming-format/tool-call-streaming)
+
+<!-- source: internal/server/sse.go (prepareSSE, sseHeartbeatInterval 15s, ": keep-alive", text/event-stream), internal/server/api_chat.go (streamAPIChatCompletion, apiChatChunk, choices[]), internal/server/api_chat_response.go (writeChatChunk, writeChatUsageChunk include_usage, writeChatStreamError, [DONE]), internal/inference/contracts.go (FinishReason), internal/inference/validation.go (streaming not supported with E2E-TEE) -->

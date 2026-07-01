@@ -1,0 +1,61 @@
+---
+title: Privacy Overview
+description: What "private" means on Nito. Privacy is selectable per call, metadata-only by default, and verifiable on the top tiers through attestation.
+---
+
+Most AI platforms treat privacy as an account setting. You pick a plan, and every request you ever send inherits whatever that plan promises. Nito does not work that way. On Nito, privacy is a property of **each request**, chosen at call time, and on the strongest tiers it comes with a proof you can check yourself instead of a promise you have to trust. This page is the narrative entry to that idea. If you are a security reviewer, read this first; it frames everything in the rest of this section.
+
+If you read only one sentence, read this one: **the model ID you send selects both the model and how private the call is, and a privacy mode never silently downgrades.** Everything below expands on that.
+
+## Privacy is per call, not per plan
+
+There is no "private account" toggle and no privacy field in the request body. Instead, the privacy mode rides on the `model` string itself. The base part of the string names the model; an optional suffix asks for a stronger mode. The same API key, in the same application, can send a throwaway request in ordinary mode and a highly sensitive request inside a sealed, attested environment, with the only difference being a suffix.
+
+This matters because the strongest modes have real costs (fewer eligible backends, no streaming on the very top mode). Letting you match protection to the sensitivity of each call means you pay those costs only where a request actually needs them, instead of forcing every routine call through the heaviest machinery. The full mechanics of selection are in [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## The modes you can ask for
+
+Nito exposes a small, fixed set of public privacy modes. Internally these map onto three stored tiers (`anon`, `private`, `tee`), but what you select from is this list:
+
+| Mode | How you get it | What it means in plain terms |
+|---|---|---|
+| `ordinary` | No suffix, on an ordinary-tier model | Standard routing. By default the gateway keeps metadata only, not your prompt or the reply. |
+| `private` | No suffix, on a private-tier model | Routed to a privately configured backend with zero-data-retention enforced at the provider. |
+| `tee` | `:tee` suffix | Runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box. You can fetch an attestation and verify the call really ran there. |
+| `e2e-tee` | `:e2e-tee` suffix (plus encryption headers) | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. Non-streaming, supported on NEAR and Phala only. |
+
+Note that you never type `:ordinary`, `:anon`, or `:private`. Those modes are reached by sending the plain model ID; the model's own tier decides whether a suffix-free call is ordinary or private. The **only** valid suffixes are `:tee` and `:e2e-tee`. Anything else is rejected.
+
+## Metadata-only by default
+
+Even an ordinary call is not a free-for-all. The gateway's default posture is **metadata only**. Prompts, completions, reasoning, tool calls, and uploaded file contents are request-local: they are used to serve your request and are not persisted by the gateway. Telemetry is restricted to a safe allowlist of fields, and inference responses are served with `Cache-Control: no-store`. Where a chat history exists, for example in a browser app, it lives on the client side and is encrypted, not on the gateway.
+
+That default is the floor. The `private`, `tee`, and `e2e-tee` modes build assurance on top of it. The precise contract, including what is and is not retained and how it is enforced upstream, is in [Zero data retention](/privacy/zero-data-retention).
+
+## Verifiable assurance, not "trust us"
+
+The reason the TEE modes are different is that they replace a promise with something you can check. When a call runs inside a TEE, the provider produces an **attestation**: a signed statement about the sealed environment that ran the call. You can fetch that attestation and verify it independently. The result is **attested** and **verifiable**. We use those words deliberately, because the assurance rests on a proof you can check, not on an absence of trust.
+
+There is one important boundary that a security reviewer should understand up front. The Nito gateway performs **baseline attestation verification**. It checks that the evidence is present and well-formed, that the proof format and signing material are there, that the nonce you supplied is echoed back, and that the report-data binding (`report_data == signing_address + nonce`) holds. What the gateway does **not** do is verify the full hardware quote: it does not validate Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. That full hardware-quote verification is delegated to the client through a "verify-yourself" path. In other words, the gateway gives you a fast, baseline-verified answer, and hands you everything you need to do the deeper hardware verification yourself.
+
+This split is the whole reason the assurance is credible. If the gateway claimed to fully verify everything, you would be back to trusting the gateway. By doing the baseline and handing you the raw evidence, it lets you be the final verifier. The gate-by-gate detail of what the baseline checks is in [Privacy architecture](/privacy/privacy-architecture).
+
+## A mode never silently downgrades
+
+This is the single most important behavior for a security reviewer to internalize. If you ask for `:tee` and no TEE-capable backend can serve the call, the call **fails**. It does not quietly fall back to an ordinary backend. The same is true for `:e2e-tee`. A privacy guarantee that silently weakens is worse than no guarantee, so Nito refuses rather than downgrades. When you see a successful response to a `:tee` or `:e2e-tee` request, you can be sure it was served at the mode you asked for.
+
+## How to think about choosing a mode
+
+- **Ordinary** for routine, low-sensitivity work where metadata-only retention is enough.
+- **Private** when you want zero-data-retention enforced at the provider but do not need hardware proof.
+- **`:tee`** when you want the call to run in a sealed environment and want to verify it did.
+- **`:e2e-tee`** when the data must be encrypted to the sealed environment itself and you can accept non-streaming, NEAR/Phala-only operation.
+
+## Related
+
+- [Per-call privacy modes](/privacy/per-call-privacy-modes) - the suffix mechanism and worked examples for each mode.
+- [Privacy architecture](/privacy/privacy-architecture) - where privacy is enforced at each hop, request to billing.
+- [Zero data retention](/privacy/zero-data-retention) - exactly what is and is not retained, and how it is enforced upstream.
+- [How Nito works](/get-started/how-nito-works) - the request lifecycle this section builds on.
+
+<!-- source: internal/models/models.go (ParseLogicalModelIDForPublicMode, PublicPrivacyMode*, privacy tiers lines 34-46), internal/server/logical_models.go (chooseLogicalRoute), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/architecture/tee-attestation.md, docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 -->

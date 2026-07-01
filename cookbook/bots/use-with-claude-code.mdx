@@ -1,0 +1,42 @@
+---
+title: Use with Claude Code
+description: A short recipe pointer for routing Claude Code through Nito via OpenAI compatibility. The Anthropic Messages path is not served.
+---
+
+Claude Code is an Anthropic-oriented CLI. To use it with Nito, you route it through Nito's **OpenAI-compatible** surface, not the Anthropic-native one. Nito does not serve the Anthropic Messages API: `POST /v1/messages` returns 404. Any path that expects native Anthropic calls will not reach Nito.
+
+This page is a recipe pointer. The full, maintained setup lives in the [Claude Code editor integration](/sdks/editor-integrations/claude-code).
+
+## The three values
+
+Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an Anthropic name like `claude-3-5-sonnet` or an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+Fetch a real model ID from the live catalog:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## The Anthropic path does not apply
+
+Nito's compatible surface is OpenAI Chat Completions at `POST /v1/chat/completions`. The Anthropic Messages API and its token-counting endpoint return 404. If your version of Claude Code can only speak the Anthropic-native protocol, it cannot reach Nito. Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
+
+## Notes
+
+- Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from an interactive CLI. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- For the current settings path and troubleshooting, follow the [Claude Code editor integration](/sdks/editor-integrations/claude-code) page.
+
+## Related
+
+- [Claude Code editor integration](/sdks/editor-integrations/claude-code)
+- [Use with Codex](/cookbook/bots/use-with-codex)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; anthropic messages 404 routes.go:142-143) -->

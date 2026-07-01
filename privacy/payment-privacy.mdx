@@ -1,0 +1,63 @@
+---
+title: Payment Privacy
+description: How spend and payment can stay separate from your prompts on Nito, including the x402 on-chain USDC top-up and per-org usage aggregation.
+---
+
+Privacy on an AI gateway is usually framed around prompts and completions. Payment is the other half, and it is easy to overlook. How you fund an account, and how spend is recorded, is its own kind of metadata. This page describes what Nito actually does with payment and balance today, in plain factual terms, and is careful to mark anything that is a privacy *guarantee* rather than an observable behavior. The goal is to be modest and accurate, not to oversell.
+
+If you read one idea from this page, read this one: **payment on Nito is a funding rail and a ledger, kept separate from the content of your requests; spend is aggregated per organization, not stitched to individual prompts.**
+
+## Two ways to fund a balance
+
+Nito tracks credit as a balance you draw down as you use the gateway. There are two ways to add to it:
+
+- **Stripe funding.** The standard path. You add credit through Stripe checkout, the same way most platforms handle card payments.
+- **x402 stored-balance top-up.** An on-chain alternative. Nito supports topping up your stored balance using **USDC on the Base network**, via the x402 `exact` payment scheme. This is a payment rail: it moves USDC to fund your balance, and from there usage works exactly as it does with a Stripe-funded balance.
+
+Both paths land in the same place: a balance the gateway draws against. Nothing about which funding path you used changes how your inference requests are routed or what is retained for them.
+
+<Note>
+The x402 top-up is a payment mechanism only. It funds a stored balance with on-chain USDC on Base. It is not a token, a staking system, or a validator mechanism, and it has no bearing on how inference runs.
+</Note>
+
+## How spend is recorded
+
+Usage is metered against your balance through a ledger. Two properties matter for privacy:
+
+- **Spend is aggregated per organization.** Usage rolls up to the org (the account that owns billing and keys), reported through the org's balance and usage overview. It is accounting, not a transcript.
+- **The ledger records cost, not content.** The billing path works from token counts and unit costs to size a hold and then settle it. The prompt and completion themselves are request-local and are not persisted by the gateway, consistent with the metadata-only default described in the [Privacy overview](/privacy/overview).
+
+In other words, the billing system knows *that* a request happened and *what it cost*, in aggregate per org. It is not designed to keep a record of *what the request said*.
+
+## What is observable versus what is guaranteed
+
+It is worth drawing a clean line here, because a reviewer should not have to guess which claims are load-bearing.
+
+**Observable in the system today:**
+
+- Two funding paths exist (Stripe and x402 USDC on Base, scheme `exact`).
+- Balance is tracked in a ledger and usage aggregates per org.
+- Inference prompts and completions are not persisted by the gateway.
+
+**Not something this page asserts as a guarantee:**
+
+Any stronger statement, for example that a funding transaction is unlinkable to a specific request, that on-chain top-ups provide payer anonymity, or that there is a formal separation guarantee between payment identity and usage, is a privacy *claim* that is not established in code. We do not assert it.
+
+> **TODO (needs SME):** any specific privacy guarantee about payments (unlinkability of funding to requests, payer anonymity for on-chain top-ups, formal separation of payment identity from usage). State only what Legal/Finance can stand behind (owner: Finance/Legal).
+
+> **TODO (needs SME):** retention and visibility of payment records and on-chain transaction references, and how long funding history is kept (owner: Finance/Legal).
+
+## Practical guidance
+
+- If your concern is keeping prompt content out of billing systems, that is already the default: billing works from aggregated cost, not content.
+- If your concern is payer identity, treat the funding path as you would any payment: a Stripe payment carries the identity Stripe sees, and an on-chain USDC top-up carries whatever the Base transaction exposes. Neither is asserted here to be anonymous.
+- If you need a contractual statement about payment privacy, that belongs in a Data Processing Addendum and is tracked in [DPA](/privacy/dpa), not promised informally here.
+
+## Related
+
+- [Privacy overview](/privacy/overview) - the metadata-only default that billing aggregation sits on top of.
+- [Provider-side enforcement](/privacy/provider-side-enforcement) - how request content is constrained at the provider.
+- [DPA](/privacy/dpa) - where contractual payment and data terms will live.
+- [Compliance posture](/privacy/compliance-posture) - what is and is not asserted about handling of account data.
+
+<!-- source: internal/billing/x402 (x402 top-up, USDC/Base, scheme exact), internal/billing/enforcement.go, internal/billing/ledger_holds.go, internal/billing/state_machine.go, internal/server/api_billing*.go (checkout, x402/top-up, org balance/overview); DOCS_SOURCE_OF_TRUTH.md §1, §8, §10 -->

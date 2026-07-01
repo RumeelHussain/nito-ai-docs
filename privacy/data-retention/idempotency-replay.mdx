@@ -1,0 +1,48 @@
+---
+title: Idempotency and Replay
+description: The Idempotency-Key header drives billing dedup so a retried request is not double-charged. The replay-retention window is unconfirmed.
+---
+
+Network calls fail and get retried. If a retry silently re-ran a paid inference call, you could be charged twice for one logical request. Nito addresses this with an **idempotency key**: a header you attach to a request so the gateway can recognize a retry of the same logical operation and avoid double-billing it. This page explains what the mechanism actually does, and is careful about what it does **not** confirm.
+
+## The mechanism: billing dedup
+
+You attach the key as a header:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Idempotency-Key: 3f1a9c2e-7b4d-4e1a-9f2c-8a6b5d4e3c21" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"grok-4.3","messages":[{"role":"user","content":"hello"}]}'
+```
+
+> **TODO (needs SME):** confirm the canonical example request and base URL once the production gateway URL is fixed (owner: Product/Infra).
+
+The key must be a **UUID**. Its role in the code is scoped to **billing deduplication**: it is carried as the idempotency key on the billing authorization for the request, so that a retried request matching the same key is not double-charged. In other words, the value the key delivers is financial safety on retries, not a general-purpose response cache.
+
+A useful way to hold it: the idempotency key tells the **billing** layer "this is the same operation you already saw," so the hold-and-settle accounting is not applied twice.
+
+## What is NOT confirmed: the replay-retention window
+
+Product materials sometimes describe a **24-hour idempotency replay window** (the idea that a stored result is replayed for 24 hours). That specific window is **not verifiable in the gateway code scanned for this documentation.** The idempotency key's observable role is billing dedup; no response-replay cache with a 24-hour retention was found in the server layer. The only 24-hour constants in the code are unrelated (OAuth token TTL, an email-token TTL, a spend-cap reservation, and the free-tier daily reset), and reusing any of those as "the idempotency window" would be wrong.
+
+This is a case where honesty matters more than completeness. Do not treat "24h" as a fact.
+
+> **TODO (needs SME):** idempotency replay/retention window (owner: Backend). The mechanism exists for billing dedup; any specific replay-retention window is unconfirmed and may live in infrastructure or SQL migrations not covered by this scan.
+
+## What you can rely on today
+
+- An `Idempotency-Key` header is accepted and **must be a UUID**.
+- Its confirmed effect is **billing deduplication**: a retried request carrying the same key is not double-charged.
+- There is **no confirmed response-replay cache** and **no confirmed retention window** for idempotency in the scanned server code.
+
+So you can safely use the key to make retries financially safe. You should not, today, design around a guaranteed window during which a previous response will be replayed verbatim, because that behavior is unconfirmed.
+
+## Related
+
+- [Data retention](/privacy/data-retention): the retention contract and its unconfirmed-window framing.
+- [Metadata-only default](/privacy/data-retention/metadata-only-default): the baseline that the idempotency key sits alongside.
+- [How Nito works](/get-started/how-nito-works): the billing hold-and-settle lifecycle the key protects.
+
+<!-- source: internal/server/api_billing.go (AuthorizeInferenceRequest.IdempotencyKey), internal/server/api_chat.go (Idempotency-Key header, UUID), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §7 (Idempotency), §10 (idempotency replay 24h: NOT CONFIRMED) -->

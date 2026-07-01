@@ -1,0 +1,36 @@
+---
+title: Base URL
+description: The single Nito gateway host and the two version prefixes every endpoint is served under.
+---
+
+Every Nito API call goes to one gateway host, under one of two version prefixes. There are no regional variants and no per-service hostnames.
+
+```text
+https://YOUR-NITO-BASE-URL/v1/...        # OpenAI-compatible
+https://YOUR-NITO-BASE-URL/api/v1/...    # first-party
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address (`http://127.0.0.1:8080`); replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+## The two prefixes
+
+| Prefix | Purpose |
+|---|---|
+| `/v1/...` | OpenAI-compatible surface. Use it to point existing OpenAI-style clients at Nito by swapping the base URL. Covers chat completions, embeddings, image generations, and models. |
+| `/api/v1/...` | First-party surface. Covers everything in `/v1` plus Nito-only endpoints such as `/chat/fusion`, `/attachments/parse`, `/model-groups`, `/tee/attestation`, orgs, billing, and account routes. |
+
+Where an endpoint exists under both prefixes, both paths share the same handler and behave identically. Endpoints that are Nito-only (for example `/api/v1/chat/fusion`) have no `/v1` alias.
+
+Pick `/v1` when you want drop-in OpenAI compatibility, and `/api/v1` when you need the full Nito feature set. You can mix them in the same application.
+
+## No regional or service variants
+
+There is one host. The gateway does not expose region-specific endpoints (no `us.` / `eu.` hosts) and does not split inference onto a separate subdomain. The admin surface runs on a separate internal address and is not part of the public API.
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+- [Headers](/api-reference/overview/headers)
+- [API Reference](/api-reference)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1, §9 (Base URLs & versioning) -->

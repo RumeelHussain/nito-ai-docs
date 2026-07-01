@@ -1,0 +1,99 @@
+---
+title: Build a usage dashboard
+description: Read org usage and balance from the API and render a small dashboard of requests, tokens, charge, and per-model and daily breakdowns.
+---
+
+**Goal.** A small dashboard that reads your organization's usage over a window and its current balance, then shows totals, a daily trend, and a per-model breakdown so you can see what you are consuming and where.
+
+**Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and an org ID. Billing lives on the organization, so every endpoint here is **org-scoped**. You can list your org IDs from `GET /api/v1/orgs`.
+
+The one fact that shapes this whole recipe: there is no flat, account-wide usage or balance URL. Both reads take an org ID in the path. Keep "billing lives on the org" in mind and the endpoints are predictable.
+
+## Step 1: Read the usage overview
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+`window_days` sets how far back the window reaches. It defaults to 30 and accepts up to 365.
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+The response is aggregated, not a transaction log. The fields you build on:
+
+- **`all_time`** and **`current_window`** totals, each with `requests`, `input_tokens`, `output_tokens`, `reasoning_tokens`, `total_tokens`, and `customer_charge_nanos`. Use `current_window` for "the last N days" and `all_time` for lifetime.
+- **`daily[]`** per-day usage, for a trend line.
+- **`models[]`** per-model usage, sorted by charge, so the most expensive model is first.
+
+## Step 2: Read the balance
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+```json
+{ "available_nanos": "4250000000" }
+```
+
+`available_nanos` is your spendable balance in **nanos** (billionths of a credit), returned as a **decimal string** to avoid precision loss. Divide by 1e9 for whole credits, so `"4250000000"` is 4.25 credits. Keep it as a string or big-decimal in your code; do not parse it into a float.
+
+## Step 3: Assemble the dashboard
+
+```python
+import os, json, urllib.request
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+API_KEY = os.environ["NITO_API_KEY"]
+ORG_ID = os.environ["ORG_ID"]
+
+def get(path):
+    req = urllib.request.Request(
+        f"{BASE_URL}{path}",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.load(resp)
+
+overview = get(f"/api/v1/orgs/{ORG_ID}/api/overview?window_days=30")
+balance = get(f"/api/v1/orgs/{ORG_ID}/billing/balance")
+
+def credits(nanos):
+    # nanos may be an int (charge) or a decimal string (balance)
+    return int(nanos) / 1e9
+
+window = overview["current_window"]
+print("== Last 30 days ==")
+print(f"requests:      {window['requests']}")
+print(f"input tokens:  {window['input_tokens']}")
+print(f"output tokens: {window['output_tokens']}")
+print(f"charge:        {credits(window['customer_charge_nanos']):.4f} credits")
+print(f"balance:       {credits(balance['available_nanos']):.4f} credits")
+
+print("\n== Per model (by charge) ==")
+for m in overview["models"]:
+    print(f"  {m['model']:<24} {credits(m['customer_charge_nanos']):.4f} credits")
+
+print("\n== Daily ==")
+for d in overview["daily"]:
+    print(f"  {d.get('date')}  reqs={d.get('requests')}")
+```
+
+That is a complete, if plain, dashboard. Swap the `print` calls for your charting library of choice: the `daily[]` array feeds a trend line, `models[]` feeds a bar chart, and the totals feed the top-line cards. The exact key names inside `daily[]` beyond the documented shape may vary, so inspect one real response before wiring a chart.
+
+> **TODO (needs SME):** the full field list inside `daily[]` and `models[]` entries (beyond `requests`, token counts, `customer_charge_nanos`, and the daily top model). Confirm against a live response (owner: Backend).
+
+## Notes
+
+- The overview is derived from billing records, not from prompt contents. Reading usage never exposes what was in any prompt.
+- Reads have their own rate limits. A `429` carries only `Retry-After`, no `X-RateLimit-*` headers.
+
+## Related
+
+- [Check usage and credits](/get-started/check-usage-and-credits)
+- [Cost monitoring dashboard](/cookbook/advanced/cost-monitoring-dashboard)
+- [Get usage reference](/api-reference/usage-and-credits/get-usage)
+- [Get balance reference](/api-reference/usage-and-credits/get-balance)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (orgs nested api/overview, billing/balance), §9 (window_days default 30 max 365, Retry-After only); internal/server/api_org_api.go, internal/billing/api_usage.go (all_time/current_window/daily/models, customer_charge_nanos), internal/server/api_org_billing_balance.go (available_nanos decimal string) -->

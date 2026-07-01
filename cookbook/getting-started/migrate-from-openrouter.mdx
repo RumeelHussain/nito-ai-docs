@@ -1,0 +1,96 @@
+---
+title: Migrate from OpenRouter
+description: Swap the base URL and key, then map OpenRouter model names to Nito catalog IDs.
+---
+
+## Goal
+
+Move an application built on OpenRouter onto Nito. Because both expose an OpenAI-compatible surface, this is a base-URL-and-key swap plus a model-name remap.
+
+## Prerequisites
+
+- Code that calls OpenRouter's OpenAI-compatible endpoint (the OpenAI SDK, or direct `POST /chat/completions`).
+- A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
+- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+
+## Step 1: Repoint the client
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="z_sk_your_key_here",              # was your OpenRouter key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # was https://openrouter.ai/api/v1
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",                          # was e.g. openai/gpt-4o
+    messages=[
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "z_sk_your_key_here",              // was your OpenRouter key
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // was https://openrouter.ai/api/v1
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",                         // was e.g. openai/gpt-4o
+  messages: [{ role: "user", content: "Say hello in one short sentence." }],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Step 2: Map your model names
+
+OpenRouter model slugs are not Nito catalog IDs. Fetch the live catalog and pick equivalents by capability:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+Select IDs at runtime, because the catalog is discovered from providers and changes over time.
+
+## Walkthrough
+
+Both gateways speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the `chat.completion` response shape carry over unchanged. The three edits are the base URL (ending in `/v1`), the `z_sk_` key, and the model ID.
+
+Privacy on Nito is chosen per call by a model-ID suffix (`grok-4.3:tee`); only `:tee` and `:e2e-tee` are valid, and `:e2e-tee` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Do not import OpenRouter-specific behavior
+
+OpenRouter has provider-routing features, headers, and request extensions that are specific to its platform. Do not assume any of them work on Nito unless they appear in Nito's documentation. In particular:
+
+- **Provider-preference and routing fields** from OpenRouter request bodies are not part of Nito's contract. Nito does its own routing; you name a logical model and it selects a backend.
+- **App-attribution headers** such as `HTTP-Referer` and `X-Title` are not wired on Nito.
+- **Model slugs** like `openai/gpt-4o` are OpenRouter identifiers, not Nito IDs.
+
+Treat anything not documented for Nito as unverified rather than carrying it over.
+
+## Next steps
+
+- See the base-URL swap details: [OpenAI drop-in base-URL swap](/sdks/openai-drop-in/base-url-swap).
+- Migrate other gateways the same way: [Migrate from other gateways](/cookbook/getting-started/migrate-from-others).
+
+## Related
+
+- [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
+- [Migrate from OpenAI](/cookbook/getting-started/migrate-from-openai)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (OpenAI-compat /v1 routes), §5 (catalog discovery, model-ID suffix), §7 (app attribution not wired), §8 (z_sk_) -->

@@ -1,0 +1,149 @@
+---
+title: List models
+description: List the chat, embedding, and image models available on Nito, with their capabilities, context window, and pricing.
+---
+
+`GET /v1/models` (OpenAI-compat) and `GET /api/v1/models` (first-party) return the catalog of models the gateway can route to. The catalog is discovered from provider APIs at runtime, not a static list, so the exact set varies by deployment.
+
+By default the list returns `chat` models. Pass `type` to filter for `embedding` or `image`.
+
+## Request
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+### Query parameters
+
+| Parameter | Notes |
+|---|---|
+| `type` | Filter by model type: `chat` (default), `embedding`, or `image`. |
+
+## Response
+
+The envelope is an OpenAI-style list:
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "...", "object": "model", "...": "..." }
+  ]
+}
+```
+
+### `apiModel` fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Logical public model ID. Use this value as `model` in chat/embeddings/images requests. |
+| `object` | string | Always `"model"`. |
+| `created` | int | Unix seconds. |
+| `owned_by` | string | Owning provider or model owner. |
+| `display_name` | string | Human-readable name for UI. |
+| `description` | string | Short description. |
+| `type` | string | `chat`, `embedding`, or `image`. |
+| `architecture` | object | `{ input_modalities, output_modalities }`. See below. |
+| `capabilities` | object | Per-feature support flags. See below. |
+| `context_window` | int | Maximum context length in tokens. |
+| `pricing` | object | Unit prices in nanos. See below. |
+| `free_tier_eligible` | bool | Whether the model can be used on the free tier. |
+| `privacy_tier` | string | Stored privacy tier: `anon`, `private`, or `tee`. |
+| `tee_provider` | string | TEE provider when the tier is `tee` (`near` or `phala`). |
+| `attestation_available` | bool | Whether a TEE attestation can be fetched for this model. |
+| `attestation_subject` | string | Attestation subject (NEAR `domain` / Phala `appid`) when applicable. |
+| `e2ee_supported` | bool | Whether end-to-end TEE encryption is supported. |
+
+### `architecture`
+
+| Field | Notes |
+|---|---|
+| `input_modalities` | Accepted input kinds (for example `text`, `image`, `file`). |
+| `output_modalities` | Produced output kinds (for example `text`, `image`). |
+
+### `capabilities`
+
+Boolean flags describing what the model supports. The set includes (and is not limited to):
+
+| Flag | Meaning |
+|---|---|
+| `supports_image_inputs` | Accepts image inputs in chat. |
+| `supports_image_generation` | Can generate images. |
+| `supports_web_search` | Can use the [web search](/api-reference/server-tools/web-search) server tool. |
+| `supports_web_fetch` | Can use the [web fetch](/api-reference/server-tools/web-fetch) server tool. |
+| `supports_x_search` | Can use the X/Twitter search tool. |
+| `supports_code_interpreter` | Can use the [code interpreter](/api-reference/server-tools/code-interpreter) tool. |
+| `supports_reasoning` | Exposes reasoning output. |
+| `supports_tee_attestation` | Can produce a TEE attestation. |
+| `supports_e2ee` | Supports end-to-end TEE encryption. |
+
+### `pricing`
+
+Per-unit prices are expressed in nanos (billionths of a currency unit). The exact fields and units are deployment-driven.
+
+> **TODO (needs SME):** the full `pricing` field set and unit definitions per model type (owner: Finance/Backend).
+
+## Worked response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "grok-4.3",
+      "object": "model",
+      "created": 1751299200,
+      "owned_by": "xai",
+      "display_name": "Grok 4.3",
+      "description": "General-purpose chat model.",
+      "type": "chat",
+      "architecture": {
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"]
+      },
+      "capabilities": {
+        "supports_image_inputs": true,
+        "supports_web_search": true,
+        "supports_code_interpreter": true,
+        "supports_reasoning": true
+      },
+      "context_window": 256000,
+      "pricing": { "...": "..." },
+      "free_tier_eligible": true,
+      "privacy_tier": "anon",
+      "attestation_available": false,
+      "e2ee_supported": false
+    }
+  ]
+}
+```
+
+> **TODO (needs SME):** the values above are illustrative. Confirm a real catalog row, its `context_window`, and `pricing` shape (owner: Backend).
+
+## Notes
+
+- The catalog is runtime-discovered and upserted from provider APIs. There is no hardcoded model list, so the available models depend on the deployment's configured providers.
+- `pricing` and `context_window` are joined from the billing layer at response time; they are not stored on the underlying model card.
+- The `id` you get back is a logical public ID. To request a privacy tier, append `:tee` or `:e2e-tee` to it. See [Model groups](/api-reference/models-catalog/model-groups) and [Models](/models/model-groups).
+
+## Not implemented
+
+The following endpoints from the original outline do not exist on the gateway and return no route:
+
+| Endpoint | Status |
+|---|---|
+| `GET /api/v1/models/{id}/endpoints` | Not implemented. |
+| `GET /api/v1/providers` | Not implemented. |
+
+If you need per-endpoint routing or a provider directory, that work is deferred. See [Model groups](/api-reference/models-catalog/model-groups) for the grouping that does exist.
+
+## Related
+
+- [Model groups](/api-reference/models-catalog/model-groups)
+- [Models](/models/model-groups)
+- [Errors & rate limits](/api-reference/errors-and-rate-limits/error-codes)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (routes.go: apiModelsHandler), §5 (models.SupportedModel/DiscoveredModel, runtime discovery), §11 (models/{id}/endpoints and /providers do not exist) -->

@@ -1,0 +1,43 @@
+---
+title: Status page
+description: A public status page for Nito is not published yet. This page describes what it will show and marks the work as a TODO owned by Product and Infra.
+---
+
+Nito (publicly Z Inference) does not have a status page today. There is no uptime surface, no incident feed, and no per-surface availability history in the current system.
+
+> **TODO (needs SME):** publish a status page / per-surface uptime (owner: Product/Infra). Confirm the hosting approach, the surfaces to report on, the incident and maintenance workflow, and the subscription mechanism before any of the content below is presented as live.
+
+<Warning>
+Nothing on this page is live. It describes the intended shape of a future status page so the gap is visible. Do not treat any availability number, SLA, or incident channel described here as existing.
+</Warning>
+
+## What a status page will show
+
+When published, a status page is expected to surface, at minimum:
+
+- **Per-surface health** - separate indicators for the main surfaces, for example chat and text generation, embeddings, image generation, attachments and parsing, and authentication. The gateway already separates these internally, so per-surface reporting is the natural granularity.
+- **Current incidents** - active degradations or outages with a short description and a running timeline of updates.
+- **Scheduled maintenance** - upcoming windows announced ahead of time.
+- **Historical uptime** - a rolling record of availability per surface.
+
+## What it will not be
+
+A status page reports availability. It is not an SLA and not a contractual commitment. Any availability target or credit is a separate legal artifact owned by Legal and Security.
+
+> **TODO (needs SME):** confirm the relationship between the status page and any SLA (owner: Product/Legal). Until an SLA exists, the status page is informational only.
+
+## How to check status today
+
+Until a status page exists, the observable signals are per-request:
+
+- The HTTP status code and the error envelope (`message` plus `code`, no `type` field) tell you whether a specific call succeeded.
+- The `Retry-After` header on a 429 tells you when to retry a rate-limited call.
+- The `X-Request-ID` on every response is what you quote to support when reporting a problem.
+
+## Related
+
+- [Observability overview](/resources/observability) - client-side request IDs and usage.
+- [Webhooks](/resources/observability/webhooks) - why there is no push-based status notification today.
+- [Trust Center](/resources/trust-center) - where an SLA artifact will live once defined.
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md - no status page exists in code. Section 9 (error envelope code not type; Retry-After; X-Request-ID). Whole page marked TODO owner Product/Infra. -->

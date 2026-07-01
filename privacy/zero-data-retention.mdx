@@ -1,0 +1,80 @@
+---
+title: Zero Data Retention
+description: What Nito retains and what it does not. Metadata-only by default, request-local prompts and completions, and ZDR enforced upstream at the providers.
+---
+
+Zero data retention (ZDR) is a precise claim, so this page states it precisely. **ZDR means the content of your request, your prompt, the model's completion, its reasoning, your tool calls, and any uploaded file contents, is not persisted.** It is used to serve the request and then it is gone from the gateway's storage. What remains is metadata: the minimal usage and routing information needed to operate and bill the service. This page defines that line carefully, says exactly what falls on each side of it, and shows how the no-retention posture is enforced not just at the gateway but at the upstream providers that actually run the model.
+
+## The default posture: metadata only
+
+On Nito the metadata-only posture is the **default**, not an upgrade you opt into. Every call, including an ordinary one, starts from there. Concretely, the default posture means:
+
+- **Not persisted by the gateway:** prompts, completions, reasoning content, tool calls, and uploaded file contents. These are request-local. They flow through the request, are sent to the chosen provider inside the privacy boundary, and are not written to the gateway's durable storage.
+- **Persisted:** usage and routing metadata, the kind of information a bill and an operational log need. Token counts, which model and provider served the call, timing, and similar.
+- **Telemetry is allowlisted.** Observability does not get to capture whatever it wants. Telemetry attributes are restricted to a safe allowlist, so content cannot leak into traces or logs by accident.
+- **Responses are not cached.** Inference responses are served with `Cache-Control: no-store`, so intermediaries are told not to keep a copy either.
+
+Put together: the gateway sees your content in order to serve the request, and then keeps only the metadata. That is the floor that the `private`, `tee`, and `e2e-tee` modes build assurance on top of.
+
+## What "retained" excludes, in detail
+
+It helps to be explicit about each content category, because "we don't keep your data" is easy to say and easy to get wrong.
+
+| Category | Retained by the gateway? |
+|---|---|
+| Prompt / input messages | No. Request-local. |
+| Completion / output | No. Request-local, `no-store`. |
+| Reasoning content | No. Request-local. |
+| Tool calls and arguments | No. Request-local. |
+| Uploaded file contents (parsed documents) | No. Parsed inline to serve the request, not persisted. |
+| Usage metadata (token counts, model, provider, timing) | Yes. This is what billing and operations run on. |
+| Allowlisted telemetry attributes | Yes, but restricted to the safe allowlist. |
+
+If a number, a window, or a category is not on this list, do not assume it. Several retention windows that appear in earlier planning material (an idempotency replay window, a debug-capture window, a saved-chat window) are **not confirmed in code** and must not be stated as fact.
+
+> **TODO (needs SME):** confirm the exact retention windows, if any, for idempotency-key billing dedup, governed debug capture, and tenant saved chats. These were unverifiable in code and must be confirmed by Backend/Legal before being documented as facts.
+
+## How ZDR is enforced upstream
+
+The gateway can keep metadata only on its own side, but the model runs at a provider. So the harder question is what the **provider** does with your content. Nito enforces no-retention at the provider boundary, with a different concrete mechanism per provider:
+
+- **xAI (Grok):** the gateway forces `Store: false` on every request, instructing the upstream not to retain the exchange.
+- **OpenRouter:** a zero-data-retention data policy is applied. There is one carve-out worth knowing: ZDR is relaxed only when OpenRouter's server-side web tools are used, because those tools necessarily involve the provider's own infrastructure. Embeddings and image requests force ZDR regardless. And models that do not offer a ZDR data policy are never imported into the catalog in the first place, so you cannot accidentally route to a non-ZDR model.
+- **NEAR and Phala:** content runs inside a Trusted Execution Environment, a sealed, hardware-isolated boundary the host cannot peer into. These are the providers behind the `:tee` and `:e2e-tee` modes, and they additionally emit an attestation you can verify.
+- **FAL (images):** the gateway sends `X-Fal-Store-IO: 0` so image inputs and outputs are not stored upstream.
+
+The single most important nuance here is the OpenRouter web-tools carve-out: if you use OpenRouter server-side web search or fetch, the strict ZDR data policy is relaxed for that call. If that matters for a given request, prefer a route that does not invoke provider-side web tools, or use a TEE mode. Embeddings and images do not have this caveat; they force ZDR.
+
+## Browser chat history is client-side only
+
+Nito does not keep your conversation history on the server. Where a chat history exists, for example in the browser chat app, it is stored **on the client side** and **encrypted**. The gateway's role is limited: it hands the client a per-user storage key, derived server-side, through `GET /api/v1/me/storage-key`. The client uses that key to encrypt history locally. The history itself never becomes server-retained content.
+
+```bash
+# Fetch the per-user storage key the browser client uses to
+# encrypt chat history locally. Replace the base URL with your gateway.
+curl https://YOUR-NITO-BASE-URL/api/v1/me/storage-key \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL before publishing a copy-pasteable example. The code default is a local address; `https://YOUR-NITO-BASE-URL` is a placeholder (owner: Product/Infra).
+
+The practical consequence: if you clear local browser storage, that history is gone, because there is no server-side copy to restore from. That is the trade Nito makes on purpose. Server-side convenience features that would require retaining your chats are not part of the default contract.
+
+## How this relates to the privacy modes
+
+ZDR as described here is the **floor**. Every mode sits at or above it:
+
+- **Ordinary** gets the metadata-only default.
+- **Private** adds provider-enforced ZDR via the routing layer setting `RequireZeroDataRetention`.
+- **`:tee`** runs inside a sealed, attestable environment on top of that.
+- **`:e2e-tee`** additionally encrypts your content to the sealed environment itself.
+
+So ZDR is not a separate product tier you buy; it is the baseline behavior, strengthened by the per-call modes. The mechanics of selecting those modes are in [Per-call privacy modes](/privacy/per-call-privacy-modes), and the hop-by-hop enforcement is in [Privacy architecture](/privacy/privacy-architecture).
+
+## Related
+
+- [Privacy overview](/privacy/overview) - what "private" means on Nito and why it is per call.
+- [Privacy architecture](/privacy/privacy-architecture) - where the metadata-only posture is enforced across hops.
+- [Per-call privacy modes](/privacy/per-call-privacy-modes) - selecting `private`, `:tee`, and `:e2e-tee`.
+
+<!-- source: docs/standards/privacy-and-retention.md, internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR = RequireZeroDataRetention && !hasServerTools; embeddings/images force ZDR), internal/provider/fal/fal.go (X-Fal-Store-IO:0), internal/server/logical_models.go (RequireZeroDataRetention), internal/server/api_storage_key (GET /api/v1/me/storage-key, HMAC-SHA256), internal/server/observability.go (SafeAttrs allowlist); DOCS_SOURCE_OF_TRUTH.md §5, §10 -->

@@ -1,0 +1,104 @@
+---
+title: Structured Data Extraction
+description: Extract structured JSON from text on Nito using prompt-based JSON plus client-side validation, since server-side JSON-schema enforcement is not exposed.
+---
+
+You often want a model to return structured data (a JSON object with known fields) rather than prose. This recipe does that on Nito while being honest about a limitation: **the chat API does not expose server-side JSON-schema enforcement.** So the reliable approach is prompt-based JSON: ask the model to return JSON, then parse and validate it yourself on the client.
+
+## The limitation, stated plainly
+
+The gateway's internal request type has a `ResponseFormat` field, and it is forwarded to providers, **but the public chat API never populates it.** There is no `response_format` or `json_schema` parameter you can set on `/v1/chat/completions`, and the gateway performs no JSON-schema validation. Do not build on a structured-outputs feature here; it is not exposed.
+
+That leaves a robust, provider-agnostic pattern that works today: instruct the model to emit JSON, then treat the model's output as untrusted and validate it in your own code.
+
+## Step 1: Ask for JSON in the prompt
+
+Give the model an explicit schema in words, tell it to return only JSON, and show the exact shape. Being strict in the prompt reduces (but does not eliminate) malformed output. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and use a private-tier model or an attestation-capable model with `:tee` to keep the extraction private.
+
+```python
+import os, json, requests
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm base URL
+MODEL = "MODEL_ID:tee"                     # TODO: attestation-capable model, or a private-tier model
+API_KEY = os.environ["NITO_API_KEY"]
+
+SCHEMA_HINT = """Return ONLY a JSON object, no prose, no code fences, matching:
+{
+  "name": string,
+  "email": string,
+  "company": string | null,
+  "intent": "sales" | "support" | "other"
+}"""
+
+def extract(text):
+    messages = [
+        {"role": "system", "content": "You are a strict information extractor. Output JSON only."},
+        {"role": "user", "content": f"{SCHEMA_HINT}\n\nText:\n{text}"},
+    ]
+    resp = requests.post(
+        f"{BASE_URL}/v1/chat/completions",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        json={"model": MODEL, "messages": messages, "temperature": 0},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
+```
+
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address (owner: Product/Infra). Confirm the model against `GET /v1/models`.
+
+Setting `temperature: 0` makes the output more deterministic. This helps consistency but is not a guarantee of valid JSON.
+
+## Step 2: Parse and validate on the client
+
+Because nothing on the server enforces the shape, your client must do it. Strip any stray formatting, parse the JSON, and validate the fields. If validation fails, either retry with a correction message or reject the result; do not pass unvalidated model output downstream.
+
+```python
+def coerce_json(raw):
+    raw = raw.strip()
+    # Defensive: strip accidental code fences if the model added them.
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        raw = raw[raw.find("{"):]
+    return json.loads(raw)  # raises on malformed JSON
+
+ALLOWED_INTENTS = {"sales", "support", "other"}
+
+def validate(obj):
+    assert isinstance(obj, dict), "not a JSON object"
+    assert isinstance(obj.get("name"), str) and obj["name"], "name missing"
+    assert isinstance(obj.get("email"), str) and "@" in obj["email"], "bad email"
+    assert obj.get("company") is None or isinstance(obj["company"], str), "bad company"
+    assert obj.get("intent") in ALLOWED_INTENTS, "bad intent"
+    return obj
+
+def extract_validated(text, max_retries=2):
+    for attempt in range(max_retries + 1):
+        raw = extract(text)
+        try:
+            return validate(coerce_json(raw))
+        except (json.JSONDecodeError, AssertionError) as e:
+            if attempt == max_retries:
+                raise
+            # Feed the error back and try again.
+            text = f"{text}\n\nYour previous output was invalid: {e}. Return corrected JSON only."
+```
+
+For richer validation, use a schema library (for example `pydantic` or `jsonschema`) instead of hand-written asserts. The important point is that the enforcement lives in your code, not the gateway.
+
+## Why not rely on the model alone
+
+A model asked for JSON will usually comply, but "usually" is not "always": it may wrap output in prose, add code fences, drop a field, or emit an out-of-range enum value. Since the gateway does not validate, an unguarded pipeline will eventually ingest bad data. The parse-and-validate step, plus a bounded retry, is what makes prompt-based extraction dependable.
+
+## Keeping it private
+
+Extraction often runs over sensitive text (resumes, contracts, support tickets). Select a private-tier model or append `:tee` to an attestation-capable model so the extraction call inherits the same privacy posture as the rest of your app. The gateway is metadata-only by default and does not persist your prompts or the model's output.
+
+## Related
+
+- [Build document Q&A](/cookbook/private-ai/build-document-qa)
+- [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
+- [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_chat.go; DOCS_SOURCE_OF_TRUTH.md §7 (Structured outputs: NOT EXPOSED), §6, §10 -->

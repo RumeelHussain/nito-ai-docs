@@ -1,0 +1,82 @@
+---
+title: Model ID convention
+description: How model IDs are named on Nito, and how the optional suffix selects a privacy mode.
+---
+
+Every request you send to Nito names a model in its `model` field. That short string is doing more work than it looks. It decides two things at once: which model answers your request, and how private that answer is. This page explains the small grammar those strings follow, because once you can read a model ID, every code sample in these docs becomes self-explanatory, and you stop guessing about privacy.
+
+If you remember one idea, make it this: the model ID is the single place where "which model" and "how private" are both chosen. There is no separate privacy field in the request body. You change behavior by changing the string.
+
+## What a model ID is
+
+A model ID is the name you put in the `model` field of a request. On most AI platforms a model name is just a label that points at one specific model on one specific provider. On Nito it is slightly richer, because Nito sits in front of many providers and offers a privacy control on every call. So the ID has room for an optional privacy instruction at the end.
+
+The shape is:
+
+```
+<model>[:<privacy-suffix>]
+```
+
+- **`<model>`** is the model identifier, for example a vendor-and-model name. Use an exact ID returned by `GET /v1/models`, the live catalog endpoint.
+- **`:<privacy-suffix>`** is optional. It selects a stronger privacy mode. The only two valid suffixes are `:tee` and `:e2e-tee`.
+
+A privacy mode is just how protected your prompt and the reply are while the model runs. Ordinary mode is standard routing. `:tee` asks for a Trusted Execution Environment, which is a hardware-isolated, sealed compute box the host cannot look inside. `:e2e-tee` adds client-side encryption on top of that. The full meaning of each mode lives in the [Privacy section](/privacy/tiers); here we only care about how the ID encodes the choice.
+
+Examples:
+
+```text
+grok-4.3              # ordinary mode
+grok-4.3:tee          # TEE-backed execution with attestation (if the model supports it)
+grok-4.3:e2e-tee      # end-to-end encrypted TEE (if the model supports it)
+```
+
+<Warning>
+`:tee` and `:e2e-tee` are the only accepted suffixes. Any other suffix (for example `:standard`, `:zdr`, `:anon`, `:private`, `:e2ee`) is rejected with a `400`. There is no separate `tier` field in the request body. Privacy is chosen here, in the model ID, and nowhere else.
+</Warning>
+
+## Why privacy lives in the ID
+
+It is reasonable to ask why privacy is glued to the model name instead of being its own parameter. The answer is that it keeps a powerful property simple: privacy is per call. The same key, in the same app, can send a throwaway request in ordinary mode and a highly sensitive request in a sealed environment, with the only difference being a suffix. Putting the choice in the one string you already have to write means you can never forget a second field, and a code reviewer can see the privacy posture of a call at a glance. One string, one decision point.
+
+## How the suffix maps to a privacy mode
+
+| Model ID | Mode | Requires |
+|---|---|---|
+| `model` | Ordinary or private (per the model's tier) | nothing extra |
+| `model:tee` | TEE | the model must report `attestation_available: true` |
+| `model:e2e-tee` | End-to-end encrypted TEE | the model must report `e2ee_supported: true`, plus encryption headers |
+
+A model's own catalog entry tells you which suffixes it accepts. This matters because suffixes are requests, not guarantees you can staple onto any model. Applying `:tee` to a model that does not support attestation returns an error rather than silently downgrading to a weaker mode. That refusal is deliberate: a privacy guarantee that quietly weakens is worse than no guarantee, because you would believe you were protected when you were not. The detailed semantics of each mode are in [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) and the [Privacy section](/privacy/tiers).
+
+## Two ID spaces
+
+Under the hood, Nito keeps two different kinds of identifier apart. You almost always touch only the first.
+
+- **Logical (public) ID** is what you send: a canonical model name with an optional `:tee` / `:e2e-tee` suffix. It is provider-independent. One logical ID can be served by more than one physical backend.
+- **Physical (scoped) ID** is internal: `provider/providerModelID` (for example `openrouter/openai/gpt-5.5`). Nito chooses the physical backend for you during routing.
+
+An analogy: the logical ID is like a phone number you dial, and the physical ID is like the specific cell tower and line that actually carries the call. You dial the number; the network picks the path. The physical ID becomes interesting only when you want to understand or reason about which backend served a call. For attested (`:tee`) calls, the attestation response names the physical model that ran, so you can confirm where the work happened. See [Backend selection](/models/backend-selection) for how that path is chosen.
+
+Whether the public API supports pinning a specific physical backend directly is not something this page asserts.
+
+> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (a provider-scoped `provider/model` ID) from the public API, beyond the model ID plus privacy suffix. Confirm the intended public contract (owner: Backend/Product).
+
+## Selecting a model with no ID
+
+If you omit `model` entirely, Nito uses a default model for that surface (chat, embeddings, or image generation). This is convenient for a quick test, but naming a model explicitly is recommended for anything you ship, so that your behavior does not silently change if the default changes.
+
+## Common mistakes
+
+- **Inventing a suffix.** Only `:tee` and `:e2e-tee` work. Everything else, including plausible-looking names like `:private` or `:zdr`, is a `400`.
+- **Adding `:tee` to a model that lacks attestation.** Check `attestation_available` on the model entry first. The call fails rather than downgrading.
+- **Expecting a suffix to add a privacy field elsewhere.** There is no `tier` field in the body. The suffix is the whole mechanism.
+- **Passing a physical `provider/model` ID when a logical one is expected.** Use the logical IDs from `GET /v1/models` for normal calls.
+- **Hard-coding an ID that later changes.** The catalog is discovered from providers and kept current; models are added and retired. Treat `GET /v1/models` as the source of truth.
+
+## Related
+
+- [Models overview](/models/overview)
+- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+- [Backend selection](/models/backend-selection)
+
+<!-- source: internal/models/models.go (ParseLogicalModelIDForPublicMode, LogicalModelIDForPublicMode, ScopedModelID, ParseScopedModelID, PublicPrivacyMode*), internal/server/logical_models.go (routeChatRequest, suffix error string) -->

@@ -1,0 +1,50 @@
+---
+title: Tenant and Saved-chat Retention
+description: Chat history on Nito is client-side, encrypted in the browser with a per-user key. No server-side saved-chat store with retention exists in code.
+---
+
+A natural question for anyone building or evaluating a chat product on Nito is: "where do conversations live, and how long are they kept?" The honest answer today is that chat history is a **client-side** concern, not a server-side store the gateway retains and ages out. This page describes that reality and is explicit that the server-side tenant retention dials sometimes cited in product materials are not present in the current code.
+
+## The reality today: client-side, encrypted
+
+Where a chat history exists (for example in a browser chat app built on Nito), it is stored **on the client**, in **encrypted IndexedDB**. The gateway does not keep a server-side copy of your conversations as part of its default behavior.
+
+The encryption uses a **per-user storage key**. The browser obtains that key from the gateway:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/api/v1/me/storage-key \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+> **TODO (needs SME):** confirm the example request and base URL once the production gateway URL is fixed (owner: Product/Infra).
+
+The key is derived server-side as `HMAC-SHA256(StorageKeySecret, userID)`, so each user gets a distinct key that the client uses to encrypt its local history. The derivation and how `StorageKeySecret` relates to the other secrets are covered in [Three secret roles](/privacy/data-retention/three-distinct-keys).
+
+The practical consequences of a client-side model:
+
+- The history lives in the browser. Clearing the browser's storage clears it, because there is no default server-side conversation store to restore from.
+- Because it is encrypted with a per-user key, the local data is not readable as plaintext at rest.
+- "Retention" of that history is effectively governed by the client and the user, not by a gateway-side timer.
+
+## What is NOT confirmed: server-side tenant retention
+
+Product materials sometimes describe a **tenant saved-chat policy** with specific windows, commonly cited as a **30-day default** with a **90-day cap**. **No server-side saved-chat store with retention was found in the gateway code scanned for this documentation.** The chat-share feature that does exist (`chatshares`) persists only an object-storage key plus a token hash, with no conversation body and no TTL on the record. And the numbers that appear elsewhere in the code are unrelated: `30` is the default usage-reporting window, and `90` is one of the API-key expiry options.
+
+So do not state "30-day default / 90-day cap" as a fact about saved-chat retention. That dial is not present in the current code.
+
+> **TODO (needs SME):** tenant saved-chat retention (30d/90d) is not present in current code; confirm roadmap (owner: Product/Backend).
+
+## What you can rely on today
+
+- Chat history is **client-side**, in **encrypted IndexedDB**, using a **per-user key** from `GET /api/v1/me/storage-key`.
+- The per-user key is `HMAC-SHA256(StorageKeySecret, userID)`.
+- There is **no confirmed server-side saved-chat store with a retention window**; any 30d/90d tenant dial is unconfirmed.
+
+## Related
+
+- [Three secret roles](/privacy/data-retention/three-distinct-keys): how the storage key is derived and isolated.
+- [Data retention](/privacy/data-retention): the contract and its unconfirmed-window framing.
+- [Data visibility](/privacy/data-visibility): why browser history sits outside what the gateway sees.
+- [Metadata-only default](/privacy/data-retention/metadata-only-default): the gateway-side baseline.
+
+<!-- source: internal/server/api_storage_key.go (GET /api/v1/me/storage-key, HMAC-SHA256(StorageKeySecret, userID)), internal/server/api_chatshares.go (object-key + token-hash, no TTL), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §10 (Tenant saved chat 30d/90d: NOT CONFIRMED) -->

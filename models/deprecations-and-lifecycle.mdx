@@ -1,0 +1,39 @@
+---
+title: Deprecations and lifecycle
+description: How models are added, activated, and retired on Nito, and how to keep integrations resilient.
+---
+
+Models come and go. This page describes how Nito brings models into the catalog and how they leave it, so your integration can handle change gracefully. There is no formal, published deprecation policy with fixed timelines yet; what follows is how the lifecycle works in the gateway today, plus the practices that protect you from surprise removals.
+
+## How models enter the catalog
+
+Nito discovers models from its providers and records them in the catalog. Each model carries availability and activation state: it is marked available when the provider offers it, and activated when it is ready for use. New models appear in `GET /v1/models` as they are discovered and activated. Because discovery is continuous, the catalog is the live source of truth for what you can call.
+
+## How models leave the catalog
+
+When a provider stops offering a model, Nito marks it unavailable on the next sync. An unavailable model is no longer a valid routing target. Because a logical model can be served by more than one backend, a call to that logical model may keep working through another backend in its group even after one backend goes away. See [Model groups](/models/model-groups).
+
+## What is not yet defined
+
+> **TODO (needs SME):** the formal deprecation and retirement policy, including advance-notice windows and timelines. The gateway tracks availability and activation and marks models unavailable on sync, but there is no codified deprecation schedule, sunset notice, or version-deprecation mechanism at this commit. Owner: Product. Until this is published, treat the practices below as the guidance.
+
+## Practices that keep you resilient
+
+- **Resolve models at runtime.** Fetch `GET /v1/models` and select by capability, not by a hard-coded name. When a model is retired, your code adapts instead of breaking.
+- **Use logical model IDs and groups.** A logical ID can survive a backend change, because the group can route to another backend.
+- **Handle the unavailable case.** If a specific model ID stops resolving, fall back to another model of the same family. The decision guide in [Choosing the right model](/models/choosing-a-model) helps you keep a backup in mind.
+- **Watch your usage breakdown.** The org usage overview shows which models you actually depend on, which makes a migration easy to plan if one is retired.
+
+## Common mistakes
+
+- **Pinning a single model name forever.** It may be retired. Select by capability and keep a fallback.
+- **Assuming an unavailable model still routes.** Once marked unavailable it is not a valid target; rely on the group or pick another model.
+- **Expecting a fixed deprecation timeline today.** That policy is still being defined; build in resilience rather than relying on notice.
+
+## Related
+
+- [Model catalog](/models/model-catalog)
+- [Model groups](/models/model-groups)
+- [Choosing the right model](/models/choosing-a-model)
+
+<!-- source: internal/models/models.go (Syncer.SyncProvider, available=false marking, Active/ActivatedAt), internal/server/api_models.go -->

@@ -1,0 +1,78 @@
+---
+title: PDF and document input
+description: Send PDFs and office documents to chat as a file content part, parsed server-side, with the parse caps.
+---
+
+Chat models accept documents (PDF and office formats) as a `file` content part. The gateway parses the document to text server-side before it reaches the model, using the same parser as the standalone attachments endpoint.
+
+## Accepted document kinds
+
+PDF, DOCX, PPTX, XLSX, XLS, and plain text. **Images are rejected here** ("send directly to an image-capable model"); use an [image content part](/api-reference/multimodal/image-input) for images.
+
+## The `file` content part
+
+Inside a message, set `content` to an array of parts and add a file part (`type: "file"` or `"input_file"`):
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "Summarize this document." },
+    {
+      "type": "file",
+      "file": {
+        "file_url": "https://example.com/report.pdf"
+      }
+    }
+  ]
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `type` | string | `"file"` or `"input_file"`. |
+| `file_url` | string | A URL to fetch the document from. |
+| `file_data` | string | Inline document bytes, as an alternative to `file_url`. |
+| `filename` | string | Used with `file_data` to hint the format. |
+
+Supply either `file_url` or `file_data` (with `filename`). **`file_id` is rejected** (`file_id is not supported`) because there is no Files API.
+
+## Parse caps
+
+The server-side parser enforces:
+
+| Cap | Value |
+|---|---|
+| Max PDF pages | 80 |
+| PDF parse timeout | 10 s |
+| Max output characters | 300,000 |
+
+A document that exceeds the page cap, times out, or overflows the output budget is truncated or rejected; truncation is surfaced by the parser.
+
+## Standalone parser endpoint
+
+If you want the extracted text without running inference, post the file to the parser endpoint directly:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -F "file=@report.pdf"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+This is a `multipart/form-data` upload. It returns the parsed text plus metadata (`mime_type`, `file_kind`, `bytes`, `page_count`, `truncated`, `warnings`). The same caps above apply.
+
+## Audio and video are not supported
+
+There are no audio or video input endpoints. Audio and video content parts are rejected at validation, and there is no transcription or media-understanding surface. These modalities are deferred.
+
+> **TODO (needs SME):** whether audio/video input is on the roadmap (owner: Product). Tracked as a deferred capability.
+
+## Related
+
+- [Image input](/api-reference/multimodal/image-input)
+- [Image generation](/api-reference/multimodal/image-generation)
+- [Request format](/api-reference/overview/request-format)
+
+<!-- source: internal/server/api_chat.go: apiChatContentPartToInference (file/input_file, file_id rejected); internal/server/api_attachments_parse.go (caps: 80 pages, 10s, 300k runes; images rejected); DOCS_SOURCE_OF_TRUTH.md §2, §4 -->

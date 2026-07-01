@@ -1,0 +1,72 @@
+---
+title: Delta format
+description: The chat.completion.chunk object Nito streams, its delta fields, and how role and content accumulate across chunks.
+---
+
+Each frame in a streaming chat completion carries a `chat.completion.chunk` object. This page is the schema reference for that chunk and its `delta`. For the transport that delivers it, see [SSE transport](/api-reference/streaming-format/server-sent-events).
+
+## The chunk object
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Completion identifier. Stable across the stream. |
+| `object` | string | Always `chat.completion.chunk`. |
+| `created` | integer | Unix seconds. |
+| `model` | string | The model serving the call. |
+| `choices` | array | Streamed choices. Each carries `index`, `delta`, `finish_reason`. |
+| `usage` | object | Optional. Present only on the trailing usage chunk. See [Stream termination](/api-reference/streaming-format/stream-termination). |
+| `web_search` | object | Optional. Present when a web search ran. |
+| `error` | object | Optional. Present on a mid-stream error chunk. See [Error events](/api-reference/streaming-format/error-events). |
+| `free_tier` | object | Optional. Present on free-tier-eligible calls. |
+
+## The choice and delta
+
+| Field | Type | Notes |
+|---|---|---|
+| `choices[].index` | integer | Choice index (always `0`). |
+| `choices[].delta` | object | The incremental update. See below. |
+| `choices[].finish_reason` | string or null | `null` until the terminal chunk, then one of `stop`, `length`, `tool_calls`, `error`. See [Finish reasons](/api-reference/chat-and-text/finish-reasons). |
+
+### delta fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `role` | string | Optional. `assistant`, sent **once** at the start. |
+| `content` | string | Optional. A fragment of the reply to append. |
+| `tool_calls` | array | Optional. Tool-call fragments. See [Tool call streaming](/api-reference/streaming-format/tool-call-streaming). |
+| `reasoning_details` | array | Optional. Reasoning summary fragments. See [Reasoning parameters](/api-reference/chat-and-text/reasoning-parameters). |
+
+## Accumulating the response
+
+The stream is incremental, not cumulative. Reassemble it like this:
+
+- `role` arrives once on the first delta; record it and expect `assistant`.
+- `content` arrives as fragments; **concatenate** them in order to build the full message.
+- `finish_reason` stays `null` until the terminal chunk; read it there to learn why generation stopped.
+
+```json
+{ "id": "...", "object": "chat.completion.chunk", "created": 1751299200, "model": "grok-4.3",
+  "choices": [ { "index": 0, "delta": { "role": "assistant", "content": "A gateway" }, "finish_reason": null } ] }
+```
+
+```json
+{ "id": "...", "object": "chat.completion.chunk", "created": 1751299200, "model": "grok-4.3",
+  "choices": [ { "index": 0, "delta": { "content": " is a single entry point." }, "finish_reason": null } ] }
+```
+
+```json
+{ "id": "...", "object": "chat.completion.chunk", "created": 1751299200, "model": "grok-4.3",
+  "choices": [ { "index": 0, "delta": {}, "finish_reason": "stop" } ] }
+```
+
+The terminal chunk carries an empty `delta` and the non-null `finish_reason`. After it, the stream sends the optional usage chunk and the `[DONE]` sentinel.
+
+## Related
+
+- [SSE transport](/api-reference/streaming-format/server-sent-events)
+- [Tool call streaming](/api-reference/streaming-format/tool-call-streaming)
+- [Error events](/api-reference/streaming-format/error-events)
+- [Stream termination](/api-reference/streaming-format/stream-termination)
+- [Finish reasons](/api-reference/chat-and-text/finish-reasons)
+
+<!-- source: internal/server/api_chat.go (apiChatChunk, streamAPIChatCompletion); DOCS_SOURCE_OF_TRUTH.md §3 -->

@@ -1,0 +1,90 @@
+---
+title: Telegram bot
+description: Build a Telegram bot whose replies come from Nito. Receive a message, call Nito's Chat Completions, and send the answer back.
+---
+
+A chat bot has two halves. The Telegram half receives updates and sends replies. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Telegram half only as a representative shape, because the Telegram Bot API and its client libraries change over time.
+
+> **TODO (needs SME):** verify the current Telegram Bot API/library setup against its official docs (owner: DevRel).
+
+## The Nito call
+
+The bot's brain is a single call to Nito's OpenAI-compatible Chat Completions endpoint. Because Nito is OpenAI-compatible, you can use the OpenAI SDK and change only the base URL, key, and model.
+
+```python
+from openai import OpenAI
+
+nito = OpenAI(
+    api_key="z_sk_your_key_here",              # your Nito API key, keep it server-side
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+def answer(user_text: str) -> str:
+    resp = nito.chat.completions.create(
+        model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+        messages=[
+            {"role": "system", "content": "You are a concise Telegram assistant."},
+            {"role": "user", "content": user_text},
+        ],
+    )
+    return resp.choices[0].message.content
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`. Do not hardcode a name like `gpt-4o`. Fetch the live list and pick one:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Wiring it to Telegram
+
+The representative structure is: receive a message, pass its text to `answer()`, send the result back. The exact library names and calls below are illustrative only.
+
+```python
+# Representative only, verify against current Telegram docs.
+def on_message(update):
+    user_text = update.message.text
+    try:
+        reply = answer(user_text)
+    except Exception as e:
+        reply = "Sorry, I could not answer that right now."
+    send_message(chat_id=update.message.chat_id, text=reply)
+```
+
+Keep the Nito key in a server-side environment variable. A Telegram bot runs on your infrastructure, so the `z_sk_` key never reaches the user's device. Never embed it in client code.
+
+## Streaming or not
+
+Telegram sends whole messages, not token streams, so a bot normally uses a non-streaming call and edits the message once the full answer is ready. If you want to show progress, you can stream from Nito (`stream=True`) and periodically edit the Telegram message with the accumulated text. Note that `:e2e-tee` does not stream, so pair streaming only with an ordinary or `:tee` model.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Handling errors
+
+Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` with no `type` field. Map the status to a friendly Telegram reply:
+
+- **429** (rate limited or quota): honor the `Retry-After` header and back off. Do not hammer the endpoint.
+- **402** (payment required) or **quota**: surface a "temporarily unavailable" message and alert your team.
+- **400**: usually a bad model ID or malformed message. Confirm you used a catalog ID.
+
+Always catch exceptions around the Nito call so a single failed reply does not crash the bot loop.
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Discord bot](/cookbook/bots/discord-bot)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Rate limits](/resources/rate-limits)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

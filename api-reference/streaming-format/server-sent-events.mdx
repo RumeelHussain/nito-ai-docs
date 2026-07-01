@@ -1,0 +1,62 @@
+---
+title: Server-Sent Events transport
+description: How Nito streams chat completions over SSE. Response headers, frame format, and the keep-alive heartbeat.
+---
+
+When you set `stream: true` on a chat completions request (and the call is not E2E-TEE), Nito streams the reply as Server-Sent Events. This page covers the transport: headers, frame format, and heartbeats. The chunk payload shape is in [Delta format](/api-reference/streaming-format/delta-format).
+
+## Response headers
+
+The gateway writes `200` immediately, then begins streaming with these headers (`prepareSSE`):
+
+| Header | Value |
+|---|---|
+| `Content-Type` | `text/event-stream; charset=utf-8` |
+| `Cache-Control` | `no-store, no-cache` |
+| `X-Accel-Buffering` | `no` |
+
+`X-Accel-Buffering: no` disables proxy buffering so frames reach the client as they are produced. After the `200` is written the gateway sends an initial heartbeat and flushes.
+
+## Frame format
+
+Each event is a single SSE data frame (`writeSSEEvent`):
+
+```
+data: <json>\n\n
+```
+
+The `<json>` payload is a `chat.completion.chunk` object. Frames are separated by a blank line (`\n\n`). Parse each `data:` line as JSON, except the terminal sentinel (see below).
+
+## Keep-alive heartbeat
+
+To keep the connection open through idle periods, the gateway emits a comment frame every 15 seconds (`sseHeartbeatInterval`):
+
+```
+: keep-alive\n\n
+```
+
+Lines beginning with `:` are SSE comments. A conformant SSE client ignores them automatically; if you parse frames by hand, skip any `data:`-less line that starts with `:`.
+
+## Termination
+
+The stream ends with a literal sentinel frame:
+
+```
+data: [DONE]\n\n
+```
+
+`[DONE]` is not JSON. Treat it as the end-of-stream marker. With `stream_options.include_usage`, a final usage chunk precedes it. See [Stream termination](/api-reference/streaming-format/stream-termination).
+
+## What is not streamable
+
+Streaming is refused for E2E-TEE chat (`streaming is not supported with E2E-TEE`). Chat fusion is non-streaming by design. See [Chat Fusion API](/api-reference/chat-and-text/chat-fusion).
+
+## Related
+
+- [Delta format](/api-reference/streaming-format/delta-format)
+- [Tool call streaming](/api-reference/streaming-format/tool-call-streaming)
+- [Error events](/api-reference/streaming-format/error-events)
+- [Stream termination](/api-reference/streaming-format/stream-termination)
+- [Streaming (feature guide)](/features/streaming)
+
+<!-- source: internal/server/sse.go (prepareSSE, writeSSEEvent, sseHeartbeatInterval); internal/server/api_chat.go (streamAPIChatCompletion); DOCS_SOURCE_OF_TRUTH.md §3 -->

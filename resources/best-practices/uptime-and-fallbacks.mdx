@@ -1,0 +1,74 @@
+---
+title: Uptime and Fallbacks
+description: Nito already fails over within a model group and never silently downgrades TEE. Add app-level fallback, retry transient errors, and honor Retry-After.
+---
+
+Resilience on Nito is a shared responsibility. The gateway already does a lot of failover work for you underneath a single model name, but there are failure modes only your application can handle well, because only your application knows what an acceptable substitute for a failed call is. This page draws that line clearly: what Nito handles, and what you should build on top.
+
+## What Nito already does
+
+Two behaviors matter most, and understanding them keeps you from re-implementing what you already have.
+
+- **Failover within a logical model group.** A single logical model can be served by more than one physical backend, the same model at different providers or tiers. When you name a model, Nito gathers the eligible backends, filters by your hard requirements, and orders the rest by availability and cost. If a healthy eligible backend exists, routing picks it. So transient trouble at one backend does not necessarily reach you; the gateway routes around it within the group.
+- **A server-side circuit breaker.** Nito runs a provider circuit breaker (enabled by default) that trips after a threshold of failures (3) and holds a cooldown (30s) before probing that provider again. This stops the gateway from hammering a backend that is clearly down and helps it shift load to healthier ones.
+
+There is one deliberate non-behavior worth stressing: **privacy modes never silently downgrade.** A `:tee` or `:e2e-tee` request that cannot be served as asked fails rather than falling back to a weaker backend. That is a guarantee, not a bug. Your fallback logic must respect it: never "retry without TEE" as a recovery step, because doing so would defeat the privacy choice the caller made.
+
+## What you should add: app-level fallback
+
+Gateway failover handles backends inside one model group. It cannot decide that a different model is an acceptable answer for your use case, because that is a product judgment. So when a request fails with a server-side error, the useful recovery is often to try an alternate model you have chosen as a substitute.
+
+Build fallback for the server errors: `502` (`provider_error`) and `503` (`unavailable`). On one of these, fall back to an alternate model that fits the task, ideally one you selected from `GET /v1/models` at startup so you know it exists. Keep the alternate at the same privacy tier as the original when the call is sensitive, so you never weaken privacy through the fallback path.
+
+```
+try MODEL_ID
+  on 502 / 503 -> try FALLBACK_MODEL_ID  (same privacy tier)
+```
+
+> **TODO (needs SME):** confirm recommended primary and fallback model pairings once canonical model IDs are published (owner: Product).
+
+## What you should add: retry with backoff
+
+Some failures are transient and the same request will succeed a moment later. Retry those, and only those, with exponential backoff.
+
+- **Retry `502` `provider_error` and `503` `unavailable`.** These signal a backend that may recover shortly.
+- **Honor `Retry-After` on `429`.** Rate-limited responses carry a `Retry-After` header telling you how long to wait; respect it rather than retrying blindly. Note that `429` also covers `insufficient_quota`, which retrying will not fix, so distinguish by the error `code` before you decide to retry.
+- **Do not retry `4xx` you caused.** A `400` (invalid request), `401` (bad key), or `402` (payment required) will fail again identically. Fix the request or the account instead.
+
+Back off exponentially between attempts, add jitter so many clients do not retry in lockstep, and cap the number of attempts. Always honor `Retry-After` when it is present; treat it as a floor on your wait, not a suggestion.
+
+```
+attempt 1 -> fail 503 -> wait base * 2^0 + jitter
+attempt 2 -> fail 503 -> wait base * 2^1 + jitter
+attempt 3 -> fail 503 -> give up, fall back or surface error
+# any Retry-After header overrides the computed wait
+```
+
+## Put it together
+
+The layered strategy looks like this, from innermost to outermost:
+
+1. Nito routes within the model group and trips its circuit breaker automatically. You get nothing to do here.
+2. On a transient `502`/`503`, retry with exponential backoff, honoring any `Retry-After`.
+3. If retries are exhausted, fall back to an alternate model at the same privacy tier.
+4. If that fails too, surface a clean error to the user, keyed by the request ID so it can be investigated.
+
+Never let any of these steps quietly relax a privacy mode, and never retry the non-retryable `4xx` errors. Correct handling of the full status set is covered in [Error format](/api-reference/overview/error-format) and the [Production readiness checklist](/resources/best-practices/production-readiness-checklist).
+
+## A quick checklist
+
+- Rely on gateway failover within a model group; do not rebuild it.
+- Fall back to an alternate model on `502`/`503`, same privacy tier.
+- Retry only transient `502`/`503`; honor `Retry-After` on `429`.
+- Never retry `400`/`401`/`402`, and never downgrade privacy to recover.
+- Surface a clean, request-ID-keyed error when all else fails.
+
+## Related
+
+- [How Nito Works](/get-started/how-nito-works)
+- [Error format](/api-reference/overview/error-format)
+- [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+- [Production readiness checklist](/resources/best-practices/production-readiness-checklist)
+
+<!-- source: internal/server/logical_models.go (chooseLogicalRoute), internal/inference/errors.go (StatusCode, ErrorKind provider_error/unavailable/rate_limited/insufficient_quota), internal/server/rate_limit.go (Retry-After), internal/config/* (PROVIDER_CIRCUIT_BREAKER threshold 3, cooldown 30s), docs/planning/DOCS_SOURCE_OF_TRUTH.md §5, §8, §9 -->

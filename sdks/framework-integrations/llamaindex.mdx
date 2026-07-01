@@ -1,0 +1,66 @@
+---
+title: LlamaIndex
+description: Use Nito in LlamaIndex via its OpenAI-compatible LLM, pointed at Nito's base URL with a Nito key and a Nito catalog model ID.
+---
+
+LlamaIndex uses an LLM object across its query engines, agents, and pipelines. Nito has no LlamaIndex-specific package; you configure its OpenAI-compatible LLM for Nito and use it everywhere LlamaIndex expects a model, because Nito exposes an OpenAI-compatible API. Your indexes, retrievers, and query engines stay the same. Nito also serves an OpenAI-compatible `POST /v1/embeddings`, so the same redirect works for an embedding model.
+
+## The principle
+
+Configure the OpenAI-compatible LLM with three values:
+
+- the Nito base URL ending in `/v1`,
+- a Nito API key (it starts with `z_sk_`),
+- a Nito catalog model ID from `GET /v1/models`.
+
+Set it as your LLM and the rest of the pipeline is unchanged.
+
+## Representative configuration
+
+```python
+from llama_index.llms.openai_like import OpenAILike
+
+llm = OpenAILike(
+    model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
+    api_key="z_sk_your_key_here",              # your Nito API key
+    api_base="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    is_chat_model=True,
+)
+
+print(llm.complete("Say hello in one short sentence."))
+```
+
+For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
+
+> **TODO (needs SME):** verify the exact current configuration for LlamaIndex (LLM and embeddings) against its official docs (owner: DevRel)
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Choosing a model and privacy
+
+Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note `:e2e-tee` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## If you reach for the Anthropic LLM
+
+LlamaIndex's Anthropic LLM targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Use the OpenAI-compatible LLM shown above to reach Nito, not the Anthropic class.
+
+## Common mistakes
+
+- **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
+- **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
+- **Selecting the Anthropic LLM.** Nito serves Chat Completions, not Messages.
+
+## Related
+
+- [Framework integrations overview](/sdks/framework-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions, compat.openai.embeddings at /v1/embeddings; /v1/messages wired to notFoundRouteHandler) -->

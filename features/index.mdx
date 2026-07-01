@@ -1,0 +1,55 @@
+---
+title: Features
+description: Everything you can do with one Nito key, one base URL, and one request. An honest map of what the gateway implements today.
+---
+
+Every feature here rides on the same frame: one key reaches the whole catalog, the `model` string selects both the model and how private the call is, and Nito handles routing, billing, and attestation underneath. If that frame is not yet familiar, read [How Nito Works](/get-started/how-nito-works) first; this page assumes it.
+
+This is a map, not a tutorial. Each capability below links to its own deep page. The list is deliberately split in two: what the gateway actually implements at this commit, and what the broader outline mentions but the gateway does **not** serve yet. The second list exists so you never wire up against an endpoint that returns `404`.
+
+## What the gateway does today
+
+These are live on the gateway and documented in depth.
+
+- **[Chat completions](/features/chat-completions)** the primary text surface. Send messages, name a model, get a reply. OpenAI-compatible shape, served at both `/v1/chat/completions` and `/api/v1/chat/completions`.
+- **[Streaming](/features/streaming)** get the reply as Server-Sent Events token by token, by setting `stream: true`. Not available in end-to-end encrypted TEE mode.
+- **[Tool calling](/features/tool-calling)** declare function tools the model can ask to call. Your code runs them and returns the result; the gateway routes the conversation but does not execute your functions.
+- **[Server-side tools](/features/server-side-tools)** tools Nito runs for you mid-generation: web search, web fetch, the file parser, and (xAI only) a code interpreter. You do not wire these up yourself.
+- **[Reasoning](/features/reasoning)** ask a capable model to think first, with controls over effort and summary. Output arrives as `reasoning_details` plus a `reasoning_tokens` usage count.
+- **[Multimodal](/features/multimodal)** image input and PDF/document input alongside text, plus text-to-image generation as a separate endpoint.
+- **[Embeddings](/features/embeddings)** vectors for search and retrieval, with the same per-call privacy options as chat.
+- **[Prompt caching](/features/prompt-caching)** pass provider cache directives (`prompt_cache_key`, `cache_control`) through to cut the cost of long, repeated prompt prefixes. Cache hits show up in `usage`.
+- **[Idempotency](/features/idempotency)** send an `Idempotency-Key` header (a UUID) so a retried request is not double-charged. Scoped to billing dedup.
+- **[Multi-model routing (fusion)](/features/multi-model-routing)** ask two or three models the same prompt at once, then have a judge model synthesize a single merged answer. A separate, non-streaming endpoint.
+
+## Not available yet
+
+The product outline mentions the capabilities below, but the gateway returns `404` or has no route for them at this commit. They are listed here plainly so you do not build against them. Some may ship later; some may be cut. Treat each as absent until a feature page exists for it.
+
+- **Responses API** (`/v1/responses`) returns `404`.
+- **Anthropic Messages API** (`/v1/messages`, `/v1/messages/count_tokens`) returns `404`.
+- **Audio input** no route.
+- **Video input** no route.
+- **Audio generation** no route.
+- **Video generation** no route.
+- **Datetime tool** no tool type or handler.
+- **Structured outputs / JSON-schema enforcement** the internal request type can carry a response format, but the public chat API never populates it and performs no schema validation.
+- **Response caching** (returning a stored full response for an identical request) not implemented. Only prompt-cache passthrough exists; see [Prompt caching](/features/prompt-caching).
+- **Message transforms** no request-level `transforms` field.
+- **BYOK (bring your own provider key)** provider keys come from gateway config only.
+- **Guardrails (prompt-injection or sensitive-info filtering on chat)** no chat-prompt moderation or injection classifier.
+- **App attribution / request metadata field** the HTTP surface wires only `user`; there is no app-title or referer field.
+- **Generation metadata endpoint** (`GET /api/v1/generation`) no route.
+- **Outbound consumer webhooks** no per-customer event-delivery system.
+
+The **MCP transport** (`/mcp`, Streamable HTTP) is present on the gateway, but the MCP protocol and server are documented separately in their own repo and are out of scope for these pages.
+
+## Related
+
+- [How Nito Works](/get-started/how-nito-works)
+- [Chat Completions](/features/chat-completions)
+- [Multi-model routing (fusion)](/features/multi-model-routing)
+- [Privacy overview](/privacy/overview)
+- [API reference](/api-reference)
+
+<!-- source: internal/server/routes.go (route table), internal/server/api_chat.go (apiChatRequest), internal/server/api_chat_fusion.go (apiChatFusionHandler), DOCS_SOURCE_OF_TRUTH.md §7, DOCS_DEFERRED.md (not-implemented list) -->

@@ -1,0 +1,92 @@
+---
+title: Build an app-level fallback router
+description: Try a primary model, fall back to another on error. Layered on top of Nito's own backend fallback, with the privacy guarantee it never crosses.
+---
+
+**Goal.** A wrapper that sends a request to a primary model and, if it errors, retries the same prompt against a fallback model, so a single model's outage does not take your feature down.
+
+**Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and at least two chat model IDs from `GET /v1/models`. Understand the [error format](/api-reference/overview/error-format) so you retry on the right failures.
+
+## Know what Nito already does
+
+Before you write a line, know that Nito already fails over for you at a level you cannot see. A single logical model can be served by more than one physical backend (the same model at different providers or tiers), and the router picks a healthy, eligible one. If a backend is unavailable, the gateway routes around it **within that logical model group**. This app-level router sits *on top* of that: it fails over from one model to a **different** model, which the gateway cannot do for you because choosing a different model is a product decision only you can make.
+
+One guarantee this recipe must never break: **a privacy mode never silently downgrades.** If you ask for `:tee` and it cannot be served as asked, the call fails rather than dropping to a weaker backend. So your fallback list must respect privacy. Do not fall back from a `:tee` model to an ordinary one for a sensitive request; that would defeat the guarantee you asked for. Keep fallbacks within the same privacy tier.
+
+## Step 1: Decide which errors are retryable
+
+Not every failure should trigger a fallback. A `400` (bad request) will fail on the fallback too, so retrying wastes time and money. Fall back on transient and availability failures, not on your own mistakes.
+
+| Status | Meaning | Fall back? |
+|---|---|---|
+| 400 | invalid_request / model_unavailable | No, fix the request |
+| 401 / 403 | auth / forbidden | No |
+| 402 | payment_required | No, add credits |
+| 429 | rate_limited / insufficient_quota | Maybe, after `Retry-After` |
+| 502 | provider_error | Yes |
+| 503 | unavailable | Yes |
+
+## Step 2: Wrap the call with fallback
+
+The list below uses `grok-4.3` as the primary stand-in; substitute IDs from `GET /v1/models`, and keep every entry in the same privacy tier.
+
+```python
+import os, json, urllib.request, urllib.error
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+API_KEY = os.environ["NITO_API_KEY"]
+
+# Ordered by preference. Keep the whole list in ONE privacy tier.
+MODELS = ["grok-4.3", "another-model-id"]  # fetch IDs from GET /v1/models
+RETRYABLE = {429, 502, 503}
+
+def call(model, messages):
+    body = json.dumps({"model": model, "messages": messages}).encode()
+    req = urllib.request.Request(
+        f"{BASE_URL}/v1/chat/completions", data=body,
+        headers={"Authorization": f"Bearer {API_KEY}",
+                 "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.load(resp), resp.headers.get("X-Request-ID")
+
+def chat_with_fallback(messages):
+    last_error = None
+    for model in MODELS:
+        try:
+            data, request_id = call(model, messages)
+            return {"model": model, "request_id": request_id,
+                    "text": data["choices"][0]["message"]["content"]}
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if e.code not in RETRYABLE:
+                raise          # our fault, do not waste a fallback
+            # log e.code and the X-Request-ID header, then try the next model
+            continue
+    raise last_error
+
+result = chat_with_fallback([{"role": "user", "content": "Summarize TEE in one line."}])
+print(result["model"], result["request_id"])
+print(result["text"])
+```
+
+Log the `X-Request-ID` from each failed attempt (it is returned on every response, including errors) so you can trace exactly which backend failed and why.
+
+## Step 3: Respect Retry-After
+
+On a `429`, the response carries a `Retry-After` header telling you how long to wait. If your fallback list is exhausted or you prefer to wait rather than switch models, honor that value instead of immediately hammering the next model. Nito emits `Retry-After` only; there are no `X-RateLimit-*` headers to read.
+
+## What not to do
+
+- **Do not fall back across privacy tiers.** A `:tee` request that fails should fall back to another `:tee` option, or fail. Silently answering a sensitive request in ordinary mode is exactly the downgrade the platform refuses to do, and your router should not reintroduce it.
+- **Do not fall back on `400`/`401`/`402`.** Those are deterministic and will fail identically on the next model.
+- **Do not duplicate the gateway's job.** You do not need to list every provider for one model; the gateway already load-balances within a logical model. Your list is about *alternative models*.
+
+## Related
+
+- [Multi-model routing](/features/multi-model-routing)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Error format](/api-reference/overview/error-format)
+- [Model comparison tool](/cookbook/advanced/model-comparison-tool)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §5 (chooseLogicalRoute, backend selection within logical model group), how-nito-works.mdx (privacy never silently downgrades), §9 (status mapping, Retry-After only, X-Request-ID on every response) -->

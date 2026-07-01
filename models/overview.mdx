@@ -1,0 +1,73 @@
+---
+title: Models overview
+description: How model access works on Nito through one key, and how to read a model entry from the catalog.
+---
+
+On Nito, a single API key reaches every model in the catalog. You do not hold accounts with the underlying providers, you do not manage their keys, and you do not learn each one's request format. To use a model, you name it in the `model` field of your request. To change how private the call is, you add a suffix to that same name. This page builds the mental model for the catalog: what a "model" is on Nito, why the list is discovered rather than fixed, and how to read everything a single model entry tells you.
+
+## Why model access works this way
+
+Reaching AI models the normal way means signing up with each vendor, holding a separate key per vendor, learning each vendor's slightly different request shape, and paying several bills. Switching from one model to another for cost or quality often means rewriting code. Nito removes that friction by sitting in front of the providers as a single entry point, called a gateway. A gateway takes one kind of request, decides which backend should serve it, applies your rules, handles payment, and hands back one consistent response shape.
+
+The practical consequence for you is simple: you integrate once and reach many models. The model you name is a logical model, meaning a stable public name that Nito maps to whichever physical backend can actually run it. You name `grok-4.3`; Nito finds a healthy, eligible, cost-effective backend that serves it. That indirection is what lets one key reach the whole catalog.
+
+## One key, the whole catalog
+
+Models on Nito are served by several providers behind the scenes (for example xAI, OpenRouter, NEAR, Phala, and an image provider). You never see that plumbing as separate accounts. You authenticate once with your Nito key, send a request naming a model, and Nito routes it to a backend that can serve it. Which provider runs a given call depends on the model and your privacy choice; see [Providers](/models/providers) and [Backend selection](/models/backend-selection).
+
+The catalog is not a fixed list baked into the product. Nito discovers models from its providers and keeps the catalog current, adding new models and retiring old ones over time. Think of it like an airport's live departures board rather than a printed timetable: the board reflects what is actually flying right now. Because of that, the authoritative list of what you can call is always the live models endpoint, not a hard-coded table in your code.
+
+## Listing models
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+This returns a list of model entries. By default it returns chat models; pass a `type` filter to see other kinds (for example embedding or image models). The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## How to read a model entry
+
+Each entry describes one model you can call. The important fields:
+
+| Field | What it tells you |
+|---|---|
+| `id` | The model ID you pass back in a request. |
+| `type` | `chat`, `embedding`, or `image`. |
+| `display_name`, `description` | Human-friendly name and summary. |
+| `owned_by` | The model's vendor. |
+| `architecture.input_modalities` / `output_modalities` | What the model accepts and produces (for example text, image input). A modality is a kind of data, such as text or images. |
+| `capabilities` | Feature support flags (see below). |
+| `context_window` | The model's context limit, when known. |
+| `pricing` | Per-token and per-unit cost, when configured. |
+| `privacy_tier` | The model's privacy tier: `anon`, `private`, or `tee`. |
+| `tee_provider`, `attestation_available`, `attestation_subject` | TEE details when the model supports attestation. |
+| `e2ee_supported` | Whether end-to-end encrypted TEE is available. |
+| `free_tier_eligible` | Whether the model can be used without a funded balance. |
+
+The `capabilities` object reports what a model can do, including: `supports_image_inputs`, `supports_image_generation`, `supports_web_search`, `supports_web_fetch`, `supports_x_search`, `supports_code_interpreter`, `supports_reasoning`, `supports_tee_attestation`, and `supports_e2ee`. Read these before sending a feature: a request that uses a capability the model lacks is rejected rather than silently ignored.
+
+### Where pricing and context window come from
+
+Two fields deserve a note, because they behave differently from the rest. `pricing` and `context_window` are not stored on the model card itself. They are joined in at response time from Nito's billing data, then shown on the entry when they are configured. The takeaway: do not assume these fields are always populated, and do not treat an absent field as zero. When pricing or a context window is present, use it; when it is absent, treat it as unknown and fall back to a model you have priced.
+
+## Privacy is part of the model choice
+
+A model entry's `privacy_tier` and TEE fields tell you which privacy modes that model supports. You select a mode by adding `:tee` or `:e2e-tee` to the model ID at request time (those two are the only valid suffixes). A model that reports `attestation_available: true` can be called with `:tee`; one with `e2ee_supported: true` can be called with `:e2e-tee`. TEE stands for Trusted Execution Environment, a hardware-isolated compute box the host cannot read into; attestation is a signed statement proving your call ran inside one. See [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) and [Model ID convention](/models/model-id-convention).
+
+## Common mistakes
+
+- **Hard-coding model names.** The catalog is discovered and changes over time. Pull IDs from `GET /v1/models` rather than pasting a name from a blog post.
+- **Assuming every model supports every feature.** Check `capabilities` first. Reasoning, image inputs, web tools, and attestation are per-model, not catalog-wide.
+- **Expecting pricing or context length to always be present.** Both are joined from billing and only appear when configured. When a field is absent, treat it as unknown rather than zero.
+- **Reading `privacy_tier` as something you set in the request body.** The tier is a property of the model; you choose a mode at call time with the model-ID suffix, not a separate field.
+
+## Related
+
+- [Model ID convention](/models/model-id-convention)
+- [Model catalog](/models/model-catalog)
+- [GET /v1/models reference](/api-reference/models-catalog/list-models)
+
+<!-- source: internal/server/api_models.go (apiModelsHandler, apiModel, apiModelListResponse, capabilities, pricing, privacy_tier), internal/models/models.go (SupportedModel, DiscoveredModel, ModelType, pricing/context joined from billing), internal/server/api_models_filters.go -->

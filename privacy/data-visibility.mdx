@@ -1,0 +1,68 @@
+---
+title: Data Visibility
+description: Who sees what on Nito. A three-column model of what the gateway sees, what the provider sees, and what is never stored.
+---
+
+When you send a request to Nito, three different parties are involved, and they do not all see the same thing. Confusing them is the most common source of privacy misunderstandings, so this page draws the lines explicitly. There is **Nito**, the gateway you call. There is the **upstream provider**, the model host that actually runs the inference. And there is the category of data that is **never stored at all** by the gateway, regardless of mode. Once you can place a given piece of data in the right column, the rest of the privacy section reads cleanly.
+
+If you read only one thing, read the table. Everything else explains a cell in it.
+
+## The three columns
+
+| Data | What Nito (the gateway) sees | What the upstream provider sees | Never stored by the gateway |
+|---|---|---|---|
+| Your prompt / messages | Sees it in transit to route and serve the call; does not persist it | Serves the call, so it may see the prompt, subject to provider-side enforcement (`Store: false`, ZDR, or TEE) | Prompt bodies are request-local, not persisted |
+| The model's completion | Sees it in transit to return it to you; does not persist it | Produces it | Completion bodies are request-local, not persisted |
+| Reasoning / chain-of-thought | In transit only | Produces it | Not persisted |
+| Tool calls and tool arguments | In transit only | Sees what it needs to drive the tool | Not persisted |
+| Uploaded file contents | Parsed inline to serve the request, then discarded | Receives the parsed text as part of the prompt | File contents not persisted |
+| Operational metadata | Kept (the metadata-only default) | N/A | This is the one category that **is** kept |
+| Telemetry / traces | Kept, but restricted to a safe allowlist | N/A | Anything outside the allowlist is not captured |
+| Browser chat history | Not on the gateway; client-side only | Not seen | Lives in the browser, encrypted |
+
+The shape to take away: the **left** column is deliberately thin (metadata and allowlisted telemetry only), the **middle** column is where your prompt actually gets read in order to be answered, and the **right** column is the long list of things the gateway treats as request-local and throws away.
+
+## What Nito (the gateway) sees
+
+Nito has to see your request to do its job. It reads your API key to authenticate you, reads the `model` field to resolve the model and privacy mode, routes the call, places a billing hold, and forwards the request to the chosen provider. While the request is in flight, the prompt, completion, reasoning, tool calls, and any parsed file contents pass through the gateway. That is unavoidable: a gateway that could not see a request could not route it.
+
+The distinction that matters is **see in transit** versus **persist**. By default, the gateway keeps **operational metadata only**. Request and response bodies are request-local: they are used to serve the call and are not written to durable storage. Inference responses are returned with `Cache-Control: no-store`. Telemetry is restricted to a `SafeAttrs` allowlist, so traces carry operational fields, not the contents of your prompt. The precise definition of "metadata" and the enforcement points behind it are in [Metadata-only default](/privacy/data-retention/metadata-only-default).
+
+## What the upstream provider sees
+
+The provider is the party that actually runs the model, so it is the party that, in ordinary operation, reads your prompt in order to answer it. This is true of every AI gateway: something, somewhere, has to run the inference. What Nito changes is the **enforcement** wrapped around that fact.
+
+Depending on the model and the privacy mode you selected, the provider is constrained in different ways:
+
+- **`Store: false`** is forced on providers that honor it (for example xAI through the OpenAI Responses adapter), telling the upstream not to retain the request.
+- **Zero data retention (ZDR)** is enforced where supported (for example OpenRouter routes on the private path), so the upstream is contractually and technically told not to keep the data; non-ZDR models are not imported on that path.
+- **TEE** runs the call inside a hardware-isolated, sealed environment the host cannot peer into, and you can fetch an attestation to verify it really ran there.
+
+So the middle column is not "the provider does whatever it wants." It is "the provider serves the call under the enforcement your mode selected." Which enforcement applies to which model is reported on the model card and covered in [Privacy overview](/privacy/overview) and [Privacy tiers](/privacy/tiers).
+
+## What is never stored
+
+The right column is the one most people are actually asking about when they ask "do you keep my data." By default, the gateway does **not** persist:
+
+- prompt and message bodies,
+- model completions,
+- reasoning / chain-of-thought,
+- tool calls and tool arguments,
+- the contents of uploaded files (parsed inline, then discarded).
+
+These are request-local. They live only for as long as it takes to serve the request and are not written to a durable store you could later read back. The one thing that **is** kept by default is operational metadata, and even telemetry about the request is filtered down to the safe allowlist rather than capturing payloads.
+
+## Browser chat history is a special case
+
+If you use a browser chat app built on Nito, you have a chat history, and it is reasonable to ask where it lives. It lives **on the client**. Chat history is stored client-side in encrypted IndexedDB, using a per-user key. The gateway does not hold a server-side copy of your conversations. The key derivation and what this means for retention are covered in [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat) and [Three secret roles](/privacy/data-retention/three-distinct-keys).
+
+The practical consequence: clearing your browser storage clears the history, because there is no server-side conversation store to fall back to by default.
+
+## Related
+
+- [Metadata-only default](/privacy/data-retention/metadata-only-default): the precise definition of the metadata the left column keeps.
+- [Data retention](/privacy/data-retention): the full retention contract and its sub-pages.
+- [Privacy overview](/privacy/overview): how privacy modes are selected and what each enforces.
+- [How Nito works](/get-started/how-nito-works): the request lifecycle these three columns sit on.
+
+<!-- source: docs/standards/privacy-and-retention.md, internal/observability/attrs.go (SafeAttrs allowlist), internal/server/api_chat.go (Cache-Control: no-store), internal/server/api_storage_key.go, internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR); DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 -->

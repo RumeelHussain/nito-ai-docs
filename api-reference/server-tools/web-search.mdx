@@ -1,0 +1,105 @@
+---
+title: Web search
+description: Let the model search the web during a chat completion, via the web_search field or a web_search tool, on supported providers.
+---
+
+Web search lets a chat completion pull fresh results from the web. It is a gateway-native pipeline (Brave-backed) with a rules engine, routed through the provider. It is available on OpenRouter, xAI, NEAR, and Phala models; other models reject it.
+
+There are two ways to turn it on: the top-level `web_search` field, or a `web_search` entry in `tools`.
+
+## Invoking
+
+### Top-level field (boolean)
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [{ "role": "user", "content": "What shipped in the latest release?" }],
+  "web_search": true
+}
+```
+
+### Top-level field (object)
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [{ "role": "user", "content": "..." }],
+  "web_search": {
+    "max_sources": 8,
+    "freshness": "pw",
+    "country": "US"
+  }
+}
+```
+
+### As a tool
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [{ "role": "user", "content": "..." }],
+  "tools": [{ "type": "web_search" }]
+}
+```
+
+## `web_search` object fields
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `mode` | string | none | Search mode. |
+| `retrieval_mode` | string | none | How results are retrieved/expanded. |
+| `max_sources` | int | `10` | Number of sources to consider. Capped at `50`. |
+| `max_context_tokens` | int | `6000` | Token budget for injected search context. |
+| `freshness` | string | none | Recency filter for results. |
+| `country` | string | none | Country bias for results. |
+| `search_lang` | string | none | Search language. |
+| `safesearch` | string | none | Safe-search setting. |
+| `location` | object | none | Location hint for the query. |
+
+> **TODO (needs SME):** the enumerated value sets for `mode`, `retrieval_mode`, `freshness`, `safesearch`, and the `location` object shape (owner: Backend).
+
+## Response
+
+When web search runs, the completion carries:
+
+- A top-level `web_search` metadata object describing the search that was performed.
+- `usage.server_tool_use` counters: `web_search_requests` and `web_search_results`.
+
+These let you see how many searches and results were used for billing and debugging.
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion",
+  "choices": [{ "...": "..." }],
+  "web_search": { "...": "..." },
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "server_tool_use": {
+      "web_search_requests": 1,
+      "web_search_results": 8
+    }
+  }
+}
+```
+
+> **TODO (needs SME):** the exact `web_search` metadata field set on the response (owner: Backend).
+
+## Provider support
+
+Web search requires an OpenRouter, xAI, NEAR, or Phala model. If you enable it on any other model, the request fails with a routing error in the standard error envelope. See [Tool errors](/api-reference/server-tools/tool-errors).
+
+## Billing
+
+Web search is billed in addition to the model's own token usage, as the pseudo-models `brave/llm_context` and `brave/web_search`. See [Tool pricing](/api-reference/server-tools/tool-pricing).
+
+## Related
+
+- [Web fetch](/api-reference/server-tools/web-fetch)
+- [Tool pricing](/api-reference/server-tools/tool-pricing)
+- [Tool errors](/api-reference/server-tools/tool-errors)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §7 (web_search field/tool, internal/websearch/*, internal/websearchbilling), §2 (apiChatRequest web_search, apiUsage.server_tool_use) -->

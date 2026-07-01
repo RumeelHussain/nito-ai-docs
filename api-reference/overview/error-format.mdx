@@ -1,0 +1,49 @@
+---
+title: Error format
+description: The canonical Nito error envelope, where the error family lives, and the OAuth exception.
+---
+
+When a Nito API call fails, the gateway returns a JSON error envelope and a matching HTTP status code. There is one canonical shape for the API surface, with a documented exception for OAuth endpoints.
+
+## The canonical envelope
+
+```json
+{
+  "error": {
+    "message": "human-readable description",
+    "code": "invalid_request",
+    "param": "model"
+  }
+}
+```
+
+| Field | Notes |
+|---|---|
+| `message` | Human-readable description of what went wrong. |
+| `code` | The error family. This is where the category lives. |
+| `param` | Optional. The request field the error refers to, when applicable. |
+
+**There is no `type` field.** If you have used other APIs that split an error into `type` and `code`, note that Nito carries the family in `code` only. Branch your error handling on `code`.
+
+The `code` values map to HTTP status codes (for example `invalid_request` → `400`, `unauthorized` → `401`, `rate_limited` → `429`). For the full list of codes, their statuses, and rate-limit behavior, see [Errors & rate limits](/api-reference/errors-and-rate-limits).
+
+## The OAuth exception
+
+OAuth endpoints follow RFC 6749 instead of the canonical envelope. Their errors use:
+
+```json
+{
+  "error": "invalid_grant",
+  "error_description": "human-readable description"
+}
+```
+
+So when you are working with `/oauth/*` endpoints, read `error` and `error_description`, not `error.code` and `error.message`.
+
+## Related
+
+- [Errors & rate limits](/api-reference/errors-and-rate-limits)
+- [Authentication](/api-reference/overview/authentication)
+- [Response format](/api-reference/overview/response-format)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (Error envelope, status mapping) -->

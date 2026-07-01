@@ -1,0 +1,90 @@
+---
+title: Slack assistant
+description: Build a Slack assistant powered by Nito. Receive an event, call Nito's Chat Completions, and post the reply in the channel or thread.
+---
+
+A Slack assistant has two halves. The Slack half subscribes to events such as mentions or messages and posts replies through the Slack API. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Slack half only as a representative shape, because the Slack app model and SDKs change over time.
+
+> **TODO (needs SME):** verify the current Slack app/API/SDK setup against its official docs (owner: DevRel).
+
+## The Nito call
+
+The assistant's brain is one call to Nito's OpenAI-compatible Chat Completions endpoint. Nito is OpenAI-compatible, so you can use the OpenAI SDK and change only the base URL, key, and model.
+
+```python
+from openai import OpenAI
+
+nito = OpenAI(
+    api_key="z_sk_your_key_here",              # your Nito API key, keep it server-side
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+def answer(user_text: str) -> str:
+    resp = nito.chat.completions.create(
+        model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+        messages=[
+            {"role": "system", "content": "You are a helpful Slack assistant."},
+            {"role": "user", "content": user_text},
+        ],
+    )
+    return resp.choices[0].message.content
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Wiring it to Slack
+
+The representative structure is: an event handler fires on a mention, you pass the text to `answer()`, then post the reply in the same channel or thread. The handler names and method calls below are illustrative only.
+
+```python
+# Representative only, verify against current Slack docs.
+def on_app_mention(event, say):
+    user_text = event["text"]
+    try:
+        reply = answer(user_text)
+    except Exception:
+        reply = "Sorry, I could not answer that right now."
+    say(text=reply, thread_ts=event.get("thread_ts", event["ts"]))
+```
+
+Keep the Nito key in a server-side environment variable alongside your Slack app tokens. The `z_sk_` key stays on your backend and is never exposed to Slack clients.
+
+## Streaming or not
+
+Slack posts whole messages, so an assistant typically uses a non-streaming call and posts the reply once complete. You can update a posted message with the growing text if you stream from Nito (`stream=True`), but mind Slack's update rate limits. Because `:e2e-tee` does not stream, pair streaming only with an ordinary or `:tee` model.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Handling errors
+
+Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` with no `type` field. Map the status to a graceful reply:
+
+- **429**: honor `Retry-After` and back off. This covers rate limits and quota exhaustion.
+- **402** or quota: post a short "temporarily unavailable" note and alert your team.
+- **400**: usually a bad model ID or malformed message. Confirm you used a catalog ID.
+
+Slack expects a fast acknowledgement to events. If the Nito call may be slow, acknowledge first and post the answer asynchronously so Slack does not retry the event.
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [WhatsApp assistant](/cookbook/bots/whatsapp-assistant)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Rate limits](/resources/rate-limits)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

@@ -1,0 +1,111 @@
+---
+title: TEE-attested Call and Verify Nonce
+description: Make a :tee chat call, then fetch and verify its attestation with a fresh nonce, running the baseline checks the gateway supports.
+---
+
+This is the flagship private-AI flow: make an attested chat call, then **prove** the tier instead of trusting it. You do that by fetching the attestation with a fresh nonce and running a set of independent checks on what comes back. It combines the [drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade) with the [verify-it-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe).
+
+One thing up front, because it governs everything below. These checks confirm a **baseline-verified** result. The gateway does **baseline** verification only: field stability and binding (`report_data == signing_address + nonce`). It does **not** validate Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policy. Full hardware-quote verification is **your responsibility** on top of these checks. That is the point of the verify-yourself path: the gateway hands you the evidence so you can do the hardware verification it deliberately does not do.
+
+## Step 1: Make the attested chat call
+
+Select the attested tier with the `:tee` model-ID suffix. The suffix only works on attestation-capable models (NEAR or Phala in the current catalog); fetch `GET /v1/models` and pick one whose card advertises attestation.
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL_ID:tee",
+    "messages": [{"role": "user", "content": "Summarize this in one line."}]
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace both once confirmed (owner: Security / Product).
+
+## Step 2: Generate a fresh nonce
+
+Replay protection is caller-driven (there is no server-side nonce store), so always start from a fresh, unpredictable nonce. Use a cryptographically secure source, at least 32 bytes, hex-encoded. Never reuse a nonce; a fresh value per call is what makes the freshness and binding gates meaningful.
+
+```bash
+NONCE=$(openssl rand -hex 32)
+```
+
+## Step 3: Fetch the attestation
+
+Fetch `GET /api/v1/tee/attestation` for the same model, passing your nonce.
+
+```bash
+curl -sS \
+  "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL_ID:tee&nonce=$NONCE" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+## Step 4: Run the baseline checks
+
+Do not trust the `verified` flag alone. Re-check what you can against the response. Each item is something you assert in your own code.
+
+1. **HTTP status is 200.**
+2. **`object` equals `"tee.attestation"`.**
+3. **`model` is set, `privacy_tier` is `"tee"`, and `attestation_available` is true.**
+4. **The echoed `nonce` equals the nonce you sent.** If not, stop; the report is not bound to your request.
+5. **`evidence` is present** (a non-empty JSON object).
+6. **Proof metadata is present:** `proof_format`, `signing_algo`, and `signing_key` are all populated. (`signing_key` and `model_public_key` are aliases for the same model public key.)
+7. **The baseline `verified` flag is true.**
+
+Here is a compact Python sketch that fetches and checks, using only the standard library.
+
+```python
+import os, secrets, json, urllib.parse, urllib.request
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"  # TODO: confirm canonical base URL
+MODEL = "MODEL_ID:tee"                   # TODO: confirm an attestation-capable model
+API_KEY = os.environ["NITO_API_KEY"]
+
+# Fresh nonce: 32 random bytes, hex-encoded.
+nonce = secrets.token_hex(32)
+
+query = urllib.parse.urlencode({"model": MODEL, "nonce": nonce})
+req = urllib.request.Request(
+    f"{BASE_URL}/api/v1/tee/attestation?{query}",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+)
+with urllib.request.urlopen(req) as resp:
+    status = resp.status
+    body = json.load(resp)
+
+assert status == 200, f"expected 200, got {status}"
+assert body.get("object") == "tee.attestation", "wrong object type"
+assert body.get("model"), "model missing"
+assert body.get("privacy_tier") == "tee", "not a TEE tier"
+assert body.get("attestation_available") is True, "attestation not available"
+assert body.get("nonce") == nonce, "nonce echo does not match what we sent"
+assert body.get("evidence"), "evidence missing"
+assert body.get("proof_format"), "proof_format missing"
+assert body.get("signing_algo"), "signing_algo missing"
+assert body.get("signing_key"), "signing_key missing"   # alias of model_public_key
+assert body.get("verified") is True, "baseline verification failed"
+
+print("baseline checks passed")
+
+# TODO (your responsibility, NOT done above):
+# Independently verify the hardware quote in body["evidence"]:
+#   - Intel TDX quote validation
+#   - NVIDIA GPU evidence validation
+#   - certificate chain / CRL / TCB policy checks
+```
+
+If any assertion fails, treat the attestation as untrustworthy and do not proceed with the sensitive workload.
+
+## Step 5: Do the hardware verification
+
+Steps 1 through 4 give you a baseline-verified result. For full assurance you must verify the hardware quote in `evidence` yourself: validate the Intel TDX quote, the NVIDIA GPU evidence, and the certificate chains, and check them against current TCB policy and CRLs. The gateway deliberately leaves these to you. Nito ships a reference verifier, `tools/tee-attestation-smoke`, that runs the same baseline checks and is a good starting point to layer hardware verification on top.
+
+## Related
+
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+- [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
+- [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+
+<!-- source: internal/server/api_tee_attestation.go; internal/server/api_tee_attestation_verification.go; tools/tee-attestation-smoke/main.go; docs/architecture/tee-attestation.md; DOCS_SOURCE_OF_TRUTH.md §6 -->

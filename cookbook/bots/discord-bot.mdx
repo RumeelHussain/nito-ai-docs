@@ -1,0 +1,91 @@
+---
+title: Discord bot
+description: Build a Discord bot that answers with Nito. Receive a message event, call Nito's Chat Completions, and reply in the channel.
+---
+
+A Discord bot has two halves. The Discord half connects over the gateway, receives message events, and posts replies. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Discord half only as a representative shape, because Discord's API and client libraries change over time.
+
+> **TODO (needs SME):** verify the current Discord API/library setup against its official docs (owner: DevRel).
+
+## The Nito call
+
+The bot's brain is one call to Nito's OpenAI-compatible Chat Completions endpoint. Nito is OpenAI-compatible, so you can use the OpenAI SDK and change only the base URL, key, and model.
+
+```python
+from openai import OpenAI
+
+nito = OpenAI(
+    api_key="z_sk_your_key_here",              # your Nito API key, keep it server-side
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+def answer(user_text: str) -> str:
+    resp = nito.chat.completions.create(
+        model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+        messages=[
+            {"role": "system", "content": "You are a helpful Discord assistant."},
+            {"role": "user", "content": user_text},
+        ],
+    )
+    return resp.choices[0].message.content
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Wiring it to Discord
+
+The representative structure is: an event fires when a message is posted, you pass its text to `answer()`, then reply in the channel. The library names and decorators below are illustrative only.
+
+```python
+# Representative only, verify against current Discord docs.
+async def on_message(message):
+    if message.author.is_bot:
+        return
+    try:
+        reply = answer(message.content)
+    except Exception:
+        reply = "Sorry, I could not answer that right now."
+    await message.channel.send(reply)
+```
+
+Keep the Nito key in a server-side environment variable. A Discord bot runs on your own host, so the `z_sk_` key never reaches a client. Never ship it to the browser or a desktop client.
+
+## Streaming or not
+
+Discord posts whole messages, so a bot normally uses a non-streaming call and sends the reply once it is complete. If you want a "typing" effect, you can stream from Nito (`stream=True`) and edit the message as chunks arrive, respecting Discord's edit rate limits. Note that `:e2e-tee` does not stream, so combine streaming only with an ordinary or `:tee` model.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Handling errors
+
+Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` with no `type` field. Map the status to a graceful channel reply:
+
+- **429**: honor `Retry-After` and back off. This covers both rate limits and quota exhaustion.
+- **402** or quota: post a short "temporarily unavailable" note and alert your team.
+- **400**: usually a bad model ID or malformed message. Confirm you used a catalog ID.
+
+Wrap the Nito call in a try/except so one failed reply does not tear down your event loop.
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Telegram bot](/cookbook/bots/telegram-bot)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Rate limits](/resources/rate-limits)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

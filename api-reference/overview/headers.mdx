@@ -1,0 +1,55 @@
+---
+title: Headers
+description: The request headers Nito reads and the response headers it sets, including security headers.
+---
+
+This page lists the HTTP headers the Nito gateway reads on requests and sets on responses. Most calls only need `Authorization` and `Content-Type`; the rest are situational.
+
+## Request headers
+
+| Header | Notes |
+|---|---|
+| `Authorization` | Required. `Bearer <z_sk_ key>`. See [Authentication](/api-reference/overview/authentication). |
+| `Content-Type` | `application/json` for JSON bodies; `multipart/form-data` for file-parse and multipart chat image upload. |
+| `Idempotency-Key` | Must be a UUID. Scopes billing deduplication for the request. Distinct from `X-Request-ID`. |
+| `X-Request-ID` | Caller-supplied trace ID, sanitized to ≤128 chars. Echoed back. See [Request IDs](/api-reference/overview/request-ids). |
+| `X-CSRF-Token` | Browser-session double-submit token; not used for `z_sk_` API-key calls. |
+| `X-Z-Anonymous-ID` | Anonymous/free-tier identity for unauthenticated browser flows. |
+| `X-Forwarded-For` / `X-Forwarded-Proto` | Honored only from trusted proxies. |
+| `X-Z-TEE-*` | End-to-end TEE encryption envelope headers, parsed for E2E-TEE chat. |
+
+`Idempotency-Key` must be a UUID specifically; any other format is rejected. It controls billing dedup, which is a different concern from the trace `X-Request-ID`.
+
+## Response headers
+
+| Header | Notes |
+|---|---|
+| `X-Request-ID` | Echoed from the request, or generated (16 random bytes, hex) if absent. |
+| `z-env` / `z-service` / `z-version` | Runtime identity of the gateway that served the call. |
+| `Retry-After` | Set on `429` only. Seconds to wait before retrying. |
+| `Content-Type` | `application/json; charset=utf-8` for JSON responses. |
+| `Cache-Control` | `no-store` on inference responses. |
+
+### Security headers
+
+The gateway sets a standard security header set on responses:
+
+| Header | Value |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | set |
+| `Cross-Origin-Opener-Policy` / `Cross-Origin-Resource-Policy` | set |
+| `Permissions-Policy` | set |
+| `Content-Security-Policy` | set |
+| `Strict-Transport-Security` | only when the base URL is `https` |
+
+HSTS is emitted only on an HTTPS base URL, so you will not see it against a local HTTP gateway.
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+- [Request IDs](/api-reference/overview/request-ids)
+- [Response format](/api-reference/overview/response-format)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (Headers) -->

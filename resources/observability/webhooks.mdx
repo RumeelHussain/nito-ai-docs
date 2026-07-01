@@ -1,0 +1,38 @@
+---
+title: Webhooks
+description: Outbound consumer webhooks are not implemented in the Nito gateway today. This page states that plainly and points to the deferred list.
+---
+
+Outbound consumer webhooks are **not available today**. The Nito gateway does not deliver events to customer-defined endpoints. If you are looking for a way to receive a callback when something happens on your account or a request completes, that capability does not exist in the current gateway.
+
+<Warning>
+There is no outbound webhook feature. Do not build against one. The only webhooks the gateway handles are **inbound Stripe webhooks** it receives for billing, which are internal plumbing and not a customer-facing event stream.
+</Warning>
+
+## What exists and what does not
+
+- **Inbound Stripe webhooks** - the gateway receives Stripe events at an inbound endpoint for billing. This is Nito consuming Stripe's webhooks, not Nito emitting webhooks to you.
+- **Outbound consumer webhooks** - not implemented. There is no per-customer event delivery, no webhook registration, no signing secret, and no event catalog.
+
+## How to observe events today
+
+Because there is no push mechanism, observability is pull- and log-based:
+
+- Log the **`X-Request-ID`** and **`usage`** block from every response to build your own record of activity.
+- Poll the endpoints that do exist (for example org-scoped billing and usage surfaces) when you need account state.
+
+For durable event history, keep your own client-side logs, optionally exported to storage you control as described under [S3](/resources/observability/s3).
+
+## Roadmap status
+
+An outbound webhook system is on the deferred list, not the shipped surface.
+
+> **TODO (needs SME):** confirm whether outbound consumer webhooks are planned, and if so the event catalog, signing scheme, and delivery guarantees (owner: Product/DevRel). Until then, this page must not describe an outbound webhook feature as available.
+
+## Related
+
+- [Observability overview](/resources/observability) - the request ID and usage primitives.
+- [S3](/resources/observability/s3) - client-side log export.
+- [Status page](/resources/status-page) - planned uptime surface.
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md section 7 (Outbound webhooks NOT FOUND; only inbound Stripe + internal Slack alert), section 11 (webhooks deferred/stub). -->

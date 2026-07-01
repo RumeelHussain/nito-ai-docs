@@ -1,0 +1,133 @@
+---
+title: Image input
+description: Send PNG, JPEG, or WebP images into a vision-capable chat model as content parts, with formats, limits, and a worked example.
+---
+
+Image input lets a chat model see. You put one or more pictures into a chat message alongside your text, and a model that supports vision reads them and answers. This is how you ask "what is in this screenshot," "transcribe this receipt," or "what is wrong with this chart." This page covers the exact request shape, the two ways to attach an image, the model requirement, the limits that apply to multipart uploads, and a complete example.
+
+## How an image rides in a request
+
+An image is a **content part** inside a chat message. Normally a message's `content` is a string. To send an image, you make `content` an array of typed parts instead: a `text` part for your words and an `image_url` part for the picture. The model reads them together, in order.
+
+The image part has this shape:
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "https://example.com/chart.png",
+    "detail": "auto"
+  }
+}
+```
+
+The fields:
+
+- `url` (required) the image itself. It can be an `https` URL, a data URL (`data:image/png;base64,...`), or raw base64 paired with a media type (see below).
+- `detail` (optional) a hint about how finely the model should look at the image. Pass it through if you have a preference; omit it otherwise.
+
+### Three ways to supply the image
+
+The `image_url.url` field is flexible. You can give it:
+
+1. **An `https` URL.** The gateway fetches the image. The URL must be `https`, must carry no credentials, and must not point at a private, loopback, or metadata host. Public URLs only.
+2. **A data URL.** A self-contained string of the form `data:image/png;base64,<encoded bytes>`. Nothing is fetched; the bytes travel in the request.
+3. **Raw base64 plus a media type.** If you supply the encoded bytes and a `media_type` (for example `image/png`), the gateway assembles them into a data URL for you. This is a convenience so you do not have to build the `data:` prefix yourself.
+
+<Warning>
+URL attachments must be `https` with no embedded credentials, and may not resolve to private, loopback, or cloud-metadata hosts. A URL that violates this is rejected. There is also no `file_id` path for images: you cannot reference a previously uploaded file by ID. Send the image as a URL, a data URL, or base64 each time.
+</Warning>
+
+## The model must support image inputs
+
+Not every chat model can read images. A model advertises vision support through its capability flag (`supports_image_inputs` on its catalog entry). If you send an image to a model that does not support image inputs, the request is rejected.
+
+Because the catalog is discovered at runtime and changes over time, do not hard-code a vision model name. Ask the gateway which models support image inputs and select one at request time:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+Each entry reports its capabilities; pick one whose capabilities include image input. See [How Nito works](/get-started/how-nito-works) for why the catalog is the live source of truth.
+
+## Limits for multipart image upload
+
+There are two ways to get image bytes to the gateway. The `image_url` content part (above) is one. The other is a multipart form upload, where a chat request carries a JSON `request` field plus image attachments as form parts. The multipart path enforces concrete limits:
+
+| Limit | Value |
+|---|---|
+| Accepted formats | PNG, JPEG, WebP only |
+| Maximum images per request | 10 |
+| Maximum size per image | 5 MiB |
+| Maximum combined image size | 50 MiB |
+| Maximum long edge | 2048 px |
+
+A request that exceeds any of these is rejected. The accepted-format list is the same idea everywhere: PNG, JPEG, and WebP are the supported image formats for input. Other formats are not accepted.
+
+> **TODO (needs SME):** confirm whether the per-image 5 MiB, combined 50 MiB, 10-image, and 2048 px long-edge limits also bound images supplied as data URLs or base64 inside the `image_url` content part, or whether those numbers apply only to the multipart upload path. Owner: Backend.
+
+## A worked example
+
+Here is a complete non-streaming chat request that sends one image by URL and asks a question about it. Replace the base URL and pick a model that supports image inputs.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "VISION_MODEL_ID",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "What does this chart show? Summarize the trend." },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://example.com/quarterly-revenue.png",
+              "detail": "auto"
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+> **TODO (needs SME):** supply a real `VISION_MODEL_ID` value (a catalog model that advertises image input) once a canonical example model is chosen, and confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`. Owner: Product/Infra.
+
+To send the bytes inline instead of a URL, swap the `url` value for a data URL:
+
+```json
+{
+  "type": "image_url",
+  "image_url": { "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..." }
+}
+```
+
+Or supply raw base64 with a media type and let the gateway build the data URL:
+
+```json
+{
+  "type": "image_url",
+  "image_url": { "url": "iVBORw0KGgoAAAANSUhEUgAA...", "media_type": "image/png" }
+}
+```
+
+The response is an ordinary chat completion. The model's reading of the image comes back as text in `choices[0].message.content`.
+
+## What this is not
+
+- **Not image generation.** Sending an image in does not produce a new image. To create an image from a prompt, use [Image generation](/features/multimodal/image-generation).
+- **Not document parsing.** A PDF or office document is a different content part and a different path. See [PDF and document input](/features/multimodal/pdf-input). Images are never run through the document parser.
+- **Not audio or video.** Audio and video content parts are rejected. See the [Multimodal overview](/features/multimodal) for the full list of what is not available.
+
+## Related
+
+- [Multimodal overview](/features/multimodal)
+- [PDF and document input](/features/multimodal/pdf-input)
+- [Image generation](/features/multimodal/image-generation)
+- [How Nito works](/get-started/how-nito-works)
+
+<!-- source: internal/server/api_chat.go (apiChatContentPartToInference, image_url -> {url, detail?, media_type?}, imageURLWithMediaType, validateAttachmentURL, apiChatMultipartMaxImages), internal/inference/contracts.go (ContentPartKind, AttachmentSource), internal/models/models.go (supportsImageInputs) -->

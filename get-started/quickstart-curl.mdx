@@ -1,0 +1,92 @@
+---
+title: Quickstart, curl
+description: Raw HTTP against Nito, with every header and field spelled out. No dependencies, any language.
+---
+
+This page shows the raw HTTP call behind every SDK. If you work in a language without a Nito or OpenAI SDK, or you just want to see exactly what goes over the wire, this is the page. Everything here is plain `curl` you can paste into a terminal.
+
+## The minimum call
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      { "role": "user", "content": "Say hello in one short sentence." }
+    ]
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+### What each part is
+
+- **`Authorization: Bearer $NITO_API_KEY`** authenticates the request. API keys start with `z_sk_`. This header is required on every call.
+- **`Content-Type: application/json`** tells the gateway the body is JSON. The body is decoded strictly: unknown fields are rejected, so a typo in a field name returns a 400.
+- **`model`** selects the model and, via an optional `:tee` / `:e2e-tee` suffix, the privacy mode.
+- **`messages`** is the conversation, an array of `{ role, content }` objects.
+
+## A fuller call
+
+This adds a system message, streaming off, sampling controls, and a token cap:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      { "role": "system", "content": "You are a concise assistant." },
+      { "role": "user", "content": "Give me three names for a privacy-first AI app." }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 200
+  }'
+```
+
+The response is a `chat.completion` object. The text is in `choices[0].message.content`, the stop condition is in `choices[0].finish_reason` (one of `stop`, `length`, `tool_calls`, `error`), and `usage` reports tokens billed.
+
+## Streaming with curl
+
+Add `"stream": true` and read the Server-Sent Events stream. Each line is `data: <json>`, and the stream ends with `data: [DONE]`:
+
+```bash
+curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "stream": true,
+    "messages": [{ "role": "user", "content": "Count to five." }]
+  }'
+```
+
+The `-N` flag disables curl's buffering so you see tokens as they arrive. Token text is in `choices[0].delta.content` on each chunk. See [Stream your first response](/get-started/stream-your-first-response) for parsing details.
+
+## Using the first-party path
+
+Every example above uses the OpenAI-compatible `/v1/...` path. Nito also exposes a first-party `/api/v1/...` path with identical behavior for chat:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+```
+
+## Common mistakes
+
+- **A trailing comma or unknown field in the JSON.** The body is decoded strictly; unknown fields return `400` with a message naming the problem.
+- **Missing `-N` when streaming.** Without it, curl buffers and you see the whole stream at once.
+- **Wrong content type.** Chat is JSON. File parsing endpoints use `multipart/form-data` instead.
+
+## Related
+
+- [Make your first request](/get-started/make-your-first-request)
+- [Streaming format reference](/api-reference/streaming-format)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: internal/server/routes.go (api.chat_completions, compat.openai.chat_completions), internal/server/api_chat.go (apiChatRequest, decodeStrictJSON, apiChatResponse), internal/server/sse.go (prepareSSE), internal/server/api_chat_response.go (writeSSEEvent, [DONE]) -->

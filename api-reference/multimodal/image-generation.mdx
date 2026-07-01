@@ -1,0 +1,98 @@
+---
+title: Image generation
+description: Generate images from a text prompt with the Nito images endpoint, including the request and response schema and provider caveats.
+---
+
+Generate images from a text prompt.
+
+```
+POST /v1/images/generations
+POST /api/v1/images/generations
+```
+
+Both paths share one handler (`apiImageGenerationsHandler`). Image generation is backed by the fal provider; output is always PNG.
+
+## Request
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `prompt` | string | yes | The text prompt to render. |
+| `model` | string | no | Falls back to the default image model when omitted. |
+| `n` | integer | no | Number of images, `0`–`4`. |
+| `size` | string | no | Output size, e.g. `"1024x1024"`. |
+| `quality` | string | no | **Rejected for fal.** See below. |
+| `style` | string | no | **Rejected for fal.** See below. |
+| `response_format` | string | no | `"url"` (default) or `"b64_json"`. |
+| `user` | string | no | Opaque caller-supplied identifier, passed through. |
+
+Non-obvious points:
+
+- **`quality` and `style` are rejected.** The fal backend does not accept them; sending either fails the request. Omit both.
+- **Output is always PNG**, regardless of `size`.
+- **`response_format` chooses delivery.** `"url"` returns a hosted URL per image; `"b64_json"` returns the bytes inline as base64.
+
+## Response
+
+```json
+{
+  "created": 1751299200,
+  "model": "fal/fal-ai/z-image/turbo",
+  "data": [
+    {
+      "url": "https://.../generated.png",
+      "revised_prompt": "..."
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "output_images": 1,
+    "total_tokens": 12
+  }
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `created` | integer | Unix seconds. |
+| `model` | string | The model that produced the images. |
+| `data` | array | One entry per generated image. |
+| `data[].url` | string | Present when `response_format` is `"url"`. |
+| `data[].b64_json` | string | Present when `response_format` is `"b64_json"`. |
+| `data[].revised_prompt` | string | Optional. The prompt as the provider rewrote it, when supplied. |
+| `usage.prompt_tokens` | integer | Tokens counted from the prompt. |
+| `usage.output_images` | integer | Number of images returned. |
+| `usage.total_tokens` | integer | Total billable tokens. |
+
+Each `data` entry carries either `url` or `b64_json`, matching the `response_format` you requested.
+
+## Worked call
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/images/generations" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "a watercolor fox in a misty forest",
+    "n": 1,
+    "size": "1024x1024"
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+The default image model native id is `fal/fal-ai/z-image/turbo` (a Z-Image model). Use `GET /v1/models?type=image` to discover image models in your deployment.
+
+## What is not available
+
+- **Image edits and variations**: no endpoints exist; this endpoint is text-to-image only.
+- **Audio and video generation**: not available; there are no audio or video generation endpoints.
+
+> **TODO (needs SME):** whether audio/video generation is on the roadmap (owner: Product). Tracked as a deferred capability.
+
+## Related
+
+- [Image input](/api-reference/multimodal/image-input)
+- [PDF and document input](/api-reference/multimodal/pdf-input)
+- [Response format](/api-reference/overview/response-format)
+
+<!-- source: internal/server/api_images.go: apiImageGenerationsHandler, apiImageGenerationRequest, apiImageGenerationResponse; internal/provider/fal/fal.go (default fal/fal-ai/z-image/turbo, PNG, quality/style rejected); DOCS_SOURCE_OF_TRUTH.md §4 (Image generation) -->

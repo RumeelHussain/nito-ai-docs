@@ -1,0 +1,43 @@
+---
+title: Input limits
+description: The per-request input count and per-string size caps for embeddings, with batching guidance.
+---
+
+The embeddings endpoint validates the shape and size of `input` before forwarding to a provider.
+
+## Caps
+
+| Limit | Value |
+|---|---|
+| Max inputs per request | 96 |
+| Max bytes per input string | 32 KiB (32768 bytes) |
+
+When `input` is an array, each element counts toward the 96-input cap and is independently checked against the 32 KiB per-string limit. A request that exceeds either cap is rejected with `400`.
+
+Token-ID arrays are not accepted as `input`; send raw strings. See [Create embeddings](/api-reference/embeddings/create-embeddings) for the full request schema.
+
+## Batching and chunking guidance
+
+- **Batch up to 96 strings per call.** Group your texts into arrays of at most 96 entries and embed them in one request rather than one call per string.
+- **Split oversized text before sending.** Any single string over 32 KiB must be chunked. Pick a chunk size comfortably under 32 KiB (allowing for multi-byte UTF-8 characters, since the cap is on bytes, not characters), then embed each chunk and combine or store the resulting vectors as your retrieval strategy requires.
+- **Preserve order by `index`.** The response `data` array mirrors input order, so you can map each returned vector back to its source chunk by `index`.
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/embeddings" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen3-Embedding-0.6B",
+    "input": ["chunk one ...", "chunk two ...", "chunk three ..."]
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+## Related
+
+- [Create embeddings](/api-reference/embeddings/create-embeddings)
+- [Vector dimensions](/api-reference/embeddings/vector-dimensions)
+- [Embedding models](/api-reference/embeddings/embedding-models)
+
+<!-- source: internal/embeddings/validation.go (MaxInputs=96, MaxInputBytes=32 KiB); DOCS_SOURCE_OF_TRUTH.md §4 (Embeddings validation) -->

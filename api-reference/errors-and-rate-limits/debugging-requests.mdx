@@ -1,0 +1,51 @@
+---
+title: Debugging requests
+description: Use X-Request-ID and the error code to diagnose failing Nito requests and get support.
+---
+
+When a request fails, two things tell you most of what you need: the `X-Request-ID` on the response and the `code` in the error body. Capture both.
+
+## Start with the request ID
+
+Every response carries an `X-Request-ID` header. If you supply one (sanitized to ≤128 chars) it is echoed back; otherwise the gateway generates one (16 random bytes, hex). Log it for every call.
+
+When you contact support, include the `X-Request-ID`. It is how the gateway correlates your failing call to its server-side trace.
+
+```bash
+curl -i "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+# look for: X-Request-ID: <value>
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Read the code, then the message
+
+The `code` in the [error envelope](/api-reference/errors-and-rate-limits/error-envelope) is the family; the `message` and optional `param` tell you the specifics. Branch on `code`, then read `message`/`param` for the detail.
+
+## Common causes by status
+
+| Status | Likely cause | What to check |
+|---|---|---|
+| `400` | Invalid request, unsupported feature/attachment, or unresolved model (`param: model`). | Validate the JSON body, the `model`, and any attachments. Do not retry unchanged. |
+| `401` | Missing, malformed, revoked, or expired key. | The key starts with `z_sk_` and is sent as `Authorization: Bearer`. |
+| `402` | Payment required. | Funding/payment status for the org. |
+| `429` | Rate limit or quota exceeded. | The `Retry-After` header and whether `code` is `rate_limited` or `insufficient_quota`. |
+
+## Checklist
+
+1. Capture the `X-Request-ID`.
+2. Read `error.code` and map it (see [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)).
+3. For `400`/`401`/`403`, fix the request or credential; do not retry blindly.
+4. For `429`/`502`/`503`, retry with [backoff](/api-reference/errors-and-rate-limits/backoff), honoring `Retry-After`.
+5. If it persists, send support the `X-Request-ID`, the `code`, and the timestamp.
+
+## Related
+
+- [Error envelope](/api-reference/errors-and-rate-limits/error-envelope)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+- [Backoff](/api-reference/errors-and-rate-limits/backoff)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (X-Request-ID echoed/generated 16 random bytes hex; error code/message/param), §8 (auth failures), §9 (Retry-After) -->

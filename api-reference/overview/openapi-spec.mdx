@@ -1,0 +1,30 @@
+---
+title: OpenAPI spec
+description: There is no machine-readable OpenAPI spec yet; the docs schemas are derived from the gateway code.
+---
+
+There is no OpenAPI or Swagger file in the Nito repository yet. The API does not currently publish a machine-readable contract.
+
+> **TODO (needs SME):** publish the OpenAPI spec at `docs/planning/openapi.yaml` (owner: Backend).
+
+## What this means until then
+
+Until the spec lands, the request and response schemas documented across this API Reference are **derived directly from the gateway's Go source** at the analyzed build, not from a published contract. They are accurate to the code that was mined, but:
+
+- There is no file you can feed to a code generator or import into Postman or an HTTP client.
+- There is no automated client SDK generation path.
+- Schemas here are hand-derived, so treat the per-endpoint reference pages as the authoritative description in the meantime.
+
+## How to integrate now
+
+Build against the documented endpoints directly. Send strict JSON (unknown fields are rejected), read the `object` field on responses to discriminate shapes, and branch error handling on `error.code`. The OpenAI-compatible `/v1` surface means existing OpenAI-style clients work by pointing the base URL at Nito.
+
+Once `docs/planning/openapi.yaml` is published, this page will link to it and the generated tooling it enables.
+
+## Related
+
+- [Request format](/api-reference/overview/request-format)
+- [Response format](/api-reference/overview/response-format)
+- [API Reference](/api-reference)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md header (no OpenAPI file present), §9 -->

@@ -1,0 +1,61 @@
+---
+title: Tool call streaming
+description: How Nito streams tool calls in a chat completion. The start, argument-delta, and completed events, and how to reassemble them.
+---
+
+When a model calls a tool mid-stream, the tool call arrives in fragments inside the `delta.tool_calls` array. This page covers the streaming events and how to reassemble a complete tool call. For the non-streaming shape and the round-trip, see [Tool calling](/features/tool-calling).
+
+## The three stages
+
+A streamed tool call unfolds across chunks, keyed by `index`:
+
+### Start
+
+The first fragment names the tool and assigns the call its `id`:
+
+```json
+{ "index": 0, "id": "call_abc", "type": "function", "function": { "name": "get_weather" } }
+```
+
+### Argument deltas
+
+The arguments stream as string fragments. Each fragment carries only the `index` and an `arguments` piece:
+
+```json
+{ "index": 0, "function": { "arguments": "{\"city\":" } }
+```
+
+```json
+{ "index": 0, "function": { "arguments": " \"Paris\"}" } }
+```
+
+### Completion
+
+A completed-arguments event echoes the same `index`. Note that a **completed-args event echoing an index already streamed is suppressed** by the gateway, so you reassemble arguments purely from the deltas rather than waiting for a final echo.
+
+## Reassembling a call
+
+Build each tool call by its `index`:
+
+1. On the start fragment, record `id`, `type`, and `function.name` for that index.
+2. On each argument delta, **concatenate** `function.arguments` onto the buffer for that index.
+3. When the stream reaches its terminal chunk, `finish_reason` is `tool_calls`. Parse each accumulated `arguments` buffer as JSON.
+
+```json
+{ "choices": [ { "index": 0, "delta": {}, "finish_reason": "tool_calls" } ] }
+```
+
+Multiple concurrent tool calls are distinguished by their `index`; keep one buffer per index.
+
+## After the stream
+
+Once `finish_reason` is `tool_calls`, run the requested tools, append each result as a `tool` message with the matching `tool_call_id`, and make a new chat completions call. The gateway routes tool declarations, calls, and results but does **not** execute caller-defined function tools. See [Tool calling](/features/tool-calling).
+
+## Related
+
+- [Tool calling](/features/tool-calling)
+- [Delta format](/api-reference/streaming-format/delta-format)
+- [Finish reasons](/api-reference/chat-and-text/finish-reasons)
+- [SSE transport](/api-reference/streaming-format/server-sent-events)
+
+<!-- source: internal/server/api_chat.go (apiChatChunk delta tool_calls, ToolCallStarted, ToolCallArgsDelta, ToolCallArgsCompleted, streamAPIChatCompletion); DOCS_SOURCE_OF_TRUTH.md §3 (Tool-call streaming) -->

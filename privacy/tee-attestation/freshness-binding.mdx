@@ -1,0 +1,58 @@
+---
+title: Freshness and Binding
+description: How report_data = signing_address + nonce is recomputed and compared, why anti-replay is caller-driven, and why reports are never persisted.
+---
+
+An attestation is only meaningful if it was produced for *your* request and not replayed from an earlier one. The mechanism that ties a report to a specific request is the **report-data binding**, and the freshness it provides is something you create by sending a fresh nonce. This page explains the binding, how the gateway checks it, and exactly where the responsibility for replay protection sits.
+
+## The binding: `report_data = signing_address + nonce`
+
+Inside a TEE, the hardware can stamp a small piece of caller-supplied data into the signed report. That field is the **report data**. Nito uses it to commit the report to two things at once: a signing identity and a nonce.
+
+The binding is:
+
+```
+report_data = signing_address + nonce
+```
+
+The TEE binds this value into the report it signs. Because the value includes your nonce, a report produced for one request cannot stand in for another: a different nonce produces a different `report_data`, and the signature would not match.
+
+## How the gateway checks the binding
+
+The gateway does two separate things, and it is worth keeping them distinct.
+
+1. **It recomputes the binding.** The gateway takes the signing address and the nonce, concatenates them in the same `signing_address + nonce` form, and compares the result against the `report_data` observed in the evidence. The comparison is **case-insensitive**. If the recomputed value does not match what the report committed to, the binding check fails.
+
+2. **It requires the observed nonce to equal the caller nonce.** Separately from recomputing `report_data`, the gateway checks that the nonce observed in the provider's evidence equals the nonce you supplied as the caller. This is a distinct check: one confirms the report committed to `signing_address + nonce`, the other confirms that the nonce in play is the one you actually sent.
+
+Both must hold. Together they establish that the report was produced for a request carrying your nonce and committed to the expected signing address.
+
+## Anti-replay is caller-driven
+
+Here is the part a security reviewer must not miss. **There is no server-side nonce store.** The gateway does not remember nonces it has seen, and it does not reject a nonce for having been used before. The freshness guarantee comes entirely from you choosing a fresh, unpredictable nonce on every request.
+
+The consequences:
+
+- **Send a fresh random nonce every time** and the binding checks confirm the report is fresh for this request. This is the supported, secure pattern.
+- **Omit the nonce** and an **empty-binding report is permitted.** The endpoint allows it, but you get no replay protection from it. An empty binding commits to nothing fresh, so an old report could satisfy it.
+
+So replay protection on Nito is not an unconditional property of the endpoint. It is a property of the protocol you follow as the caller. Do not describe a Nito attestation as replay-proof in the abstract; it is replay-proof only when you supply a fresh nonce and verify it was echoed back.
+
+A practical recommendation: generate the nonce from a cryptographically secure random source, at least 32 bytes, encoded as hex, and never reuse one. The [verify-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe) does exactly this as its first step.
+
+## Reports are request-local
+
+Attestation reports are **request-local**. They are produced for the request that asked for them and are **never persisted** by the gateway. The response carries `Cache-Control: no-store`, and there is no stored history of past reports. Each call stands alone: a fresh nonce, a fresh report, a fresh binding check. This is consistent with Nito's metadata-only default posture described in the [privacy overview](/privacy/overview).
+
+## How this fits the baseline
+
+The binding and the nonce match are gates 4 and 5 of the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), and gate 7 extends the nonce check into the nested payload for GPU envelopes. The address side of the binding is governed by an additional invariant covered in [address-only model binding](/privacy/tee-attestation/address-only-model-binding).
+
+## Related
+
+- [TEE attestation overview](/privacy/tee-attestation)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+- [Address-only model binding](/privacy/tee-attestation/address-only-model-binding)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_tee_attestation_verification.go (verifyGatewayAttestationObject), docs/architecture/tee-attestation.md -->

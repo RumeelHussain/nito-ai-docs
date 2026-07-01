@@ -1,0 +1,50 @@
+---
+title: Error events
+description: How Nito signals failures during a streaming chat completion, both mid-stream and before the first byte.
+---
+
+A streaming chat completion can fail in two places: after the stream has started, or before any byte is written. Nito handles these differently. This page covers both.
+
+## Mid-stream error
+
+If generation fails after the stream has begun, the gateway emits a chunk that carries a top-level `error` object and a terminal choice (`writeChatStreamError`):
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion.chunk",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "error": { "message": "human-readable description", "code": "provider_error", "param": null },
+  "choices": [
+    { "index": 0, "delta": {}, "finish_reason": "error" }
+  ]
+}
+```
+
+| Field | Notes |
+|---|---|
+| `error.message` | Human-readable description. |
+| `error.code` | The error family. Same families as the [error format](/api-reference/overview/error-format). |
+| `error.param` | Optional. The field the error refers to, when applicable. |
+| `choices[0].finish_reason` | `error`. See [Finish reasons](/api-reference/chat-and-text/finish-reasons). |
+
+The `delta` is empty. Any content streamed before this chunk is partial. After the error chunk the stream still terminates with `[DONE]`. Branch your reader on the presence of a top-level `error` and on `finish_reason: "error"`.
+
+## Failure before the first byte
+
+If the upstream connection fails to open before any byte is written, there is no SSE stream to write into. The gateway instead returns a **normal HTTP error response** (`writeInferenceError`) with the standard JSON error envelope and the mapped status code, exactly as a non-streaming call would. See [Error format](/api-reference/overview/error-format).
+
+This means a streaming client must handle two distinct failure shapes:
+
+- A non-`200` HTTP response with a JSON error body (open failed).
+- A `200` SSE stream that later contains an error chunk (mid-stream failure).
+
+## Related
+
+- [Error format](/api-reference/overview/error-format)
+- [Finish reasons](/api-reference/chat-and-text/finish-reasons)
+- [Delta format](/api-reference/streaming-format/delta-format)
+- [Stream termination](/api-reference/streaming-format/stream-termination)
+
+<!-- source: internal/server/api_chat.go (writeChatStreamError, writeInferenceError, apiChatChunk error); DOCS_SOURCE_OF_TRUTH.md §3 (Mid-stream error) -->

@@ -1,0 +1,86 @@
+---
+title: Quickstart, Anthropic SDK drop-in
+description: Use Nito from Anthropic-shaped codebases. Note the current support boundary before you switch.
+---
+
+If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change, and where the current boundary is. Nito's compatible surface is the OpenAI Chat Completions shape. The Anthropic Messages endpoint is on the roadmap but is not served yet, so today you route Anthropic-based code through Chat Completions.
+
+<Warning>
+The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are not served by the gateway at this time. Requests to them return 404. Until they ship, use the OpenAI-compatible Chat Completions surface described below. This page will be updated when the Messages API is available.
+</Warning>
+
+## The recommended path today
+
+Point your client at Nito's OpenAI-compatible endpoint and use the Chat Completions shape. Most Anthropic-based applications keep a thin abstraction over the model call, so the change is usually confined to one client setup file.
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+# Route Anthropic-style code through Nito's OpenAI-compatible surface.
+client = OpenAI(
+    api_key="z_sk_your_key_here",
+    base_url="https://YOUR-NITO-BASE-URL/v1",
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",   # a Nito catalog ID from GET /v1/models
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "z_sk_your_key_here",
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",
+  messages: [
+    { role: "system", content: "You are a concise assistant." },
+    { role: "user", content: "Say hello in one short sentence." },
+  ],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Mapping notes
+
+- **System prompts.** Anthropic takes a top-level `system` string; the Chat Completions shape uses a message with `role: "system"`. Move the system text into the messages array as shown above.
+- **Roles.** Nito accepts `system`, `user`, `assistant`, `tool`, and `developer` roles on the inference layer.
+- **Model names.** Anthropic model names are not Nito IDs. Use a Nito catalog ID from `GET /v1/models`.
+- **Privacy.** As everywhere on Nito, add `:tee` or `:e2e-tee` to the model ID to raise the privacy tier.
+
+## Common mistakes
+
+- **Calling `/v1/messages`.** It returns 404 today. Use `/v1/chat/completions`.
+- **Keeping a top-level `system` field.** It will not be read on the Chat Completions surface. Convert it to a `system` message.
+- **Carrying over an Anthropic model name.** Replace it with a Nito ID.
+
+## Notes
+
+- Rate limits: per-key and per-org; 429 carries `Retry-After`. See [Rate limits](/resources/rate-limits).
+- Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
+- Privacy-mode applicability: ordinary, private, and `:tee`. `:e2e-tee` is non-streaming and needs extra headers.
+
+## Related
+
+- [OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Chat completions feature](/features/chat-completions)
+- The Messages-shaped surface is tracked in [DOCS_DEFERRED](/resources/roadmap) until it ships.
+
+<!-- source: internal/server/routes.go (compat.anthropic.messages.unsupported, compat.anthropic.messages_count_tokens.unsupported -> notFoundRouteHandler), internal/inference/contracts.go (Role), internal/server/api_chat.go -->

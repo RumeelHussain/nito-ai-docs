@@ -1,0 +1,100 @@
+---
+title: Image input
+description: The wire contract for sending images to an image-capable chat model, plus the multipart upload and URL limits.
+---
+
+Image-capable chat models accept images as a content part inside a message. The model must support image inputs; sending an image to a text-only model is an error.
+
+## The `image_url` content part
+
+Inside a message, set `content` to an array of parts and include one part per image:
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "What is in this image?" },
+    {
+      "type": "image_url",
+      "image_url": {
+        "url": "https://example.com/photo.jpg",
+        "detail": "auto"
+      }
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `type` | string | yes | `"image_url"`. |
+| `image_url.url` | string | yes | A `https://` URL or a `data:` URL. |
+| `image_url.media_type` | string | no | Used when supplying raw base64; the gateway assembles `media_type` + base64 into a data URL. |
+| `image_url.detail` | string | no | Optional detail hint passed through to the provider. |
+
+Three ways to supply the bytes:
+
+- **`https://` URL**: `url` points at a publicly fetchable image.
+- **Data URL**: `url` is a full `data:<media_type>;base64,<...>` string.
+- **Raw base64 + `media_type`**: supply the base64 payload as `url` together with `media_type`; the gateway combines them into a data URL for you.
+
+**`file_id` is not supported for images.** There is no Files API, so you cannot reference a previously uploaded image by id. Inline the image, use a data URL, or supply an `https://` URL.
+
+## Worked call
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL-WITH-IMAGE-SUPPORT",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "Describe this picture." },
+          { "type": "image_url", "image_url": { "url": "https://example.com/photo.jpg" } }
+        ]
+      }
+    ]
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+Use `GET /v1/models` to find a model that supports image inputs (its model card carries `supportsImageInputs`).
+
+## Multipart upload limits
+
+As an alternative to inline `image_url` parts, chat completions accept `multipart/form-data` with a `request` JSON field plus image attachments. The multipart path enforces:
+
+| Limit | Value |
+|---|---|
+| Accepted formats | PNG, JPEG, WebP only |
+| Max images per request | 10 |
+| Max size per image | 5 MiB |
+| Max combined size | 50 MiB |
+| Max long edge | 2048 px |
+
+## URL attachment rules
+
+When you supply an image by URL, the URL must:
+
+- use `https` (no `http`, no other schemes),
+- carry no embedded credentials,
+- not resolve to a private, loopback, or metadata host.
+
+These rules block server-side request forgery against internal addresses. A URL that violates them is rejected with `400`.
+
+## What is not supported
+
+- **`file_id` references**: no Files API exists.
+- **Audio and video inputs**: rejected. See [PDF and document input](/api-reference/multimodal/pdf-input) for the unsupported-modalities note.
+
+## Related
+
+- [PDF and document input](/api-reference/multimodal/pdf-input)
+- [Image generation](/api-reference/multimodal/image-generation)
+- [Request format](/api-reference/overview/request-format)
+
+<!-- source: internal/server/api_chat.go: apiChatContentPartToInference, imageURLWithMediaType, validateAttachmentURL; apiChatMultipartMaxImages=10; DOCS_SOURCE_OF_TRUTH.md §2 (content parts), §4 (multimodal input) -->

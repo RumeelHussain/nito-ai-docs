@@ -1,0 +1,132 @@
+---
+title: Build a streaming chat UI
+description: Render tokens as they arrive over Server-Sent Events, with a framework-light front-end sketch.
+---
+
+## Goal
+
+Stream a chat reply token by token instead of waiting for the whole response, so a UI can show text as it is generated. When you finish you will understand Nito's SSE format and have a small front-end sketch that renders it.
+
+## Prerequisites
+
+- A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
+- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- curl for the raw view, and Python or a browser for the rendered version.
+
+## How streaming works on Nito
+
+Set `stream: true` and the response becomes a stream of Server-Sent Events. Each event is a line `data: <json>\n\n` carrying a `chat.completion.chunk`. The incremental text is in `choices[0].delta.content`. The gateway sends `: keep-alive` heartbeat comments roughly every 15 seconds to hold the connection open, and the stream ends with a literal `data: [DONE]` line.
+
+One constraint: the `:e2e-tee` privacy mode does not stream. Use ordinary mode or `:tee` when you need streaming.
+
+## Step 1: See the raw stream with curl
+
+```bash
+curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "stream": true,
+    "messages": [
+      { "role": "user", "content": "Count to five, one number per line." }
+    ]
+  }'
+```
+
+The `-N` flag disables curl buffering so you see chunks arrive. You will get a series of `data: {...}` lines and a final `data: [DONE]`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Step 2: Consume the stream in Python
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.environ["NITO_API_KEY"],
+    base_url=os.environ["NITO_BASE_URL"] + "/v1",
+)
+
+stream = client.chat.completions.create(
+    model="grok-4.3",
+    stream=True,
+    messages=[{"role": "user", "content": "Count to five, one number per line."}],
+)
+
+for chunk in stream:
+    piece = chunk.choices[0].delta.content
+    if piece:
+        print(piece, end="", flush=True)
+print()
+```
+
+The SDK parses the SSE frames and `[DONE]` for you; you just concatenate `delta.content`.
+
+## Step 3: Render it in a browser (framework-light sketch)
+
+This uses the browser `fetch` API and a manual reader. It is deliberately framework-free so you can drop the core into React, Vue, or plain HTML. Do not call Nito directly from untrusted client code with a real key; put a small server between the browser and Nito and forward the stream.
+
+```javascript
+async function streamChat(prompt, onToken) {
+  const resp = await fetch("/api/chat", {          // your server proxies to Nito
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "grok-4.3",
+      stream: true,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    // SSE frames are separated by a blank line.
+    const frames = buffer.split("\n\n");
+    buffer = frames.pop();                          // keep the partial frame
+
+    for (const frame of frames) {
+      const line = frame.trim();
+      if (!line.startsWith("data:")) continue;      // skip heartbeats/comments
+      const data = line.slice(5).trim();
+      if (data === "[DONE]") return;
+
+      const json = JSON.parse(data);
+      const token = json.choices?.[0]?.delta?.content;
+      if (token) onToken(token);                    // append to the DOM
+    }
+  }
+}
+
+// Usage: append each token to an element.
+streamChat("Count to five, one number per line.", (t) => {
+  document.getElementById("reply").textContent += t;
+});
+```
+
+## Walkthrough
+
+The front-end logic is entirely about reassembling SSE frames. Reads do not land on tidy message boundaries, so you buffer bytes, split on the blank-line separator, and hold back the last (possibly partial) frame for the next read. Lines that do not start with `data:` are heartbeats or comments and are ignored. A `data: [DONE]` line means stop. Everything else is a chunk whose `choices[0].delta.content` you append to the screen.
+
+Keeping the key server-side matters: the browser talks to your `/api/chat` endpoint, and that endpoint holds the `z_sk_` key and forwards the stream. This keeps the credential off the client and lets you add your own rate limiting.
+
+## Next steps
+
+- Wire this into a multi-turn app: [Build a first chat app](/cookbook/getting-started/build-first-chat-app).
+- Read the exact chunk fields: [Streaming feature](/features/streaming).
+
+## Related
+
+- [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
+- [Server-Sent Events reference](/api-reference/streaming-format/server-sent-events)
+- [Delta format reference](/api-reference/streaming-format/delta-format)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §3 (stream:true, SSE frame format, 15s heartbeat, data: [DONE], apiChatChunk delta), §2 (E2E-TEE streaming refused), §8 (z_sk_) -->

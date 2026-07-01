@@ -1,0 +1,68 @@
+---
+title: Model groups
+description: List models collapsed into logical groups and options by capability, so callers pick one canonical ID per family.
+---
+
+`GET /api/v1/model-groups` returns models collapsed into logical groups. Physical provider rows that share a canonical model ID are folded into a single group with one option per public mode, so callers can pick a stable canonical ID instead of a provider-scoped one.
+
+There is no `/v1` alias for this endpoint; it is first-party only.
+
+## Request
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/model-groups?capability=chat" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+### Query parameters
+
+| Parameter | Notes |
+|---|---|
+| `capability` | Which capability to group by: `chat`, `embeddings`, or `images`. |
+
+## Response
+
+```json
+{
+  "groups": [
+    {
+      "label": "Grok 4.3",
+      "options": [
+        { "...": "..." }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Notes |
+|---|---|
+| `groups` | Array of logical groups. |
+| `groups[].label` | Human-readable label for the model family. |
+| `groups[].options` | The selectable options within the family, one per available public mode. |
+
+> **TODO (needs SME):** the exact per-option field set (owner: Backend).
+
+## How grouping works
+
+- Each physical model is identified by a provider-scoped ID such as `openrouter/openai/gpt-5.5`. The catalog also assigns a canonical model ID.
+- Rows that share a canonical model ID are collapsed into one group. Within a group, each option corresponds to a public mode the family can be served under.
+- A logical public ID is the canonical ID, optionally suffixed with a privacy mode: `<model>`, `<model>:tee`, or `<model>:e2e-tee`. No other suffix is valid.
+
+So a group is the "pick one of these" unit, and an option is the concrete `model` value you send to the chat, embeddings, or images endpoint.
+
+## Backend route selection
+
+When you send a canonical ID, the gateway chooses a physical route behind it. Selection prefers, in order: available models, then free-tier eligibility, then (for the ordinary mode) private over anonymous, then known price, then lowest estimated cost, then provider priority, then name. On a private route the gateway sets zero-data-retention on the upstream where supported.
+
+You do not control this ranking per call; you pick the group/option, and the gateway resolves the physical model.
+
+## Related
+
+- [List models](/api-reference/models-catalog/list-models)
+- [Models](/models/model-groups)
+- [Errors & rate limits](/api-reference/errors-and-rate-limits/error-codes)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (routes.go: apiModelGroupsHandler), §5 (chooseLogicalRoute, ParseLogicalModelIDForPublicMode, model grouping by canonicalModelID) -->

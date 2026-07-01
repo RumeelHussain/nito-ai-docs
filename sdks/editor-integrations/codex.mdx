@@ -1,0 +1,49 @@
+---
+title: Codex
+description: Point Codex at Nito through the OpenAI-compatible Chat Completions path using a Nito base URL, key, and catalog model ID.
+---
+
+Codex is an OpenAI-oriented coding tool. Since Nito exposes an OpenAI-compatible API, you can route Codex through Nito by overriding its base URL, key, and model. You are not selecting a named "Nito" provider. You are using Codex's OpenAI-compatible configuration and pointing it at Nito.
+
+## Values to enter
+
+Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+> **TODO (needs SME):** verify the exact current settings path/config for Codex against its official docs, including whether the running version targets Chat Completions or the Responses API (owner: DevRel).
+
+## Use Chat Completions, not Responses
+
+The protocol matters. Nito's compatible surface is OpenAI **Chat Completions** at `POST /v1/chat/completions`. The OpenAI **Responses API** (`/v1/responses`) is not served. Newer OpenAI-oriented tools sometimes default to the Responses API, so confirm that your Codex version can target Chat Completions before relying on this route. If Codex only speaks the Responses API in your version, it will not reach Nito.
+
+## Finding a model ID
+
+Codex will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID, so no separate Codex setting is required. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **Expecting the Responses API.** Nito serves Chat Completions, not `/v1/responses`.
+- **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
+- **Dropping `/v1` from the base URL.** The Chat Completions route will not be reached without it.
+
+## Related
+
+- [Editor and tool integrations](/sdks/editor-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Claude Code](/sdks/editor-integrations/claude-code)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; responses 404 routes.go:141) -->

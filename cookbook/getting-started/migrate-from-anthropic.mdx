@@ -1,0 +1,105 @@
+---
+title: Migrate from Anthropic
+description: Move off the Anthropic Messages API onto Nito's OpenAI-compatible Chat Completions surface.
+---
+
+## Goal
+
+Move an application built on the Anthropic Messages API onto Nito. Because Nito does not serve the native Messages API, this recipe routes your calls through the OpenAI-compatible Chat Completions surface instead.
+
+## Prerequisites
+
+- Code that currently calls the Anthropic Messages API (`POST /v1/messages`) or uses the Anthropic SDK.
+- A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
+- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+
+## The key difference
+
+Nito does not serve the Anthropic native surface. `POST /v1/messages` and `POST /v1/messages/count_tokens` return `404`. So this is not a base-URL-only swap: you also translate the request shape from Messages to Chat Completions. The good news is the translation is mechanical, and the easiest path is to use the OpenAI SDK against Nito.
+
+## Step 1: Translate the request shape
+
+The Messages API and Chat Completions differ in two visible ways. The system prompt moves from a top-level `system` field into a message with `role: "system"`, and the response text is read from `choices[0].message.content` instead of `content[0].text`.
+
+<CodeGroup>
+
+```python Python (OpenAI SDK against Nito)
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="z_sk_your_key_here",
+    base_url="https://YOUR-NITO-BASE-URL/v1",
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",  # a Nito catalog ID from GET /v1/models
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+    max_tokens=256,
+)
+
+print(resp.choices[0].message.content)
+```
+
+```bash curl
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      { "role": "system", "content": "You are a concise assistant." },
+      { "role": "user", "content": "Say hello in one short sentence." }
+    ],
+    "max_tokens": 256
+  }'
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Step 2: Map your model names
+
+Anthropic model names are not Nito catalog IDs. Fetch the catalog and select by capability:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Translation reference
+
+| Anthropic Messages | Nito Chat Completions |
+|---|---|
+| top-level `system` string | a message with `role: "system"` |
+| `messages: [{role, content}]` | `messages: [{role, content}]` (same) |
+| `max_tokens` (required) | `max_tokens` (optional) |
+| `stream: true` (SSE events) | `stream: true` (SSE chunks, `data: [DONE]`) |
+| `content[0].text` in response | `choices[0].message.content` |
+
+## Walkthrough
+
+Once the request is in Chat Completions shape, everything else is standard Nito. Streaming uses `stream: true` and emits SSE chunks ending with `data: [DONE]`. Privacy is chosen by a model-ID suffix (`grok-4.3:tee`), not a request field. Only `:tee` and `:e2e-tee` are valid, and `:e2e-tee` does not stream.
+
+Do not carry Anthropic-specific behaviors over as if they were Nito's. Features that are part of the Anthropic API but not documented for Nito's Chat Completions surface should be treated as unverified rather than assumed to work.
+
+## What does not carry over
+
+- **The native Messages API is not served.** `/v1/messages` and `/v1/messages/count_tokens` return `404`. Route through Chat Completions.
+- **Anthropic model names.** Substitute Nito catalog IDs.
+
+## Next steps
+
+- See the Anthropic drop-in mapping notes: [Anthropic drop-in](/get-started/quickstart-anthropic-sdk).
+- Add streaming: [Build a streaming chat UI](/cookbook/getting-started/build-streaming-chat-ui).
+
+## Related
+
+- [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
+- [Anthropic drop-in mapping notes](/sdks/anthropic-drop-in/mapping-notes)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (/v1/messages, /v1/messages/count_tokens -> 404), §2 (roles include system), §3 (SSE, data: [DONE]), §5 (model-ID suffix), §8 (z_sk_) -->

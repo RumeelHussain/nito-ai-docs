@@ -1,0 +1,36 @@
+---
+title: Request IDs
+description: How Nito reads, sanitizes, generates, and echoes the X-Request-ID trace header.
+---
+
+Every Nito response carries an `X-Request-ID`. It is a trace identifier that ties a single request to its log and trace records, which makes it the fastest way to get support on a specific call.
+
+## How it works
+
+| Step | Behavior |
+|---|---|
+| You send `X-Request-ID` | The value is sanitized: capped at 128 characters and restricted to the charset `[A-Za-z0-9._:-]`. |
+| You omit it | The gateway generates one from 16 random bytes, hex-encoded. |
+| Response | The resulting ID is echoed back in the `X-Request-ID` response header. |
+| Internally | The ID is attached to logs and traces for the request. |
+
+Because the value is sanitized rather than rejected, characters outside the allowed set are stripped. Send a clean ID (for example a UUID or your own correlation token) if you want the value preserved exactly.
+
+## Capture it on every call
+
+Read `X-Request-ID` off the response and record it alongside your own request logs. When something goes wrong, that single value lets support or your own tracing locate the exact request without guessing.
+
+## Not the same as the idempotency key
+
+`X-Request-ID` is a trace identifier. It does not affect billing or deduplication. The billing idempotency key is a separate header, `Idempotency-Key`, which must be a UUID and scopes billing dedup. Keep the two distinct:
+
+- `X-Request-ID`: tracing and support correlation. Any sanitized string.
+- `Idempotency-Key`: billing deduplication. Must be a UUID.
+
+## Related
+
+- [Headers](/api-reference/overview/headers)
+- [Error format](/api-reference/overview/error-format)
+- [Authentication](/api-reference/overview/authentication)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (Headers, request IDs) -->

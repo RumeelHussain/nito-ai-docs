@@ -1,0 +1,113 @@
+---
+title: Verify It Yourself
+description: A runnable recipe for fetching and checking a Nito attestation, with a curl call and a Python sketch, plus the boundary you must verify on top.
+---
+
+Attestation is only worth anything if you check it. This page is a runnable recipe: generate a fresh nonce, fetch the attestation, and run a set of independent checks on what comes back. It closes the section by turning the [pipeline](/privacy/tee-attestation/attestation-pipeline) and the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline) into something you can execute.
+
+One thing up front, because it governs everything below. The checks on this page confirm a **baseline-verified** result. They do **not** perform full hardware verification. Validating the Intel TDX quote, the NVIDIA GPU evidence, and the certificate chains in the raw `evidence` is **your responsibility** on top of these checks. That is the whole point of the verify-yourself path: the gateway hands you the evidence so you can do the hardware verification it deliberately does not do.
+
+## Step 1: Generate a fresh nonce
+
+Replay protection is caller-driven and there is no server-side nonce store, so the first step is always a fresh, unpredictable nonce. Use a cryptographically secure source and at least 32 bytes, hex-encoded.
+
+```bash
+NONCE=$(openssl rand -hex 32)
+echo "$NONCE"
+```
+
+Never reuse a nonce. A fresh value per call is what makes gates 4 and 5 of the baseline meaningful (see [freshness and binding](/privacy/tee-attestation/freshness-binding)).
+
+## Step 2: Fetch the attestation
+
+```bash
+curl -sS \
+  "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL_ID:tee&nonce=$NONCE" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` and `MODEL_ID` once confirmed (owner: Security / Product).
+
+## Step 3: Run the independent checks
+
+Do not trust the `verified` flag alone. Re-check the things you can check yourself against the response. Each item below is something you assert in your own code.
+
+1. **HTTP status is 200.**
+2. **`object` equals `"tee.attestation"`.**
+3. **`model` is set, `privacy_tier` is `"tee"`, and `attestation_available` is true.**
+4. **The echoed `nonce` equals the nonce you sent.** If it does not, stop; the report is not bound to your request.
+5. **`evidence` is present** (a non-empty JSON object).
+6. **Proof metadata is present:** `proof_format`, `signing_algo`, and `signing_key` are all populated. (Recall `signing_key` and `model_public_key` are aliases for the same model public key.)
+7. **The baseline `verified` flag is true.**
+
+Here is a compact Python sketch that performs the fetch and the checks. It uses only the standard library.
+
+```python
+import os
+import secrets
+import json
+import urllib.parse
+import urllib.request
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"  # TODO: confirm canonical base URL
+MODEL = "MODEL_ID:tee"                   # TODO: confirm an attestation-capable model
+API_KEY = os.environ["NITO_API_KEY"]
+
+# Step 1: fresh nonce, 32 random bytes, hex-encoded.
+nonce = secrets.token_hex(32)
+
+# Step 2: fetch the attestation.
+query = urllib.parse.urlencode({"model": MODEL, "nonce": nonce})
+req = urllib.request.Request(
+    f"{BASE_URL}/api/v1/tee/attestation?{query}",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+)
+
+with urllib.request.urlopen(req) as resp:
+    status = resp.status
+    body = json.load(resp)
+
+# Step 3: independent checks. Each must hold.
+assert status == 200, f"expected 200, got {status}"
+assert body.get("object") == "tee.attestation", "wrong object type"
+assert body.get("model"), "model missing"
+assert body.get("privacy_tier") == "tee", "not a TEE tier"
+assert body.get("attestation_available") is True, "attestation not available"
+assert body.get("nonce") == nonce, "nonce echo does not match what we sent"
+assert body.get("evidence"), "evidence missing"
+assert body.get("proof_format"), "proof_format missing"
+assert body.get("signing_algo"), "signing_algo missing"
+assert body.get("signing_key"), "signing_key missing"   # alias of model_public_key
+assert body.get("verified") is True, "baseline verification failed"
+
+print("baseline checks passed")
+
+# TODO (your responsibility, NOT done above):
+# Independently verify the hardware quote in body["evidence"]:
+#   - Intel TDX quote validation
+#   - NVIDIA GPU evidence validation
+#   - certificate chain / CRL / TCB policy checks
+# The gateway does NOT do these. This sketch is baseline-only.
+```
+
+If any assertion fails, treat the attestation as not trustworthy and do not proceed with the sensitive workload.
+
+## Step 4: Do the hardware verification
+
+Steps 1 through 3 give you a baseline-verified result. To get full assurance you must verify the hardware quote in `evidence` yourself: validate the Intel TDX quote, the NVIDIA GPU evidence, and the certificate chains, and check them against current TCB policy and CRLs. The gateway deliberately leaves these to you (see the scope limit in the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)).
+
+## Reference verifier
+
+Nito ships a reference verifier you can read and run: **`tools/tee-attestation-smoke`**. It generates a 32-byte nonce, calls the endpoint, and runs the same kind of independent checks described above: status 200, the envelope shape, TEE metadata, the nonce echo, evidence present, proof metadata, and the baseline `verified` flag. Use it as a worked example of the baseline checks, and as the starting point for layering your own hardware verification on top.
+
+> **TODO (needs SME):** the exact invocation and any build step for the reference verifier (for example a `make` target), confirmed against the current repo (owner: Security).
+
+## Related
+
+- [TEE attestation overview](/privacy/tee-attestation)
+- [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+- [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)
+
+<!-- source: tools/tee-attestation-smoke/main.go, internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go, docs/architecture/tee-attestation.md -->

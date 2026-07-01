@@ -1,0 +1,85 @@
+---
+title: Known Limitations
+description: A frank inventory of Nito's current gaps, so you build on what the system actually does today rather than on an imagined version of it.
+---
+
+This page exists to set accurate expectations. It is a plain list of where Nito stops, drawn from the code as it stands, so you do not design around a capability that is not there. None of these is hidden, and none is dressed up. Some are deliberate scope decisions, some are not-yet-built, and a few are claims we simply cannot verify in code and therefore will not assert. Naming all of them in one place is more useful than discovering them one failed request at a time.
+
+If you read one idea from this page, read this one: **build on what is verifiable today, and treat everything marked unverifiable as not-yet-true until it can be confirmed.**
+
+## Attestation is baseline-verified, not full hardware verification
+
+The gateway verifies attestations at a baseline level (evidence present and well-formed, proof and signing material present, your nonce echoed, and the `report_data == signing_address + nonce` binding). It does **not** perform full hardware-quote verification: no Intel TDX quote validation, no NVIDIA GPU evidence checks, no certificate chains, no CRLs, no TCB policy checks. That deeper verification is the client's job, and the raw evidence is returned so you can do it. Use the terms **attested** and **verifiable**, never "trustless" or "fully verified." Detail is in [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against).
+
+## Anti-replay requires a caller-supplied nonce
+
+Attestation freshness is bound through the nonce you send. If you omit it, the binding can be satisfied by an empty value, which is not replay protection. To get anti-replay you must generate a fresh random nonce per request and confirm it is echoed. The gateway does not generate one for you.
+
+## E2E-TEE is non-streaming and feature-limited
+
+The `e2e-tee` mode is the strongest privacy mode and, by design, the most constrained:
+
+- It does **not** stream. A chat UI built on it cannot show tokens as they arrive.
+- It rejects reasoning, tools, prompt caching, and multi-part messages when the encryption headers are present.
+- It is available on **NEAR and Phala only**.
+
+If you need streaming or those features, you cannot use `e2e-tee` for that call. Choose the privacy mode against the call's real needs, as described in the [Privacy overview](/privacy/overview).
+
+## Audio and video are not available
+
+There is no audio or video support, in either direction:
+
+- **Audio input** and **video input** in chat are rejected.
+- There is no **audio generation** or **video generation**.
+
+Supported input modalities are text, image, and parsed documents (PDF, docx, pptx, xlsx, xls, text). The only generation modality is image, served by fal. Do not plan an audio or video workflow on the current gateway.
+
+## Several endpoints return 404
+
+A number of endpoints are mounted but deliberately return `404`. They are not implemented as of the analyzed commit:
+
+- **Responses API:** `/v1/responses` and its lifecycle paths.
+- **Anthropic Messages:** `/v1/messages` and `/v1/messages/count_tokens`.
+- **Files API:** `/v1/files` and `/v1/files/*`.
+- **Jobs:** `/jobs/*`.
+
+If your integration assumes any of these, it will fail. Use `/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, and the other documented routes instead. Whether these are roadmap or cut is a Product decision.
+
+## No chat-prompt guardrails or moderation
+
+The gateway does not moderate chat prompts and does not run a prompt-injection or jailbreak classifier. The only content filtering is the **outbound web-search query redaction** that strips secrets and PII before a search query leaves to the backend. If you need moderation, injection defense, or output filtering over the conversation itself, you must build it.
+
+## No bring-your-own-key (BYOK)
+
+Provider keys come from gateway configuration only. You cannot supply your own upstream provider key to route a call under your own provider account. You authenticate to Nito with a Nito API key and the gateway holds the provider credentials.
+
+## Structured-output schema enforcement is not exposed
+
+The internal request type carries a response-format field, and it is forwarded to providers, but the public chat API never populates it and there is no JSON-schema validation in the gateway. So you cannot rely on the gateway to enforce a structured-output schema. If you need guaranteed-shaped output, validate it in your own code.
+
+## Some retention windows are not verifiable in code
+
+Three retention windows that appear in earlier planning material could **not** be confirmed in the code these docs are built from, so they are **not** stated as fact anywhere:
+
+> **TODO (needs SME):** idempotency-replay retention window. `Idempotency-Key` drives billing dedup, but no replay/retention duration was found in code. Verify with Backend (may live in SQL migrations not scanned).
+
+> **TODO (needs SME):** governed debug-capture retention. The retention doc references "bounded retention" with no number, and no debug-capture subsystem or duration constant exists in code. Verify with Backend.
+
+> **TODO (needs SME):** tenant saved-chat retention. No server-side saved-chat store with a retention window exists in code; share links persist only an object key and a token hash with no TTL. Verify with Backend.
+
+What *is* confirmed is the metadata-only default itself and the 15-minute object-storage presign lifetime. The three windows above must not be presented as guarantees until Backend confirms them.
+
+## A note on context windows and pricing
+
+Per-model pricing and context-window sizes are **not** on the model card; they are joined from billing at response time. Treat `GET /v1/models` as the live source for what exists, and do not hard-code a model's price or context length from these docs.
+
+> **TODO (needs SME):** per-model pricing and context windows, and per-model embedding output dimensions, are not encoded on the model card and are not published here (owner: Finance/Backend).
+
+## Related
+
+- [Threat model](/privacy/threat-model) - defenses and boundaries, stated as a pair.
+- [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against) - the privacy boundaries in depth.
+- [Privacy overview](/privacy/overview) - the per-call privacy model and the metadata-only default.
+- [Compliance posture](/privacy/compliance-posture) - what is and is not asserted about compliance.
+
+<!-- source: internal/server/api_tee_attestation_verification.go (baseline scope), internal/inference/validation.go (validateTEEEncryption, audio/video rejection), internal/server/routes.go (404 routes 141-147), internal/websearch/redaction.go (outbound-only, no chat guardrails), internal/inference (ResponseFormat not exposed), internal/billing (BYOK absent), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §2, §4, §6, §7, §10, §11 -->

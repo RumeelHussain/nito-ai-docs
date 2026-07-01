@@ -1,0 +1,88 @@
+---
+title: Message format
+description: The Nito chat message object across roles, string vs content-part arrays, and the image and file part shapes.
+---
+
+Every chat completions and chat fusion request carries a `messages` array. This page is the schema reference for a single message object: its roles, the two `content` forms, and the supported content-part shapes.
+
+## The message object
+
+| Field | Type | Notes |
+|---|---|---|
+| `role` | string | Required. One of `system`, `developer`, `user`, `assistant`, `tool`. |
+| `content` | string or array | The message body. A string, or an array of content parts (see below). |
+| `tool_call_id` | string | Required on `tool` messages. Pairs the result with the originating tool call. |
+| `tool_calls` | array | Optional. Carried on `assistant` messages that request tool calls. |
+
+## Roles
+
+| Role | Use |
+|---|---|
+| `system` | Instructions that set behavior for the whole conversation. |
+| `user` | Input from the end user. |
+| `assistant` | A prior model turn. May carry `tool_calls`. |
+| `tool` | The result of a tool call. Requires `tool_call_id`. |
+| `developer` | Accepted and passed through with **no special handling**. Use it only if your target model expects it. |
+
+## Content: string or parts
+
+The common case is a plain string:
+
+```json
+{ "role": "user", "content": "Explain a gateway in one sentence." }
+```
+
+For multimodal input, `content` is an array of content parts. The only part kinds in code are `text`, `image`, and `file`.
+
+### Text part
+
+```json
+{ "type": "text", "text": "Describe this image.", "cache_control": { "type": "ephemeral" } }
+```
+
+`cache_control` is optional and forwarded to the provider when supported.
+
+### Image part
+
+```json
+{ "type": "image_url", "image_url": { "url": "https://example.com/photo.png", "detail": "auto" } }
+```
+
+| Field | Notes |
+|---|---|
+| `image_url.url` | An `https` URL or a data URL. |
+| `image_url.detail` | Optional detail hint. |
+| `image_url.media_type` | Optional. Combined with raw base64 to assemble a data URL. |
+
+The model must support image inputs. URL attachments must be `https`, carry no credentials, and must not point at private, loopback, or metadata hosts.
+
+### File part
+
+```json
+{ "type": "file", "file_url": "https://example.com/report.pdf", "filename": "report.pdf" }
+```
+
+Files are parsed server-side inline (text, pdf, docx, pptx, xlsx, xls) by the same parser as the attachments endpoint. You may supply `file_url`, `file_data`, and `filename`.
+
+**`file_id` is not supported** and is rejected (`...file_id is not supported`). There is no Files API to mint such an ID against; see [Chat Completions API](/api-reference/chat-and-text/chat-completions) for the 404 endpoints.
+
+## Rejected part kinds
+
+| Part | Result |
+|---|---|
+| `audio` / `audio_url` / `input_audio` | Rejected: `audio inputs are not supported`. |
+| `video*` | Rejected. |
+| `document` | Rejected for chat (send PDFs and office files as `file` parts instead). |
+
+## Tool and assistant pairing
+
+When an `assistant` message requests tools, it carries `tool_calls`. Each tool result is then sent back as a separate `tool` message whose `tool_call_id` matches the call. See [Tool calling](/features/tool-calling) for the full round-trip.
+
+## Related
+
+- [Chat Completions API](/api-reference/chat-and-text/chat-completions)
+- [Chat Fusion API](/api-reference/chat-and-text/chat-fusion)
+- [Tool calling](/features/tool-calling)
+- [Multimodal](/features/multimodal)
+
+<!-- source: internal/server/api_chat.go (apiChatRequestMessage, apiChatContentPartToInference, imageURLWithMediaType, validateAttachmentURL); internal/inference/contracts.go (Role, ContentPartKind, AttachmentSource); internal/inference/validation.go (validateMessage); DOCS_SOURCE_OF_TRUTH.md §2 (Roles & content parts) -->

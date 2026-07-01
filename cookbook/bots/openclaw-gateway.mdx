@@ -1,0 +1,84 @@
+---
+title: OpenClaw gateway
+description: Route an OpenClaw gateway to Nito over the OpenAI-compatible endpoint, then call it from your bot with a Nito key and catalog model ID.
+---
+
+OpenClaw can act as a gateway in front of your bot or agent, forwarding requests to an upstream OpenAI-compatible provider. This recipe owns the Nito side: the base URL, key, model, privacy tier, and error handling. The OpenClaw side is shown only as a representative shape, because its configuration format and provider model change over time.
+
+> **TODO (needs SME):** verify the current OpenClaw gateway/provider setup against its official docs (owner: DevRel).
+
+If you instead want to use OpenClaw as an editor assistant rather than a gateway, see the [OpenClaw editor integration](/sdks/editor-integrations/openclaw). The values you enter are the same.
+
+## Point OpenClaw at Nito
+
+Wherever OpenClaw configures an upstream OpenAI-compatible provider, supply these three values. This is a generic OpenAI-compatible upstream, not a named "Nito" provider.
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+```yaml
+# Representative only, verify against current OpenClaw docs.
+upstream:
+  provider: openai-compatible
+  base_url: https://YOUR-NITO-BASE-URL/v1
+  api_key: z_sk_your_key_here
+  model: grok-4.3
+```
+
+## Finding a model ID
+
+OpenClaw will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Calling the gateway from your bot
+
+Your bot talks to OpenClaw, and OpenClaw forwards to Nito. Because OpenClaw preserves the OpenAI-compatible shape, your bot code is a standard Chat Completions call pointed at the OpenClaw address instead of Nito directly.
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="local-or-openclaw-key",       # OpenClaw holds the real z_sk_ key upstream
+    base_url="https://YOUR-OPENCLAW-HOST/v1",
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",
+    messages=[{"role": "user", "content": "Summarize this thread."}],
+)
+print(resp.choices[0].message.content)
+```
+
+Keep the real `z_sk_` key inside the OpenClaw configuration on your server. Your bot then only needs to reach OpenClaw, so the Nito key is never distributed to bot clients.
+
+## Streaming or not
+
+OpenClaw forwards standard Chat Completions, so streaming works if both your bot and the gateway pass `stream=True` through. Because `:e2e-tee` does not stream, only combine streaming with an ordinary or `:tee` model.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID passed upstream. To run a request in a TEE with a verifiable attestation, use `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Handling errors
+
+Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` with no `type` field. Confirm OpenClaw passes these through rather than masking them:
+
+- **429**: honor `Retry-After` and back off. This covers rate limits and quota exhaustion.
+- **402** or quota: treat as temporarily unavailable and alert your team.
+- **400**: usually a bad model ID or a request OpenClaw reshaped incorrectly. Confirm the upstream model is a Nito catalog ID and the base URL ends in `/v1`.
+
+## Related
+
+- [OpenClaw editor integration](/sdks/editor-integrations/openclaw)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Rate limits](/resources/rate-limits)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

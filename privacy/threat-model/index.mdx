@@ -1,0 +1,43 @@
+---
+title: Threat Model
+description: An explicit statement of what Nito protects and what it does not, so a security reviewer can judge the system on its real boundaries.
+---
+
+A threat model is only useful if it is honest about both sides. A page that lists defenses and goes quiet on gaps tells a reviewer nothing they can trust, because they cannot tell whether a missing protection was considered and scoped out, or simply forgotten. So this section does the opposite of a marketing page: it states plainly what Nito defends against, and then, with equal specificity, what it does not. If you are evaluating Nito for sensitive workloads, this is the section to read closely, because it draws the boundaries you will be designing around.
+
+The framing is deliberate. Everywhere these docs make a privacy claim, we want you to be able to check it, and checking requires knowing the edges. Honesty about limits is what makes the defenses credible: if we are specific about what the gateway does *not* verify, you can believe us about what it does.
+
+## How to read this section
+
+The section is split into two pages, and they are meant to be read as a pair:
+
+- **[What Nito defends against](/privacy/threat-model/what-nito-defends-against).** The concrete defenses that exist in the system today, each tied to a real mechanism: metadata-only retention, provider-side no-retention enforcement, sealed TEE execution with attestation, hashed credentials, outbound query redaction, and standard web security controls.
+- **[What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against).** The boundaries, stated frankly: the gateway does not perform full hardware-quote verification, anti-replay depends on the caller supplying a nonce, there is no chat-prompt moderation or prompt-injection classifier, and a non-TEE call is not sealed from the provider beyond the provider's own retention settings.
+
+Neither page is complete without the other. A defense without its boundary invites overconfidence; a boundary without its defense invites the wrong conclusion that nothing is protected.
+
+## The shape of the system
+
+To read the two pages well, hold this picture of where your data goes:
+
+1. Your request reaches the gateway, authenticated by an API key that is stored only as a hash.
+2. The gateway resolves the model and privacy mode from the model ID, places a billing hold, and routes to a provider inside the privacy boundary you selected.
+3. The provider runs the call. For ordinary and private modes, the provider is constrained by a per-request no-retention setting. For `tee` and `e2e-tee`, the call runs inside a sealed environment that produces an attestation.
+4. The result returns; prompts and completions are request-local and not persisted by the gateway.
+
+Each step has defenses and each step has limits. The two pages walk them in that order.
+
+## What this section is not
+
+- It is not a compliance statement. Certifications, residency, and contractual terms are out of scope here and are tracked in [Compliance posture](/privacy/compliance-posture) and [DPA](/privacy/dpa), where nothing is asserted until Legal and Security sign off.
+- It is not a guarantee of provider behavior beyond the settings Nito sends. The gateway enforces what it can express on each request; what the provider does with that instruction is covered in [Provider-side enforcement](/privacy/provider-side-enforcement).
+- It does not use the word "trustless." The top tiers are **attested** and **verifiable**, which is a stronger and more honest claim than "trust us" but a narrower one than "trustless."
+
+## Related
+
+- [What Nito defends against](/privacy/threat-model/what-nito-defends-against) - the concrete defenses in the system today.
+- [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against) - the boundaries, stated frankly.
+- [Provider-side enforcement](/privacy/provider-side-enforcement) - how each provider hop is constrained.
+- [Known limitations](/privacy/known-limitations) - the broader list of current gaps and unverifiable claims.
+
+<!-- source: internal/server/routes.go, internal/models/models.go, internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), internal/auth/tokens.go (hashed credentials), internal/websearch/redaction.go, docs/architecture/tee-attestation.md, docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §6, §8, §10 -->

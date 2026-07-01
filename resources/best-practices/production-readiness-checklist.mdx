@@ -1,0 +1,64 @@
+---
+title: Production Readiness Checklist
+description: A concrete pre-launch checklist for Nito, covering secrets, spend caps, error handling, streaming parsing, privacy tiers, request-ID logging, and model IDs.
+---
+
+Before you put a Nito integration in front of real users, it is worth walking a short, concrete list. Most production incidents with a gateway come from a handful of predictable gaps: a key in the wrong place, an error path that was never handled, a stream parsed naively, or a model ID that quietly went away. This page is that list. Each item links to the deeper page where it is explained, so you can use this as an index as well as a checklist. Work top to bottom; nothing here is optional for a serious launch.
+
+## Credentials and spend
+
+- [ ] **Keys live in secrets, not code.** Every `z_sk_` key is loaded from an environment variable or secrets manager, and no key appears in source control or any client-side bundle. Remember a key is full org-scoped access with no per-key scopes. See [Secure API key handling](/resources/best-practices/secure-api-key-handling).
+- [ ] **One key per workload.** Each service or environment has its own key so you can revoke and attribute independently.
+- [ ] **Spend caps are set.** Every key carries a `daily`, `monthly`, or `overall` spend cap sized to its workload, so a breach force-expires the key rather than draining the balance. See [Cost control](/resources/best-practices/cost-control).
+- [ ] **Key management is role-limited.** Only `owner` and `admin` can mint or revoke keys, and that membership has been reviewed.
+
+## Error handling
+
+Handle the full status set explicitly; do not treat every non-200 the same way. The mapping comes from the gateway's error kinds.
+
+- [ ] **`400` invalid request** surfaced as a bug to fix, not retried. Covers decode, validation, feature, and attachment errors.
+- [ ] **`401` unauthorized** treated as a bad, revoked, or expired key; not retried.
+- [ ] **`402` payment required** surfaced as a billing problem; not retried.
+- [ ] **`429` rate limited** handled by honoring the `Retry-After` header, and distinguished from `insufficient_quota` (also `429`) which retrying will not fix.
+- [ ] **`5xx` handled and retried where transient.** `502` (`provider_error`) and `503` (`unavailable`) are retried with exponential backoff and jitter; `500` is surfaced. See [Uptime and fallbacks](/resources/best-practices/uptime-and-fallbacks).
+- [ ] **`Retry-After` is honored** wherever it appears, treated as a floor on the wait time.
+- [ ] **App-level fallback exists.** On exhausted retries for `502`/`503`, you fall back to an alternate model at the same privacy tier, never a weaker one.
+
+## Streaming
+
+If you use `stream: true`, parse the stream correctly. Naive parsing is a common source of truncated or dropped responses.
+
+- [ ] **`[DONE]` is handled.** The stream terminates with a literal `data: [DONE]\n\n`; your parser stops on it rather than trying to JSON-decode it.
+- [ ] **Mid-stream error chunks are handled.** An error can arrive as a chunk with a top-level `error` object and a choice whose `finish_reason` is `error`. Detect and surface it instead of silently ending. See [Error events](/api-reference/streaming-format/error-events).
+- [ ] **Heartbeats are tolerated.** Keep-alive comment lines (`: keep-alive`) arrive periodically and must be ignored by the parser, not treated as data.
+- [ ] **`:e2e-tee` is never streamed.** That mode does not support streaming; your code does not request it. See [Streaming](/features/streaming).
+
+## Privacy
+
+- [ ] **The right tier is chosen per call.** Each request uses the privacy mode its sensitivity warrants, selected by the model-ID suffix (`:tee`, `:e2e-tee`, or none), not a blanket maximum that slows every call. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- [ ] **No path downgrades privacy.** No retry or fallback ever relaxes a requested privacy mode; the gateway refuses to downgrade and your code must not work around that.
+
+## Observability
+
+- [ ] **Request IDs are logged.** You log `X-Request-ID` on every call for correlation, and set your own on the way in for end-to-end matching. See [Privacy-safe logging](/resources/best-practices/privacy-safe-logging).
+- [ ] **Logs are content-free.** You log metadata (model, status, finish reason, token counts, error code), never prompt or response bodies, and never the `Authorization` header.
+- [ ] **Spend is monitored.** The org usage overview is checked on a schedule so trends are caught before caps trip.
+
+## Configuration
+
+- [ ] **Model IDs are confirmed against the catalog.** Every model ID you use has been verified against `GET /v1/models`, and ideally selected by capability at runtime rather than hard-coded, because the catalog is discovered live and models are added and retired over time. See [Model catalog](/models/model-catalog).
+- [ ] **Request bodies stay under 4 MiB.** You have confirmed your largest realistic request fits under the body cap.
+- [ ] **The base URL is the confirmed production URL.** You have replaced `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+
+> **TODO (needs SME):** confirm the canonical production base URL before launch; the code default is a local address (owner: Product/Infra).
+
+## Related
+
+- [Secure API key handling](/resources/best-practices/secure-api-key-handling)
+- [Cost control](/resources/best-practices/cost-control)
+- [Uptime and fallbacks](/resources/best-practices/uptime-and-fallbacks)
+- [Privacy-safe logging](/resources/best-practices/privacy-safe-logging)
+- [Latency and performance](/resources/best-practices/latency-and-performance)
+- [Error format](/api-reference/overview/error-format)
+
+<!-- source: internal/inference/errors.go (StatusCode mapping 400/401/402/429/502/503), internal/server/api_chat.go (SSE [DONE], writeChatStreamError, apiMaxRequestBytes), internal/server/rate_limit.go (Retry-After), internal/auth/api_keys.go (spend caps, owner/admin), internal/server/api_models.go (GET /v1/models), docs/planning/DOCS_SOURCE_OF_TRUTH.md §2, §3, §8, §9 -->

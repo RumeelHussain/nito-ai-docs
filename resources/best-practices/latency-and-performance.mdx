@@ -1,0 +1,65 @@
+---
+title: Latency and Performance
+description: Practical ways to make Nito calls feel fast and stay within limits, from streaming and prompt caching to model choice and the body-size cap.
+---
+
+Latency is two different things, and it helps to keep them apart. There is the total time a request takes, and there is the time until the user sees something happen. You optimize them with different tools. This page walks through the levers Nito gives you, from the ones that change perceived speed to the ones that change real work, and it flags the privacy modes that trade latency for stronger guarantees.
+
+If you have not read [How Nito Works](/get-started/how-nito-works), skim the request lifecycle first. Several of the tips below map directly onto steps in that lifecycle.
+
+## Stream for perceived speed
+
+The single biggest win for a chat-style UI is streaming. Set `stream: true` and Nito returns tokens as they are produced over a long-lived connection instead of making the user wait for the whole response. The total generation time is unchanged, but the time to first visible token drops dramatically, which is what users actually feel.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"MODEL_ID","stream":true,"messages":[{"role":"user","content":"..."}]}'
+```
+
+> **TODO (needs SME):** replace `MODEL_ID` with a confirmed streaming-capable model ID from `GET /v1/models`.
+
+Streaming has one important exception. The `:e2e-tee` end-to-end encrypted mode does not stream at all: those requests are non-streaming only, by design. If you build a UI on top of `:e2e-tee`, you cannot show tokens as they arrive, so plan the experience around a single returned response. See [Per-call privacy modes](/privacy/per-call-privacy-modes) for the full constraint list.
+
+## Reuse work with prompt caching
+
+If every request repeats a long, stable prefix, a system prompt, a big instruction block, or a document the model keeps re-reading, you are paying to process those tokens every time, and paying the latency to process them too. Prompt caching lets the provider remember that prefix so later calls skip most of the work. On Nito this is a passthrough: you set `prompt_cache_key` (up to 256 bytes) or `cache_control`, and the gateway forwards the directive to a provider that supports it.
+
+Put the stable content first and the variable content, the user's actual question, last, so the cacheable boundary is as long as possible. The response `usage` reports `cache_read_input_tokens` so you can confirm the cache is being hit. Full detail is in [Prompt caching](/features/prompt-caching).
+
+## Pick the right-sized model
+
+A smaller, cheaper model that is good enough for the task will usually respond faster than a larger one, and it costs less. Do not reach for the biggest model by default. Match the model to the job: use a compact model for classification, extraction, or short replies, and reserve heavyweight models for genuinely hard reasoning. Because the catalog is discovered at runtime, select by capability from `GET /v1/models` rather than hard-coding a name. See [Choosing a model](/models/choosing-a-model).
+
+## Stay under the body cap
+
+Nito caps the request body at 4 MiB (the `apiMaxRequestBytes` default). Oversized requests are rejected before any inference happens, so a request that carries huge inline attachments or a very long history can fail outright. Keep bodies lean: trim conversation history you do not need, and prefer referencing documents through the supported attachment flows over pasting enormous blobs inline. For file-heavy work, the attachments parser has its own separate 10 MiB cap; see [File parser](/features/server-side-tools/file-parser).
+
+## Know the TEE latency trade-off
+
+Stronger privacy modes have real latency costs, and choosing them everywhere would make routine calls slower for no benefit. Two things to keep in mind:
+
+- **TEE-capable backends are fewer.** The `:tee` and `:e2e-tee` modes route only to specific providers, which can mean higher latency or lower availability than ordinary routing.
+- **`:e2e-tee` does not stream.** As noted above, this removes the perceived-speed win entirely, so those calls feel slower even when total time is comparable.
+
+The right move is to match the privacy mode to the sensitivity of each call, paying the latency cost only where the request needs it. That per-call dial is the whole point of the design.
+
+## A quick mental checklist
+
+- Streaming on for anything a human watches (except `:e2e-tee`).
+- Prompt caching on for repeated prefixes; confirm with `cache_read_input_tokens`.
+- Smallest adequate model, selected from the live catalog.
+- Request bodies well under 4 MiB.
+- Strong privacy modes reserved for calls that need them.
+
+## Related
+
+- [How Nito Works](/get-started/how-nito-works)
+- [Streaming](/features/streaming)
+- [Prompt caching](/features/prompt-caching)
+- [Choosing a model](/models/choosing-a-model)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Cost control](/resources/best-practices/cost-control)
+
+<!-- source: internal/server/api_chat.go (streamAPIChatCompletion, apiMaxRequestBytes), internal/inference/validation.go (validateTEEEncryption), internal/models/models.go (ParseLogicalModelIDForPublicMode), docs/planning/DOCS_SOURCE_OF_TRUTH.md §2, §3, §5, §9 -->

@@ -1,0 +1,80 @@
+---
+title: The Attestation Pipeline
+description: The end-to-end flow of GET /api/v1/tee/attestation, from query keys to every field in the response, with the baseline scope stated plainly.
+---
+
+This page traces exactly what happens when you call `GET /api/v1/tee/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [freshness binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
+
+## The endpoint
+
+```
+GET /api/v1/tee/attestation
+```
+
+The endpoint takes an allow-listed set of query keys. Only these keys are read; the allow-list is explicit.
+
+| Query key | Required | Purpose |
+|---|---|---|
+| `model` | Yes | The public model ID to attest. Must resolve to an attestation-capable physical model. |
+| `nonce` | No | A fresh random value you generate. Binds the report to this request. Omitting it permits an empty binding. |
+| `signing_address` | No | The signing address you expect the report-data binding to commit to. |
+| `signing_algo` | No | The signing algorithm you expect. If given, it must match what the evidence declares. |
+| `trust_tier` | No | Selects the tier: `""` or `tee`, or `e2e-tee`. |
+
+Although the nonce is optional to the endpoint, supplying a fresh random nonce on every call is what gives you replay protection. Anti-replay is caller-driven and there is no server-side nonce store, so an omitted nonce is permitted but produces an empty-binding report. See [freshness binding](/privacy/tee-attestation/freshness-binding).
+
+## What the gateway does with the request
+
+The flow is three stages.
+
+1. **Resolve the model.** The gateway takes the public `model` you sent and resolves it to a physical, attestation-capable model: a concrete provider plus provider-side model ID that actually supports attestation. If the model does not support attestation, there is nothing to attest.
+2. **Call the provider attestation client.** The gateway calls the resolved provider's attestation client to fetch the raw evidence. The provider (NEAR or Phala) returns its attestation report. How each provider frames the request differs, which is covered in [per-provider attestation](/privacy/tee-attestation/per-provider-attestation).
+3. **Run the baseline verifier.** The gateway runs `verifyTEEAttestationBaseline` over the evidence: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline). The outcome of that contract sets the `verified` flag in the response.
+
+## The response
+
+A successful call returns a JSON object. Every field below is part of the documented response shape.
+
+| Field | Notes |
+|---|---|
+| `object` | Always the string `"tee.attestation"`. |
+| `model` | The public model you asked to attest. |
+| `routed_model` | Optional. The physical model the request resolved to, when it differs from `model`. |
+| `provider` | The provider that produced the evidence. |
+| `provider_model_id` | The provider-side model identifier. |
+| `privacy_tier` | The stored tier for this model. |
+| `tee_provider` | The TEE provider backing the model. |
+| `attestation_available` | Whether attestation is available for this model. |
+| `attestation_subject` | Optional. The subject sent to the provider (a `domain` for NEAR, an `appid` for Phala). |
+| `verified` | The baseline result: did the seven-gate contract pass. |
+| `nonce` | Optional. The nonce observed in the evidence; you compare this to the nonce you sent. |
+| `proof_format` | Optional. The proof format the evidence declares. |
+| `signing_algo` | Optional. The signing algorithm the evidence declares. |
+| `signing_address` | Optional. The signing address committed to in the report-data binding. |
+| `signing_key` | Optional. Populated from the model public key. |
+| `model_public_key` | Optional. The model public key. |
+| `evidence` | The raw attestation evidence as JSON, for your independent verification. |
+
+### `signing_key` and `model_public_key` are aliases
+
+This is easy to misread, so it is stated directly: `signing_key` and `model_public_key` are **aliases**. Both fields are populated from the same model public key. They are not two independent keys, and you should not treat the presence of both as evidence of a second key. Whenever this page or your own code refers to "the model public key," it means the single value that fills both fields.
+
+### Caching
+
+The response is served with `Cache-Control: no-store`. Attestation results are request-local and are not cached. Each call produces a fresh report bound to the nonce you sent on that request.
+
+## The scope limit, restated
+
+This pipeline produces a **baseline-verified** result, not a fully verified one. The `verified` flag means the evidence passed the gateway's baseline contract. It does **not** mean the gateway validated the Intel TDX quote, the NVIDIA GPU evidence, the certificate chains, the CRLs, or the TCB policy. Those checks are deliberately out of scope for the gateway and are your responsibility on the client side. The `evidence` field is returned in full precisely so you can run them. See [verify it yourself](/privacy/tee-attestation/verify-yourself-recipe).
+
+> **TODO (needs SME):** a full worked request and response example against the production endpoint, including the canonical base URL. Until confirmed, use `https://YOUR-NITO-BASE-URL` as the placeholder (owner: Security / Product).
+
+## Related
+
+- [TEE attestation overview](/privacy/tee-attestation)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+- [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go, docs/architecture/tee-attestation.md -->

@@ -1,0 +1,53 @@
+---
+title: Cursor
+description: Connect Cursor to Nito by setting a custom OpenAI-compatible base URL, a Nito API key, and a Nito catalog model ID.
+---
+
+Cursor lets you configure a custom OpenAI-compatible API instead of its built-in models. Because Nito exposes an OpenAI-compatible API, you can route Cursor's chat and inline edits through Nito by filling in that custom-endpoint setting. You are not selecting a named "Nito" provider. You are using Cursor's OpenAI-compatible override and pointing it at Nito.
+
+## Values to enter
+
+Wherever Cursor asks for OpenAI-compatible connection details, supply these three values:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+> **TODO (needs SME):** verify the exact current settings path/config for Cursor against its official docs (owner: DevRel).
+
+## Finding a model ID
+
+Cursor will not auto-discover Nito's catalog. Pick a model ID from the live list:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+Enter one of the returned IDs as the Cursor model name. If Cursor lets you add a custom model name to its model list, add the Nito ID there so it appears in the model picker.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID, so you do not need a separate Cursor setting. To run a request in a TEE with a verifiable attestation, append `:tee` to the model name, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Note that `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from Cursor's chat box. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## What to expect
+
+- Cursor sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
+- The OpenAI Responses API is not served, so leave any "use Responses API" option off if Cursor exposes one.
+- If a model or feature is rejected, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
+
+## Common mistakes
+
+- **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with an ID from `GET /v1/models`.
+- **Dropping `/v1` from the base URL.** Without it, Cursor's requests will not reach the Chat Completions route.
+- **Expecting auto-discovery.** Add the Nito model ID manually if Cursor does not list it.
+
+## Related
+
+- [Editor and tool integrations](/sdks/editor-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

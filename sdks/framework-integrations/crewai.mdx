@@ -1,0 +1,70 @@
+---
+title: CrewAI
+description: Use Nito in CrewAI by pointing its OpenAI-compatible LLM at Nito's base URL with a Nito key and a Nito catalog model ID.
+---
+
+CrewAI agents call a model through an LLM configuration. Nito has no CrewAI-specific package; you configure CrewAI's OpenAI-compatible LLM and point it at Nito, because Nito exposes an OpenAI-compatible API. Your agents, tasks, and crews stay exactly as written.
+
+## The principle
+
+Configure the LLM your agents use with three values:
+
+- the Nito base URL ending in `/v1`,
+- a Nito API key (it starts with `z_sk_`),
+- a Nito catalog model ID from `GET /v1/models`.
+
+Assign that LLM to your agents and the rest of the crew is unchanged.
+
+## Representative configuration
+
+```python
+from crewai import LLM, Agent
+
+llm = LLM(
+    model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
+    api_key="z_sk_your_key_here",              # your Nito API key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+researcher = Agent(
+    role="Researcher",
+    goal="Answer questions concisely.",
+    backstory="A focused analyst.",
+    llm=llm,
+)
+```
+
+> **TODO (needs SME):** verify the exact current configuration for CrewAI against its official docs (owner: DevRel)
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+CrewAI routes model calls through a provider layer, so depending on your version you may set the base URL and key via environment variables rather than constructor arguments. Confirm the current mechanism in CrewAI's official docs; the values you supply are the same three regardless.
+
+## Choosing a model and privacy
+
+Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note `:e2e-tee` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Anthropic-shaped configuration
+
+If you configure CrewAI to use an Anthropic model, it targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Configure CrewAI's OpenAI-compatible LLM as shown above to reach Nito instead.
+
+## Common mistakes
+
+- **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
+- **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
+- **Selecting an Anthropic-native path.** Nito serves Chat Completions, not Messages.
+
+## Related
+
+- [Framework integrations overview](/sdks/framework-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) -->

@@ -1,0 +1,119 @@
+---
+title: Quickstart recipe
+description: Go from a key to a working chat response with curl and Python, then read the response fields that matter.
+---
+
+## Goal
+
+Send one chat request to Nito and read the reply, using nothing but your API key and either curl or Python. When you finish you will have a verified working setup you can build on.
+
+## Prerequisites
+
+- A Nito API key that starts with `z_sk_`. If you do not have one, see [Authentication](/get-started/authentication).
+- Your gateway base URL. This recipe uses `https://YOUR-NITO-BASE-URL` as a placeholder.
+- Either curl (already on most systems) or Python 3 with the `openai` package installed.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Step 1: Set your key and base URL
+
+```bash
+export NITO_API_KEY="z_sk_your_key_here"
+export NITO_BASE_URL="https://YOUR-NITO-BASE-URL"
+```
+
+## Step 2: Discover a model
+
+Model IDs are not hard-coded. Ask the gateway what is available and pick one:
+
+```bash
+curl "$NITO_BASE_URL/v1/models" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+Each entry includes an `id` you pass back in a request, a `type` (chat, embedding, image), and a `privacy_tier`. Pick a chat model. The rest of this recipe uses `grok-4.3` as an example; substitute a real ID from your catalog.
+
+## Step 3: Send a chat request
+
+<CodeGroup>
+
+```bash curl
+curl "$NITO_BASE_URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      { "role": "user", "content": "Say hello in one short sentence." }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.environ["NITO_API_KEY"],
+    base_url=os.environ["NITO_BASE_URL"] + "/v1",  # base URL must end in /v1
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",  # a Nito catalog ID from GET /v1/models
+    messages=[
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+</CodeGroup>
+
+## Step 4: Read the response
+
+A successful call returns a standard `chat.completion` object:
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "Hello, good to meet you." },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 12, "completion_tokens": 7, "total_tokens": 19 }
+}
+```
+
+## Walkthrough
+
+Three fields carry everything you need. `choices[0].message.content` is the assistant's text. `finish_reason` tells you why generation stopped: `stop` means the model finished on its own, and the other values are `length`, `tool_calls`, and `error`. `usage` reports the tokens you were billed for.
+
+The Python example uses the OpenAI SDK unchanged, because Nito speaks the same protocol. The only Nito-specific details are the key (a `z_sk_` value) and the base URL, which must end in `/v1` so the SDK can append `/chat/completions` itself. The curl example hits that path directly.
+
+To send a request through a stronger privacy mode, add a suffix to the model ID, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid, and the model must support the mode. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **401 Unauthorized.** The key is missing or not sent as `Authorization: Bearer <key>`. Keys start with `z_sk_`.
+- **400 about the model.** The `model` ID is not in your catalog. Copy an exact `id` from `GET /v1/models`.
+- **402 Payment Required.** No funded balance and the model is not free-tier eligible. See [Check usage and credits](/get-started/check-usage-and-credits).
+
+## Next steps
+
+- Turn on token streaming: [Build a streaming chat UI](/cookbook/getting-started/build-streaming-chat-ui).
+- Wrap this into a small app: [Build a first chat app](/cookbook/getting-started/build-first-chat-app).
+
+## Related
+
+- [Quickstart, 60 seconds](/get-started/quickstart-60-seconds)
+- [Chat completions feature](/features/chat-completions)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (routes), §2 (apiChatRequest/Response, finish reasons), §5 (catalog discovery, model-ID suffix), §8 (z_sk_) -->

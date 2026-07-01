@@ -1,0 +1,86 @@
+---
+title: Server-Side Tools
+description: Tools Nito or the provider runs for you mid-generation, turned on with a request field instead of a separate API call.
+---
+
+A server-side tool is a capability the model can reach for while it is generating a response, where Nito or the upstream provider does the actual work. You turn it on with a field on your chat request, and the gateway handles the rest: it decides whether the tool should run, runs it, feeds the result back into the model, and reports what happened in the response. You never make a second API call, and you never wire up the tool yourself.
+
+This is the line that matters most on this page, so it is worth stating plainly.
+
+## Server-side tools vs. your own function tools
+
+Nito supports two different things that both get called "tools," and they behave oppositely. Keeping them straight saves a lot of confusion.
+
+| | Server-side tools | Your own function tools |
+|---|---|---|
+| Who runs the tool | Nito or the provider | Your code |
+| How you enable it | A request field (for example `web_search`) or a hosted entry in `tools` | A `function` entry in `tools` |
+| The loop | The gateway runs the tool mid-generation and continues | The model asks, you run it, you send the result back |
+| Round trips | One request | Multiple requests (the classic tool-calling loop) |
+
+With your own function tools, the model can ask to call a function, but **the gateway never executes it for you**. Your application runs the function and sends the result back in a follow-up message, exactly like the OpenAI tool-calling loop. Server-side tools are the opposite: the execution happens inside the gateway boundary, so a single request can search the web, read a page, or run code without you orchestrating anything.
+
+For the mechanics of the function-tool loop, see [How Nito works](/get-started/how-nito-works#what-nito-does-not-do-for-you).
+
+## Which server-side tools exist
+
+These are the server-side tools implemented today. Each links to its own page.
+
+- **[Web search](/features/server-side-tools/web-search)** lets the model search the web and pull fresh sources into its context. Enabled with the top-level `web_search` field, or as `tools:[{type:web_search}]`. Backed by a gateway-native pipeline.
+- **[Web fetch](/features/server-side-tools/web-fetch)** retrieves and reads a specific URL during generation. Enabled with the `web_fetch` field, or as `tools:[{type:web_fetch}]`.
+- **[File parser](/features/server-side-tools/file-parser)** extracts text from uploaded documents. Unlike the others, this is a **REST endpoint** (`POST /api/v1/attachments/parse`), not a chat tool, though the same parser also runs inline when you send a file in a chat message.
+- **[Code interpreter](/features/server-side-tools/code-interpreter)** runs code in a sandbox. Available on **xAI models only**, as a passthrough to xAI; there is no gateway-native sandbox.
+- **x_search** searches X (formerly Twitter). Available on **xAI models only**, as `tools:[{type:x_search}]`.
+
+## How you turn them on
+
+There are two shapes, and which you use depends on the tool.
+
+The first shape is a dedicated top-level field on the chat request. Web search and web fetch both support this:
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [{ "role": "user", "content": "What changed in the latest release?" }],
+  "web_search": true
+}
+```
+
+The second shape is a hosted entry in the `tools` array, using a `type` instead of a `function`. The recognized hosted tool types are `web_search`, `web_fetch`, `x_search`, and `code_interpreter`:
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [{ "role": "user", "content": "Plot the last quarter's data." }],
+  "tools": [{ "type": "code_interpreter" }]
+}
+```
+
+Because the chat request is decoded strictly, unknown fields are rejected, and sending the same feature in two conflicting places returns `request body contains duplicate feature fields`. Pick one shape per feature.
+
+## What you get back
+
+When a server-side tool runs, the gateway reports it in two places on the response:
+
+- A feature-specific metadata field. Web search, for example, returns a `web_search` object describing what was searched and which sources were used.
+- Usage counters under `usage.server_tool_use`, including `web_search_requests`, `web_search_results`, and `web_fetch_requests`. These let you see and reconcile tool activity.
+
+Server-side tools are billed in addition to the model's own token usage. The specifics live on each tool's page.
+
+## Provider routing
+
+Server-side tools are not available on every model, because they depend on what the underlying provider supports. The eligible providers differ per tool (web search is the broadest; code interpreter and x_search are xAI-only). If you enable a tool on a model whose provider cannot serve it, the request is rejected rather than silently ignored. Each sub-page lists its own provider requirements.
+
+## A note on the datetime tool
+
+> **Not available yet.** A "datetime" server tool has been discussed but is **not implemented** today. There is no tool type or handler for it in the gateway. Do not rely on it. It is tracked on the deferred/roadmap list, and this page will be updated if it ships.
+
+## Related
+
+- [How Nito works](/get-started/how-nito-works) for the request lifecycle and the function-tool boundary.
+- [Web search](/features/server-side-tools/web-search)
+- [Web fetch](/features/server-side-tools/web-fetch)
+- [File parser](/features/server-side-tools/file-parser)
+- [Code interpreter](/features/server-side-tools/code-interpreter)
+
+<!-- source: internal/server/api_chat.go (apiChatRequest web_search/web_fetch fields), internal/server/api_chat_tools.go, internal/inference/contracts.go (ToolType: web_search/web_fetch/x_search/code_interpreter), internal/inference/service.go (routeServerTool), internal/inference/validation.go (duplicate feature fields) -->

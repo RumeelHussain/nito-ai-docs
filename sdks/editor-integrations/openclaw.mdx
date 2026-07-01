@@ -1,0 +1,53 @@
+---
+title: OpenClaw
+description: Connect OpenClaw to Nito by configuring a custom OpenAI-compatible endpoint with a Nito base URL, key, and catalog model ID.
+---
+
+If OpenClaw supports a custom OpenAI-compatible provider, you can route it through Nito. Nito exposes an OpenAI-compatible API, so OpenClaw sends standard Chat Completions requests and Nito serves them. You are not selecting a named "Nito" provider. You are using OpenClaw's generic OpenAI-compatible endpoint setting and pointing it at Nito.
+
+## Values to enter
+
+Wherever OpenClaw accepts OpenAI-compatible connection details, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+> **TODO (needs SME):** verify the exact current settings path/config for OpenClaw against its official docs, including whether it supports a custom OpenAI-compatible endpoint at all (owner: DevRel).
+
+## Finding a model ID
+
+OpenClaw will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+If OpenClaw lets you register a custom model name, add the Nito ID so it appears in its model picker.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID, so no separate OpenClaw setting is required. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from an interactive editor. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## What to expect
+
+- OpenClaw sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
+- The OpenAI Responses API and the Anthropic Messages API are not served. Keep OpenClaw on the Chat Completions path.
+- If a request is rejected, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
+
+## Common mistakes
+
+- **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
+- **Dropping `/v1` from the base URL.** The Chat Completions route will not be reached without it.
+- **Assuming a built-in Nito provider.** There is none. Use the OpenAI-compatible custom-endpoint setting.
+
+## Related
+
+- [Editor and tool integrations](/sdks/editor-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

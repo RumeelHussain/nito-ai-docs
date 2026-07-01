@@ -1,0 +1,50 @@
+---
+title: Editor and tool integrations
+description: Use Nito from any AI editor that supports a custom OpenAI-compatible provider by pointing it at the Nito base URL.
+---
+
+Many AI coding editors and CLI tools let you bring your own model by configuring a custom OpenAI-compatible provider. Nito exposes an OpenAI-compatible API, so any of those tools can talk to Nito without a Nito-specific plugin. You are not using a named "Nito" provider built into the editor. You are using the editor's generic OpenAI-compatible endpoint setting and pointing it at Nito.
+
+## The shared pattern
+
+Every editor on these pages follows the same three-value setup. Wherever the editor asks for OpenAI-compatible connection details, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append routes like `/chat/completions` themselves.
+- **API key:** a Nito key that starts with `z_sk_`.
+- **Model ID:** a Nito catalog ID, such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`. Fetch the live list with `GET /v1/models`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+That is the whole idea. The editor sends standard Chat Completions requests, and Nito serves them.
+
+## Selecting privacy
+
+Privacy is chosen by the model ID, not by a separate setting. Add a suffix to the model name to opt into a stronger tier:
+
+- `grok-4.3:tee` runs in a TEE with an attestation you can verify.
+- `grok-4.3:e2e-tee` adds end-to-end encryption, but does not stream and needs extra headers, so it is rarely usable from an editor's chat box.
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## What works and what does not
+
+- The compatible surface is **Chat Completions** (`POST /v1/chat/completions`). Messages, streaming, and tool calls work as in the OpenAI SDK.
+- The OpenAI **Responses API** (`/v1/responses`) is not served.
+- The **Anthropic Messages API** (`/v1/messages`) is not served and returns 404. Tools that default to Anthropic-native calls must be pointed at the OpenAI-compatible path instead.
+
+## A note on settings paths
+
+Each editor's exact settings screen, config-file name, and key names change often and are owned by that editor, not by Nito. The per-editor pages below describe the values to enter, not authoritative click-paths. Always confirm the current location against the editor's official documentation.
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
+- [Cursor](/sdks/editor-integrations/cursor)
+- [Claude Code](/sdks/editor-integrations/claude-code)
+- [Codex](/sdks/editor-integrations/codex)
+- [OpenClaw](/sdks/editor-integrations/openclaw)
+- [Zed](/sdks/editor-integrations/zed)
+- [Continue.dev](/sdks/editor-integrations/continue-dev)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; messages/responses 404 routes.go:141-147) -->

@@ -1,0 +1,66 @@
+---
+title: Providers
+description: Who actually serves a Nito call, and how each provider enforces privacy.
+---
+
+Behind one Nito key sit several model providers. You rarely choose a provider directly; you choose a model and a privacy mode, and Nito routes to a provider that can serve it. Still, it helps to know who runs a call and what each provider does to protect it, especially when you are reasoning about where sensitive data goes. This page profiles each serving provider and the privacy enforcement it applies. If you only remember one thing: the provider is an implementation detail of the model you name, and for attested calls you can confirm after the fact exactly which one ran your request.
+
+## How providers fit in
+
+Nito normalizes your request into one internal shape, picks a backend that can serve the named model at the privacy mode you asked for, and forwards the call to that provider's API. Provider keys are held by the gateway, not by you, so you never sign up with or pay these providers directly. The provider that serves a call is reflected in the model's physical ID, written `provider/model`, and, for attested calls, in the attestation response. How Nito chooses among eligible providers is covered in [Backend selection](/models/backend-selection).
+
+A couple of terms recur below. **Zero-data-retention (ZDR)** means the upstream provider is instructed, contractually and technically, not to keep your request after serving it. **Attestation** is a signed statement a Trusted Execution Environment (TEE) produces about what ran inside it, which you can verify; the **attestation subject** is the identity that statement is bound to (a domain or an application ID, depending on the provider).
+
+## The providers
+
+### xAI
+Serves xAI models (the Grok family) and xAI-hosted server tools. xAI requests are forwarded with storage disabled at the provider (the gateway forces `Store: false`), so the provider is instructed not to retain the request. xAI also backs several server-side tools the model can use mid-generation: web search, X search (search over X/Twitter), and code interpreter. The default model in this family is a Grok model.
+
+### OpenRouter
+A broad model aggregator that fronts many vendors' models. Nito imports only zero-data-retention endpoints from OpenRouter, and never imports non-ZDR models in the first place, so an OpenRouter-served model is a ZDR model by construction. For models whose owner is a major lab (Anthropic, Google, OpenAI), the stored tier is treated as anonymized (`anon`); other models routed through ZDR endpoints are treated as `private`.
+
+One nuance is worth knowing because it is the exception to the ZDR rule. When a request uses OpenRouter's own server-side web tools, the ZDR flag is not applied to that specific call, because those tools require a data flow the ZDR policy would block. In other words, asking OpenRouter to run web tools and asking it to retain nothing are in tension, and the tool call wins for that request. Embeddings and image requests through OpenRouter, by contrast, always force ZDR.
+
+### NEAR
+One of the two TEE-capable providers. NEAR can run a call inside a TEE and return an attestation. It uses domain-based attestation, meaning the attestation subject is a domain, and it supports end-to-end encryption with ed25519 client and model keys (ed25519 is a public-key signature scheme; in plain terms, your client and the sealed model each hold a key pair so data can be encrypted directly to the environment). NEAR-served models can carry `privacy_tier: "tee"` and, for chat, `e2ee_supported: true`. For NEAR the attestation subject is optional.
+
+### Phala
+The second TEE-capable provider. Phala uses appid-based attestation, meaning the attestation subject is an application ID rather than a domain, and like NEAR it can serve both TEE and end-to-end encrypted TEE calls. The practical difference from NEAR is that Phala requires an attestation subject (the appid) to be present, where NEAR does not.
+
+### Image provider (fal)
+Serves text-to-image generation only. Image requests are forwarded with storage disabled at the provider (the gateway sets `X-Fal-Store-IO: 0`). This provider backs the [image generations endpoint](/api-reference/multimodal/image-generation); the default image model is a Z-Image model. fal does not serve chat, embeddings, or TEE modes.
+
+## Privacy enforcement at a glance
+
+| Provider | Serves | Privacy enforcement |
+|---|---|---|
+| xAI | Grok chat, xAI tools | Storage disabled at provider (`Store: false`) |
+| OpenRouter | Aggregated chat, embeddings, images | ZDR-only import and ZDR data policy (relaxed when OpenRouter server web tools are used; embeddings and images always force ZDR) |
+| NEAR | TEE-capable chat, embeddings | Domain-based attestation, ed25519 end-to-end encryption; subject optional |
+| Phala | TEE-capable chat, embeddings | Appid-based attestation, end-to-end encryption; subject required |
+| Image provider (fal) | Image generation | Storage disabled at provider (`X-Fal-Store-IO: 0`); image only |
+
+## Why this matters for sensitive calls
+
+The reason to care who serves a call is that different providers give you different kinds of assurance, and the strongest kind is one you can check yourself. Walk it up by sensitivity:
+
+- For routine, low-sensitivity calls, ordinary routing is fine; any eligible provider may serve it.
+- If you want the upstream to keep nothing but do not need a proof, a private-tier model (often routed through OpenRouter ZDR endpoints) is enough.
+- If you need a verifiable privacy guarantee, you want a TEE-capable provider (NEAR or Phala) and a `:tee` or `:e2e-tee` call. Here the assurance is not a promise but an attestation: the provider that served the call is named in the attestation response, so you can confirm after the fact where a sensitive request actually ran.
+
+This is why the language across these docs is "attested" and "verifiable" rather than absolute claims: TEE gives you evidence to check, not a request to take on faith.
+
+## Common mistakes
+
+- **Assuming you pick the provider directly.** You pick a model and a privacy mode; Nito picks the provider. To influence which backend runs, see [Backend selection](/models/backend-selection).
+- **Expecting ZDR on an OpenRouter call that uses OpenRouter web tools.** That specific combination relaxes the ZDR flag by necessity. Use a TEE mode if you need a guarantee on a tool-using call.
+- **Looking for TEE on xAI or the image provider.** TEE and end-to-end TEE come from NEAR and Phala only.
+- **Treating "storage disabled" and "TEE" as the same protection.** Storage disabled (xAI, fal) tells the provider not to keep the request; TEE seals execution and gives you an attestation. The second is a stronger, checkable guarantee.
+
+## Related
+
+- [Backend selection](/models/backend-selection)
+- [Provider-side privacy enforcement](/privacy/provider-side-enforcement)
+- [TEE attestation](/privacy/tee-attestation)
+
+<!-- source: internal/provider/registry/registry.go (entries, imageEntries), internal/provider/openairesponses/request.go (Store:false for xai/grok), internal/provider/openrouter/request.go (ZDR = RequireZeroDataRetention && !hasServerTools; embeddings/images force ZDR; non-ZDR never imported), internal/provider/openrouter/models.go (openRouterPrivacyTier), internal/provider/near (domain attestation, ed25519 e2eeHeaders, subject optional), internal/provider/phala (appid attestation, subject required), internal/provider/fal/fal.go (X-Fal-Store-IO:0, image only), internal/models/models.go (privacy tier mapping) -->

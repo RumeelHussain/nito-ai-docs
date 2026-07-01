@@ -1,0 +1,56 @@
+---
+title: Metadata-only Default
+description: Nito's baseline retention posture. Only operational metadata is kept; request and response bodies are request-local and served with no-store.
+---
+
+This is the foundational retention page, and it is the most strongly supported claim in the privacy section. Nito's default posture is **metadata only**: the gateway keeps operational metadata about a request, and it does not persist the request body or the response body. If you internalize one retention fact about Nito, make it this one, because every stronger privacy mode builds on top of this floor rather than replacing it.
+
+If you read only one sentence: **prompts, completions, reasoning, tool calls, and uploaded file contents are request-local and are not written to durable storage by default; what the gateway keeps is metadata.**
+
+## What "metadata" means here
+
+It is worth being precise, because "metadata" is a word that can quietly expand to mean anything. On Nito, in the retention context, **metadata** is the operational record of *that a request happened and how it was handled*, not *what the request said*. It is the difference between knowing a call was made (when, which model, how many tokens, whether it succeeded, what it cost) and knowing the words in the prompt.
+
+Concretely, the metadata-only posture means the gateway can keep operational facts such as:
+
+- which model and provider served the call,
+- token counts and usage for billing,
+- timing, status, and error class,
+- the request ID and similar correlation identifiers.
+
+And it means the gateway does **not** persist the contents:
+
+- prompt and message bodies,
+- the model's completion,
+- reasoning / chain-of-thought,
+- tool calls and their arguments,
+- the contents of uploaded files (parsed inline to serve the request, then discarded).
+
+Those content categories are **request-local**: they exist for the lifetime of the request and are not saved to a durable store you could read back later. The full who-sees-what breakdown is on [Data visibility](/privacy/data-visibility).
+
+## Three enforcement points
+
+The metadata-only default is not just a policy statement; it shows up in code at concrete points.
+
+**Bodies are request-local.** The request and response payloads are handled in memory to serve the call and are not committed to durable storage as part of the default path. There is no server-side prompt or completion store that the gateway writes to on every request.
+
+**Inference responses are `Cache-Control: no-store`.** Every inference response carries `Cache-Control: no-store`. This is an explicit instruction that the response should not be cached, by the gateway or by intermediaries, reinforcing that the body is meant to be delivered and then gone. (Streaming responses additionally carry `no-cache` and disable proxy buffering.)
+
+**Telemetry uses a `SafeAttrs` allowlist.** Observability is real on Nito, but it is deliberately narrow. Traces and telemetry attributes are restricted to a `SafeAttrs` allowlist, meaning only operational fields on the allowlist are recorded. The contents of a prompt or completion are not allowlisted, so they do not leak into traces. This is the part people most often worry about (the idea that "logging" quietly captures everything), and the allowlist is the structural answer to it.
+
+## Why this is the strongest claim in the section
+
+The other retention pages in this section describe mechanisms whose exact windows are still pending confirmation. This page is different: the metadata-only default is grounded in observable code behavior (request-local bodies, the `no-store` header, the telemetry allowlist), not in a number that has to be taken on faith. That is why it is the right place to start and the right thing to cite when someone asks the blunt question, "does Nito keep my prompts?" The answer is: not by default.
+
+## What this does and does not cover
+
+The metadata-only default is the **gateway's** posture. It is not a statement about what an upstream provider does with the call; that is governed separately by provider-side enforcement (`Store: false`, ZDR, or TEE) and is covered in [Data visibility](/privacy/data-visibility) and [Privacy overview](/privacy/overview). Nor does it cover client-side chat history, which lives in the browser and is described in [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat).
+
+## Related
+
+- [Data retention](/privacy/data-retention): the retention contract this default anchors.
+- [Data visibility](/privacy/data-visibility): the three-column view of who sees what.
+- [Idempotency and replay](/privacy/data-retention/idempotency-replay): the one place a key is kept, for billing dedup.
+- [Privacy overview](/privacy/overview): how privacy modes build on this floor.
+
+<!-- source: internal/server/api_chat.go (Cache-Control: no-store), internal/server/sse.go (no-store, no-cache), internal/observability/attrs.go (SafeAttrs allowlist), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §10 (Metadata-only default: CONFIRMED) -->

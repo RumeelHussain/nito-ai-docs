@@ -1,0 +1,50 @@
+---
+title: Framework integrations
+description: Point any framework that speaks the OpenAI-compatible API at Nito by changing the base URL, the key, and the model ID.
+---
+
+Nito does not ship a bespoke plugin for each agent framework. It does not need to. Nito exposes an OpenAI-compatible API (`POST /v1/chat/completions`, `POST /v1/embeddings`, `GET /v1/models`), so any framework that can talk to an OpenAI-compatible provider can talk to Nito with no custom adapter. You change three things and reuse everything else the framework gives you.
+
+## The shared pattern
+
+Every integration on the following pages is the same move, expressed in that framework's configuration:
+
+1. **Base URL.** Point the framework's OpenAI client at the Nito base plus `/v1`, for example `https://YOUR-NITO-BASE-URL/v1`. The client appends paths like `/chat/completions` itself, so the base must end in `/v1`.
+2. **API key.** Use a Nito key (it starts with `z_sk_`) wherever the framework expects an OpenAI API key.
+3. **Model ID.** Use a Nito catalog ID, not an OpenAI name like `gpt-4o`. Fetch the current catalog from `GET /v1/models` and pick an ID such as `grok-4.3`.
+
+That is the whole contract. Messages, streaming, and tool-call shapes follow the OpenAI Chat Completions format the framework already targets.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Selecting privacy
+
+Privacy is chosen by the model ID, not by a framework setting. Add a suffix to the model name and change nothing else:
+
+```text
+grok-4.3:tee      # TEE-backed execution with an attestation you can verify
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note that `:e2e-tee` does not stream and requires extra headers, so it is a poor fit for most framework integrations; prefer `:tee` when you need attestation with streaming. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## A note on Anthropic-shaped frameworks
+
+Some frameworks default to the Anthropic Messages API (`/v1/messages`). Nito does not serve that surface; it returns 404. Route those frameworks through their OpenAI-compatible provider option instead, using the base URL, key, and model ID above. There is no Anthropic-native path to Nito.
+
+## Pages
+
+- [LangChain and LangGraph](/sdks/framework-integrations/langchain-langgraph)
+- [Vercel AI SDK](/sdks/framework-integrations/vercel-ai-sdk)
+- [CrewAI](/sdks/framework-integrations/crewai)
+- [Mastra](/sdks/framework-integrations/mastra)
+- [Pydantic AI](/sdks/framework-integrations/pydantic-ai)
+- [LiteLLM](/sdks/framework-integrations/litellm)
+- [LlamaIndex](/sdks/framework-integrations/llamaindex)
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions, compat.openai.embeddings at /v1/embeddings, compat.openai.models at /v1/models) -->

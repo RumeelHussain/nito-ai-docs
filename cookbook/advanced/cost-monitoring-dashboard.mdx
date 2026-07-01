@@ -1,0 +1,91 @@
+---
+title: Build a cost monitoring dashboard
+description: Track spend over time and per model from the org overview, convert nanos to credits correctly, and alert when a window crosses a threshold.
+---
+
+**Goal.** A cost view focused on money, not tokens: spend over the last N days, spend per model, and a simple threshold alert when the current window crosses a budget you set.
+
+**Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and an org ID (list them from `GET /api/v1/orgs`). This recipe uses the same org overview endpoint as the [usage dashboard](/cookbook/advanced/usage-dashboard) but reads it through a cost lens.
+
+Everything here hangs on one field, `customer_charge_nanos`, and one unit rule. Get those right and the rest is arithmetic.
+
+## The nanos rule
+
+Nito tracks charges in **nanos**, billionths of a credit, so fractions of a cent can be accounted for exactly without rounding error. To turn any `*_nanos` value into whole credits, **divide by 1e9** (1,000,000,000). Do the division once, in a helper, and never sprinkle raw nanos through your UI.
+
+A second rule matters for honesty: **do not hard-code per-model prices.** Actual per-model pricing is configured live in the billing layer and is not on the model card. The overview already gives you the resolved `customer_charge_nanos` per model, so report that. If you need a unit price, derive it from charge over tokens for a real window rather than pasting a number.
+
+## Step 1: Pull the overview
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+`window_days` defaults to 30 and accepts up to 365. You get `current_window` and `all_time` totals (each with `customer_charge_nanos`), a `daily[]` breakdown, and a `models[]` breakdown sorted by charge.
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Step 2: Convert and chart spend
+
+```python
+import os, json, urllib.request
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+API_KEY = os.environ["NITO_API_KEY"]
+ORG_ID = os.environ["ORG_ID"]
+BUDGET_CREDITS = 100.0   # your own threshold
+
+def credits(nanos):
+    return int(nanos) / 1e9   # nanos -> credits, always divide by 1e9
+
+req = urllib.request.Request(
+    f"{BASE_URL}/api/v1/orgs/{ORG_ID}/api/overview?window_days=30",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+)
+with urllib.request.urlopen(req) as resp:
+    overview = json.load(resp)
+
+window_spend = credits(overview["current_window"]["customer_charge_nanos"])
+print(f"Spend, last 30 days: {window_spend:.4f} credits")
+
+print("\nSpend by model:")
+for m in overview["models"]:
+    print(f"  {m['model']:<24} {credits(m['customer_charge_nanos']):.4f} credits")
+
+print("\nDaily spend:")
+for d in overview["daily"]:
+    print(f"  {d.get('date')}  {credits(d.get('customer_charge_nanos', 0)):.4f} credits")
+```
+
+The `daily[]` array is your time series: plot `credits(customer_charge_nanos)` per day to see spend trend and spot spikes. The `models[]` array, already sorted by charge, is your "where the money goes" bar chart.
+
+## Step 3: Alert on a threshold
+
+A cost monitor earns its name when it tells you before the bill surprises you. Compare the current window against a budget and raise an alert.
+
+```python
+if window_spend >= BUDGET_CREDITS:
+    print(f"ALERT: 30-day spend {window_spend:.2f} >= budget {BUDGET_CREDITS}")
+    # TODO: wire this to your notifier (email, Slack, PagerDuty, etc.)
+```
+
+Run this on a schedule (cron, a serverless timer) and you have continuous cost monitoring. Because the overview supports up to 365 `window_days`, you can also compute month-over-month or quarter-over-quarter deltas by pulling two windows and subtracting.
+
+## Pair it with balance
+
+Spend answers "what did we use." Balance answers "what is left." Read `available_nanos` from `GET /api/v1/orgs/{orgId}/billing/balance` (a decimal string, also divide by 1e9) and show runway alongside spend so a rising burn rate against a fixed balance is obvious.
+
+## Notes
+
+- The overview is aggregated from billing records, not prompts. Cost monitoring never exposes prompt contents.
+- There is no per-transaction history endpoint. Use the response `usage` block per call and this overview for aggregates.
+
+## Related
+
+- [Usage dashboard](/cookbook/advanced/usage-dashboard)
+- [Check usage and credits](/get-started/check-usage-and-credits)
+- [Observability pipeline](/cookbook/advanced/observability-pipeline)
+- [Get usage reference](/api-reference/usage-and-credits/get-usage)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (orgs api/overview, billing/balance), §5 (pricing not on model card, joined from billing at runtime), §9 (window_days default 30 max 365, nanos = billionths); internal/billing/api_usage.go (customer_charge_nanos, current_window/all_time/daily/models) -->

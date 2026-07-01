@@ -1,0 +1,80 @@
+---
+title: Model catalog
+description: List and filter every model available on Nito. The catalog is discovered live, so the models endpoint is the source of truth.
+---
+
+The catalog is the list of everything you can call. Nito discovers models from its providers and keeps the list current, so the catalog is something you query at runtime, not a static page you bookmark. This page shows how to list it, how to filter it, and how to use the result in code.
+
+## Listing the catalog
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+The response is a list of model entries:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "grok-4.3",
+      "object": "model",
+      "type": "chat",
+      "owned_by": "...",
+      "display_name": "...",
+      "capabilities": { "supports_reasoning": true, "supports_web_search": true, "supports_tee_attestation": false },
+      "privacy_tier": "anon",
+      "free_tier_eligible": false
+    }
+  ]
+}
+```
+
+The `id` is what you pass back in the `model` field of a request. `type` separates chat, embedding, and image models. `capabilities` and `privacy_tier` tell you what a model can do and which privacy modes it supports. The first-party path `GET /api/v1/models` returns the same shape.
+
+Note that pricing and context window are not on the entry by default; pricing appears as a separate `pricing` object only when it is configured for that model. See [Pricing](/models/pricing).
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Filtering
+
+By default the endpoint returns only chat models. To see other kinds, pass a `type` filter such as `embedding` or `image`. Additional query parameters narrow the list further; the full set is in the [models endpoint reference](/api-reference/models-catalog/list-models). In practice you filter on:
+
+- **`type`** to separate chat, embedding, and image models. Without it, embedding and image models are hidden.
+- **privacy** to find models that support `:tee`, by reading `privacy_tier: "tee"` or `attestation_available: true`.
+- **capabilities** such as `supports_image_inputs` or `supports_reasoning`, to match a model to a feature you need.
+
+## Using the catalog in code
+
+Fetch the catalog at startup, cache it briefly, and pick a model by capability rather than by a hard-coded name:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="z_sk_your_key_here", base_url="https://YOUR-NITO-BASE-URL/v1")
+
+models = client.models.list()
+chat_models = [m for m in models.data if getattr(m, "type", None) == "chat"]
+print([m.id for m in chat_models])
+```
+
+This keeps your integration resilient: when a model is added or retired, your code adapts instead of breaking on a missing name.
+
+> **Interactive catalog widget:** the docs site will host a live, filterable catalog table. That component is a TODO for the docs build; until then, query `GET /v1/models` directly.
+
+## Common mistakes
+
+- **Expecting embedding or image models in the default list.** The endpoint returns chat models unless you pass a `type` filter.
+- **Caching the catalog forever.** The list changes as models are added and retired; refresh it periodically.
+- **Inferring privacy support from the model name.** Read `privacy_tier` and `attestation_available` from the entry instead.
+- **Assuming a model name from another provider exists here.** Always confirm against `GET /v1/models`.
+
+## Related
+
+- [Models overview](/models/overview)
+- [Model ID convention](/models/model-id-convention)
+- [GET /v1/models reference](/api-reference/models-catalog/list-models)
+
+<!-- source: internal/server/api_models.go (apiModelsHandler, apiModelListResponse, apiModel), internal/server/api_models_filters.go (parseAPIModelsFilter, defaultAPIModelsFilter), internal/models/models.go (Syncer.SyncProvider, runtime discovery) -->

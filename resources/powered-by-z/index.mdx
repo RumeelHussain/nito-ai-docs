@@ -1,0 +1,39 @@
+---
+title: Powered by Z
+description: A high-level look at the engine behind Nito, kept discoverable rather than loud, and where to go for the fuller Z surface.
+---
+
+Nito is the product: one key, many models, selectable privacy per call, and inference you can verify. Most of the time that is all you need to know. This page is for the moments when you want to understand what sits underneath.
+
+## The engine behind Nito
+
+Nito is powered by Z, the engine that provides the privacy and execution guarantees you use through the gateway. When you pick a privacy mode per call, or fetch an attestation and verify it yourself, those capabilities come from Z underneath. Nito is the clean, OpenAI-compatible surface on top of that engine.
+
+We keep this reference discoverable rather than loud. In day-to-day use you work with Nito's API, models, and privacy modes, and you never have to think about the layer below. When you do want to look, this is the door.
+
+## What this means in practice
+
+The parts of Z you can already touch through Nito are the ones the gateway exposes directly:
+
+- **Selectable privacy per call**, from ordinary routing up to TEE-sealed execution, chosen with a model-ID suffix. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- **Attested execution you can verify.** For TEE tiers, Nito returns raw attestation evidence so you can complete verification client-side. See [TEE attestation](/privacy/tee-attestation).
+- **Metadata-only retention by default**, with prompt and completion contents treated as request-local. See [Zero Data Retention](/privacy/zero-data-retention).
+
+These are Nito features first. That they are backed by Z is the framing, not a separate product you have to adopt.
+
+## Going deeper
+
+The specifics of the Z engine, and exactly how Nito bridges to it, are owned by the Z surface rather than the Nito gateway docs. We do not restate those internals here, both to keep this page honest and because the gateway code does not detail them.
+
+> **TODO (needs SME):** Z engine specifics and the Nito-to-Z bridge (owner: Product).
+
+If you are building agents and want the fuller Z surface, start with [For developers building agents](/resources/powered-by-z/for-developers-building-agents).
+
+## Related
+
+- [For developers building agents](/resources/powered-by-z/for-developers-building-agents)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [TEE attestation](/privacy/tee-attestation)
+- [Privacy overview](/privacy/overview)
+
+<!-- source: high-level framing only; gateway repo does not detail Z engine internals. Framing from docs/planning explainer. Specifics marked TODO (owner: Product). -->

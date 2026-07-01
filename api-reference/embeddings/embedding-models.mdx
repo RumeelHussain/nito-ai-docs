@@ -1,0 +1,35 @@
+---
+title: Embedding models
+description: How to discover embedding models and what the default is.
+---
+
+The embeddings endpoint accepts an optional `model`. When you omit it, the gateway uses its default embedding model.
+
+## Discover available models
+
+The model catalog is discovered from providers at runtime, not published as a static list. To see the embedding models your deployment actually serves, list models and filter by type:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/models?type=embedding" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+Pass the `model` value from a returned model card into the [Create embeddings](/api-reference/embeddings/create-embeddings) request.
+
+## The default model
+
+When `model` is omitted, the request falls back to the gateway's default embedding model. The native default id is `Qwen/Qwen3-Embedding-0.6B`, served by the NEAR and Phala providers.
+
+There is no hardcoded, publishable list of embedding models in the gateway; the catalog is synced from provider APIs. Treat the `GET /v1/models?type=embedding` listing as the source of truth for what is callable right now.
+
+> **TODO (needs SME):** a curated table of recommended embedding models with their providers and intended use (owner: Backend/Product).
+
+## Related
+
+- [Create embeddings](/api-reference/embeddings/create-embeddings)
+- [Vector dimensions](/api-reference/embeddings/vector-dimensions)
+- [Input limits](/api-reference/embeddings/input-limits)
+
+<!-- source: internal/server/api_embeddings.go (h.defaultEmbeddingModel); internal/models/models.go (runtime catalog); DOCS_SOURCE_OF_TRUTH.md §4 (default Qwen embedding model), §5 (runtime-discovered catalog) -->

@@ -1,0 +1,108 @@
+---
+title: File Parser
+description: Extract text from uploaded documents through a REST endpoint, separate from the chat tools, with the same parser available inline in chat.
+---
+
+The file parser extracts plain text from an uploaded document so you can feed it into a prompt. It is grouped with the server-side tools because the gateway does the work for you, but it is different in one important way.
+
+**The file parser is a REST endpoint, not a chat tool.** You do not enable it with a request field or a `tools` entry. You upload a file to a dedicated endpoint and get text back. The same parser also runs **inline** when you attach a file to a chat message, so you have two ways to reach it.
+
+## The parse endpoint
+
+```
+POST /api/v1/attachments/parse
+Content-Type: multipart/form-data
+```
+
+The request is multipart form data with these fields.
+
+| Field | Values | Notes |
+|---|---|---|
+| `file` | the upload | required |
+| `trust_tier` | `anon`, `private`, `tee` | `e2e-tee` is not supported here |
+| `parse_mode` | `""`, `server`, `auto` | empty string is the default mode |
+
+### Accepted file kinds
+
+The parser accepts text and common office documents: **text, pdf, docx, pptx, xlsx, xls**.
+
+**Images are rejected.** If you need the model to read an image, send it directly to an image-capable model as image input rather than parsing it here.
+
+### Size limit
+
+The upload size cap defaults to **10 MiB**. A file larger than the cap is rejected with **`413`**.
+
+## Response
+
+A successful parse returns a JSON body:
+
+| Field | Notes |
+|---|---|
+| `text` | the extracted text |
+| `mime_type` | detected MIME type |
+| `file_kind` | normalized kind (for example `pdf`, `docx`) |
+| `bytes` | size of the input |
+| `page_count?` | present for paginated formats |
+| `parsed_pages?` | how many pages were actually parsed |
+| `truncated?` | true if output hit a cap |
+| `warnings[]` | non-fatal notes about the parse |
+
+### Caps
+
+The parser bounds its work to keep responses predictable:
+
+- **300,000** output characters maximum (output is truncated beyond this; `truncated` is set).
+- **80** PDF pages maximum.
+- **10 seconds** PDF parsing timeout.
+
+## Worked example
+
+```bash
+curl https://YOUR-NITO-BASE-URL/api/v1/attachments/parse \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -F "file=@/path/to/report.pdf" \
+  -F "trust_tier=private" \
+  -F "parse_mode=auto"
+```
+
+> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once confirmed (owner: Product/Infra).
+
+A typical response:
+
+```json
+{
+  "text": "...extracted document text...",
+  "mime_type": "application/pdf",
+  "file_kind": "pdf",
+  "bytes": 84213,
+  "page_count": 12,
+  "parsed_pages": 12,
+  "truncated": false,
+  "warnings": []
+}
+```
+
+## The text-parser variant
+
+A second endpoint uses the same upload and parser but returns a different shape:
+
+```
+POST /api/v1/augment/text-parser
+```
+
+It returns `{ text, tokens }` (an approximate token count alongside the text) and additionally supports a `response_format` field set to `json` (default) or `text`. Reach for this when you want a token estimate or a plain-text response instead of the richer `/attachments/parse` envelope.
+
+## Parsing inline in chat
+
+You do not have to call the endpoint at all. When you send a file as a content part in a chat message, the gateway runs **the same parser** server-side and folds the extracted text into the prompt. The supported document kinds match the endpoint: text, pdf, docx, pptx, xlsx, xls. Note that in chat, a `file_id` reference is not supported; supply the file by URL or inline data. See [How Nito works](/get-started/how-nito-works) for the chat request surface.
+
+## Billing
+
+A parse is billed as **`z-protocol/document-parse`**, metered as **1 unit** per call, separate from any model token usage.
+
+## Related
+
+- [Server-side tools](/features/server-side-tools) for the family overview.
+- [How Nito works](/get-started/how-nito-works) for sending files inline in a chat request.
+
+<!-- source: internal/server/api_attachments_parse.go (apiAttachmentParseHandler), internal/server/api_text_parser.go (apiTextParserHandler), internal/server/api_chat.go (apiChatContentPartToInference inline file parsing) -->

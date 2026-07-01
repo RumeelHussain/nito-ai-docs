@@ -1,0 +1,41 @@
+---
+title: Response format
+description: The JSON envelopes Nito returns, the object discriminator, and the no-store cache rule on inference.
+---
+
+Nito returns JSON responses with `Content-Type: application/json; charset=utf-8`. Each response is an envelope whose `object` field names its shape, mirroring the OpenAI-compatible conventions.
+
+## Common envelopes
+
+| `object` | Returned by |
+|---|---|
+| `chat.completion` | Chat completions (non-streaming) |
+| `chat.completion.chunk` | Streaming chat completion chunks |
+| `fusion.completion` | `/chat/fusion` multi-model synthesis |
+| `list` | Embeddings and other collection responses |
+| `embedding` | Each entry inside an embeddings `data[]` |
+| `tee.attestation` | TEE attestation endpoint |
+
+Read the `object` field to discriminate the shape. The full field-by-field schemas live on each endpoint's reference page; this page only fixes the common conventions.
+
+A non-streaming chat response, for example, carries `id`, `object: "chat.completion"`, `created` (unix seconds), `model`, a one-element `choices[]`, and `usage`. List responses carry `object: "list"` and a `data[]` array.
+
+## Caching
+
+Inference responses set `Cache-Control: no-store`. The gateway does not cache generated output, and you should not cache it on the client either. This applies to chat, fusion, embeddings, and the other inference surfaces.
+
+## Streaming
+
+When `stream: true` is set on chat, the response is a Server-Sent Events stream of `chat.completion.chunk` objects rather than a single JSON body, terminated by a `[DONE]` sentinel. See the streaming reference for frame format and usage chunks.
+
+## Errors
+
+Error responses use a separate envelope, `{"error": {...}}`, with the same `application/json` content type. See [Error format](/api-reference/overview/error-format).
+
+## Related
+
+- [Error format](/api-reference/overview/error-format)
+- [Request format](/api-reference/overview/request-format)
+- [Headers](/api-reference/overview/headers)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §2, §3, §4, §9 (response shapes, Cache-Control) -->

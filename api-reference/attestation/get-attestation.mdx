@@ -1,0 +1,99 @@
+---
+title: Get attestation
+description: Fetch a baseline-verified TEE attestation for a model, with the full query and response schema and a worked call.
+---
+
+Fetch a TEE attestation for an attestation-capable model.
+
+```
+GET /api/v1/tee/attestation
+```
+
+The gateway resolves the public model to a physical, attestation-capable model, calls the provider's attestation client, runs **baseline** verification, and returns the result. The gateway does baseline verification only; it does not perform full hardware-quote verification (see the scope note below).
+
+## Query parameters
+
+Only these keys are allow-listed; others are ignored.
+
+| Key | Required | Notes |
+|---|---|---|
+| `model` | yes | The public model id to attest. |
+| `nonce` | no | Caller-supplied freshness value. Supply a fresh random nonce for anti-replay. |
+| `signing_address` | no | The signing address you expect the report-data to bind to. |
+| `signing_algo` | no | The signing algorithm you expect. If given, it must match the evidence. |
+| `trust_tier` | no | `""` or `tee`, or `e2e-tee`. Selects the attestation tier. |
+
+Anti-replay is **caller-driven**: you supply a fresh nonce and check that it is echoed. If you omit `nonce`, the report may carry an empty binding, so an omitted nonce does not give you replay protection. See [Verify yourself](/api-reference/attestation/verify-yourself).
+
+## Response
+
+```json
+{
+  "object": "tee.attestation",
+  "model": "MODEL:tee",
+  "routed_model": "near/...",
+  "provider": "near",
+  "provider_model_id": "...",
+  "privacy_tier": "tee",
+  "tee_provider": "near",
+  "attestation_available": true,
+  "attestation_subject": "...",
+  "verified": true,
+  "nonce": "...",
+  "proof_format": "near-attestation-report-v1",
+  "signing_algo": "...",
+  "signing_address": "0x...",
+  "signing_key": "...",
+  "model_public_key": "...",
+  "evidence": { }
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `object` | string | Always `"tee.attestation"`. |
+| `model` | string | The public model id you requested. |
+| `routed_model` | string | Optional. The physical model that produced the attestation. |
+| `provider` | string | The serving provider (e.g. `near`, `phala`). |
+| `provider_model_id` | string | The provider's native model id. |
+| `privacy_tier` | string | The stored tier (`tee` for attested models). |
+| `tee_provider` | string | The TEE provider. |
+| `attestation_available` | boolean | Whether attestation evidence was available. |
+| `attestation_subject` | string | Optional. NEAR uses a domain; Phala uses an appid. |
+| `verified` | boolean | Whether the **baseline** verification passed. |
+| `nonce` | string | Optional. The nonce observed in the evidence; compare to what you sent. |
+| `proof_format` | string | Optional. The provider's proof format. |
+| `signing_algo` | string | Optional. The signing algorithm declared by the evidence. |
+| `signing_address` | string | Optional. The signing address the report-data binds to. |
+| `signing_key` | string | Optional. **Alias** of `model_public_key`. |
+| `model_public_key` | string | Optional. The model public key. |
+| `evidence` | object | The raw provider evidence as JSON, for independent verification. |
+
+**`signing_key` and `model_public_key` are aliases.** Both are populated from the same model public key. They are not two independent keys; do not treat them as a key pair.
+
+`verified: true` means the baseline checks passed, not that the hardware quote was verified end to end. The raw `evidence` is returned precisely so you can run your own hardware verification client-side.
+
+The response is served with `Cache-Control: no-store`. Do not cache attestations; fetch a fresh one with a fresh nonce each time you need assurance.
+
+## Worked call
+
+```bash
+NONCE=$(openssl rand -hex 32)
+curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL:tee&nonce=$NONCE" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+## Scope limit (load-bearing)
+
+The gateway runs the [seven-gate baseline](/api-reference/attestation/seven-gate-reference) only. It does **not** verify Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. Those checks are the caller's responsibility, using the returned `evidence`. Describe results as "attested" or "baseline-verified", never as "trustless" or "fully verified".
+
+## Related
+
+- [Seven-gate reference](/api-reference/attestation/seven-gate-reference)
+- [Verify yourself](/api-reference/attestation/verify-yourself)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+- [Verify-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_tee_attestation.go: apiTEEAttestationHandler, apiTEEAttestationResponse; api_tee_attestation_verification.go: verifyTEEAttestationBaseline; DOCS_SOURCE_OF_TRUTH.md §6 (attestation endpoint, scope limit) -->

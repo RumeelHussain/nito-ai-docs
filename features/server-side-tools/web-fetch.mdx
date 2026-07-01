@@ -1,0 +1,71 @@
+---
+title: Web Fetch
+description: Have the model retrieve and read a specific URL during generation, enabled with the web_fetch request field.
+---
+
+A model only knows what was in its training data, which has a cutoff and never included the specific page you care about right now. Web fetch closes that gap for a single, known page: it retrieves a specific URL and reads its contents into the model's context while it generates an answer. Where [web search](/features/server-side-tools/web-search) starts from a query and goes looking for sources, web fetch starts from a URL you (or the prompt) already have and pulls that one page in.
+
+The everyday case: a user pastes a link and asks "summarize this," "what changed in this release," or "is this article relevant to X." Without fetch, the model can only guess from the URL text. With fetch, it reads the actual page and answers from its real contents. Use web fetch whenever you already know exactly which page the model should read.
+
+## Turning it on
+
+Enable web fetch with the top-level `web_fetch` field, or as a hosted tool entry:
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [
+    { "role": "user", "content": "Summarize https://example.com/changelog for me." }
+  ],
+  "web_fetch": true
+}
+```
+
+```json
+{
+  "tools": [{ "type": "web_fetch" }]
+}
+```
+
+As with the other server-side tools, the request is decoded strictly, so unknown fields are rejected and enabling the same feature twice in conflicting places returns `request body contains duplicate feature fields`. Use one shape.
+
+## When fetch actually runs
+
+The gateway's web pipeline triggers fetch mode when **explicit URLs are present in the prompt**. That is the signal: if the user's message contains one or more URLs, the gateway can retrieve and read them rather than running an open-ended search. If there is no URL to fetch, there is nothing for fetch mode to do.
+
+## Provider routing
+
+Web fetch requires a model whose provider can serve it. Today that means an **OpenRouter, NEAR, or Phala** model. (Note this set differs from web search, which also includes xAI.) Enabling web fetch on a model outside that set is rejected rather than silently ignored.
+
+## Web fetch vs. web search
+
+They solve different problems and you pick based on what you start with.
+
+| | Web fetch | Web search |
+|---|---|---|
+| Starts from | A specific URL | A query |
+| What it does | Retrieves and reads that page | Finds and retrieves relevant sources |
+| Triggered when | Explicit URLs appear in the prompt | The rules engine decides a search would help |
+| Providers | OpenRouter, NEAR, Phala | OpenRouter, xAI, NEAR, Phala |
+
+If your prompt names a page, reach for web fetch. If it asks a question that needs the model to go discover sources, reach for web search. The two are part of the same gateway web pipeline, and `web_search`'s own `retrieval_mode` can also be set to `web_fetch` when you want search-style invocation to behave as a fetch.
+
+## What you get back
+
+Fetch activity shows up in `usage.server_tool_use` as `web_fetch_requests`, so you can see how many pages were retrieved and reconcile it against your bill.
+
+> **TODO (needs SME):** the response-level metadata shape for web fetch (fetched URL, content length, any per-page status). Confirm against the serialized response before publishing literal fields (owner: Backend).
+
+## Common mistakes
+
+- **Expecting a fetch with no URL in the prompt.** Fetch mode triggers on explicit URLs. If there is no link in the message, there is nothing to fetch; use [web search](/features/server-side-tools/web-search) for query-driven retrieval instead.
+- **Enabling it on the wrong provider.** Web fetch needs an OpenRouter, NEAR, or Phala model. xAI serves web search but is not in the fetch set. The request is rejected rather than silently ignored.
+- **Setting the feature twice in conflicting places.** Use either the top-level `web_fetch` field or the `tools` entry, not both, or the request returns `request body contains duplicate feature fields`.
+- **Assuming fetch can reach private or internal pages.** It retrieves public web content; do not rely on it for authenticated or intranet URLs.
+
+## Related
+
+- [Web search](/features/server-side-tools/web-search) for query-driven retrieval.
+- [Server-side tools](/features/server-side-tools) for how hosted tools work in general.
+
+<!-- source: internal/server/api_chat.go (apiChatRequest web_fetch), internal/websearch/* (web pipeline, fetch-on-URL trigger, retrieval_mode), internal/inference/contracts.go (server_tool_use web_fetch_requests), internal/inference/service.go (routeServerTool) -->

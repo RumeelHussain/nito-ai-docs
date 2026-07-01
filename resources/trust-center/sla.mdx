@@ -1,0 +1,36 @@
+---
+title: Service Level Agreement
+description: What a Nito SLA is and will define. No availability or support commitment is established in code, so all numbers here are pending Legal and Security.
+---
+
+A Service Level Agreement (SLA) is the commitment Nito makes about service availability and support: the uptime target, how it is measured, what counts as downtime, the response and resolution expectations for support, and the remedies if a target is missed.
+
+<Warning>
+No SLA, uptime target, or support commitment is established in the codebase these docs are built from. This page describes the structure of an SLA only. It states no numbers, and none should be inferred. Every commitment is owned by Legal and Security.
+</Warning>
+
+## What an SLA is expected to define
+
+Once authored, the SLA is expected to cover:
+
+- **Availability target.** The uptime commitment (for example, a monthly percentage), and the exact method and window used to measure it.
+- **Scope.** Which endpoints and surfaces the target applies to, and which are excluded.
+- **Downtime definition.** What counts as an outage versus expected maintenance or a degraded-but-available state.
+- **Maintenance windows.** Planned maintenance and how it is announced.
+- **Support commitments.** Response and resolution expectations by severity.
+- **Remedies.** Service credits or other remedies when a target is missed, and how to claim them.
+- **Exclusions.** Events outside the commitment (for example, force majeure or issues caused by upstream providers).
+
+## Why no numbers appear here
+
+Availability figures are contractual promises. None exist in code, so publishing any number here would be fabrication. The related engineering facts a future SLA would reference (for example, the provider circuit breaker and per-request timeouts) describe runtime behavior, not a guarantee. They are documented in the platform reference, not asserted as an SLA.
+
+> **TODO (needs SME):** SLA terms, including the availability target, measurement method, support-response commitments, and remedies. No uptime number may be published until this is authored (owner: Legal/Security).
+
+## Related
+
+- [Compliance posture](/privacy/compliance-posture) - notes that no SLA is asserted today.
+- [Security advisories](/resources/trust-center/security-advisories) - how incidents are communicated.
+- [Trust Center](/resources/trust-center) - the index for all artifacts here.
+
+<!-- source: no code source; owner Legal/Security. Per DOCS_SOURCE_OF_TRUTH.md §10 note, SLA/uptime numbers are always-TODO unless confirmed by code. -->

@@ -1,0 +1,49 @@
+---
+title: Claude Code
+description: Route Claude Code through Nito using the OpenAI-compatible path. The Anthropic-native Messages endpoint is not served.
+---
+
+Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default. To use it with Nito, you route it through Nito's **OpenAI-compatible** surface rather than the Anthropic-native one. Nito does not serve the Anthropic Messages API: `POST /v1/messages` returns 404. So any path that expects native Anthropic calls will not work. Use a configuration that points Claude Code at an OpenAI-compatible endpoint.
+
+## Values to enter
+
+Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an Anthropic name like `claude-3-5-sonnet` or an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+> **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all (owner: DevRel).
+
+## The Anthropic path does not apply
+
+The important constraint is the protocol. Nito's compatible surface is OpenAI Chat Completions at `POST /v1/chat/completions`. The Anthropic Messages API and its token-counting endpoint are not implemented and return 404. If Claude Code can only speak the Anthropic-native protocol in your version, it cannot reach Nito. Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
+
+## Finding a model ID
+
+Fetch the catalog and use one of the returned IDs as the model name:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from an interactive CLI. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **Relying on the Anthropic Messages path.** It returns 404. Use the OpenAI-compatible path.
+- **Leaving a Claude or GPT model name in.** Replace it with a Nito catalog ID from `GET /v1/models`.
+- **Dropping `/v1` from the base URL.** The route will not be reached without it.
+
+## Related
+
+- [Editor and tool integrations](/sdks/editor-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Codex](/sdks/editor-integrations/codex)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; anthropic messages 404 routes.go:142-143) -->

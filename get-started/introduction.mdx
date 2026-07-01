@@ -1,0 +1,78 @@
+---
+title: Introduction
+description: Nito is a private multi-LLM inference gateway. One key reaches many models, and you choose how private every single call is.
+---
+
+Nito lets you use modern AI models the way you already do, with one important addition: privacy you can select per request. It is a single gateway that sits in front of many language and embedding models from several providers. You authenticate once, send a familiar request, and get back a familiar response. What changes is that you decide, on each call, how much protection that request gets, from lightweight routing up to execution inside a sealed, attested environment.
+
+If you are not an engineer, here is the short version. Most AI services see your prompts, keep some record of them, and ask you to trust that they will behave. Nito is built so that the most sensitive work can run in a way that is verifiable rather than merely promised, and so that by default the service keeps as little about your requests as possible. If you are an engineer, the short version is: it is an OpenAI- and Anthropic-compatible HTTP API with a privacy dial on every request and an attestation endpoint you can check yourself.
+
+This page defines what Nito is and the principles behind it. The next page, [How Nito Works](/get-started/how-nito-works), turns those principles into the mental model you will use in code. If you only have time for one, read that one.
+
+## The problem Nito solves
+
+Using AI models directly is more work than it looks. Each provider has its own account, its own API key, its own model names, its own request format, and its own stance on whether it keeps your data. Reaching three providers means managing three integrations and three bills, and you still have to take each one's word on privacy. Switching models for cost or quality often means rewriting code.
+
+A gateway removes that friction. A gateway is a single entry point that takes your request, decides which backend should handle it, applies your rules, handles payment, and returns the result in one consistent shape. Nito is that gateway, with one addition most gateways do not have: a privacy control on every single request, backed where it matters by hardware you can verify.
+
+So the value is two-sided. Practically, you integrate once and reach many models. On privacy, you stop having to take a provider's word for it, because the strongest tiers give you a proof you can check yourself.
+
+## What Nito is
+
+Nito is an inference gateway. ("Inference" just means running a model to get an answer: you send input, the model produces output.) The gateway accepts your request, decides which backend model and provider should serve it, enforces your privacy choice, handles billing, and returns the result. You never manage provider accounts, juggle multiple API keys, or wire up each model yourself. One Nito account reaches the whole catalog.
+
+Three things define the product:
+
+- **One key, many models.** A single API key reaches every model Nito offers, across multiple serving providers. You select a model by its ID in the request body. There is no per-provider signup, and you never touch the underlying providers' keys.
+- **Selectable privacy per call.** Privacy is not a plan you buy once. It is a property of each request, chosen by the model ID you send. A routine call and a highly sensitive call can use the same key and differ only in one suffix on the model name.
+- **Verifiable, not just promised.** For the highest tiers, Nito runs inference inside a Trusted Execution Environment (a TEE: a hardware-isolated, sealed compute environment the host cannot peer into) and exposes an attestation you can verify independently. An attestation is a signed statement about the sealed environment that ran your call. The guarantee is checkable in code, not a marketing line.
+
+## The model ID carries two decisions
+
+Here is the single idea the rest of the docs hang on: **the model ID you send carries two decisions at once, which model and how private.** The base part of the ID selects the model. An optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode. `grok-4.3:tee` asks for execution inside a TEE. `grok-4.3:e2e-tee` asks for end-to-end encrypted TEE, the strongest mode. Only `:tee` and `:e2e-tee` are valid suffixes, and there is no separate privacy field in the request body. If you want a different privacy mode, you change the model string and nothing else.
+
+## Principles
+
+**Private by default.** The default posture is metadata-only retention. Prompts, completions, reasoning, tool calls, and uploaded file contents are treated as request-local and are not persisted by the gateway. Telemetry is restricted to a safe allowlist of non-sensitive attributes.
+
+**Privacy is selectable, not all-or-nothing.** Not every call needs the strongest protection, and the strongest protection has real trade-offs. End-to-end encrypted TEE does not stream, so a chat UI built on it cannot show tokens as they arrive, and TEE-capable backends are fewer, which can mean higher latency or lower availability. Forcing every request through the strongest mode would make routine calls slower and more fragile for no benefit. Nito lets you match the protection to the sensitivity of each call, so you pay the cost of strong privacy only where the request actually needs it.
+
+**Verifiability comes from attestation.** When Nito says a call ran inside a TEE, you can ask for an attestation and check it yourself. The words we use are "attested" and "verifiable." We do not call inference "trustless," because the assurance comes from hardware attestation, not from a blockchain. Note also that the gateway's attestation check is a baseline verifier: it confirms field stability and binding (that the proof is bound to the address and nonce you supplied), and it explicitly does not verify low-level hardware quotes or certificate chains. Full hardware assurance is the client "verify-yourself" path. See the [Privacy overview](/privacy/overview).
+
+**Compatibility first.** Nito speaks the request and response shapes you already use. The fastest integration is usually a one-line base-URL change against the OpenAI or Anthropic SDK.
+
+**Code is the contract.** The behavior documented here is the behavior implemented in the gateway. Where a number or limit depends on your deployment or is still being finalized, this documentation marks it rather than guessing.
+
+## Who it is for
+
+- Teams who want OpenAI- or Anthropic-style APIs without sending sensitive prompts to a provider that retains them.
+- Builders in regulated or privacy-sensitive domains who need a verifiable privacy story, not a promise.
+- Anyone who wants access to many models through one account and one bill.
+
+## What Nito does not do
+
+Knowing the boundaries prevents wrong assumptions:
+
+- **It does not execute your own custom function tools.** If you define a function tool, the model can ask to call it, but your code runs it and sends the result back, exactly like the OpenAI tool-calling loop. Nito routes the conversation; it does not run your functions.
+- **It is not a single model.** There is no "Nito model." You always name a model from the catalog.
+- **It does not keep your conversation history by default.** Where a chat history exists (for example in a browser app), it is stored on the client side.
+
+## Where to go next
+
+- New to the model? Read **[How Nito Works](/get-started/how-nito-works)**.
+- Want a response right now? Jump to the **[60-second quickstart](/get-started/quickstart-60-seconds)**.
+- Care most about the privacy guarantees? Start with the **[Privacy overview](/privacy/overview)**.
+
+## FAQ
+
+**Is Nito a model?** No. Nito is a gateway in front of many models from several providers. You pick the model per request.
+
+**Do I need a new SDK?** No. You can point the OpenAI or Anthropic SDK at Nito by changing the base URL. A native SDK exists and is documented separately.
+
+**Does every call run in a TEE?** No, and that is deliberate. TEE execution is the highest tier, selected per call with the `:tee` or `:e2e-tee` suffix. Most calls use lighter privacy modes. See [How Nito Works](/get-started/how-nito-works).
+
+**What does Nito store about my prompts?** By default, metadata only. Prompt and completion contents are not persisted by the gateway. See the [Privacy overview](/privacy/overview) for the precise contract.
+
+**What is "Powered by Z"?** Nito runs on an engine called Z. That relationship is described in [Powered by Z](/resources/powered-by-z). Everywhere else, the product is simply Nito.
+
+<!-- source: internal/models/models.go (PrivacyTier*, PublicPrivacyMode*, ParseLogicalModelIDForPublicMode), internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/standards/privacy-and-retention.md, docs/architecture/tee-attestation.md, internal/observability/attrs.go (SafeAttrs) -->

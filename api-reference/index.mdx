@@ -1,0 +1,54 @@
+---
+title: API Reference
+description: The Nito HTTP API surface, grouped by area, plus the cross-cutting conventions every endpoint shares.
+---
+
+The Nito API is an HTTP/JSON API. Every endpoint is reachable under two version prefixes: the OpenAI-compatible `/v1/...` and the first-party `/api/v1/...`. Authenticate with a `z_sk_` organization key sent as `Authorization: Bearer <key>`.
+
+Start with the [Overview](#overview-conventions) pages: they cover the base URL, auth, headers, request and response shapes, and errors that apply across the whole API. Then move to the per-area references below.
+
+## Overview (conventions)
+
+- [Base URL](/api-reference/overview/base-url)
+- [Authentication](/api-reference/overview/authentication)
+- [Headers](/api-reference/overview/headers)
+- [Request IDs](/api-reference/overview/request-ids)
+- [Pagination](/api-reference/overview/pagination)
+- [Request format](/api-reference/overview/request-format)
+- [Response format](/api-reference/overview/response-format)
+- [Error format](/api-reference/overview/error-format)
+- [OpenAPI spec](/api-reference/overview/openapi-spec)
+
+## Endpoint groups
+
+| Group | What it covers | Status |
+|---|---|---|
+| Chat & inference | `/chat/completions`, `/chat/fusion`, streaming, reasoning, tools | Implemented |
+| Embeddings | `/embeddings` | Implemented |
+| Images | `/images/generations` (FAL-backed) | Implemented |
+| Attachments & parsing | `/attachments/parse`, `/augment/text-parser` | Implemented |
+| Models | `/models`, `/model-groups` | Implemented |
+| TEE attestation | `/tee/attestation` | Implemented |
+| API keys | org-scoped create / list / revoke | Implemented |
+| Orgs & members | `/orgs` and nested members, invitations, balance | Implemented |
+| Billing | checkout, portal, x402 top-up | Implemented |
+| Account & auth | session, CSRF, account security, OAuth | Implemented |
+
+### Not implemented yet
+
+These surfaces are mounted but return `404`, or have no route at all, as of the analyzed build:
+
+- `/v1/responses` (and lifecycle routes)
+- `/v1/messages`, `/v1/messages/count_tokens`
+- `/v1/files`, `/v1/files/*`
+- `/jobs/*`
+- Audio and video input or generation; image edits and variations
+
+Do not build against these. They are tracked for a future pass.
+
+## Related
+
+- [Authentication (Get started)](/get-started/authentication)
+- [Errors & rate limits](/api-reference/errors-and-rate-limits)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1, §9 -->

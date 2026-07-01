@@ -1,0 +1,31 @@
+---
+title: Pagination
+description: Nito uses simple limit and time-window query parameters; there is no cursor pagination.
+---
+
+Nito pagination is intentionally minimal. List endpoints take a `limit` query parameter, and usage endpoints take a time window. There is no cursor-based pagination anywhere in the API.
+
+## What exists
+
+| Parameter | Where | Default | Bounds |
+|---|---|---|---|
+| `limit` | List endpoints (for example notifications) | 20 (notifications) | per-endpoint |
+| `window_days` | Usage endpoints | 30 | max 365 |
+
+`limit` caps how many items a list returns. `window_days` selects a trailing time window for usage data, defaulting to the last 30 days and accepting up to 365.
+
+## What does not exist
+
+There is no cursor pagination. The API does not return `next_cursor`, `has_more`, page tokens, or `Link` headers, and there is no `offset` or page-number scheme. List responses return their items directly, bounded by `limit`.
+
+If you need more results than a single `limit` returns, raise `limit` (within the endpoint's bound) rather than paging. For usage, widen `window_days` instead of stepping through pages.
+
+This is a deliberate design choice for the current API surface, not an omission to work around. Do not build cursor-following logic against these endpoints.
+
+## Related
+
+- [Response format](/api-reference/overview/response-format)
+- [Request format](/api-reference/overview/request-format)
+- [API Reference](/api-reference)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (Pagination) -->

@@ -1,0 +1,66 @@
+---
+title: LiteLLM
+description: Use Nito in LiteLLM by routing through its OpenAI-compatible path with Nito's base URL, a Nito key, and a Nito catalog model ID.
+---
+
+LiteLLM gives one calling interface across many providers, and it can target any OpenAI-compatible endpoint. Nito has no LiteLLM-specific provider; you route through LiteLLM's OpenAI-compatible path and point it at Nito, because Nito exposes an OpenAI-compatible API. Your calling code stays the same whether you use the Python SDK or the proxy.
+
+## The principle
+
+Supply LiteLLM with three values:
+
+- the Nito base URL ending in `/v1`,
+- a Nito API key (it starts with `z_sk_`),
+- a Nito catalog model ID from `GET /v1/models`.
+
+LiteLLM forwards the request in OpenAI Chat Completions shape, which is exactly what Nito serves.
+
+## Representative configuration
+
+```python
+from litellm import completion
+
+resp = completion(
+    model="openai/grok-4.3",                   # OpenAI-compatible route; grok-4.3 is a Nito catalog ID
+    api_key="z_sk_your_key_here",              # your Nito API key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    messages=[{"role": "user", "content": "Say hello in one short sentence."}],
+)
+
+print(resp.choices[0].message.content)
+```
+
+The `openai/` prefix tells LiteLLM to use its OpenAI-compatible client; the part after it, `grok-4.3`, is the Nito catalog ID sent to the gateway. If you run the LiteLLM proxy, set the same base URL, key, and model on the model entry in your proxy config.
+
+> **TODO (needs SME):** verify the exact current configuration for LiteLLM (SDK and proxy) against its official docs (owner: DevRel)
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Choosing a model and privacy
+
+Use a Nito catalog ID after the `openai/` route prefix, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+
+```python
+model="openai/grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note `:e2e-tee` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Do not use the Anthropic route
+
+If you call LiteLLM with an `anthropic/` route, it targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Route through the OpenAI-compatible path shown above to reach Nito.
+
+## Common mistakes
+
+- **Using a real OpenAI model name.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
+- **Forgetting `/v1` on the base URL.** LiteLLM's OpenAI client appends `/chat/completions` itself, so the base must end in `/v1`.
+- **Choosing the `anthropic/` route.** Nito serves Chat Completions, not Messages.
+
+## Related
+
+- [Framework integrations overview](/sdks/framework-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) -->

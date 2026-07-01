@@ -1,0 +1,54 @@
+---
+title: Stream termination
+description: How a Nito streaming chat completion ends. The [DONE] sentinel and the optional trailing usage chunk.
+---
+
+A streaming chat completion always ends with a literal sentinel. When you request usage, one extra chunk precedes it. This page covers both.
+
+## The [DONE] sentinel
+
+The stream ends with a literal frame:
+
+```
+data: [DONE]\n\n
+```
+
+`[DONE]` is **not JSON**. Do not attempt to parse it; treat it as the end-of-stream marker and stop reading. Every successful stream ends this way, including streams that carried a mid-stream error chunk. See [Error events](/api-reference/streaming-format/error-events).
+
+## The trailing usage chunk
+
+By default, streaming chunks do not include token usage. To get it, set `stream_options.include_usage: true` on the request. The gateway then sends one extra chunk **just before `[DONE]`** with an empty `choices` array and a populated `usage` object:
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion.chunk",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "choices": [],
+  "usage": {
+    "prompt_tokens": 24,
+    "completion_tokens": 17,
+    "total_tokens": 41
+  }
+}
+```
+
+Because `choices` is empty on this chunk, a reader that indexes `choices[0]` unconditionally will fail here. Check for an empty `choices` array and read `usage` instead. The usage fields are the same ones documented for the [non-streaming response](/api-reference/chat-and-text/chat-completions).
+
+## Ordering
+
+The end of a stream is therefore:
+
+1. The terminal content chunk (empty `delta`, non-null `finish_reason`).
+2. The usage chunk, only if `stream_options.include_usage` was set.
+3. `data: [DONE]`.
+
+## Related
+
+- [SSE transport](/api-reference/streaming-format/server-sent-events)
+- [Delta format](/api-reference/streaming-format/delta-format)
+- [Error events](/api-reference/streaming-format/error-events)
+- [Chat Completions API](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: internal/server/sse.go (writeSSEEvent, [DONE]); internal/server/api_chat.go (apiChatChunk usage, stream_options.include_usage, streamAPIChatCompletion); DOCS_SOURCE_OF_TRUTH.md §3 -->

@@ -1,0 +1,80 @@
+---
+title: Authentication
+description: How to get a Nito key, the key types and their prefixes, and how to authenticate every request.
+---
+
+Every Nito request is authenticated with a bearer token. A bearer token is a secret string that proves who you are: whoever holds it ("bears" it) is treated as the owner, the same way a movie ticket admits whoever carries it rather than a named person. That property makes the token convenient and also makes it dangerous if it leaks, which is why most of this page is about getting, sending, and protecting keys correctly. This page explains how to get a key, the different key types you may encounter, and how authentication works at the wire level so you can recognize and fix auth errors quickly.
+
+## Why keys belong to an organization
+
+In Nito, a key belongs to an organization, not to an individual person. An organization is the account that owns billing and keys. This matters because it explains the behavior you will see: a key grants access to its organization's inference and its organization's balance, every call that key makes is billed to that org, and who is allowed to create or revoke keys is decided by each member's role in the org (owner, admin, or member). If you think "the key is the org's spending credential," the rest follows.
+
+## Getting a key
+
+API keys are created inside an organization from your Nito dashboard. When you create a key you see the secret value once. Store it somewhere safe immediately, because the gateway keeps only a hash of the key and cannot show the original again. (A hash is a one-way fingerprint: the gateway can check a token you send against the stored fingerprint, but it cannot run the fingerprint backwards to recover the token.)
+
+To create or manage keys programmatically, see the [API Keys reference](/api-reference/api-keys). Creating a key requires an organization role of owner or admin.
+
+## Authenticating a request
+
+Send the key as a bearer token in the `Authorization` header on every request:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+Reading that header left to right: `Authorization` is the standard HTTP header for credentials, `Bearer` is the scheme (it tells the server "what follows is a bearer token"), and `z_sk_your_key_here` is your key. There is no query-parameter or cookie auth for the inference API. The `Authorization: Bearer <key>` header is the one way in. A missing, malformed, revoked, or expired key returns `401 Unauthorized`.
+
+Authentication is the first thing the gateway does with your request. It looks up the key, resolves it to the owning organization, and rejects the call before any model work happens if the key does not check out. This same step is where rate limits are enforced: if you are over a limit, you get `429` with a `Retry-After` header telling you how many seconds to wait.
+
+## Key types and prefixes
+
+Nito uses a small set of token types, each with a distinct prefix so you can tell them apart at a glance. The prefix is part of the token itself, so a quick look at the first characters tells you what kind of credential you are holding:
+
+| Prefix | Type | Used for |
+|---|---|---|
+| `z_sk_` | Organization API key | Server-to-server inference and account calls. This is the key you use for the HTTP API. |
+| `nito_cli_` | CLI access token | Current token issued by the OAuth device flow for the `z` CLI. |
+| `z_cli_` | Legacy CLI token | Older CLI tokens, still accepted. |
+| `z_mcp_` | MCP access token | Issued by OAuth for the MCP transport. |
+
+For the HTTP API you almost always want a `z_sk_` organization API key. The CLI and MCP token types are issued by their own OAuth flows and are documented with those tools. Note what is not on this list: there is no `sk-` prefix and no bare `z_` token. If a credential does not start with one of the prefixes above, it is not a Nito token.
+
+<Note>
+Tokens are stored as keyed hashes, never in plaintext. Specifically, the gateway stores `HMAC-SHA256(token, SESSION_SECRET)`, a keyed fingerprint, and never the raw token. It can verify a token you send but cannot retrieve the original. If you lose a key, you cannot recover it: revoke it and create a new one.
+</Note>
+
+## Accounts, organizations, and the wallet option
+
+A Nito account can sign in by email and password, by social login (Google or X), or by linking a crypto wallet. Wallet sign-in uses a challenge-and-signature flow rather than a password: the server issues a challenge, your wallet signs it, and the signature proves you control the address. Whichever sign-in you use, inference is billed to an organization, and API keys are minted within that organization. Team accounts can invite members with owner, admin, or member roles. See [Orgs and members](/api-reference/orgs-and-members) and [Account security](/api-reference/account-security).
+
+## What a key can and cannot do
+
+The permission model here is intentionally small, so it is worth stating plainly what a key controls and what it does not:
+
+- A `z_sk_` key grants full organization-level access to inference and balance. There is no per-key scope or permission system: a key either belongs to the org or it does not. You cannot mint a "read-only" or "inference-only" key.
+- A key can carry a spend cap (daily, monthly, or overall), tracked in nanos (billionths of a credit, the unit Nito uses for precise accounting). When the cap is reached the key is automatically expired. This is the main way to bound what a single key can spend.
+- To restrict who can manage keys, use organization roles. Only owners and admins can create or revoke keys.
+
+Because keys are not individually scoped, the practical pattern for limiting blast radius is to issue a separate key per workload and give each one its own spend cap. If one leaks or misbehaves, you revoke just that key and cap the damage.
+
+## Common mistakes
+
+- **401 Unauthorized.** The key is missing, mistyped, revoked, expired, or not sent as `Authorization: Bearer`. Check the prefix is `z_sk_` and that there is a single space after `Bearer`.
+- **Using a CLI or MCP token for the HTTP API.** The `nito_cli_`, `z_cli_`, and `z_mcp_` token types are for their own surfaces. Use a `z_sk_` key for the API.
+- **Committing a key to source control.** Keys are full-access credentials. Store them in environment variables or a secrets manager, and rotate by revoking and recreating.
+- **Expecting per-key permissions.** Keys are not scoped. To limit blast radius, use spend caps and separate keys per workload.
+- **Expecting `X-RateLimit-*` headers on a 429.** Only `Retry-After` is emitted. Read that header to know how long to back off.
+
+## Related
+
+- [API Keys reference](/api-reference/api-keys)
+- [Per-key rate limits](/api-reference/api-keys/rate-limits)
+- [Secure API key handling](/resources/best-practices/secure-api-key-handling)
+
+<!-- source: internal/auth/tokens.go (APIKeyTokenPrefix z_sk_, OAuthCLITokenPrefix nito_cli_, LegacyOAuthCLITokenPrefix z_cli_, OAuthMCPTokenPrefix z_mcp_, TokenHash HMAC-SHA256), internal/auth/api_keys.go (CreateAPIKey, spend caps nanos, owner/admin), internal/server/api_auth.go (requireAPIAuth, bearerToken), internal/server/rate_limit.go (Retry-After only) -->

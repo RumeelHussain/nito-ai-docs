@@ -1,0 +1,71 @@
+---
+title: Quickstart, 60 seconds
+description: The fastest path to a first response from Nito. One key, one request, no SDK.
+---
+
+This is the shortest path from nothing to a working response. You need an API key and a terminal. No SDK, no project setup. If the call returns a message, your key works and you are ready to build.
+
+## 1. Set your key
+
+Get an API key from your Nito dashboard (see [Authentication](/get-started/authentication) if you do not have one yet). It looks like `z_sk_...`. Put it in your shell:
+
+```bash
+export NITO_API_KEY="z_sk_your_key_here"
+export NITO_BASE_URL="https://YOUR-NITO-BASE-URL"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra). The code default is a local development address.
+
+## 2. Send one request
+
+```bash
+curl "$NITO_BASE_URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      { "role": "user", "content": "Say hello in one short sentence." }
+    ]
+  }'
+```
+
+The `model` value above is an example. Run `GET /v1/models` to see the live catalog and pick an ID that fits your use case.
+
+## 3. Read the response
+
+You get back a standard chat completion object:
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "Hello, good to meet you." },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 12, "completion_tokens": 7, "total_tokens": 19 }
+}
+```
+
+Three fields carry the result. `choices[0].message.content` holds the assistant's text. `finish_reason` of `stop` means the model finished on its own (other values: `length`, `tool_calls`, `error`). `usage` reports the tokens billed. That is a complete, successful call.
+
+## Common mistakes
+
+- **401 Unauthorized.** The key is missing, mistyped, or not sent as `Authorization: Bearer <key>`. API keys start with `z_sk_`.
+- **400 with an error about the model.** The `model` ID is not in your catalog. Call `GET /v1/models` and copy an exact ID.
+- **402 Payment Required.** The account has no funded balance and the model is not free-tier eligible. Add credits, or use a free-tier model. See [Check usage and credits](/get-started/check-usage-and-credits).
+- **Using the wrong base URL.** The OpenAI-compatible path is `/v1/chat/completions`. The first-party path is `/api/v1/chat/completions`. Both work and share the same behavior.
+
+## Next
+
+- Walk through the same call in detail: **[Make your first request](/get-started/make-your-first-request)**.
+- Keep your existing code: **[OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)** or **[Anthropic SDK drop-in](/get-started/quickstart-anthropic-sdk)**.
+- Turn on streaming: **[Stream your first response](/get-started/stream-your-first-response)**.
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions /v1/chat/completions), internal/server/api_chat.go (apiChatCompletionsHandler, apiChatResponse, apiChatChoice, apiUsage), internal/inference/contracts.go (FinishReason) -->

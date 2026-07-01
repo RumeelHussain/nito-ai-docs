@@ -1,0 +1,71 @@
+---
+title: OpenAI drop-in, compatibility notes
+description: What carries over from the OpenAI SDK to Nito, what differs, and which surfaces return 404.
+---
+
+The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatible Chat Completions shape. Most of your code is unaffected. A handful of things differ, and a few surfaces are not served at all. This page is the honest, complete list so you never wire up against something that returns `404` or quietly behaves differently.
+
+## What carries over unchanged
+
+- **The Chat Completions request shape.** `messages`, `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `stream`, `tools`, `tool_choice`, and `user` are all accepted.
+- **The response shape.** A standard `chat.completion` object with `choices`, `message`, `finish_reason`, and `usage`.
+- **Streaming.** Set `stream=True` (Python) or `stream: true` (TypeScript) and iterate Server-Sent Event chunks, exactly as with OpenAI.
+- **Tool calling.** Declare function tools; the model returns `tool_calls`, your code runs them, you return a `tool` message. The gateway routes the conversation but does not execute your function tools.
+- **Prompt caching.** `prompt_cache_key` is supported (the model must support it); cache hits show up in `usage`.
+- **Reasoning.** Supported on capable models, with output in `reasoning_details` and a `reasoning_tokens` count in `usage`.
+- **Embeddings, image generation, and model listing** through the matching SDK methods.
+
+## What differs from OpenAI
+
+- **`system_fingerprint` is always `null`.** It is serialized for compatibility but never populated. Do not branch on it.
+- **There is always exactly one choice.** Nito does not return `n > 1` alternatives. Read `choices[0]`.
+- **The error envelope has no `type` field.** Errors are `{"error": {"message", "code", "param"}}`. The error family lives in `code`, not in a `type` field as some OpenAI tooling expects.
+- **The model ID carries privacy.** Append `:tee` or `:e2e-tee` to raise the tier. There is no separate privacy parameter, and only those two suffixes are valid. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- **`:e2e-tee` does not stream.** End-to-end TEE mode is non-streaming and needs extra headers, so it is best driven by hand rather than through the SDK. Use `:tee` if you need streaming with attestation.
+- **Strict JSON decoding.** Unknown fields are rejected with a `400` rather than silently ignored, so a field pasted from another provider's API will surface an error immediately.
+- **Rate-limit headers.** On a `429`, Nito sends `Retry-After`. It does not emit `X-RateLimit-*` headers. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
+- **Model names.** OpenAI names are not Nito IDs. See [model mapping](/sdks/openai-drop-in/model-mapping).
+
+## What is not served (returns 404)
+
+- **The Responses API** (`/v1/responses`). The SDK's `client.responses.create(...)` will hit `404`. Use Chat Completions, which is the compatible surface.
+- **The Files API** (`/v1/files`). Not implemented. For document input, send the file inline to a capable model or use the file-parser endpoint; see [Multimodal](/features/multimodal).
+
+## Inputs the chat surface rejects
+
+Even on Chat Completions, some content types are rejected rather than processed:
+
+- **Audio and video input** are not supported and are rejected.
+- **`file_id` content references** are rejected. Supply file content inline (file data or a file URL) instead.
+- **Structured outputs / JSON-schema enforcement** is not exposed. The public chat API does not populate a response-format schema and performs no schema validation, so do not rely on `response_format` for guaranteed JSON.
+
+Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported. See [Multimodal](/features/multimodal) for the limits.
+
+## A quick compatibility table
+
+| Capability | Status on Nito |
+|---|---|
+| Chat Completions | Supported |
+| Streaming | Supported (not with `:e2e-tee`) |
+| Tool calling (function tools) | Supported (you execute them) |
+| Prompt caching | Supported (passthrough) |
+| Reasoning | Supported |
+| Embeddings | Supported |
+| Image generation | Supported |
+| `GET /v1/models` | Supported |
+| Responses API | Not served (404) |
+| Files API | Not served (404) |
+| Audio / video input | Rejected |
+| Structured outputs (schema enforced) | Not exposed |
+
+## Related
+
+- [SDKs overview](/sdks)
+- [Base URL swap](/sdks/openai-drop-in/base-url-swap)
+- [Model mapping](/sdks/openai-drop-in/model-mapping)
+- [Chat completions feature](/features/chat-completions)
+- [Streaming](/features/streaming)
+- [Error format](/api-reference/overview/error-format)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §2 (request fields, strict JSON, rejected inputs, file_id rejected), §3 (streaming), §1 (/v1/responses, /v1/files 404), §5 (model ID suffixes), §7 (structured outputs not exposed), §8 (Retry-After only), §9 (no type field, system_fingerprint null), docs/get-started/quickstart-openai-sdk.mdx -->

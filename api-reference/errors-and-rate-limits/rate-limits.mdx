@@ -1,0 +1,59 @@
+---
+title: Rate limits
+description: Nito rate limits are policy-table defaults across scopes, signalled only with Retry-After on 429.
+---
+
+Nito enforces rate limits from a policy table. The limiter has scopes such as org, API key, and session; the values below are global group defaults applied to a scope, not values stored per individual key.
+
+When you exceed a limit, the gateway returns `429` with a `Retry-After` header. There are **no `X-RateLimit-*` headers**.
+
+## Selected defaults
+
+These are the published defaults for the listed limiter groups. Values are deployment-configurable, so a given environment may differ.
+
+### `inference_generate` (chat, fusion, image, embeddings generation)
+
+| Scope | Limit |
+|---|---|
+| org | 600 / min |
+| api_key | 120 / min |
+| session | 120 / min |
+| org (in-flight) | 25 concurrent |
+| api_key (in-flight) | 10 concurrent |
+
+### Other groups
+
+| Group | Scope | Limit |
+|---|---|---|
+| `inference_count` | api_key | 300 / min |
+| `model_list` | api_key | 600 / min |
+
+> **TODO (needs SME):** the exact published limits per deployment, if they differ from these defaults (owner: Backend/Infra).
+
+## Per-key vs global
+
+Per-key limit values are global group defaults, not stored per key. Two keys in the same group share the same default rate; the table does not hold a custom number for each key.
+
+## In-flight (concurrency) limits
+
+`inference_generate` also bounds concurrent in-flight requests: 25 per org and 10 per API key. Exceeding the concurrency bound is rate-limited the same way (`429` + `Retry-After`), independent of the per-minute rate.
+
+## What you get on a 429
+
+- HTTP status `429`.
+- `Retry-After` header with the seconds to wait.
+- The error envelope with `code` either `rate_limited` or `insufficient_quota`. See [Status mapping](/api-reference/errors-and-rate-limits/status-mapping).
+
+No `X-RateLimit-Limit`, `X-RateLimit-Remaining`, or `X-RateLimit-Reset` headers are emitted, so do not depend on them.
+
+## Fail-open vs fail-closed
+
+If the limiter's own infrastructure errors, most groups fail open (the request proceeds). A fail-closed set, including `inference_generate`, `inference_count`, auth, OAuth, MCP, and org-admin groups, rejects requests when the limiter cannot be consulted.
+
+## Related
+
+- [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
+- [Backoff](/api-reference/errors-and-rate-limits/backoff)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §8 (internal/ratelimit: policy-table defaults, inference_generate org 600 / api_key 120 / session 120 / in-flight org 25 / api_key 10; inference_count api_key 300; model_list api_key 600; Retry-After only; fail-open/closed set) -->

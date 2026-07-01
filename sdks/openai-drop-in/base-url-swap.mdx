@@ -1,0 +1,108 @@
+---
+title: OpenAI drop-in, base URL swap
+description: Point the official OpenAI SDK at Nito by changing three things, the base URL, the API key, and the model ID.
+---
+
+If your code already uses the OpenAI SDK, you reach Nito by changing three things and nothing else: the base URL, the API key, and the model ID. The request shape, the response shape, streaming, and tool calls all stay the same, because Nito serves the OpenAI-compatible Chat Completions surface.
+
+## The three changes
+
+1. **Base URL** point it at your Nito base plus `/v1`.
+2. **API key** use a Nito `z_sk_` key, not an OpenAI key.
+3. **Model ID** use a Nito catalog ID from `GET /v1/models`, not an OpenAI name like `gpt-4o`.
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="z_sk_your_key_here",              # your Nito API key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",                          # a Nito catalog ID, not an OpenAI name
+    messages=[
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "z_sk_your_key_here",              // your Nito API key
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // Nito's OpenAI-compatible base URL
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",                         // a Nito catalog ID
+  messages: [
+    { role: "user", content: "Say hello in one short sentence." },
+  ],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The example model `grok-4.3` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
+
+## Why the base URL must end in `/v1`
+
+The OpenAI SDK appends the operation path itself. When you call `client.chat.completions.create(...)`, the SDK sends a `POST` to `<base_url>/chat/completions`. So the base URL has to end at the version segment, `/v1`, and not include the operation. If you accidentally set the base URL to `.../v1/chat/completions`, the SDK will build a doubled path and the request will fail.
+
+## Which surfaces work this way
+
+The same base URL swap covers every OpenAI-compatible surface Nito serves:
+
+| SDK call | HTTP surface |
+|---|---|
+| `client.chat.completions.create(...)` | `POST /v1/chat/completions` |
+| `client.embeddings.create(...)` | `POST /v1/embeddings` |
+| `client.images.generate(...)` | `POST /v1/images/generations` |
+| `client.models.list()` | `GET /v1/models` |
+
+One surface is intentionally not served: the OpenAI **Responses API** (`client.responses.create(...)`, `POST /v1/responses`) returns `404`. Chat Completions is the compatible text surface. See the [compatibility notes](/sdks/openai-drop-in/compatibility-notes) for the full list of what differs.
+
+## Reading the response
+
+The SDK returns a standard `chat.completion` object. `resp.choices[0].message.content` is the assistant's text, and `resp.usage` reports the tokens billed. There is always exactly one choice. `system_fingerprint` is serialized but always `null`, so do not build logic on it.
+
+Streaming works exactly as in the OpenAI SDK: pass `stream=True` (Python) or `stream: true` (TypeScript) and iterate the chunks. Tool calling, prompt caching (`prompt_cache_key`), and reasoning are all supported on this surface.
+
+## Selecting privacy
+
+Privacy is chosen by the model ID, so you opt into a stronger tier by adding a suffix, with no other code change:
+
+```python
+# TEE-backed execution with an attestation you can verify
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Use `GET /v1/models` to find models that support attestation. Note that `:e2e-tee` does not stream and needs extra headers, so it is best done by hand rather than through the SDK. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. See [model mapping](/sdks/openai-drop-in/model-mapping).
+- **Forgetting `/v1` on the base URL.** The SDK appends the operation path, so the base URL must end in `/v1`.
+- **Using an OpenAI `sk-` key.** Nito keys are prefixed `z_sk_`.
+- **Expecting the Responses API.** `/v1/responses` returns `404`. Use Chat Completions.
+
+## Related
+
+- [SDKs overview](/sdks)
+- [OpenAI SDK quickstart](/get-started/quickstart-openai-sdk)
+- [Model mapping](/sdks/openai-drop-in/model-mapping)
+- [Compatibility notes](/sdks/openai-drop-in/compatibility-notes)
+- [Chat completions feature](/features/chat-completions)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §1 (route table: /v1/chat/completions, /v1/embeddings, /v1/images/generations, /v1/models; /v1/responses 404), §5 (model IDs, :tee/:e2e-tee suffix), §8 (z_sk_ prefix), §9 (system_fingerprint null), docs/get-started/quickstart-openai-sdk.mdx -->

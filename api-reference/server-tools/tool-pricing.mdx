@@ -1,0 +1,29 @@
+---
+title: Tool pricing
+description: How server-side tools are billed in addition to model tokens, and the pseudo-models used for metering.
+---
+
+Server-side tools are billed in addition to the model's own token usage. Each tool meters separately, so a request that uses web search costs the model tokens plus the search units.
+
+## How tools are metered
+
+| Tool | Billed as |
+|---|---|
+| [Web search](/api-reference/server-tools/web-search) | The pseudo-models `brave/llm_context` and `brave/web_search`. |
+| [Web fetch](/api-reference/server-tools/web-fetch) | Web-fetch units, in addition to model tokens. |
+| [File parser](/api-reference/server-tools/file-parser) | `z-protocol/document-parse`, one unit per parse request. |
+| [Code interpreter](/api-reference/server-tools/code-interpreter) | Upstream xAI usage, in addition to model tokens. |
+
+Web search and web fetch surface their counts in the chat response under `usage.server_tool_use` (`web_search_requests`, `web_search_results`, `web_fetch_requests`), so you can reconcile usage against billing.
+
+## Unit prices
+
+> **TODO (needs SME):** server-side tool unit prices (owner: Finance)
+
+## Related
+
+- [Web search](/api-reference/server-tools/web-search)
+- [Web fetch](/api-reference/server-tools/web-fetch)
+- [File parser](/api-reference/server-tools/file-parser)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §7 (billed as brave/llm_context & brave/web_search; z-protocol/document-parse), §2 (usage.server_tool_use) -->

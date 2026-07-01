@@ -1,0 +1,158 @@
+---
+title: Embeddings
+description: Turn text into vectors for search and retrieval with the Nito embeddings endpoint, including request and response shapes and examples.
+---
+
+An embedding turns a piece of text into a vector: a list of numbers that captures the text's meaning. Texts that mean similar things land near each other in that number space, and texts that mean different things land far apart. That single property is what powers semantic search, retrieval-augmented generation (RAG), clustering, classification, and deduplication. This page covers what embeddings are for, the Nito embeddings endpoint, every request field, the response shape, validation limits, and worked examples in curl and Python.
+
+## What an embedding is for
+
+A chat model answers questions. An embedding model does something narrower and more reusable: it converts text into a fixed-length vector you can compare with arithmetic. The most common use is **search over your own data**:
+
+1. Take your documents, split them into chunks, and embed each chunk once. Store the vectors.
+2. When a user asks a question, embed the question.
+3. Find the stored vectors closest to the question's vector (by cosine similarity or dot product). Those are your most relevant chunks.
+4. Feed those chunks to a chat model as context so it answers from your data. This is RAG.
+
+The value is that "closeness in meaning" becomes "closeness of vectors," which a database can compute quickly. You embed your corpus once and reuse the vectors for every query. Embeddings are also how you cluster similar items, detect near-duplicates, and build classifiers, but search and RAG are the bread and butter.
+
+## The endpoint
+
+Embeddings have a dedicated endpoint with two paths that share a handler:
+
+```
+POST /v1/embeddings
+POST /api/v1/embeddings
+```
+
+The bare `/v1` path is the OpenAI-compatible alias; `/api/v1` is the first-party one. They behave identically.
+
+## Request fields
+
+| Field | Required | Notes |
+|---|---|---|
+| `input` | yes | A string, or an array of strings. Each array entry is embedded separately. |
+| `model` | no | Defaults to a Qwen embedding model if omitted. |
+| `encoding_format` | no | `""` or `float` only. See the warning below. |
+| `dimensions` | no | Requested output vector length, bounded 1 to 3072. |
+| `user` | no | An opaque end-user identifier, passed through. |
+
+A few details that matter:
+
+- **`input` is text, not tokens.** You pass a string or an array of strings. Arrays of token IDs are rejected; this endpoint embeds text, not pre-tokenized integers.
+- **`model` is optional.** Omit it and you get the default embedding model, a Qwen model. As always, the catalog is discovered at runtime, so prefer selecting an embedding model from `GET /v1/models` over hard-coding a name.
+- **`dimensions` is a request, bounded 1 to 3072.** Where a model supports it, this asks for a shorter or specific-length vector. See the note on dimensions below for an important caveat.
+
+<Warning>
+`encoding_format` accepts only `""` (empty, the default) or `float`. The `base64` encoding is **not supported**. If you are porting code that requests base64-encoded embeddings, change it to request float arrays; the vectors come back as plain JSON arrays of numbers.
+</Warning>
+
+## Validation limits
+
+The endpoint enforces two hard limits on `input`:
+
+| Limit | Value |
+|---|---|
+| Maximum number of inputs | 96 |
+| Maximum size per input | 32 KiB |
+
+So a single request can embed at most 96 texts, and no single text may exceed 32 KiB. Batch larger corpora across multiple requests, staying within 96 inputs each.
+
+## Response shape
+
+A successful response is a list envelope:
+
+```json
+{
+  "object": "list",
+  "model": "Qwen/Qwen3-Embedding-0.6B",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0123, -0.0456, 0.0789, "..."]
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+The fields:
+
+- `object` always `"list"`.
+- `model` the embedding model that served the request.
+- `data[]` one entry per input, each with `object: "embedding"`, its `index` (matching the position in your `input` array), and `embedding`, the vector as an array of floats.
+- `usage` token accounting: `prompt_tokens` and `total_tokens`.
+
+The order of `data` matches the order of your inputs by `index`, so you can line vectors back up with the texts you sent.
+
+## A note on output dimensions
+
+The length of each returned vector is decided by the provider at runtime, not by the gateway. The gateway does not encode a per-model output dimension, so there is no static table of "model X returns N numbers." If you need to know the exact length, read it from the `embedding` array in an actual response, or pass `dimensions` (within 1 to 3072) where the model honors it.
+
+> **TODO (needs SME):** publish per-model output dimensions for the default and other embedding models. This is not encoded in the gateway; the provider returns the vector length at runtime, so it must come from Backend. Owner: Backend.
+
+## Privacy
+
+Embeddings inherit the **same privacy options as chat**. The privacy mode is selected the same way it is for a chat call, through the model ID, and the gateway's default posture (metadata only, prompts and inputs not retained) applies here too. If you embed sensitive text, the same per-call privacy dial is available. See the [Privacy overview](/privacy/overview) and [How Nito works](/get-started/how-nito-works) for how the model ID carries the privacy decision.
+
+## Worked examples
+
+### curl
+
+Embed two short texts and get float vectors back:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/embeddings \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": ["the quick brown fox", "a fast auburn fox"],
+    "encoding_format": "float"
+  }'
+```
+
+Because `model` is omitted, this uses the default Qwen embedding model.
+
+### Python
+
+The endpoint is OpenAI-compatible, so the OpenAI client works by pointing its base URL at the gateway:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_NITO_API_KEY",
+    base_url="https://YOUR-NITO-BASE-URL/v1",
+)
+
+resp = client.embeddings.create(
+    input=["the quick brown fox", "a fast auburn fox"],
+    model="EMBEDDING_MODEL_ID",  # or omit to use the default
+)
+
+for item in resp.data:
+    print(item.index, len(item.embedding))
+```
+
+> **TODO (needs SME):** confirm the production base URL replacing `https://YOUR-NITO-BASE-URL` and supply a canonical `EMBEDDING_MODEL_ID` to show in examples. Owner: Product/Infra.
+
+A simple similarity check, once you have vectors, is the cosine similarity between two embeddings; the higher the value, the closer in meaning. Compute it in your application or let your vector database do it at query time.
+
+## What this is not
+
+- **Not chat.** Embeddings do not generate text. They turn text into vectors. To generate text, use the chat endpoint.
+- **Not a vector store.** Nito returns vectors; storing and searching them is your application's job (a vector database or an in-memory index).
+- **Not token input.** You send text, not token-ID arrays. Token-ID input is rejected.
+
+## Related
+
+- [How Nito works](/get-started/how-nito-works)
+- [Multimodal overview](/features/multimodal)
+- [Privacy overview](/privacy/overview)
+- [Models](/models)
+
+<!-- source: internal/server/api_embeddings.go (apiEmbeddingsHandler, apiEmbeddingsRequest, apiEmbeddingsEnvelope), internal/embeddings (validation.go: MaxInputs=96, MaxInputBytes=32 KiB, dimensions 1-3072; encoding_format ""/float; default Qwen/Qwen3-Embedding-0.6B; output dimensions not encoded in gateway) -->

@@ -1,0 +1,68 @@
+---
+title: Web fetch
+description: Let the model fetch the contents of explicit URLs during a chat completion, on supported providers.
+---
+
+Web fetch lets a chat completion retrieve the contents of URLs that appear in the conversation. It is triggered by explicit URLs in the request, and is available on OpenRouter, NEAR, and Phala models.
+
+There are two ways to turn it on: the top-level `web_fetch` field, or a `web_fetch` entry in `tools`.
+
+## Invoking
+
+### Top-level field
+
+`web_fetch` is a boolean (`*bool`) on the chat request.
+
+```json
+{
+  "model": "openai/gpt-5.5",
+  "messages": [
+    { "role": "user", "content": "Summarize https://example.com/post" }
+  ],
+  "web_fetch": true
+}
+```
+
+### As a tool
+
+```json
+{
+  "model": "openai/gpt-5.5",
+  "messages": [
+    { "role": "user", "content": "Summarize https://example.com/post" }
+  ],
+  "tools": [{ "type": "web_fetch" }]
+}
+```
+
+## Trigger
+
+Web fetch acts on explicit URLs present in the messages. Enabling it does not crawl the open web; it fetches the specific URLs the model is asked to read.
+
+## Response
+
+When fetches occur, `usage.server_tool_use.web_fetch_requests` reports how many fetches were performed.
+
+```json
+{
+  "usage": {
+    "server_tool_use": { "web_fetch_requests": 1 }
+  }
+}
+```
+
+## Provider support
+
+Web fetch requires an OpenRouter, NEAR, or Phala model. xAI is not supported for web fetch. Enabling it on an unsupported model fails with a routing error in the standard error envelope. See [Tool errors](/api-reference/server-tools/tool-errors).
+
+## Billing
+
+Web fetch is billed in addition to model tokens. See [Tool pricing](/api-reference/server-tools/tool-pricing).
+
+## Related
+
+- [Web search](/api-reference/server-tools/web-search)
+- [Tool pricing](/api-reference/server-tools/tool-pricing)
+- [Tool errors](/api-reference/server-tools/tool-errors)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §7 (web_fetch field/tool, OpenRouter/NEAR/Phala only), §2 (apiChatRequest web_fetch, apiUsage.server_tool_use.web_fetch_requests) -->

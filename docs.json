@@ -1,0 +1,447 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Nito",
+  "colors": {
+    "primary": "#0B6BCB"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "get-started/index",
+              "get-started/introduction",
+              "get-started/how-nito-works"
+            ]
+          },
+          {
+            "group": "Quickstarts",
+            "pages": [
+              "get-started/quickstart-60-seconds",
+              "get-started/quickstart-openai-sdk",
+              "get-started/quickstart-anthropic-sdk",
+              "get-started/quickstart-curl"
+            ]
+          },
+          {
+            "group": "End to end",
+            "pages": [
+              "get-started/authentication",
+              "get-started/make-your-first-request",
+              "get-started/stream-your-first-response",
+              "get-started/check-usage-and-credits",
+              "get-started/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Models",
+        "groups": [
+          {
+            "group": "Models",
+            "pages": [
+              "models/index",
+              "models/overview",
+              "models/model-catalog",
+              "models/model-id-convention",
+              "models/privacy-tiers-at-a-glance",
+              "models/model-families",
+              "models/providers",
+              "models/model-groups",
+              "models/backend-selection",
+              "models/choosing-a-model",
+              "models/pricing",
+              "models/deprecations-and-lifecycle"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["features/index"]
+          },
+          {
+            "group": "Core",
+            "pages": [
+              "features/chat-completions",
+              "features/streaming",
+              "features/tool-calling",
+              "features/reasoning"
+            ]
+          },
+          {
+            "group": "Server-side tools",
+            "pages": [
+              "features/server-side-tools",
+              "features/server-side-tools/web-search",
+              "features/server-side-tools/web-fetch",
+              "features/server-side-tools/file-parser",
+              "features/server-side-tools/code-interpreter"
+            ]
+          },
+          {
+            "group": "Multimodal",
+            "pages": [
+              "features/multimodal",
+              "features/multimodal/image-input",
+              "features/multimodal/pdf-input",
+              "features/multimodal/image-generation"
+            ]
+          },
+          {
+            "group": "Embeddings and efficiency",
+            "pages": [
+              "features/embeddings",
+              "features/prompt-caching",
+              "features/idempotency",
+              "features/multi-model-routing"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Privacy",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "privacy/overview",
+              "privacy/privacy-architecture",
+              "privacy/zero-data-retention",
+              "privacy/per-call-privacy-modes"
+            ]
+          },
+          {
+            "group": "Privacy tiers",
+            "pages": [
+              "privacy/tiers/index",
+              "privacy/tiers/t1-anonymous",
+              "privacy/tiers/t2-private",
+              "privacy/tiers/t3-private-plus-tee",
+              "privacy/tiers/t4-encrypted-e2e-tee"
+            ]
+          },
+          {
+            "group": "TEE attestation",
+            "pages": [
+              "privacy/tee-attestation/index",
+              "privacy/tee-attestation/what-a-tee-is",
+              "privacy/tee-attestation/attestation-pipeline",
+              "privacy/tee-attestation/seven-gate-baseline",
+              "privacy/tee-attestation/freshness-binding",
+              "privacy/tee-attestation/address-only-model-binding",
+              "privacy/tee-attestation/per-provider-attestation",
+              "privacy/tee-attestation/verify-yourself-recipe"
+            ]
+          },
+          {
+            "group": "Data handling",
+            "pages": [
+              "privacy/data-visibility",
+              "privacy/data-retention/index",
+              "privacy/data-retention/metadata-only-default",
+              "privacy/data-retention/idempotency-replay",
+              "privacy/data-retention/governed-debug-capture",
+              "privacy/data-retention/tenant-saved-chat",
+              "privacy/data-retention/three-distinct-keys"
+            ]
+          },
+          {
+            "group": "Trust and limits",
+            "pages": [
+              "privacy/provider-side-enforcement",
+              "privacy/payment-privacy",
+              "privacy/threat-model/index",
+              "privacy/threat-model/what-nito-defends-against",
+              "privacy/threat-model/what-nito-does-not-defend-against",
+              "privacy/compliance-posture",
+              "privacy/dpa",
+              "privacy/known-limitations"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["sdks/index"]
+          },
+          {
+            "group": "OpenAI drop-in",
+            "pages": [
+              "sdks/openai-drop-in/base-url-swap",
+              "sdks/openai-drop-in/model-mapping",
+              "sdks/openai-drop-in/compatibility-notes"
+            ]
+          },
+          {
+            "group": "Anthropic drop-in",
+            "pages": [
+              "sdks/anthropic-drop-in/base-url-swap",
+              "sdks/anthropic-drop-in/mapping-notes"
+            ]
+          },
+          {
+            "group": "Framework integrations",
+            "pages": [
+              "sdks/framework-integrations/index",
+              "sdks/framework-integrations/langchain-langgraph",
+              "sdks/framework-integrations/vercel-ai-sdk",
+              "sdks/framework-integrations/crewai",
+              "sdks/framework-integrations/mastra",
+              "sdks/framework-integrations/pydantic-ai",
+              "sdks/framework-integrations/litellm",
+              "sdks/framework-integrations/llamaindex"
+            ]
+          },
+          {
+            "group": "Editor integrations",
+            "pages": [
+              "sdks/editor-integrations/index",
+              "sdks/editor-integrations/cursor",
+              "sdks/editor-integrations/claude-code",
+              "sdks/editor-integrations/codex",
+              "sdks/editor-integrations/openclaw",
+              "sdks/editor-integrations/zed",
+              "sdks/editor-integrations/continue-dev"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": ["sdks/postman-bruno"]
+          }
+        ]
+      },
+      {
+        "tab": "Cookbook",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["cookbook/index"]
+          },
+          {
+            "group": "Getting started",
+            "pages": [
+              "cookbook/getting-started/quickstart-recipe",
+              "cookbook/getting-started/migrate-from-openai",
+              "cookbook/getting-started/migrate-from-anthropic",
+              "cookbook/getting-started/migrate-from-openrouter",
+              "cookbook/getting-started/migrate-from-others",
+              "cookbook/getting-started/build-first-chat-app",
+              "cookbook/getting-started/build-streaming-chat-ui"
+            ]
+          },
+          {
+            "group": "Private AI apps",
+            "pages": [
+              "cookbook/private-ai/drop-in-privacy-upgrade",
+              "cookbook/private-ai/build-private-chat-app",
+              "cookbook/private-ai/build-private-rag-bot",
+              "cookbook/private-ai/build-document-qa",
+              "cookbook/private-ai/structured-data-extraction",
+              "cookbook/private-ai/tee-attested-call-verify-nonce",
+              "cookbook/private-ai/end-to-end-tee-call",
+              "cookbook/private-ai/confidential-enterprise-inference"
+            ]
+          },
+          {
+            "group": "Bots and integrations",
+            "pages": [
+              "cookbook/bots/telegram-bot",
+              "cookbook/bots/discord-bot",
+              "cookbook/bots/whatsapp-assistant",
+              "cookbook/bots/slack-assistant",
+              "cookbook/bots/openclaw-gateway",
+              "cookbook/bots/use-with-cursor",
+              "cookbook/bots/use-with-claude-code",
+              "cookbook/bots/use-with-codex"
+            ]
+          },
+          {
+            "group": "Advanced projects",
+            "pages": [
+              "cookbook/advanced/model-comparison-tool",
+              "cookbook/advanced/usage-dashboard",
+              "cookbook/advanced/cost-monitoring-dashboard",
+              "cookbook/advanced/fallback-router",
+              "cookbook/advanced/observability-pipeline",
+              "cookbook/advanced/privacy-first-workflow",
+              "cookbook/advanced/multimodal-app"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/index",
+              "api-reference/overview/base-url",
+              "api-reference/overview/authentication",
+              "api-reference/overview/headers",
+              "api-reference/overview/request-ids",
+              "api-reference/overview/pagination",
+              "api-reference/overview/request-format",
+              "api-reference/overview/response-format",
+              "api-reference/overview/error-format",
+              "api-reference/overview/openapi-spec"
+            ]
+          },
+          {
+            "group": "Chat and Text",
+            "pages": [
+              "api-reference/chat-and-text/chat-completions",
+              "api-reference/chat-and-text/chat-fusion",
+              "api-reference/chat-and-text/finish-reasons",
+              "api-reference/chat-and-text/message-format",
+              "api-reference/chat-and-text/reasoning-parameters"
+            ]
+          },
+          {
+            "group": "Embeddings",
+            "pages": [
+              "api-reference/embeddings/create-embeddings",
+              "api-reference/embeddings/embedding-models",
+              "api-reference/embeddings/vector-dimensions",
+              "api-reference/embeddings/input-limits"
+            ]
+          },
+          {
+            "group": "Multimodal",
+            "pages": [
+              "api-reference/multimodal/image-input",
+              "api-reference/multimodal/pdf-input",
+              "api-reference/multimodal/image-generation"
+            ]
+          },
+          {
+            "group": "Models catalog",
+            "pages": [
+              "api-reference/models-catalog/list-models",
+              "api-reference/models-catalog/model-groups"
+            ]
+          },
+          {
+            "group": "Attestation",
+            "pages": [
+              "api-reference/attestation/get-attestation",
+              "api-reference/attestation/seven-gate-reference",
+              "api-reference/attestation/verify-yourself"
+            ]
+          },
+          {
+            "group": "Server tools",
+            "pages": [
+              "api-reference/server-tools/web-search",
+              "api-reference/server-tools/web-fetch",
+              "api-reference/server-tools/file-parser",
+              "api-reference/server-tools/code-interpreter",
+              "api-reference/server-tools/tool-pricing",
+              "api-reference/server-tools/tool-errors"
+            ]
+          },
+          {
+            "group": "Streaming format",
+            "pages": [
+              "api-reference/streaming-format/server-sent-events",
+              "api-reference/streaming-format/delta-format",
+              "api-reference/streaming-format/tool-call-streaming",
+              "api-reference/streaming-format/error-events",
+              "api-reference/streaming-format/stream-termination"
+            ]
+          },
+          {
+            "group": "Errors and rate limits",
+            "pages": [
+              "api-reference/errors-and-rate-limits/error-envelope",
+              "api-reference/errors-and-rate-limits/error-codes",
+              "api-reference/errors-and-rate-limits/status-mapping",
+              "api-reference/errors-and-rate-limits/rate-limits",
+              "api-reference/errors-and-rate-limits/retry-behavior",
+              "api-reference/errors-and-rate-limits/backoff",
+              "api-reference/errors-and-rate-limits/debugging-requests"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Reference",
+            "pages": [
+              "resources/index",
+              "resources/pricing",
+              "resources/rate-limits",
+              "resources/errors-reference"
+            ]
+          },
+          {
+            "group": "Best practices",
+            "pages": [
+              "resources/best-practices/latency-and-performance",
+              "resources/best-practices/cost-control",
+              "resources/best-practices/secure-api-key-handling",
+              "resources/best-practices/privacy-safe-logging",
+              "resources/best-practices/uptime-and-fallbacks",
+              "resources/best-practices/production-readiness-checklist"
+            ]
+          },
+          {
+            "group": "Observability",
+            "pages": [
+              "resources/observability/index",
+              "resources/observability/datadog",
+              "resources/observability/langfuse",
+              "resources/observability/sentry",
+              "resources/observability/s3",
+              "resources/observability/webhooks"
+            ]
+          },
+          {
+            "group": "Trust Center",
+            "pages": [
+              "resources/trust-center/index",
+              "resources/trust-center/dpa",
+              "resources/trust-center/subprocessors",
+              "resources/trust-center/sla",
+              "resources/trust-center/security-advisories",
+              "resources/trust-center/responsible-disclosure"
+            ]
+          },
+          {
+            "group": "Policies and legal",
+            "pages": [
+              "resources/policies/terms-of-service",
+              "resources/policies/acceptable-use-policy",
+              "resources/policies/privacy-policy",
+              "resources/policies/cookies"
+            ]
+          },
+          {
+            "group": "More",
+            "pages": [
+              "resources/status-page",
+              "resources/faq",
+              "resources/community",
+              "resources/powered-by-z/index",
+              "resources/powered-by-z/for-developers-building-agents"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

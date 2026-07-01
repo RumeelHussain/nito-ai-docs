@@ -1,0 +1,92 @@
+---
+title: FAQ
+description: Categorized answers to common Nito questions across getting started, models, privacy, billing, errors, and limits.
+---
+
+A categorized reference for the questions that come up most. Answers are short and link to the page with the full story. For first-hour questions, see the [Get Started FAQ](/get-started/faq).
+
+## Getting started
+
+**Do I need a special SDK?**
+No. Nito is OpenAI-compatible. Point the OpenAI SDK (or plain HTTP) at Nito's base URL and use a Nito model ID. See the [OpenAI drop-in](/get-started/quickstart-openai-sdk).
+
+**Which base URL do I use?**
+Nito serves an OpenAI-compatible path at `/v1/...` and a first-party path at `/api/v1/...`. For chat they behave the same. The production host is being finalized.
+
+> **TODO (needs SME):** canonical production base URL (owner: Product/Infra).
+
+**How do I find available models?**
+Call `GET /v1/models`. The catalog is discovered from providers at runtime, so the live list is authoritative. Do not hard-code model names. See [Model catalog](/models/model-catalog).
+
+## Models
+
+**How are model IDs formatted?**
+A logical public ID is `model` with an optional privacy suffix, either `:tee` or `:e2e-tee`. No other suffix is valid. See [Model ID convention](/models/model-id-convention).
+
+**Can I call more than one model in one request?**
+Yes, through fusion: `POST /api/v1/chat/fusion` asks 2 to 3 distinct models the same prompt and runs one synthesis pass. It is non-streaming only. See [Multi-model routing](/features/multi-model-routing).
+
+**Which input types are supported?**
+Text, image input, and document input (PDF, docx, pptx, xlsx, xls, text) parsed inline. Image generation is available. See [Multimodal](/features/multimodal).
+
+## Privacy
+
+**Does every call run in a TEE?**
+No. TEE execution is the highest tier and is selected per call by adding `:tee` to the model ID (the model must support it). Most calls use lighter modes. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+**How do I make a call private?**
+Add a suffix to the model ID: `:tee` for TEE-backed execution with attestation, or `:e2e-tee` for end-to-end encrypted TEE. Ordinary and private modes need no suffix.
+
+**Can I verify the privacy claim myself?**
+Yes, for TEE tiers. Fetch an attestation from `GET /api/v1/tee/attestation` and verify it independently. The gateway runs a baseline verification and returns the raw evidence so you can complete full verification client-side. See [TEE attestation](/privacy/tee-attestation).
+
+**What does Nito keep about my prompts?**
+By default, metadata only. Prompt and completion contents are treated as request-local and are not persisted by the gateway. See [Zero Data Retention](/privacy/zero-data-retention).
+
+## Billing
+
+**What does an API key look like?**
+It starts with `z_sk_`. Other prefixes (`nito_cli_`, `z_cli_`, `z_mcp_`) belong to the CLI and MCP surfaces, not the HTTP API. See [Authentication](/get-started/authentication).
+
+**Was I charged for a failed request?**
+No. Nito places a hold before the call and releases it if the request fails before producing usage. See [Check usage and credits](/get-started/check-usage-and-credits).
+
+**Where do I see my balance?**
+`GET /api/v1/orgs/{orgId}/billing/balance`. Balance is scoped to the organization, not the individual key, and is returned in nanos.
+
+**Can I cap what a key spends?**
+Yes. A key can carry a daily, monthly, or overall spend cap; when the cap is hit, the key is force-expired. Keys have no per-feature scopes; use organization roles to limit management.
+
+## Errors
+
+**Why am I getting 401?**
+The key is missing, mistyped, revoked, or not sent as `Authorization: Bearer <key>`.
+
+**Why am I getting 400 about the model?**
+The model ID is not in your catalog, or you used an invalid privacy suffix. Only `:tee` and `:e2e-tee` are valid. Pull a valid ID from `GET /v1/models`.
+
+**Why am I getting 402?**
+The account has no funded balance and the model is not free-tier eligible. Add credits or use a free-tier model.
+
+**Why am I getting 429?**
+You hit a rate limit. The response carries a `Retry-After` header telling you how long to wait. There are no `X-RateLimit-*` headers. See [Rate limits](/resources/rate-limits).
+
+## Limits
+
+**Is there a request size cap?**
+Yes. The chat request body is capped at 4 MiB. The attachments parser has a separate 10 MiB cap. Oversized requests are rejected before any inference runs.
+
+**What is not available yet?**
+Audio and video input, audio and video generation, and image edits or variations are not available. Several endpoints return 404 today: `/v1/responses`, `/v1/messages`, `/v1/messages/count_tokens`, `/v1/files`, and `/jobs/*`. See [What is not available](/api-reference).
+
+**Does streaming work with every mode?**
+No. The `:e2e-tee` mode is non-streaming only. See [Streaming](/features/streaming).
+
+## Related
+
+- [Get Started FAQ](/get-started/faq)
+- [How Nito Works](/get-started/how-nito-works)
+- [Rate limits](/resources/rate-limits)
+- [Community](/resources/community)
+
+<!-- source: internal/server/routes.go, internal/models/models.go (ParseLogicalModelIDForPublicMode), internal/auth/tokens.go (prefixes), internal/server/api_tee_attestation.go, internal/inference/errors.go (StatusCode 401/400/402/429), internal/server/rate_limit.go (Retry-After), internal/server/api_org_billing_balance.go, internal/server/api_chat_fusion.go -->

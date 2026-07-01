@@ -1,0 +1,86 @@
+---
+title: Quickstart, OpenAI SDK drop-in
+description: Point the OpenAI SDK at Nito by changing the base URL. Your existing code keeps working.
+---
+
+If your code already uses the OpenAI SDK, you do not need to rewrite it. Nito exposes an OpenAI-compatible endpoint, so you change three things: the base URL, the API key, and the model ID. Messages, streaming, tool calls, and the response shape stay the same.
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="z_sk_your_key_here",          # your Nito API key
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+    messages=[
+        {"role": "user", "content": "Say hello in one short sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "z_sk_your_key_here",              // your Nito API key
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // Nito's OpenAI-compatible base URL
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",                         // a Nito catalog ID
+  messages: [
+    { role: "user", content: "Say hello in one short sentence." },
+  ],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+</CodeGroup>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The base URL must end in `/v1`, because the SDK appends paths like `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`.
+
+## Reading the response
+
+The SDK sends a POST to `/v1/chat/completions` and returns a standard `chat.completion` object. `resp.choices[0].message.content` is the assistant's text, and `resp.usage` reports tokens billed. Streaming works exactly as in the OpenAI SDK: pass `stream=True` (Python) or `stream: true` (TypeScript) and iterate the chunks.
+
+## Selecting privacy
+
+Because privacy is chosen by the model ID, you opt into a stronger tier by adding a suffix to the model name, with no other code change:
+
+```python
+# TEE-backed execution with an attestation you can verify
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and a model must support that tier. Use `GET /v1/models` to find models that support attestation. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with a Nito model ID from `GET /v1/models`. Model mapping is covered in [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping).
+- **Forgetting `/v1` on the base URL.** The OpenAI SDK appends paths like `/chat/completions`, so the base URL must end in `/v1`.
+- **Expecting the Responses API.** Nito's compatible surface is Chat Completions. The OpenAI Responses API (`/v1/responses`) is not served at this time.
+- **Streaming with end-to-end TEE.** The `:e2e-tee` mode does not stream. Use `:tee` if you need streaming with attestation.
+
+## Notes
+
+- Rate limits: standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/resources/rate-limits).
+- Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
+- Privacy-mode applicability: ordinary, private, and `:tee` work with the OpenAI SDK. `:e2e-tee` requires extra headers and is best done via curl or the native SDK.
+
+## Related
+
+- [Make your first request](/get-started/make-your-first-request)
+- [Chat completions feature](/features/chat-completions)
+- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions, compat.openai.responses.unsupported), internal/server/api_chat.go (apiChatRequest, apiChatResponse), internal/models/models.go (ParseLogicalModelIDForPublicMode) -->

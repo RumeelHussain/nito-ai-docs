@@ -1,0 +1,61 @@
+---
+title: Privacy tiers in depth
+description: The four privacy tiers as a ladder, how to select each one, and why support is decided per model in the catalog.
+---
+
+Nito lets you choose how private each call is, and you make that choice per request rather than once for your whole account. The brief version lives in [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance). This section is the authoritative reference: one page per tier, going deeper into what each one protects, how you select it, and the trade-offs you accept when you pick it.
+
+## A ladder, not a switch
+
+Read the four tiers as a ladder. Each rung adds a stronger guarantee and, in exchange, narrows the set of models and features available to you. You climb only as high as a given call needs.
+
+| Tier (label) | Named mode | How you select it | The core guarantee it adds |
+|---|---|---|---|
+| **T1 Anonymous** | stored tier `anon` | the model ID, no suffix | Anonymized routing; metadata-only retention by default |
+| **T2 Private** | stored tier `private` | the model ID, no suffix (the model's tier decides) | No upstream retention (zero-data-retention enforced at the provider) |
+| **T3 Private+ (TEE)** | `tee` mode | `model:tee` | Sealed, hardware-isolated execution with an attestation you can verify |
+| **T4 Encrypted (E2E TEE)** | `e2e-tee` mode | `model:e2e-tee` plus encryption headers | Client-side encryption of your data to the sealed environment, on top of TEE |
+
+Each higher tier keeps the guarantees of the ones below it and adds its own. T3 runs inside a Trusted Execution Environment that you can attest; T4 keeps that sealed execution and additionally encrypts your data to it.
+
+## On the names: labels mapped onto named modes
+
+You will see these tiers written as marketing labels, T1 through T4. Those numbers are labels mapped onto the named modes the code actually works in. There is no `Tier1..Tier4` enum anywhere in the gateway. Under the hood there are three stored tiers, `anon`, `private`, and `tee`, plus the `e2e-tee` mode layered on top of TEE. The model-ID suffix is the real selector:
+
+- **No suffix** selects the model's stored tier, either `anon` (T1) or `private` (T2).
+- **`:tee`** selects T3.
+- **`:e2e-tee`** selects T4.
+
+`:tee` and `:e2e-tee` are the only valid suffixes. Any other suffix (`:standard`, `:zdr`, `:private`, `:anon`, and so on) is rejected. There is no separate `tier` field in the request body; you change the privacy of a call by changing the model string, nothing else.
+
+## Support is per model, so read the catalog entry
+
+No model supports every tier. Which rungs of the ladder a given model offers is reported on its catalog entry from `GET /v1/models`, and the practical rule is always the same: read the model entry, then choose the tier the model supports.
+
+- **T1 / T2** are decided by the model's `privacy_tier` field (`anon` or `private`). You do not add a suffix; the model's own tier determines which of the two you get.
+- **T3** is available when the entry shows `attestation_available: true` (with `privacy_tier: "tee"`). Select it with `:tee`.
+- **T4** is available when the entry shows `e2ee_supported: true`. Select it with `:e2e-tee` and the required encryption headers.
+
+A privacy mode never silently downgrades. If you append `:tee` to a model that has no TEE backend, the call is rejected rather than served at a weaker tier. A guarantee that quietly weakens is worse than no guarantee, so the gateway refuses instead.
+
+> **Diagram placeholder (privacy tier flow).** Show the four tiers as a ladder from T1 Anonymous to T4 Encrypted (E2E TEE): for each rung, the named mode (`anon` / `private` / `tee` / `e2e-tee`), the selector (no suffix, no suffix, `:tee`, `:e2e-tee` + headers), the guarantee it adds, and the catalog field that gates it (`privacy_tier`, `attestation_available`, `e2ee_supported`). Mark each higher rung as inheriting the guarantees below it. Marked TODO for design; no ASCII art.
+
+## How to read the rest of this section
+
+Start with the tier closest to your need and climb from there:
+
+- **[T1 Anonymous](/privacy/tiers/t1-anonymous)** the lightest tier and the default. Broad model availability, metadata-only retention.
+- **[T2 Private](/privacy/tiers/t2-private)** privately served models with no upstream retention.
+- **[T3 Private+ (TEE)](/privacy/tiers/t3-private-plus-tee)** sealed execution with an attestation you can fetch and verify. Supports streaming.
+- **[T4 Encrypted (E2E TEE)](/privacy/tiers/t4-encrypted-e2e-tee)** the top rung: client-side encryption to the sealed environment, with the most constraints.
+
+## Related
+
+- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+- [Privacy overview](/privacy/overview)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [TEE attestation](/privacy/tee-attestation)
+- [Model ID convention](/models/model-id-convention)
+- [How Nito works](/get-started/how-nito-works)
+
+<!-- source: internal/models/models.go:34-46 (PrivacyTier anon/private/tee, PublicPrivacyMode ordinary/anon/private/tee/e2e-tee, ParseLogicalModelIDForPublicMode suffix :tee/:e2e-tee), internal/models/models.go:730 (validatePrivacyCapabilities), internal/server/logical_models.go (chooseLogicalRoute), internal/server/api_models.go (apiModelsHandler) -->

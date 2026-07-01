@@ -1,0 +1,57 @@
+---
+title: Three Secret Roles
+description: Nito separates session, storage-key, and chat-share secrets as an HMAC domain-separated key hierarchy, independent only under explicit override.
+---
+
+A common security claim is "we use three distinct keys for three distinct purposes." On Nito the spirit of that claim is true, but the precise mechanism is more interesting than "three unrelated secrets," and getting it right matters for a security reviewer. What actually exists is a small **key hierarchy**: three secret **roles** with separate purposes, where two of the three are, by default, **HMAC-derived from the first** using distinct domain-separation labels, and become **fully independent keys only when each is set explicitly**. This page states that accurately.
+
+If you read only one sentence: **the three secrets are domain-separated roles derived from a root by default, and independent keys only under explicit override; they are not three unrelated secrets unless you configure them to be.**
+
+## The three roles
+
+The gateway recognizes three secret roles, each with its own job:
+
+- **`SESSION_SECRET`**: signs browser sessions. This is the root of the hierarchy.
+- **`STORAGE_KEY_SECRET`**: derives the per-user browser storage key (used to encrypt client-side chat history; see [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat)).
+- **`CHAT_SHARE_TOKEN_SECRETS`**: signs chat-share tokens.
+
+Three roles, three purposes: session signing, storage-key derivation, and chat-share token signing. So far this matches the "three distinct keys" intuition.
+
+## The nuance: domain separation, not three independent roots
+
+Here is the part the simple claim gets wrong. By **default**, `STORAGE_KEY_SECRET` and `CHAT_SHARE_TOKEN_SECRETS` are **not** independently configured secrets. They are **HMAC-derived from `SESSION_SECRET`**, each using a **distinct HMAC label**. The distinct labels provide **domain separation**: even though both descend from the same root secret, the derived keys are cryptographically separated, so one role's key cannot be used in another role's context and learning a derived key does not hand an attacker the others' contexts.
+
+They become **independent keys only when each is set explicitly** in configuration. So the accurate framing is:
+
+- **Default deployment:** one root (`SESSION_SECRET`) plus two HMAC-derived, domain-separated keys. A **key hierarchy**, not three unrelated secrets.
+- **Explicit override:** if `STORAGE_KEY_SECRET` and/or `CHAT_SHARE_TOKEN_SECRETS` are set explicitly, those roles use the supplied secrets and are then **independent** of the session root.
+
+This is a stronger and more honest description than "three distinct keys," because it tells a reviewer exactly what isolation they get out of the box (domain separation by label) versus what they get only by configuring all three (full key independence).
+
+## Why domain separation is the right default
+
+Deriving the other two roles from a single root with distinct labels gives you meaningful isolation without forcing every deployment to provision and rotate three independent secrets. Each role gets a key that is unusable outside its own context, which is the property you actually want from "distinct keys": you do not want a session secret to double as a chat-share signing key. A deployment that needs the keys to be fully independent (for example, to rotate or revoke them on separate schedules, or to scope blast radius across systems) can set all three explicitly and get exactly that.
+
+## Stored credentials are hashes, never plaintext
+
+Separate from the key hierarchy, but in the same spirit, is how the gateway stores credentials. **All stored credentials are kept as HMAC / SHA-256 hashes, never as plaintext.** This covers:
+
+- **API keys**: tokens are stored as `HMAC-SHA256(token, SESSION_SECRET)`; the raw token is shown once at creation and never stored.
+- **OAuth / MCP tokens**: stored as hashes, not raw tokens.
+- **Sessions**: stored as hashes.
+
+The consequence: a dump of the credential store does not yield usable secrets, because what is stored is a one-way hash, not the original value. This is why the raw API key is your responsibility to keep at creation time; the gateway cannot show it to you again because it does not keep it.
+
+## What you can rely on today
+
+- Three secret **roles** exist: `SESSION_SECRET` (session signing), `STORAGE_KEY_SECRET` (storage-key derivation), `CHAT_SHARE_TOKEN_SECRETS` (chat-share token signing).
+- By default the latter two are **HMAC-derived from `SESSION_SECRET`** with distinct labels (**domain separation**), and are **independent only when set explicitly**.
+- All stored credentials (API keys, OAuth/MCP tokens, sessions) are stored as **HMAC / SHA-256 hashes**, never plaintext.
+
+## Related
+
+- [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat): where the derived storage key is used.
+- [Data retention](/privacy/data-retention): the broader retention contract.
+- [Data visibility](/privacy/data-visibility): who sees what across a request.
+
+<!-- source: internal/config/auth.go (SESSION_SECRET root, STORAGE_KEY_SECRET / CHAT_SHARE_TOKEN_SECRETS HMAC derivation + labels), internal/server/api_storage_key.go (HMAC-SHA256(StorageKeySecret, userID)), internal/auth/tokens.go (HMAC-SHA256(token, SESSION_SECRET), hashes never plaintext); DOCS_SOURCE_OF_TRUTH.md §8, §10 (Three-distinct-keys: PARTIAL) -->

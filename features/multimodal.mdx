@@ -1,0 +1,70 @@
+---
+title: Multimodal
+description: What Nito accepts beyond text and what it can generate. An honest map of supported input and output modalities.
+---
+
+Most of what you send Nito is text, but the gateway is not limited to text. You can put images into a chat request and let a vision-capable model read them, you can attach documents (including PDFs) and have them parsed into text the model can reason over, and you can ask a model to generate an image from a prompt. This page is the map of what is and is not multimodal on Nito, so you know the edges before you build against them.
+
+The honest framing matters here, because it is easy to assume a modern gateway does everything. Nito does not. Read the [What is not available](#what-is-not-available) section before you design a feature around audio or video; those endpoints do not exist today.
+
+## The three things that work
+
+There are exactly three multimodal capabilities, two on the way in and one on the way out.
+
+- **Image input.** You send one or more images inside a chat message and a vision-capable model reads them alongside your text. Supported formats are PNG, JPEG, and WebP. You can pass an image as a URL, as a data URL, or as raw base64 with a media type that the gateway assembles for you. The model you route to must declare image support. Full detail, limits, and a worked example are on [Image input](/features/multimodal/image-input).
+- **Document input.** You attach a document and the gateway parses it into text server-side before the model sees it. Supported kinds are PDF, DOCX, PPTX, XLSX, XLS, and plain text. This is how you get a contract, a slide deck, or a spreadsheet into a prompt. Detail, parsing caps, and the two ways to do it are on [PDF and document input](/features/multimodal/pdf-input).
+- **Image generation.** You send a prompt and get back a PNG image. This is the only generation modality. Detail, parameters, and a worked example are on [Image generation](/features/multimodal/image-generation).
+
+That is the whole surface. One model call can mix text with image inputs and document inputs; image generation is a separate endpoint with its own request shape.
+
+## Input versus generation
+
+It helps to keep two ideas apart, because they use different endpoints and different model types.
+
+**Input** is what you feed a chat model so it can answer. Images and documents are inputs. They travel inside the `messages` array of a chat completion request as content parts, and they are handled by a chat model that supports them. Nothing is generated; the model reads your material and responds with text.
+
+**Generation** is what a model produces for you. The only thing Nito can generate beyond text is an image, and that happens at a dedicated image endpoint, not inside a chat request. You send a prompt, you get image data back.
+
+So "multimodal" on Nito means: rich inputs into chat (images, documents), plus one rich output (images) from a separate endpoint.
+
+## What is not available
+
+This is the part to read carefully. The following modalities have **no endpoints** on the gateway at this time, and a request that tries to use them is rejected rather than silently ignored:
+
+- **Audio input.** Sending audio content to a chat model is rejected. There is no speech-to-text or audio-understanding path.
+- **Video input.** Sending video content to a chat model is rejected.
+- **Audio generation.** There is no text-to-speech or audio-output endpoint.
+- **Video generation.** There is no text-to-video endpoint.
+
+There are also no image edit or image variation endpoints; image generation is prompt-to-image only.
+
+If your application needs any of these, treat them as not present today rather than as something to work around. They are tracked on the deferred capabilities list.
+
+> **TODO (needs SME):** confirm the canonical location and link for the deferred-capabilities list (audio in, video in, audio generation, video generation) so this page can point readers to a single source. Owner: Product.
+
+<Warning>
+Audio and video are rejected on purpose, not skipped quietly. If you send an audio or video content part to a chat model, the request fails with a validation error rather than dropping the part and answering from the text alone. Build for the rejection, not for a silent fallback.
+</Warning>
+
+## How the inputs travel
+
+Image input and document input both ride inside a normal chat request, as entries in a message's `content` array. Instead of a plain string, `content` becomes a list of typed parts: a `text` part for your words, an `image_url` part for a picture, a `file` part for a document. The model reads them together. The two sub-pages below show the exact shapes.
+
+Document input has a second path worth knowing about: a standalone parser endpoint that turns a file into text you can then place into any prompt yourself. That is covered on the document page and in the [file parser](/features/file-parser) feature.
+
+## Where to go next
+
+- **[Image input](/features/multimodal/image-input)** send PNG, JPEG, or WebP into a vision model, with limits and a worked `image_url` example.
+- **[PDF and document input](/features/multimodal/pdf-input)** attach PDFs and office documents for server-side parsing, inline or via the parser endpoint.
+- **[Image generation](/features/multimodal/image-generation)** prompt-to-PNG with the request and response shapes and a worked curl call.
+- **[Embeddings](/features/embeddings)** not multimodal, but the other non-chat capability you will likely reach for next.
+
+## Related
+
+- [How Nito works](/get-started/how-nito-works)
+- [Image input](/features/multimodal/image-input)
+- [PDF and document input](/features/multimodal/pdf-input)
+- [Image generation](/features/multimodal/image-generation)
+- [File parser](/features/file-parser)
+
+<!-- source: internal/server/api_chat.go (apiChatContentPartToInference, content parts: text/image/file; audio/video rejected), internal/server/api_images.go (apiImageGenerationsHandler), internal/server/api_attachments_parse.go -->

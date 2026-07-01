@@ -1,0 +1,114 @@
+---
+title: PDF and document input
+description: Pass PDFs and office documents into a model for analysis, inline in a chat message or through the standalone parser endpoint.
+---
+
+When you need a model to reason over a contract, a slide deck, or a spreadsheet, you do not paste the text by hand. You attach the document and let Nito parse it into text server-side, then the model works from that text. This page covers which document kinds are supported, the two ways to get a document into a request, and the caps that apply to PDF parsing.
+
+The supported document kinds are **PDF, DOCX, PPTX, XLSX, XLS, and plain text**. All of them are parsed into text on the server before any model sees them. Images are not in this list: a picture is not parsed this way, it is sent to a vision model. See [Image input](/features/multimodal/image-input) for that path.
+
+## Two ways to send a document
+
+### 1. Inline in a chat message
+
+The first way places the document directly inside a chat message as a `file` content part, next to your text. The gateway parses the file server-side and the model reasons over the extracted text in the same request.
+
+Like image input, this turns a message's `content` into an array of typed parts. The file part carries the document by URL or by inline data:
+
+```json
+{
+  "role": "user",
+  "content": [
+    { "type": "text", "text": "Summarize the key obligations in this contract." },
+    {
+      "type": "file",
+      "file": {
+        "file_url": "https://example.com/contract.pdf",
+        "filename": "contract.pdf"
+      }
+    }
+  ]
+}
+```
+
+The file part accepts:
+
+- `file_url` a URL to the document (same URL rules as other attachments: `https`, no credentials, no private or loopback hosts), or
+- `file_data` the document bytes supplied inline, with
+- `filename` the name, which helps the parser identify the kind.
+
+The part type may appear as `file` or `input_file`; both are accepted.
+
+<Warning>
+There is no `file_id` for documents. You cannot upload a file once and reference it later by ID in a chat message; that field is rejected. Supply the document as a URL or as inline data on each request. (This mirrors image input, which also has no `file_id` path.)
+</Warning>
+
+A full chat request using this looks like:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "CHAT_MODEL_ID",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "List every payment deadline in this PDF." },
+          { "type": "file", "file": { "file_url": "https://example.com/contract.pdf", "filename": "contract.pdf" } }
+        ]
+      }
+    ]
+  }'
+```
+
+> **TODO (needs SME):** supply a real `CHAT_MODEL_ID` and confirm the production base URL replacing `https://YOUR-NITO-BASE-URL`. Owner: Product/Infra.
+
+### 2. The standalone parser endpoint
+
+The second way is to parse the document first, on its own, and then do whatever you want with the resulting text, including placing it into a prompt yourself. This is a multipart upload to a dedicated endpoint:
+
+```
+POST /api/v1/attachments/parse
+```
+
+You send the file as a multipart form. The endpoint returns the extracted text plus metadata about what was parsed (the MIME type, the detected file kind, the byte count, page counts for paged formats, and any truncation warnings). This is the right path when you want the text as a reusable artifact rather than a one-shot inline parse, or when the same document feeds several later prompts.
+
+The parser endpoint has its own dedicated feature page with the complete request and response shape, the trust-tier option, and parse modes. See [File parser](/features/file-parser) for the full treatment; this page only points at it.
+
+## PDF parsing caps
+
+PDF parsing is bounded so a single document cannot consume unlimited time or output. The caps are:
+
+| Cap | Value |
+|---|---|
+| Maximum pages parsed | 80 |
+| Parse timeout | 10 seconds |
+| Maximum output characters | 300,000 |
+
+A document past these limits is parsed up to the cap and the result is marked as truncated rather than silently returning partial text with no signal. If you are working with large PDFs, expect truncation past 80 pages or 300,000 characters and design for it.
+
+> **TODO (needs SME):** confirm whether the 80-page, 10-second, and 300,000-character caps apply identically to the inline `file` content-part path and the `/api/v1/attachments/parse` endpoint, or whether they differ between the two. Owner: Backend.
+
+## Which path should you use
+
+- Use the **inline `file` part** when you want one request to both supply the document and get the model's answer. It is the simplest path for "here is a document, answer a question about it."
+- Use the **parser endpoint** when you want the extracted text as a standalone result: to cache it, to feed it into multiple prompts, to inspect it before sending it to a model, or to combine it with other text yourself.
+
+Both use the same server-side parser, so the supported kinds and the parsing behavior are the same. They differ only in whether the model call is bundled in.
+
+## What this is not
+
+- **Not for images.** Images are rejected by the document parser. Send a picture to a vision model via [Image input](/features/multimodal/image-input).
+- **Not a file store.** There is no persistent file API and no `file_id` to reuse. Documents travel with the request.
+- **Not generation.** This is input only. The only generation modality is [Image generation](/features/multimodal/image-generation).
+
+## Related
+
+- [Multimodal overview](/features/multimodal)
+- [File parser](/features/file-parser)
+- [Image input](/features/multimodal/image-input)
+- [How Nito works](/get-started/how-nito-works)
+
+<!-- source: internal/server/api_chat.go (apiChatContentPartToInference, file/input_file -> file_url/file_data/filename, file_id rejected), internal/server/api_attachments_parse.go (apiAttachmentParseHandler, 80 PDF pages, 10s timeout, 300k output runes), internal/inference/contracts.go (ContentPartKind file) -->

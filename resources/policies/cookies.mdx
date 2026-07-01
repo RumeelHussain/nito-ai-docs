@@ -1,0 +1,39 @@
+---
+title: Cookies
+description: What Nito's Cookie notice is and will cover. The cookie disclosures and consent terms are owned by Legal and are not established as policy in code.
+---
+
+A cookie notice explains the cookies and similar technologies Nito uses, what each is for, how long it lasts, and the choices a user has over them. It is the disclosure side of the [Privacy Policy](/resources/policies/privacy-policy), focused specifically on browser storage.
+
+<Warning>
+The cookie disclosures and any consent terms are owned by Legal and are not authored as policy in the codebase these docs are built from. The engineering facts below describe cookies the system sets, but the categorization, consent requirements, and legal framing are a TODO for Legal.
+</Warning>
+
+## Cookies the system sets (engineering facts)
+
+These are cookies observable in the gateway today. They are functional session and security cookies, described here as system behavior, not as a completed legal disclosure:
+
+- **`ig_session`** - the session cookie. It carries the authenticated session, has a limited lifetime, uses `SameSite=lax`, and is marked `Secure` outside local development.
+- **`ig_csrf`** - the CSRF-protection cookie, used in a double-submit check against a request header to guard against cross-site request forgery.
+
+Presenting these as facts about what the system sets is safe. Classifying them (strictly necessary versus optional), deciding whether consent is required, and writing the user-facing choices is legal work that Legal owns.
+
+## What the cookie notice is expected to cover
+
+Once authored by Legal, the notice is expected to include:
+
+- A categorized list of cookies (for example, strictly necessary, functional, analytics).
+- The purpose and lifetime of each cookie.
+- Any third-party cookies and who sets them.
+- The consent mechanism and how users change their choices, where consent applies.
+
+> **TODO (needs SME):** cookie categorization, consent requirements, third-party cookie disclosures, and the final cookie notice text (owner: Legal).
+
+## Related
+
+- [Privacy Policy](/resources/policies/privacy-policy) - the broader data-handling disclosure.
+- [Terms of Service](/resources/policies/terms-of-service) - the overall agreement.
+- [Compliance posture](/privacy/compliance-posture) - what is and is not asserted today.
+- [Trust Center](/resources/trust-center) - security and legal artifacts index.
+
+<!-- source: internal/auth/tokens.go / session and CSRF cookie behavior (ig_session, ig_csrf) per DOCS_SOURCE_OF_TRUTH.md §8. Cookie categorization and consent terms have no code source; owner Legal. -->

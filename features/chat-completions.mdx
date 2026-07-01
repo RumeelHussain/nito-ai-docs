@@ -1,0 +1,166 @@
+---
+title: Chat Completions
+description: The primary text surface on Nito. One OpenAI-compatible endpoint for chat and text generation, with per-call privacy.
+---
+
+Chat completions is the main way you talk to a model on Nito. You send a list of messages, name a model, and get back a reply. The shape is the OpenAI chat-completions shape, so if you have ever called that API the request and response will feel familiar. What is different is everything around it: one key reaches every model in the catalog, the model ID also selects how private the call is, and Nito handles routing, billing, and (for the strongest tiers) attestation underneath. This page is the deep reference for that one endpoint.
+
+If you have not yet read [How Nito Works](/get-started/how-nito-works), skim it first. This page assumes you know that the `model` string carries two decisions at once: which model, and how private.
+
+## The endpoint
+
+Chat lives at two paths that share the exact same handler:
+
+- `POST /v1/chat/completions` the OpenAI-compatible path.
+- `POST /api/v1/chat/completions` the first-party path.
+
+Pick whichever fits your stack. An OpenAI SDK pointed at the `/v1` base will work unchanged; a first-party client can use `/api/v1`. There is no behavioral difference between them.
+
+The body is decoded as **strict JSON**: unknown fields are rejected with a `400`, not silently ignored. This is deliberate. If you misspell `max_tokens` or paste a field from another provider's API, you find out immediately instead of having it quietly dropped. Send only the fields documented below.
+
+## The request
+
+Only `messages` is required. Everything else is optional and passed through when present.
+
+| Field | Type | Notes |
+|---|---|---|
+| `messages` | array | **Required.** The conversation so far. Empty array is rejected. |
+| `model` | string | Optional; falls back to a default. Add a `:tee` or `:e2e-tee` suffix to select a privacy mode. |
+| `temperature` | number | Sampling temperature, passed through. |
+| `top_p` | number | Nucleus sampling, passed through. |
+| `max_tokens` | integer | Cap on generated tokens. |
+| `max_completion_tokens` | integer | Newer alias for the completion cap. |
+| `stream` | boolean | Stream the reply as Server-Sent Events. See [Streaming](/features/streaming). |
+| `stream_options.include_usage` | boolean | Add a trailing usage chunk to the stream. |
+| `reasoning` | object | Ask a capable model to think first. See [Reasoning](/features/reasoning). |
+| `prompt_cache_key` | string | Reuse a cached prompt prefix (model must support it). |
+| `cache_control` | object | Provider cache hints, passed through. |
+| `web_search` | bool or object | Let the model search the web mid-generation. |
+| `web_fetch` | boolean | Let the model fetch a URL mid-generation. |
+| `tools` | array | Function tools and hosted tools. See [Tool Calling](/features/tool-calling). |
+| `tool_choice` | string or object | Force, forbid, or pick a tool. |
+| `user` | string | An opaque end-user identifier for your own bookkeeping. |
+
+Duplicate feature keys (for example sending `web_search` twice) are rejected.
+
+### Messages and roles
+
+Each message has a `role` and `content`. The accepted roles are `system`, `user`, `assistant`, `tool`, and `developer`. The `developer` role is accepted and passed through with no special handling, so use it only if your model expects it. A `tool` message carries the result of a tool call and pairs with a `tool_call_id` (see [Tool Calling](/features/tool-calling)).
+
+`content` is either a plain string or an array of content parts for multimodal input. The text case is the common one and is all you need for ordinary chat.
+
+## A first call
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+`grok-4.3` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      {"role": "system", "content": "You are concise."},
+      {"role": "user", "content": "Explain a gateway in one sentence."}
+    ]
+  }'
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://YOUR-NITO-BASE-URL/v1",
+    api_key="YOUR_NITO_API_KEY",
+)
+
+resp = client.chat.completions.create(
+    model="grok-4.3",
+    messages=[
+        {"role": "system", "content": "You are concise."},
+        {"role": "user", "content": "Explain a gateway in one sentence."},
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",
+  apiKey: process.env.NITO_API_KEY,
+});
+
+const resp = await client.chat.completions.create({
+  model: "grok-4.3",
+  messages: [
+    { role: "system", content: "You are concise." },
+    { role: "user", content: "Explain a gateway in one sentence." },
+  ],
+});
+
+console.log(resp.choices[0].message.content);
+```
+
+To make the same call inside an attested environment, change one thing: `"model": "grok-4.3:tee"`. The privacy mode rides on the model string and nothing else. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## The response
+
+A successful non-streaming call returns an object with `object` set to `chat.completion`:
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "A gateway is a single entry point that routes your request to the right backend." },
+      "finish_reason": "stop"
+    }
+  ],
+  "system_fingerprint": null,
+  "usage": {
+    "prompt_tokens": 24,
+    "completion_tokens": 17,
+    "total_tokens": 41
+  }
+}
+```
+
+A few details worth internalizing:
+
+- **There is always exactly one choice.** Nito does not return `n>1` alternatives. Read `choices[0]`.
+- **`message.content` is always present** on the response message. When the model wants to call a tool, content may be empty and `tool_calls` carries the request instead.
+- **`finish_reason` is one of exactly four values:** `stop` (the model finished normally), `length` (it hit a token cap), `tool_calls` (it wants you to run a tool), or `error` (something failed mid-generation). These come straight from the provider.
+- **`system_fingerprint` is always `null`.** It is serialized for OpenAI compatibility but Nito does not populate it. Do not build logic on it.
+- **`usage`** reports `prompt_tokens`, `completion_tokens`, and `total_tokens`, plus optional detail fields when relevant (cached-token counts, `reasoning_tokens`, and server-tool-use counts). Usage is what you are billed on, settled against the hold placed before the call.
+
+## Errors
+
+Validation and decoding problems return `400` with an error envelope of the shape `{"error": {"message", "code", "param"}}`. Note there is no `type` field; the error family lives in `code`. A non-POST request returns `405` with an `Allow` header. Authentication, quota, and provider failures map to their own status codes. All responses carry `Cache-Control: no-store`. The full status mapping is in the [error reference](/api-reference/errors).
+
+## When to reach for something else
+
+Chat completions is the right default for almost everything text. Reach elsewhere when:
+
+- You want several models to answer and a judge to merge them: that is [chat fusion](/api-reference/chat-and-text/fusion), a separate non-streaming endpoint.
+- You need vectors for search or retrieval: use [embeddings](/features/embeddings).
+- You want text-to-image: use [image generation](/features/image-generation).
+
+## Related
+
+- [Tool Calling](/features/tool-calling)
+- [Reasoning](/features/reasoning)
+- [Streaming](/features/streaming)
+- [How Nito Works](/get-started/how-nito-works)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
+
+<!-- source: internal/server/api_chat.go (apiChatCompletionsHandler, apiChatRequest, apiChatRequestMessage, apiChatResponse, apiChatChoice, apiChatMessage, apiUsage, apiErrorBody, decodeStrictJSON), internal/inference/validation.go (ValidateChatRequest), internal/inference/contracts.go (Role, FinishReason), internal/server/routes.go (routes.go:84,137) -->

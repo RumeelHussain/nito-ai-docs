@@ -1,0 +1,90 @@
+---
+title: Build an observability pipeline
+description: Capture request IDs and usage on the client side, and point the gateway's OpenTelemetry and Sentry hooks at your backends.
+---
+
+**Goal.** A two-sided observability setup: a client-side log of every request (its `X-Request-ID`, model, latency, and token usage) that you can ship anywhere, plus the server-side signals the gateway already emits.
+
+**Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and a place to send logs. For the server side you need operator access to the gateway's environment configuration.
+
+Observability here has two layers. The gateway emits its own telemetry from the server. Your application emits its own record of each call. You wire both to your backends. Keep them distinct, because they are configured in different places.
+
+## Layer 1: Client-side request log
+
+Every Nito response returns an `X-Request-ID` header (echoed from your request if you sent one, otherwise generated). That ID is the join key between your logs and any support conversation, so capture it on every call, success or failure.
+
+```python
+import os, json, time, urllib.request, urllib.error, uuid
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+API_KEY = os.environ["NITO_API_KEY"]
+
+def observed_chat(model, messages):
+    request_id = str(uuid.uuid4())        # send our own, so we control the join key
+    body = json.dumps({"model": model, "messages": messages}).encode()
+    req = urllib.request.Request(
+        f"{BASE_URL}/v1/chat/completions", data=body,
+        headers={"Authorization": f"Bearer {API_KEY}",
+                 "Content-Type": "application/json",
+                 "X-Request-ID": request_id},
+    )
+    started = time.time()
+    record = {"request_id": request_id, "model": model}
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.load(resp)
+        record.update({
+            "status": 200,
+            "server_request_id": resp.headers.get("X-Request-ID"),
+            "latency_ms": int((time.time() - started) * 1000),
+            "usage": data.get("usage", {}),
+            "finish_reason": data["choices"][0].get("finish_reason"),
+        })
+    except urllib.error.HTTPError as e:
+        record.update({
+            "status": e.code,
+            "server_request_id": e.headers.get("X-Request-ID"),
+            "latency_ms": int((time.time() - started) * 1000),
+        })
+    emit(record)   # ship to your pipeline
+    return record
+
+def emit(record):
+    print(json.dumps(record))   # replace with your exporter
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+Note two IDs in the record. You send `X-Request-ID` so you control the value; the gateway echoes it back in `server_request_id`. If you supply a value, use a UUID and log both to confirm they match.
+
+Do not log prompt or completion text into a shared observability store by reflex. The gateway's own posture is metadata only; keep your pipeline aligned by logging IDs, model, status, latency, and token counts rather than message bodies, especially for sensitive traffic.
+
+## Layer 2: Server-side telemetry
+
+The gateway supports two server-side observability integrations, configured by environment variables where the gateway runs:
+
+- **OpenTelemetry** via `OTEL_*` environment variables. This is the standard path for traces and metrics into an OTEL-compatible backend.
+- **Sentry** via `SENTRY_*` environment variables, for error reporting.
+
+These are operator-side settings, not request parameters. You cannot turn them on from an API call; they are part of deploying the gateway.
+
+> **TODO (needs SME):** the exact `OTEL_*` and `SENTRY_*` variable names, required values, and which exporters/protocols are wired. Confirm against the gateway's `.env` configuration (owner: Infra/Backend).
+
+## Choosing a destination
+
+Where your client-side records land is your choice, but not everything is verifiable from the gateway, so treat the destination wiring as a configuration task on your side:
+
+> **TODO (config):** shipping the client-side records to Datadog, Langfuse, an S3 bucket, or any other sink. These destinations are not part of the gateway; wire the `emit()` function to your chosen exporter. Confirm formats and credentials against that vendor's docs.
+
+## Correlating the two layers
+
+The `X-Request-ID` is the thread that ties your application record to the gateway's server-side telemetry. When you file a support request, quote the request ID; when you debug a latency spike, filter both layers by it. For usage and cost aggregates across many requests, do not derive them from logs alone. Read the org overview (see the [cost monitoring dashboard](/cookbook/advanced/cost-monitoring-dashboard)), which is the authoritative billing record.
+
+## Related
+
+- [Request IDs](/api-reference/overview/request-ids)
+- [Cost monitoring dashboard](/cookbook/advanced/cost-monitoring-dashboard)
+- [Usage dashboard](/cookbook/advanced/usage-dashboard)
+- [Headers reference](/api-reference/overview/headers)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (X-Request-ID read/set, config OTEL_* and SENTRY_* in .env.example observability group), §10 (metadata-only posture); internal/server/observability.go -->

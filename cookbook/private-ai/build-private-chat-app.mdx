@@ -1,0 +1,71 @@
+---
+title: Build a Private Chat App
+description: Build a chat app on Nito that uses a private or attested model from the start, with metadata-only retention by default.
+---
+
+This recipe builds a chat app that is private by design: it talks to a private-tier or attested (`:tee`) model from the first request, and it relies on the gateway's metadata-only retention rather than bolting privacy on later. If you already have a chat app, see the [drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade) instead; this page assumes you are starting fresh.
+
+## Pick the model first
+
+Privacy on Nito is selected by the **model ID**, so the design decision that matters most is which model you call. A logical model ID is `<model>`, `<model>:tee`, or `<model>:e2e-tee`, and nothing else. To build a private chat app you either:
+
+- choose a model stored at the `private` tier (routed with zero-data-retention on the upstream), or
+- append `:tee` to an attestation-capable model to get an attested route.
+
+Fetch `GET /v1/models` and pick a model whose card advertises the tier you need. The `:tee` suffix only works on attestation-capable models (NEAR or Phala in the current catalog); it is rejected on models that do not support it. The example model `grok-4.3` below is a placeholder for a non-attested tier; replace it with a real ID from the catalog.
+
+## The chat loop
+
+A chat app just accumulates messages and replays them each turn. Nito's `/v1/chat/completions` is OpenAI-compatible: `messages` is an array of `{role, content}`, roles are `system`, `developer`, `user`, `assistant`, and `tool`. Send the whole history each turn; the gateway does not store it for you.
+
+```python
+import os, requests
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+MODEL = "MODEL_ID:tee"                     # TODO: attestation-capable model; or a private-tier model
+API_KEY = os.environ["NITO_API_KEY"]
+
+history = [{"role": "system", "content": "You are a careful, concise assistant."}]
+
+def ask(user_text):
+    history.append({"role": "user", "content": user_text})
+    resp = requests.post(
+        f"{BASE_URL}/v1/chat/completions",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        json={"model": MODEL, "messages": history},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    msg = resp.json()["choices"][0]["message"]
+    history.append({"role": msg["role"], "content": msg["content"]})
+    return msg["content"]
+
+print(ask("Draft a two-line out-of-office reply."))
+```
+
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address (owner: Product/Infra). Confirm the model against `GET /v1/models`.
+
+## Streaming responses
+
+For a responsive UI, set `stream: true`. The gateway returns Server-Sent Events: frames are `data: <json>\n\n`, each chunk has `object: "chat.completion.chunk"` with a `delta`, a `: keep-alive` heartbeat arrives roughly every 15 seconds, and the stream ends with `data: [DONE]`. Concatenate `choices[0].delta.content` across chunks to render tokens as they arrive.
+
+Streaming works on ordinary, private, and `:tee` models. It is **not** available on `:e2e-tee`; that mode is non-streaming only.
+
+## Where the chat history lives
+
+The gateway is metadata-only by default: prompts, completions, reasoning, and attachment payloads are never persisted, and inference responses carry `Cache-Control: no-store`. That means **your app owns the history**. In the browser, Nito's own chat stores history client-side only, in encrypted IndexedDB, using a per-user AES key derived server-side via `GET /api/v1/me/storage-key` (an `HMAC-SHA256` of a server secret and the user ID). You can follow the same pattern: keep conversation state on the client, and treat the gateway as stateless.
+
+If you persist history server-side in your own backend, that store is yours to secure and yours to set retention on. The gateway's metadata-only guarantee covers the gateway, not a database you add downstream.
+
+## Attest the tier (optional but recommended)
+
+If you chose a `:tee` model, you can prove the tier rather than trust it. Make the chat call, then fetch `GET /api/v1/tee/attestation?model=...&nonce=<fresh>` and run the baseline checks. That flow is its own recipe: [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
+
+## Related
+
+- [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
+- [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
+- [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_chat.go; internal/server/sse.go; internal/inference/contracts.go: Role; internal/models/models.go:34-46,485; DOCS_SOURCE_OF_TRUTH.md §2, §3, §6, §10 -->

@@ -1,0 +1,159 @@
+---
+title: Chat Completions API
+description: Schema reference for POST /v1/chat/completions on Nito. Request fields, response shape, status codes, and a worked call.
+---
+
+The chat completions endpoint is the primary text surface on Nito. This page is the precise schema companion to the [Chat Completions feature guide](/features/chat-completions): it leads with the request and response tables and a worked call. Read the feature guide first for the conceptual model (one key, model-ID-carried privacy).
+
+## Endpoint
+
+```
+POST /v1/chat/completions
+POST /api/v1/chat/completions
+```
+
+Both paths route to the same handler (`apiChatCompletionsHandler`) and behave identically. Use `/v1` for OpenAI-compatible clients and `/api/v1` for first-party clients.
+
+The body is decoded as **strict JSON**: unknown fields are rejected with a `400`. Send only the fields below. The request is size-capped at 4 MiB (`apiMaxRequestBytes`). Multipart/form-data is also accepted (a `request` JSON field plus image attachments) for multimodal uploads.
+
+## Request
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `messages` | array | Yes | Conversation so far. Empty array is rejected (`messages is required`). See [Message format](/api-reference/chat-and-text/message-format). |
+| `model` | string | No | Empty falls back to the gateway default. Append `:tee` or `:e2e-tee` to select a privacy mode. Router mode expects `provider/model` form. |
+| `temperature` | number | No | Sampling temperature. Nil passthrough. |
+| `top_p` | number | No | Nucleus sampling. Nil passthrough. |
+| `max_tokens` | integer | No | Cap on generated tokens. |
+| `max_completion_tokens` | integer | No | Newer alias for the completion cap. |
+| `stream` | boolean | No | Stream the reply as Server-Sent Events. See [SSE transport](/api-reference/streaming-format/server-sent-events). |
+| `stream_options.include_usage` | boolean | No | Append a trailing usage chunk to the stream. See [Stream termination](/api-reference/streaming-format/stream-termination). |
+| `reasoning` | object | No | Ask a capable model to think first. See [Reasoning parameters](/api-reference/chat-and-text/reasoning-parameters). |
+| `prompt_cache_key` | string | No | Reuse a cached prompt prefix. Must be `<= 256` bytes; model must support it. |
+| `cache_control` | object | No | Provider cache hints (raw JSON object), passed through. Model must support it. |
+| `web_search` | bool or object | No | Let the model search the web mid-generation. |
+| `web_fetch` | boolean | No | Let the model fetch a URL mid-generation. |
+| `tools` | array | No | Function tools and hosted tools. See [Tool calling](/features/tool-calling). |
+| `tool_choice` | string or object | No | `auto` / `none` / `required`, or `{type, function:{name}}`. |
+| `user` | string | No | Opaque end-user identifier for your own bookkeeping. |
+
+Duplicate feature keys (for example sending `web_search` twice) are rejected with `request body contains duplicate feature fields`.
+
+### Message object
+
+Each entry in `messages` carries `role`, `content`, and optionally `tool_call_id` and `tool_calls`. Accepted roles are `system`, `developer`, `user`, `assistant`, and `tool`. `content` is a string or an array of content parts. The full per-role schema and content-part shapes are documented in [Message format](/api-reference/chat-and-text/message-format).
+
+## Worked call
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+`grok-4.3` below is a realistic example only. Do not hard-code it; fetch `GET /v1/models` for the live catalog and select by capability at runtime.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [
+      {"role": "system", "content": "You are concise."},
+      {"role": "user", "content": "Explain a gateway in one sentence."}
+    ]
+  }'
+```
+
+## Response
+
+A successful non-streaming call returns an object with `object` set to `chat.completion`:
+
+```json
+{
+  "id": "...",
+  "object": "chat.completion",
+  "created": 1751299200,
+  "model": "grok-4.3",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "A gateway is a single entry point that routes your request to the right backend."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "system_fingerprint": null,
+  "usage": {
+    "prompt_tokens": 24,
+    "completion_tokens": 17,
+    "total_tokens": 41
+  }
+}
+```
+
+### Top-level fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Completion identifier. |
+| `object` | string | Always `chat.completion`. |
+| `created` | integer | Unix seconds. |
+| `model` | string | The model that served the call. |
+| `choices` | array | Always exactly one element. Nito does not return `n > 1`. Read `choices[0]`. |
+| `system_fingerprint` | null | Always serialized as `null`. Present for OpenAI compatibility; never populated. Do not build logic on it. |
+| `usage` | object | Token accounting. See below. |
+| `web_search` | object | Optional. Present when a web-search tool ran. |
+| `free_tier` | object | Optional. Present on free-tier-eligible calls. |
+
+### Choice and message
+
+| Field | Type | Notes |
+|---|---|---|
+| `choices[].index` | integer | Choice index (always `0`). |
+| `choices[].message.role` | string | Always `assistant` on the response. |
+| `choices[].message.content` | string | Always present. May be empty when the model is calling a tool. |
+| `choices[].message.tool_calls` | array | Optional. Present when the model requests tool calls. |
+| `choices[].message.reasoning_details` | array | Optional. Present when reasoning is enabled. See [Reasoning parameters](/api-reference/chat-and-text/reasoning-parameters). |
+| `choices[].finish_reason` | string | One of `stop`, `length`, `tool_calls`, `error`. See [Finish reasons](/api-reference/chat-and-text/finish-reasons). |
+
+### Usage object
+
+| Field | Type | Notes |
+|---|---|---|
+| `prompt_tokens` | integer | Tokens in the prompt. |
+| `completion_tokens` | integer | Tokens generated. |
+| `total_tokens` | integer | Sum of the two. |
+| `prompt_tokens_details` | object | Optional. `cached_tokens`, `cache_creation_input_tokens`. |
+| `cache_read_input_tokens` | integer | Optional. Tokens read from a provider prompt cache. |
+| `cache_write_input_tokens` | integer | Optional. Tokens written to a provider prompt cache. |
+| `reasoning_tokens` | integer | Optional. Tokens spent on reasoning. |
+| `server_tool_use` | object | Optional. `web_search_requests`, `web_search_results`, `web_fetch_requests`. |
+
+Usage is what you are billed on, settled against the hold placed before the call.
+
+## Status codes
+
+| Status | When |
+|---|---|
+| `200` | Success. |
+| `400` | Decode, validation, feature, or attachment error. Envelope `{"error":{message,code,param}}`. |
+| `405` | Non-POST request. Sets the `Allow` header. |
+| `401` / `402` / `403` / `429` / `502` / `503` / `500` | Authentication, quota, and provider failures, mapped by `inference.StatusCode`. See [Error format](/api-reference/overview/error-format). |
+
+All responses set `Cache-Control: no-store`.
+
+## Related endpoints that return 404
+
+The OpenAI Responses endpoint (`/v1/responses`) and the Anthropic Messages endpoints (`/v1/messages`, `/v1/messages/count_tokens`) are wired to a not-found handler and return `404` at this commit. They are not implemented.
+
+## Related
+
+- [Chat Completions (feature guide)](/features/chat-completions)
+- [Message format](/api-reference/chat-and-text/message-format)
+- [Reasoning parameters](/api-reference/chat-and-text/reasoning-parameters)
+- [Finish reasons](/api-reference/chat-and-text/finish-reasons)
+- [Chat Fusion API](/api-reference/chat-and-text/chat-fusion)
+- [SSE transport](/api-reference/streaming-format/server-sent-events)
+- [Error format](/api-reference/overview/error-format)
+
+<!-- source: internal/server/api_chat.go (apiChatCompletionsHandler, apiChatRequest, apiChatRequestMessage, apiChatResponse, apiChatChoice, apiChatMessage, apiUsage, apiErrorBody, decodeStrictJSON); internal/inference/validation.go (ValidateChatRequest); internal/inference/contracts.go (Role, FinishReason); internal/server/routes.go (routes.go:84,137,141-147); DOCS_SOURCE_OF_TRUTH.md §2, §9 -->

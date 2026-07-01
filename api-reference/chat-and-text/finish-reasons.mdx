@@ -1,0 +1,53 @@
+---
+title: Finish reasons
+description: The four finish_reason values Nito returns on chat completions, what each one signals, and how it serializes in streams.
+---
+
+Every chat completion choice carries a `finish_reason` that tells you why generation stopped. Nito returns exactly four values, emitted verbatim from the provider. There are no others.
+
+## The four values
+
+| Value | Signals |
+|---|---|
+| `stop` | The model finished normally. It reached a natural end or a stop sequence. This is the success case. |
+| `length` | Generation hit a token cap (`max_tokens` / `max_completion_tokens`, or a model context limit). The reply is truncated; raise the cap and retry if you need more. |
+| `tool_calls` | The model wants you to run one or more tools. Read `message.tool_calls`, execute them, append the results as `tool` messages, and call again. See [Tool calling](/features/tool-calling). |
+| `error` | Something failed mid-generation. In a stream this arrives alongside a top-level `error` object. See [Error events](/api-reference/streaming-format/error-events). |
+
+## Where it appears
+
+In a non-streaming response, `finish_reason` is on each choice:
+
+```json
+{
+  "choices": [
+    { "index": 0, "message": { "role": "assistant", "content": "..." }, "finish_reason": "stop" }
+  ]
+}
+```
+
+In a stream, `finish_reason` lives on `choices[].delta` and is **`null` until the terminal chunk**. An empty finish reason serializes as `null` in chunks, so do not treat the absence of a value as an error; wait for a non-null value on the final chunk. See [Delta format](/api-reference/streaming-format/delta-format).
+
+```json
+{ "choices": [ { "index": 0, "delta": {}, "finish_reason": "stop" } ] }
+```
+
+## Branching on it
+
+A robust client branches on all four:
+
+- `stop`: use the content as-is.
+- `length`: the output is incomplete; decide whether to continue or raise the cap.
+- `tool_calls`: run the requested tools and continue the conversation.
+- `error`: surface the accompanying error; the content (if any) is partial.
+
+The same four values appear on each participant in a [fusion response](/api-reference/chat-and-text/chat-fusion) under `models[].finish_reason`.
+
+## Related
+
+- [Chat Completions API](/api-reference/chat-and-text/chat-completions)
+- [Tool calling](/features/tool-calling)
+- [Error events](/api-reference/streaming-format/error-events)
+- [Delta format](/api-reference/streaming-format/delta-format)
+
+<!-- source: internal/inference/contracts.go (FinishReason); internal/server/api_chat.go (apiChatChoice, apiChatChunk); DOCS_SOURCE_OF_TRUTH.md §2 (Finish reasons), §3 -->

@@ -1,0 +1,108 @@
+---
+title: Image generation
+description: Turn a text prompt into a PNG image with the Nito image endpoint, including request and response shapes and a worked curl example.
+---
+
+Image generation is the one thing Nito produces beyond text. You send a prompt, you get back a PNG. This page covers the endpoint, every request field, the response shape, and a complete worked call, plus the two parameters you should not bother sending.
+
+## The endpoint
+
+Image generation is a dedicated endpoint, separate from chat. There are two paths and they share a handler:
+
+```
+POST /v1/images/generations
+POST /api/v1/images/generations
+```
+
+The bare `/v1` path is the OpenAI-compatible alias; the `/api/v1` path is the first-party one. Use whichever fits your client; they behave the same.
+
+The endpoint is backed by the **fal** provider. The default model is a Z-Image model, so you do not have to name one for a basic call. Output is always PNG.
+
+## Request fields
+
+| Field | Required | Notes |
+|---|---|---|
+| `prompt` | yes | The text description of the image to generate. |
+| `model` | no | Defaults to a Z-Image model if omitted. |
+| `n` | no | How many images to generate, 0 to 4. |
+| `size` | no | Pixel dimensions, for example `1024x1024`. |
+| `quality` | no | See the warning below: rejected by the fal provider. |
+| `style` | no | See the warning below: rejected by the fal provider. |
+| `response_format` | no | `url` (default) or `b64_json`. |
+| `user` | no | An opaque identifier for the end user, passed through. |
+
+The `response_format` field decides how you receive the image. With `url` (the default) the response carries a link to the generated PNG; with `b64_json` the response carries the base64-encoded bytes inline.
+
+<Warning>
+`quality` and `style` are rejected for the fal provider. Even though the fields exist in the request shape, sending them to the fal-backed image models does not work. Leave them out. Plan your generation around `prompt`, `model`, `n`, `size`, and `response_format`.
+</Warning>
+
+## Response shape
+
+A successful response looks like:
+
+```json
+{
+  "created": 1751299200,
+  "model": "fal/fal-ai/z-image/turbo",
+  "data": [
+    {
+      "url": "https://.../generated.png",
+      "revised_prompt": "..."
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "output_images": 1,
+    "total_tokens": 12
+  }
+}
+```
+
+The fields:
+
+- `created` a unix timestamp.
+- `model` the model that served the request.
+- `data[]` one entry per generated image. Each entry has `url` (when `response_format` is `url`), `b64_json` (when `response_format` is `b64_json`), and an optional `revised_prompt` if the provider rewrote your prompt.
+- `usage` token and image accounting: `prompt_tokens`, `output_images`, and `total_tokens`.
+
+## Billing
+
+Image generation is **billed by pixels**. The cost scales with the size of the images you generate, not by a flat per-image rate, so a larger `size` or a higher `n` costs more.
+
+> **TODO (needs SME):** publish the per-pixel pricing (or the formula) and confirm how `n` and `size` combine into the billed amount, including any minimum charge. Pricing is not encoded in the gateway model card. Owner: Finance/Backend.
+
+## A worked example
+
+This generates a single 1024x1024 image and returns a URL to it. Replace the base URL.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/images/generations \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A quiet harbor at dawn, soft fog, wooden boats, painterly",
+    "n": 1,
+    "size": "1024x1024",
+    "response_format": "url"
+  }'
+```
+
+Because `model` is omitted, this routes to the default Z-Image model. To receive the bytes inline instead of a URL, set `"response_format": "b64_json"` and read `data[0].b64_json` from the response.
+
+> **TODO (needs SME):** confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts. Owner: Product/Infra.
+
+## What this is not
+
+- **Not image editing.** There are no edit or variation endpoints. Generation is prompt-to-image only. You cannot upload an image and ask for a modified version.
+- **Not image input.** Sending an image into a model so it can read it is a different feature. See [Image input](/features/multimodal/image-input).
+- **Not chat.** Image generation does not run through `/chat/completions`. It is its own endpoint with its own request and response shapes.
+
+## Related
+
+- [Multimodal overview](/features/multimodal)
+- [Image input](/features/multimodal/image-input)
+- [How Nito works](/get-started/how-nito-works)
+- [Models](/models)
+
+<!-- source: internal/server/api_images.go (apiImageGenerationsHandler, apiImageGenerationRequest, apiImageGenerationResponse), internal/provider/fal/fal.go (default model fal/fal-ai/z-image/turbo, X-Fal-Store-IO:0, quality/style rejected, PNG output, billed by pixels) -->

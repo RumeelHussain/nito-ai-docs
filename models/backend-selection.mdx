@@ -1,0 +1,78 @@
+---
+title: Backend selection
+description: How Nito chooses which backend serves a request, and how latency, cost, and privacy shape that choice.
+---
+
+When you name a logical model, more than one backend may be able to serve it. A backend here means one specific model on one specific provider. Nito has to pick exactly one of them for each call, and it does so with a defined order of preference rather than at random. This page explains that order, because understanding it lets you reason about why a call went where it did, predict how cost and privacy interact, and avoid being surprised when the "same" model lands on a different provider tomorrow.
+
+The mental model is a hiring decision made in two stages. First Nito throws out every candidate that cannot do the job: the wrong privacy mode, a missing feature, an input it cannot accept. Only the qualified candidates remain. Then, among those, it ranks by a fixed list of tiebreakers and hires the top one. Filter first, then order.
+
+## Stage one: filtering by capability and privacy
+
+Before a backend is even eligible, it has to be compatible with your specific request. A candidate is filtered out if it does not support:
+
+- The **inputs you sent**, for example image inputs or file attachments.
+- The **features you asked for**, such as reasoning, a prompt cache key, or cache control.
+- Any **server-side tools you requested**, such as web search or web fetch.
+
+Your privacy choice is part of this same filtering stage, and it is a hard filter, not a gentle preference:
+
+- A **`:tee` call** only considers TEE-capable backends with attestation. It will not fall back to a non-TEE backend.
+- A **`:e2e-tee` call** only considers backends that support end-to-end encryption.
+- On a **private route**, Nito sets a zero-data-retention requirement, which constrains which backends and provider settings are allowed.
+
+The order matters: privacy and capability narrow the candidate set first. Cost and availability only get to choose among whatever survives. This is why a cheaper backend can lose to a more expensive one. If the cheap one cannot satisfy your privacy mode or a feature you requested, it was never in the running.
+
+## Stage two: ordering the survivors
+
+For a given logical model and privacy mode, Nito sorts the eligible candidates by a fixed priority. In order, it prefers a candidate that is:
+
+1. **Available** over unavailable.
+2. **On the free-tier route**, when free-tier applies.
+3. **Higher-privacy when you did not specify.** In ordinary mode, a private-tier backend is preferred over an anonymized one.
+4. **Price-known** over a backend whose price is unknown.
+5. **Cheaper** by estimated cost.
+6. **Higher provider priority**, by the configured provider order.
+7. Then by **provider name and model ID**, as a stable final tiebreak.
+
+Read top to bottom, the list tells a story: never route to something that is down; honor free-tier and the safer default first; then, among healthy and equal-privacy options, prefer the one whose price you actually know and that costs less; and only fall back to provider order and name when everything above ties. The last rule exists so that ties resolve deterministically rather than flickering between equal choices.
+
+## A worked example
+
+Suppose you send a request for a popular chat model with `:tee`, and you attach an image. Walk it through both stages:
+
+1. **Filter by privacy.** Every non-TEE backend in the group is dropped immediately. Only attestation-capable backends remain.
+2. **Filter by capability.** Of those, any that cannot accept image inputs is dropped.
+3. **Order the rest.** Unavailable backends fall to the bottom. Among the available ones, Nito prefers a price-known, cheaper backend, then higher provider priority, then name.
+
+If only one TEE backend can take an image, that one is chosen regardless of price, because filtering happened before ordering. If two qualify, the cheaper available one wins.
+
+## Influencing the choice
+
+You shape backend selection mostly through the model ID:
+
+- **Pick a more specific model** to narrow the group.
+- **Set the privacy mode** with `:tee` / `:e2e-tee` to constrain the candidates to attested backends.
+- **Use a free-tier-eligible model** to stay on the free-tier route.
+
+Beyond the model ID and privacy suffix, this page does not claim a mechanism for pinning one exact physical backend.
+
+> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (for example a provider-scoped `provider/model` ID) from the public API, beyond the model ID and privacy mode. The routing logic chooses among candidates; confirm the intended public contract for explicit pinning (owner: Backend/Product).
+
+## Why a call went where it did
+
+For attested calls, the attestation response names the provider and physical model that served the request, so you can confirm the backend after the fact. For ordinary calls, the response `model` field reflects what served it. If a call landed somewhere unexpected, the ordering above is usually the explanation: check availability and price, because a cheaper, available backend wins among equally qualified candidates.
+
+## Common mistakes
+
+- **Expecting cost preference to override privacy.** Privacy filters first; cost only orders the survivors. A cheaper non-TEE backend can never win a `:tee` request.
+- **Assuming the same logical ID always hits the same backend.** It can change with availability and price between calls.
+- **Requesting a feature the cheapest backend lacks.** Because the candidate set is filtered by capability first, a single feature requirement can change which backend is chosen.
+
+## Related
+
+- [Model groups](/models/model-groups)
+- [Providers](/models/providers)
+- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+
+<!-- source: internal/server/logical_models.go (chooseLogicalRoute, logicalRouteCandidates, logicalCandidateCompatible, logicalProviderCompatible, providerSupportsRequestedServerTools, RequireZeroDataRetention), internal/models/models.go -->

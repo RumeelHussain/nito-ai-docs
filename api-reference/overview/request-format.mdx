@@ -1,0 +1,44 @@
+---
+title: Request format
+description: How Nito parses request bodies, including strict JSON decoding, the size cap, and multipart uploads.
+---
+
+Most Nito endpoints take a JSON request body. File-handling endpoints take `multipart/form-data`. This page covers the rules that apply to the body itself.
+
+## JSON bodies
+
+Send `Content-Type: application/json` with a JSON object. Decoding is **strict**: unknown fields are rejected.
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+| Rule | Behavior |
+|---|---|
+| Unknown fields | Rejected with `400`. A misspelled or unsupported field fails the request rather than being ignored. |
+| Max request size | 4 MiB (configurable per deployment). Larger bodies are rejected. |
+| Content type | `application/json` for JSON endpoints. |
+
+Strict decoding is a feature: a typo like `temprature` returns a `400` instead of silently dropping your value. Match the documented field names exactly, and do not send fields the endpoint does not define.
+
+## Multipart uploads
+
+Two situations use `multipart/form-data` instead of JSON:
+
+- **File parsing**: `/api/v1/attachments/parse` and `/api/v1/augment/text-parser` require a multipart upload with a `file` part.
+- **Multipart chat image upload**: chat completions can accept a `request` JSON field plus image attachments as multipart parts, as an alternative to inline image URLs.
+
+The 4 MiB JSON cap is separate from the larger file-parse cap (10 MiB) on the parsing endpoints.
+
+## Related
+
+- [Response format](/api-reference/overview/response-format)
+- [Error format](/api-reference/overview/error-format)
+- [Headers](/api-reference/overview/headers)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §2 (strict decode, apiMaxRequestBytes), §4 (multipart) -->

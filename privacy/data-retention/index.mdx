@@ -1,0 +1,35 @@
+---
+title: Data Retention
+description: Nito's retention contract. Metadata-only by default, with request bodies request-local and several windows still pending SME confirmation.
+---
+
+Retention is the question of **what survives a request and for how long**. It is separate from visibility (who sees what while the request is in flight, covered in [Data visibility](/privacy/data-visibility)) and separate from privacy modes (how strongly a single call is protected). This page is the contract: it states Nito's default posture, then frames the sub-pages that go deeper on each mechanism.
+
+Read the one-line version first: **the default is metadata only.** The gateway keeps operational metadata about a request; it does not persist the prompt, the completion, the reasoning, the tool calls, or the contents of any file you uploaded. Those are request-local. Everything below either reinforces that default or marks the places where a specific retention window is referenced in product materials but is **not yet verifiable in the current gateway code**.
+
+## The default: metadata only
+
+The baseline retention posture is the strongest and best-supported claim in this section. By default the gateway keeps only operational metadata. Request and response bodies are request-local; inference responses are returned with `Cache-Control: no-store`; and telemetry is restricted to a safe allowlist rather than capturing payloads. This is the floor that every privacy mode builds on, and it is documented in full on [Metadata-only default](/privacy/data-retention/metadata-only-default).
+
+## A note on honesty about retention windows
+
+The product and standards materials reference several specific retention windows: a 24-hour idempotency replay window, a debug-capture retention bound (sometimes cited as 7 days), and a tenant saved-chat policy (sometimes cited as 30 days default with a 90-day cap). **These numbers are not verifiable in the gateway code scanned for this documentation.** Some may live in infrastructure, SQL migrations, or roadmap not covered here.
+
+In keeping with the rule that retention numbers are facts only when confirmed by code, this section does **not** state those numbers as fact. Where a window is referenced but unconfirmed, the page carries a visible `> **TODO (needs SME):** ...` marker instead of asserting a value. If you are a security reviewer, treat any unmarked number as confirmed and any TODO-marked window as pending sign-off.
+
+## The sub-pages
+
+- **[Metadata-only default](/privacy/data-retention/metadata-only-default)**: CONFIRMED. The baseline: what "metadata" means, why bodies are request-local, the `no-store` header, and the telemetry allowlist. Start here.
+- **[Idempotency and replay](/privacy/data-retention/idempotency-replay)**: the `Idempotency-Key` mechanism, which drives billing dedup so a retried request is not double-charged. The specific replay-retention window is unconfirmed.
+- **[Governed debug capture](/privacy/data-retention/governed-debug-capture)**: the designed, opt-in concept of bounded debug captures. The mechanism and its retention bound are unconfirmed.
+- **[Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat)**: the client-side reality of chat history today, and the status of any server-side tenant retention dial.
+- **[Three secret roles](/privacy/data-retention/three-distinct-keys)**: how the gateway separates signing, storage-key, and chat-share secrets as an HMAC domain-separated key hierarchy, and how stored credentials are hashed rather than kept in plaintext.
+
+## Related
+
+- [Data visibility](/privacy/data-visibility): who sees what while a request is being served.
+- [Metadata-only default](/privacy/data-retention/metadata-only-default): the confirmed baseline this contract rests on.
+- [Privacy overview](/privacy/overview): how per-call privacy modes layer on top of the retention default.
+- [How Nito works](/get-started/how-nito-works): the request lifecycle behind these guarantees.
+
+<!-- source: docs/standards/privacy-and-retention.md, internal/server/api_chat.go (Cache-Control: no-store), internal/observability/attrs.go (SafeAttrs); DOCS_SOURCE_OF_TRUTH.md §10 -->

@@ -1,0 +1,42 @@
+---
+title: Retry behavior
+description: Which Nito errors are safe to retry, which are not, and why live streams are never replayed.
+---
+
+Not every error should be retried. Retrying a `400` will just fail again; retrying a `429` after waiting will usually succeed. This page sorts the error families into retryable and non-retryable.
+
+## Retryable
+
+| Status | Codes | How to retry |
+|---|---|---|
+| `429` | `rate_limited`, `insufficient_quota` | Wait for the `Retry-After` header, then retry. |
+| `502` | `provider_error` | Transient upstream failure. Retry with [backoff](/api-reference/errors-and-rate-limits/backoff). |
+| `503` | `unavailable` | Transient. Retry with backoff. |
+
+`502` and `503` are treated as transient upstream conditions and are safe to retry with exponential backoff.
+
+## Not retryable
+
+| Status | Meaning |
+|---|---|
+| `400` | The request is wrong (`invalid_request`, `model_unavailable`). Fix it first. |
+| `401` | The credential is wrong (`unauthorized`). Fix the key. |
+| `403` | Not permitted (`forbidden`). |
+
+Retrying these unchanged will reproduce the same failure. Change the request, the credential, or the permissions before sending again.
+
+## Streams are never replayed
+
+The gateway never replays a live stream. If a streaming completion fails after bytes have been written, you receive a terminal error chunk (`finish_reason: "error"`); the gateway does not silently restart the generation. To retry, start a new request from the client.
+
+## Upstream retry schedule
+
+> **TODO (needs SME):** the gateway's exact upstream retry set and schedule (`internal/inference/retry.go` is not fully enumerated) (owner: Backend).
+
+## Related
+
+- [Backoff](/api-reference/errors-and-rate-limits/backoff)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (status mapping), §3 (stream never replayed; terminal error chunk), §12 #6 (exact retry schedule TODO) -->

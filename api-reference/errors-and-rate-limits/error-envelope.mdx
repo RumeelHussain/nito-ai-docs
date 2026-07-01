@@ -1,0 +1,53 @@
+---
+title: Error envelope
+description: The canonical Nito error envelope, the absence of a type field, and the OAuth RFC 6749 exception.
+---
+
+Every failing Nito API call returns a JSON error envelope with a matching HTTP status. There is one canonical shape across the API surface, written by `writeAPIError`, with a documented exception for OAuth endpoints.
+
+## Canonical shape
+
+```json
+{
+  "error": {
+    "message": "human-readable description",
+    "code": "invalid_request",
+    "param": "model"
+  }
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `message` | string | Human-readable description of the failure. |
+| `code` | string | The error family. The category lives here. See [Error codes](/api-reference/errors-and-rate-limits/error-codes). |
+| `param` | string | Optional. The request field the error refers to, when applicable (for example `model`). |
+
+## There is no `type` field
+
+If you have used APIs that split errors into `type` and `code`, note that Nito carries the family in `code` only. Branch your error handling on `code`; do not look for `error.type`.
+
+## The OAuth exception
+
+OAuth endpoints (`/oauth/*`) follow RFC 6749 instead of the canonical envelope:
+
+```json
+{
+  "error": "invalid_grant",
+  "error_description": "human-readable description"
+}
+```
+
+When working with OAuth, read `error` and `error_description`, not `error.code` and `error.message`. Some SPA account endpoints use a third shape, `{"error", "code"}`.
+
+## Mid-stream errors
+
+In a streaming completion, an error that occurs after the stream has opened is delivered as a chunk with a top-level `error` object (`{message, code, param}`) and a terminal choice carrying `finish_reason: "error"`, rather than an HTTP error. See [Status mapping](/api-reference/errors-and-rate-limits/status-mapping).
+
+## Related
+
+- [Error codes](/api-reference/errors-and-rate-limits/error-codes)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+- [Debugging requests](/api-reference/errors-and-rate-limits/debugging-requests)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (apiErrorBody, writeAPIError, no type field, OAuth RFC6749), §3 (mid-stream error chunk) -->

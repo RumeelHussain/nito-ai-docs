@@ -1,0 +1,30 @@
+---
+title: Seven-gate reference
+description: A concise reference list of the seven baseline gates the gateway runs, with the hardware-verification scope limit.
+---
+
+When the gateway fetches attestation evidence, it runs a fixed sequence of seven pass-or-fail checks (the **baseline**) and reports the result in the `verified` field of the [attestation response](/api-reference/attestation/get-attestation). Every applicable gate must pass for `verified` to be true.
+
+This page is a quick reference. For the full explanation of each gate and the binding mechanics, see [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline).
+
+## The seven gates
+
+1. **Evidence present and parseable.** Provider evidence exists and parses as a JSON object.
+2. **Provider-declared verification.** If the provider's own evidence declares `verified: false`, the result is marked unverified.
+3. **Proof metadata present.** Proof format, signing algorithm, and model public key are all present; a caller-supplied `signing_algo` must match the evidence.
+4. **Nonce match.** The caller nonce matches the nonce observed in the provider evidence.
+5. **Gateway report-data binding.** `report_data == signing_address + nonce`, and the observed signing address matches the requested address.
+6. **Nested model-attestation binding.** Model id, algorithm, model signing identity, public key, and nonce bind consistently.
+7. **Nested payload nonce.** The nonce inside nested GPU envelopes (`nvidia_payload` / `payload` / `evidence`) is checked.
+
+## Scope limit
+
+The baseline does **not** verify Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. Those are the caller's responsibility, using the raw `evidence` returned by the endpoint. Use the terms "attested" and "baseline-verified", never "trustless" or "fully verified". To run the hardware checks yourself, see [Verify yourself](/api-reference/attestation/verify-yourself).
+
+## Related
+
+- [Get attestation](/api-reference/attestation/get-attestation)
+- [Verify yourself](/api-reference/attestation/verify-yourself)
+- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
+
+<!-- source: docs/architecture/tee-attestation.md:32-43; internal/server/api_tee_attestation_verification.go: verifyTEEAttestationBaseline; DOCS_SOURCE_OF_TRUTH.md §6 (seven-gate baseline, scope limit) -->

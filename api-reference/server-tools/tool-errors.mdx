@@ -1,0 +1,46 @@
+---
+title: Tool errors
+description: How server-tool routing errors surface, including unsupported-provider messages, in the standard error envelope.
+---
+
+When a server tool cannot run, the failure surfaces in the standard Nito error envelope, the same shape as any other API error. There is no separate tool-error channel. For the envelope itself, see [Error envelope](/api-reference/errors-and-rate-limits/error-envelope).
+
+## Where tool errors appear
+
+- **Before generation starts**, a tool routing error is returned as an HTTP error with the JSON envelope `{"error": {"message", "code", "param?}}`.
+- **Mid-stream**, if generation has already begun, the error arrives as a chunk carrying a top-level `error` and a terminal `finish_reason: "error"` choice. See [Streaming](/api-reference/overview/response-format).
+
+## Provider routing errors
+
+The most common tool errors are provider-support mismatches: you enabled a tool on a model whose provider does not offer it.
+
+| Condition | Message |
+|---|---|
+| Web search on an unsupported model | `web_search requires an OpenRouter, xAI, NEAR, or Phala model` |
+| Code interpreter on a non-xAI model | `code_interpreter requires an xAI model` |
+
+These are returned with `code: invalid_request` and map to `400`. The `message` names the providers that would satisfy the request.
+
+```json
+{
+  "error": {
+    "message": "code_interpreter requires an xAI model",
+    "code": "invalid_request"
+  }
+}
+```
+
+## Handling
+
+- Branch on `error.code`, not on `message` text, since messages can change.
+- For routing errors, pick a model whose provider supports the tool. See [List models](/api-reference/models-catalog/list-models) and the `capabilities` flags to confirm support before sending.
+- Provider-side failures during a tool run map through the usual status mapping (`provider_error` → `502`, `unavailable` → `503`). See [Status mapping](/api-reference/errors-and-rate-limits/status-mapping).
+
+## Related
+
+- [Error envelope](/api-reference/errors-and-rate-limits/error-envelope)
+- [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+- [Web search](/api-reference/server-tools/web-search)
+- [Code interpreter](/api-reference/server-tools/code-interpreter)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §7 (provider support per tool), §9 (error envelope, status mapping), §3 (mid-stream error chunk) -->

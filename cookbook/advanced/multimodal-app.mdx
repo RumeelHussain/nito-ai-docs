@@ -1,0 +1,121 @@
+---
+title: Build an image and document app
+description: Combine image input, document parsing, and image generation into one app. Audio and video are not supported today.
+---
+
+**Goal.** A small app that does the three multimodal things Nito actually supports: read an image in a chat request, parse a document into a prompt, and generate an image from text. One workflow, three real capabilities.
+
+**Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and a chat model that declares image support (`supportsImageInputs` in `GET /v1/models`).
+
+## Read this first: what is and is not supported
+
+Honesty up front, because it is easy to assume a modern gateway does everything. Nito's multimodal surface is exactly three things:
+
+- **Image input** (PNG, JPEG, WebP) into a chat model.
+- **Document input** (PDF, DOCX, PPTX, XLSX, XLS, plain text), parsed to text server-side.
+- **Image generation** (text to a PNG image).
+
+**Audio and video are not available**, as input or as generation. There are no audio or video endpoints today. Do not design a step around them. See [Multimodal](/features/multimodal) and [Known limitations](/privacy/known-limitations) for the full boundary. This recipe builds only on the three capabilities above.
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Step 1: Image input into chat
+
+Send an image as a content part alongside your text. Formats are PNG, JPEG, WebP. You can pass a URL, a data URL, or raw base64 with a media type.
+
+```python
+import os, json, urllib.request
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+API_KEY = os.environ["NITO_API_KEY"]
+
+def post(path, body):
+    req = urllib.request.Request(
+        f"{BASE_URL}{path}", data=json.dumps(body).encode(),
+        headers={"Authorization": f"Bearer {API_KEY}",
+                 "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.load(resp)
+
+vision = post("/v1/chat/completions", {
+    "model": "grok-4.3",   # must declare image support; check GET /v1/models
+    "messages": [{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "What is in this image?"},
+            {"type": "image_url",
+             "image_url": {"url": "https://example.com/photo.png"}},
+        ],
+    }],
+})
+print(vision["choices"][0]["message"]["content"])
+```
+
+`grok-4.3` is a stand-in; fetch a real image-capable ID from `GET /v1/models`. Limits: up to 10 images per request, 5 MiB per image, 2048px on the long edge.
+
+## Step 2: Parse a document into a prompt
+
+A document does not go straight into chat; you parse it first at the parser endpoint, which is multipart. Then you put the returned text into a normal chat message.
+
+```python
+import urllib.request
+
+def parse_document(file_path):
+    # multipart upload to the parser endpoint
+    import mimetypes, uuid
+    boundary = uuid.uuid4().hex
+    with open(file_path, "rb") as f:
+        content = f.read()
+    parts = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file"; filename="{file_path}"\r\n'
+        f"Content-Type: application/octet-stream\r\n\r\n"
+    ).encode() + content + f"\r\n--{boundary}--\r\n".encode()
+    req = urllib.request.Request(
+        f"{BASE_URL}/api/v1/attachments/parse", data=parts,
+        headers={"Authorization": f"Bearer {API_KEY}",
+                 "Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.load(resp)
+
+parsed = parse_document("contract.pdf")
+answer = post("/v1/chat/completions", {
+    "model": "grok-4.3",
+    "messages": [{"role": "user",
+                  "content": f"Summarize this document:\n\n{parsed['text']}"}],
+})
+print(answer["choices"][0]["message"]["content"])
+```
+
+The parser accepts PDF, DOCX, PPTX, XLSX, XLS, and text; it **rejects images** (send those directly to an image-capable model as in Step 1). It returns `text`, `mime_type`, `file_kind`, `bytes`, and optional `page_count`, and caps output at 300k runes and PDFs at 80 pages. The upload cap is 10 MiB.
+
+## Step 3: Generate an image
+
+Generation is a separate endpoint with its own request shape. You send a prompt, you get PNG data back.
+
+```python
+image = post("/v1/images/generations", {
+    "prompt": "a diagram of a sealed compute enclave, flat vector style",
+    "n": 1,
+    "size": "1024x1024",
+})
+print(image["data"][0].get("url") or "b64 image returned")
+```
+
+Response format is a `url` by default, or `b64_json` if you ask. Output is always PNG. `n` is 0 to 4.
+
+## Putting it together
+
+A realistic flow chains all three: parse an uploaded document (Step 2), ask a chat model about it and about a supplied image (Steps 1 and 2 combined in one call, since one chat request can mix text, image inputs, and document text), then generate an illustration for the result (Step 3). That is the full extent of multimodal on Nito today. When you find yourself reaching for an audio transcription or a video step, stop: those are not available, and the honest move is to handle them outside Nito rather than assume an endpoint that does not exist.
+
+## Related
+
+- [Multimodal overview](/features/multimodal)
+- [Image input](/features/multimodal/image-input)
+- [PDF and document input](/features/multimodal/pdf-input)
+- [Image generation](/features/multimodal/image-generation)
+- [Known limitations](/privacy/known-limitations)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §4 (image input PNG/JPEG/WebP + limits, document parse kinds + caps, image gen FAL PNG, audio/video rejected), §11 (audio/video absent, only image input + document input + image generation) -->

@@ -1,0 +1,61 @@
+---
+title: Cost Control
+description: Keep spend predictable on Nito with model choice, prompt caching, output caps, per-key spend limits, and the org usage overview.
+---
+
+Cost on Nito is mostly under your control, because most of what you pay for is a direct result of choices you make on each request: which model you route to, how much input you send, how much output you allow, and which extra features you turn on. This page collects the levers that keep spend predictable, plus the guardrails you can put in place so a runaway workload cannot drain your balance. It deliberately avoids quoting prices, which live in billing and change; check current rates in the product before you plan a budget.
+
+If you have not seen how billing works at the request level, the hold-then-settle flow in [How Nito Works](/get-started/how-nito-works) is worth a read: a failed call releases its hold and does not charge you.
+
+## Choose a cheaper model when it is adequate
+
+The largest single factor in cost is usually the model. A compact model that handles the task well costs less per token than a flagship, and often responds faster too. Do not default to the biggest model. Match the model to the job and reserve expensive models for work that genuinely needs them. Because the catalog is discovered at runtime and pricing is joined in at response time rather than baked into the model card, select by capability from `GET /v1/models` and check the live price rather than assuming. See [Choosing a model](/models/choosing-a-model) and [Pricing](/models/pricing).
+
+## Cut input cost with prompt caching
+
+If a long prefix repeats across requests, prompt caching lets a supporting provider serve that prefix from cache instead of reprocessing it, which reduces the input cost of those tokens. Set `prompt_cache_key` or `cache_control` and Nito forwards the directive; the response `usage` reports `cache_read_input_tokens` so you can see how much was served cheaply from cache. This only helps when the prefix is large and genuinely repeated, so put stable content first and the variable question last. Full detail is in [Prompt caching](/features/prompt-caching).
+
+## Cap output with max_tokens
+
+Output tokens are billed too, and generation length is easy to let run long. Set `max_tokens` (or `max_completion_tokens`) to bound how much the model can produce per call. This is both a cost control and a safety valve against a model that rambles. Pick a limit that fits the task rather than leaving it unbounded.
+
+## Bound blast radius with per-key spend caps
+
+The strongest structural guardrail is a per-key spend cap. Each API key can carry a spend cap of type `daily`, `monthly`, or `overall`. When a key breaches its cap, the key is force-expired, so a single compromised or misbehaving workload cannot keep spending past the limit you set. This makes spend caps useful in two ways: as a budget on a workload, and as a containment boundary if a key leaks.
+
+A good pattern is one key per workload, each with a cap sized to that workload. A batch job that should never cost more than a set amount per day gets a daily cap; a long-lived service gets an overall or monthly cap. See [Secure API key handling](/resources/best-practices/secure-api-key-handling) for the key-hygiene side of this.
+
+## Monitor spend through the org usage overview
+
+Caps prevent disasters; monitoring catches drift before it becomes one. Spend and usage are tracked at the organization level and surfaced through the org usage overview (`GET /api/v1/orgs/{id}/api/overview`) and the org billing balance. Check these regularly so you notice a workload trending up before it hits a cap. Usage windows default to a 30-day view.
+
+> **TODO (needs SME):** confirm the exact fields and granularity returned by the org usage overview for a cost-monitoring dashboard (owner: Backend).
+
+## Watch the features that bill extra
+
+Some capabilities add cost beyond the base input and output tokens, and it is easy to forget them:
+
+- **Reasoning tokens.** When you enable reasoning, the model spends extra tokens thinking, reported as `usage.reasoning_tokens`. Higher effort means more reasoning tokens and more cost. Use the effort control deliberately.
+- **Server-side tools.** Gateway-executed tools such as web search and web fetch are billed as their own line items in addition to the model call. An agent loop that searches on every turn adds up. The response `usage.server_tool_use` reports how many search and fetch requests ran.
+
+Neither is bad; both are worth the money when the task needs them. The point is to turn them on where they earn their keep, not by default.
+
+## A quick checklist
+
+- Right-sized model, price checked live.
+- Prompt caching on for repeated prefixes.
+- `max_tokens` set to bound output.
+- Per-key spend caps on every key.
+- Org usage overview checked on a schedule.
+- Reasoning effort and server tools used deliberately.
+
+## Related
+
+- [How Nito Works](/get-started/how-nito-works)
+- [Choosing a model](/models/choosing-a-model)
+- [Pricing](/models/pricing)
+- [Prompt caching](/features/prompt-caching)
+- [Secure API key handling](/resources/best-practices/secure-api-key-handling)
+- [Latency and performance](/resources/best-practices/latency-and-performance)
+
+<!-- source: internal/auth/api_keys.go (per-key spend caps daily/monthly/overall, force-expire), internal/server/api_orgs.go (api/overview, billing/balance), internal/server/api_chat.go (max_tokens, usage), docs/planning/DOCS_SOURCE_OF_TRUTH.md §2, §7, §8 -->

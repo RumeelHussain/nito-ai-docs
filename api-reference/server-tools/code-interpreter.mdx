@@ -1,0 +1,56 @@
+---
+title: Code interpreter
+description: Run the code interpreter tool in a chat completion. Available on xAI models only, as a provider passthrough.
+---
+
+The code interpreter tool lets the model run code during a chat completion. It is available on xAI models only, where it maps to the provider's `xai:code_interpreter`. There is no gateway-native sandbox; the gateway passes the tool through to xAI.
+
+## Invoking
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [
+    { "role": "user", "content": "Compute the 50th Fibonacci number." }
+  ],
+  "tools": [{ "type": "code_interpreter" }]
+}
+```
+
+## Provider support
+
+Code interpreter requires an xAI model. On any other provider the request fails with:
+
+```json
+{
+  "error": {
+    "message": "code_interpreter requires an xAI model",
+    "code": "invalid_request"
+  }
+}
+```
+
+This is a `400`. See [Tool errors](/api-reference/server-tools/tool-errors).
+
+## Passthrough behavior
+
+Because the tool is a passthrough to xAI:
+
+- Execution happens upstream at xAI, not inside the gateway.
+- There is no gateway-managed sandbox, file system, or persisted execution state.
+
+## Datetime tool
+
+A datetime server tool is **not implemented**. There is no tool type or handler for it on the gateway. Do not send `{"type": "datetime"}`.
+
+## Billing
+
+Code interpreter usage is billed by the upstream provider in addition to model tokens. See [Tool pricing](/api-reference/server-tools/tool-pricing).
+
+## Related
+
+- [Tool errors](/api-reference/server-tools/tool-errors)
+- [Tool pricing](/api-reference/server-tools/tool-pricing)
+- [Web search](/api-reference/server-tools/web-search)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §7 (code_interpreter xAI only -> xai:code_interpreter passthrough; datetime tool NOT FOUND) -->

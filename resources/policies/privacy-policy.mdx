@@ -1,0 +1,40 @@
+---
+title: Privacy Policy
+description: What Nito's Privacy Policy is and where it is served. The gateway serves versioned privacy terms at /privacy; the legal text is owned by Legal.
+---
+
+The Privacy Policy is the document that explains how Nito collects, uses, shares, and protects personal data, and what rights individuals have over that data. It is the legal statement of privacy practices, distinct from the engineering-focused Privacy overview in these docs.
+
+<Warning>
+The legal text of the Privacy Policy is owned by Legal and is not authored in the codebase these docs are built from. This page describes where the policy is served and what it covers in general terms. It is not the policy itself, and nothing here is a commitment until Legal publishes it.
+</Warning>
+
+## Versioned privacy terms served by the gateway
+
+One thing is grounded in code: the gateway serves a versioned privacy page at the route **`/privacy`**, and it carries a policy version value (`POLICY_PRIVACY_VERSION`) so the privacy terms in effect at a given time are identifiable. Nito therefore serves privacy terms at a stable route with an explicit version, even though the legal content is maintained by Legal rather than in these docs.
+
+Note that `/privacy` here refers to the gateway's served legal page. The engineering documentation of data handling lives under the [Privacy overview](/privacy/overview) in these docs, which describes verifiable system behavior such as metadata-only default retention.
+
+## What the Privacy Policy is expected to cover
+
+Once authored by Legal, the policy is expected to address, at minimum:
+
+- The categories of personal data collected and the purposes of use.
+- Legal bases for processing, where applicable.
+- Sharing with third parties and subprocessors (see [Subprocessors](/resources/trust-center/subprocessors)).
+- Retention and deletion practices.
+- Individual rights and how to exercise them.
+- International data transfers, where applicable.
+- Contact details for privacy inquiries.
+
+> **TODO (needs SME):** full Privacy Policy text and its publication at `/privacy`, including data-subject rights processes and any GDPR/CCPA role definitions (owner: Legal).
+
+## Related
+
+- [Privacy overview](/privacy/overview) - the engineering view of data handling.
+- [Compliance posture](/privacy/compliance-posture) - what is and is not asserted today.
+- [Data Processing Agreement](/privacy/dpa) - contractual processing terms.
+- [Cookies](/resources/policies/cookies) - cookies and similar technologies.
+- [Terms of Service](/resources/policies/terms-of-service) - the overall agreement, served at `/terms`.
+
+<!-- source: internal/config/auth.go (gateway serves versioned /privacy route; POLICY_PRIVACY_VERSION config). Legal text has no code source; owner Legal. -->

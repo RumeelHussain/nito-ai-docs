@@ -1,0 +1,39 @@
+---
+title: Use with Cursor
+description: A short recipe pointer for routing Cursor through Nito. The full setup lives in the Cursor editor integration page.
+---
+
+Cursor can use Nito as its model provider because Nito exposes an OpenAI-compatible API. You do not select a named "Nito" provider. You use Cursor's OpenAI-compatible override and point it at Nito.
+
+This page is a recipe pointer. The full, maintained setup lives in the [Cursor editor integration](/sdks/editor-integrations/cursor).
+
+## The three values
+
+Wherever Cursor asks for OpenAI-compatible connection details, supply:
+
+- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
+- **API key:** your Nito key, which starts with `z_sk_`.
+- **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+Fetch a real model ID from the live catalog:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Notes
+
+- Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- Nito serves OpenAI Chat Completions at `POST /v1/chat/completions`. The Responses API is not served, so leave any "use Responses API" option off.
+- For the current settings path, model picker behavior, and troubleshooting, follow the [Cursor editor integration](/sdks/editor-integrations/cursor) page.
+
+## Related
+
+- [Cursor editor integration](/sdks/editor-integrations/cursor)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

@@ -1,0 +1,98 @@
+---
+title: Build Document Q&A
+description: Extract text from PDF, DOCX, PPTX, XLSX, and text files with the Nito file parser, then answer questions about them with a private or attested chat model.
+---
+
+Document Q&A is a two-step pipeline: turn a file into text, then ask a chat model about that text. Nito ships a server-side **file parser** for the first step, so you do not have to run your own PDF and Office extractors. This recipe parses a document and answers questions about it at a private or attested tier.
+
+## Step 1: Parse the file to text
+
+`POST /api/v1/attachments/parse` takes a **multipart** upload and returns extracted text. It is not JSON-bodied; you send a file part.
+
+- **Accepted kinds:** `text`, `pdf`, `docx`, `pptx`, `xlsx`, `xls`.
+- **Images are rejected.** The parser tells you to send images directly to an image-capable model instead.
+- **Size cap:** 10 MiB per upload (a `413` on oversize).
+- **PDF caps:** at most **80 pages**, **300k output characters**, and a **10 second** parse timeout. Output is truncated past those limits (`truncated: true` in the response).
+- **Fields:** `file` (required), optional `trust_tier` (`anon`, `private`, or `tee`; `e2e-tee` is not supported here), and optional `parse_mode` (`""`, `server`, or `auto`).
+
+The response includes `text`, `mime_type`, `file_kind`, `bytes`, and optionally `page_count`, `parsed_pages`, `truncated`, and `warnings`.
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -F "file=@contract.pdf" \
+  -F "trust_tier=tee"
+```
+
+```python
+import os, requests
+
+BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm base URL
+API_KEY = os.environ["NITO_API_KEY"]
+
+def parse_file(path, trust_tier="tee"):
+    with open(path, "rb") as f:
+        resp = requests.post(
+            f"{BASE_URL}/api/v1/attachments/parse",
+            headers={"Authorization": f"Bearer {API_KEY}"},
+            files={"file": f},
+            data={"trust_tier": trust_tier},
+            timeout=60,
+        )
+    resp.raise_for_status()
+    body = resp.json()
+    if body.get("truncated"):
+        print("warning: document was truncated (page/char/time cap hit)")
+    return body["text"]
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address (owner: Product/Infra).
+
+## Step 2: Answer questions over the text
+
+Feed the extracted text to a private or attested chat model as context. Privacy is selected by model ID, so use a private-tier model or append `:tee` to an attestation-capable one. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and for `:tee` note the model must support attestation.
+
+```python
+CHAT_MODEL = "MODEL_ID:tee"   # TODO: attestation-capable model, or a private-tier model
+
+def ask_document(doc_text, question):
+    messages = [
+        {"role": "system", "content": "Answer strictly from the document. Cite the relevant passage."},
+        {"role": "user", "content": f"Document:\n{doc_text}\n\nQuestion: {question}"},
+    ]
+    resp = requests.post(
+        f"{BASE_URL}/v1/chat/completions",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        json={"model": CHAT_MODEL, "messages": messages},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
+
+text = parse_file("contract.pdf")
+print(ask_document(text, "What is the termination notice period?"))
+```
+
+> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example (owner: Product). Confirm against `GET /v1/models`.
+
+## Handling large documents
+
+The parser caps output at 300k characters and PDFs at 80 pages. For anything larger, or to keep prompts small, do not stuff the whole document into one call. Instead:
+
+- **Chunk and retrieve.** Split the parsed text, embed the chunks, and only pass the most relevant ones to the model. That is exactly the [private RAG bot](/cookbook/private-ai/build-private-rag-bot) pattern, with the parser as the ingestion front end.
+- **Watch `truncated`.** If the response sets `truncated: true`, the document exceeded a cap and your answer may be missing content. Split the file and parse the parts separately.
+
+## Notes
+
+- **Inline file parts in chat also work.** Chat messages can carry a `file` content part (text/PDF/DOCX/PPTX/XLSX/XLS), parsed inline by the same parser. Note `file_id` is not supported; send `file_url`, `file_data`, or `filename`. The standalone parse endpoint is useful when you want the raw text back to chunk or cache.
+- **Metadata-only retention.** The gateway does not persist the uploaded file or the extracted text; inference responses carry `Cache-Control: no-store`. Parsing is billed as `z-protocol/document-parse` (1 unit).
+- **Images go elsewhere.** The parser rejects images by design. For scanned or image documents, send them to an image-capable chat model directly.
+
+## Related
+
+- [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
+- [Structured data extraction](/cookbook/private-ai/structured-data-extraction)
+- [Build a private chat app](/cookbook/private-ai/build-private-chat-app)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/server/api_attachments_parse.go; internal/server/api_chat.go: apiChatContentPartToInference; internal/models/models.go:485; DOCS_SOURCE_OF_TRUTH.md §4, §6, §10 -->

@@ -1,0 +1,42 @@
+---
+title: Authentication
+description: Authenticate every Nito API request with a z_sk_ organization key sent as a bearer token.
+---
+
+Every Nito API request is authenticated with an organization API key, sent as a bearer token in the `Authorization` header. There is no query-parameter or cookie auth for the API.
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer z_sk_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+## The key
+
+API keys start with the prefix `z_sk_` and belong to an organization, not to an individual. The key grants full organization-level access to inference and balance; there are no per-key scopes. Create and manage keys from your dashboard or the [API Keys reference](/api-reference/api-keys).
+
+Read the header left to right: `Authorization` is the standard credentials header, `Bearer` is the scheme, and `z_sk_...` is your key. Use exactly one space after `Bearer`.
+
+## When auth fails
+
+Authentication runs before any model work. The gateway looks up the key, resolves it to its owning organization, and rejects the call if the key does not check out.
+
+| Condition | Result |
+|---|---|
+| Missing, malformed, revoked, or expired key | `401 Unauthorized` |
+| Valid key, over a rate limit | `429` with a `Retry-After` header |
+
+A `401` means the credential itself is the problem. Check that the key starts with `z_sk_`, is sent as `Authorization: Bearer`, and has not been revoked. Only `Retry-After` is emitted on a `429`; there are no `X-RateLimit-*` headers.
+
+CLI (`nito_cli_`, `z_cli_`) and MCP (`z_mcp_`) tokens are for their own surfaces and are not accepted by the HTTP API. Use a `z_sk_` key here.
+
+## Related
+
+- [Authentication (Get started)](/get-started/authentication)
+- [Headers](/api-reference/overview/headers)
+- [Error format](/api-reference/overview/error-format)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §8 (token prefixes), §9 (auth, headers) -->

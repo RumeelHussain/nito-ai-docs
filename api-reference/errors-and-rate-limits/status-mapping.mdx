@@ -1,0 +1,43 @@
+---
+title: Status mapping
+description: How each Nito error code maps to an HTTP status, including the two codes that both return 429.
+---
+
+The gateway maps each error `code` to an HTTP status via `inference.StatusCode`. The status tells you the broad category; the `code` in the body tells you the precise family. Read both.
+
+## Mapping
+
+| Code | HTTP status | Notes |
+|---|---|---|
+| `invalid_request` | `400` | Malformed or invalid request. |
+| `model_unavailable` | `400` | `param` is `model`. |
+| `unauthorized` | `401` | Bad or missing credential. |
+| `forbidden` | `403` | Not permitted. |
+| `payment_required` | `402` | Payment needed. |
+| `insufficient_quota` | `429` | Over quota. |
+| `rate_limited` | `429` | Over a rate limit. |
+| `unavailable` | `503` | Temporarily unavailable. |
+| `provider_error` | `502` | Upstream provider error. |
+| unknown / `internal_error` | `500` | Unclassified. |
+
+## Two codes share 429
+
+Both `insufficient_quota` and `rate_limited` return `429`. They are not the same condition:
+
+- `rate_limited` means you exceeded a request-rate limit. Back off and retry after `Retry-After`.
+- `insufficient_quota` means you are over a spend or usage quota. Retrying alone may not clear it; you may need more quota or to wait for a reset.
+
+Distinguish them by reading `error.code`, since the status is identical.
+
+## Notes
+
+- `model_unavailable` returns `400`, not `404`. The `param` field is set to `model` so you know which field to fix.
+- A `429` always carries a `Retry-After` header and no `X-RateLimit-*` headers. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
+
+## Related
+
+- [Error codes](/api-reference/errors-and-rate-limits/error-codes)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+- [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
+
+<!-- source: DOCS_SOURCE_OF_TRUTH.md §9 (inference.StatusCode mapping) -->

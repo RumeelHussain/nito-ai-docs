@@ -1,0 +1,46 @@
+---
+title: Verify yourself
+description: The minimal client-side attestation check, and why hardware verification is the caller's responsibility.
+---
+
+The gateway runs only the [seven-gate baseline](/api-reference/attestation/seven-gate-reference). Full hardware verification is yours to run. This page is a reference pointer to the verify-yourself path and the minimal checks to perform.
+
+For the full walkthrough and a reference verifier, see the [Verify-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe).
+
+## Minimal check
+
+Generate a fresh 32-byte nonce, fetch the attestation with it, and verify the response yourself:
+
+```bash
+NONCE=$(openssl rand -hex 32)
+curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL:tee&nonce=$NONCE" \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+
+## Key checks
+
+After you receive the response, confirm:
+
+- **Status 200** and the envelope `object` is `"tee.attestation"`.
+- **TEE metadata present**: `tee_provider` and `attestation_available: true`.
+- **Nonce echo**: the `nonce` in the response equals the `NONCE` you sent. A mismatched or absent nonce means the report is not bound to your request.
+- **Evidence present**: the `evidence` object is non-empty.
+- **Proof metadata**: `proof_format`, `signing_algo`, and the model public key (`model_public_key` / `signing_key`) are present.
+- **Baseline verified**: `verified: true`.
+
+A reference implementation of these checks lives in `tools/tee-attestation-smoke/main.go` (`make tee-attestation-smoke`), which generates the nonce, calls the endpoint, and runs the checks above.
+
+## Hardware verification is your responsibility
+
+The baseline checks field-stability and binding. It does **not** verify Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. The raw `evidence` is returned so you can run those checks client-side with a hardware verification toolchain. Until you do, describe results as "attested" or "baseline-verified", not "fully verified".
+
+## Related
+
+- [Get attestation](/api-reference/attestation/get-attestation)
+- [Seven-gate reference](/api-reference/attestation/seven-gate-reference)
+- [Verify-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe)
+- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+
+<!-- source: tools/tee-attestation-smoke/main.go; internal/server/api_tee_attestation.go; DOCS_SOURCE_OF_TRUTH.md §6 (verify-yourself path, scope limit) -->

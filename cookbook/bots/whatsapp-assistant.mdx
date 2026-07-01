@@ -1,0 +1,93 @@
+---
+title: WhatsApp assistant
+description: Build a WhatsApp assistant backed by Nito. Receive an inbound message webhook, call Nito's Chat Completions, and send the reply.
+---
+
+A WhatsApp assistant has two halves. The WhatsApp half receives inbound-message webhooks and sends replies through a messaging provider. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the WhatsApp half only as a representative shape, because WhatsApp messaging APIs and providers change over time.
+
+> **TODO (needs SME):** verify the current WhatsApp messaging API/provider setup against its official docs (owner: DevRel).
+
+## The Nito call
+
+The assistant's brain is one call to Nito's OpenAI-compatible Chat Completions endpoint. Nito is OpenAI-compatible, so you can use the OpenAI SDK and change only the base URL, key, and model.
+
+```python
+from openai import OpenAI
+
+nito = OpenAI(
+    api_key="z_sk_your_key_here",              # your Nito API key, keep it server-side
+    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+)
+
+def answer(user_text: str) -> str:
+    resp = nito.chat.completions.create(
+        model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+        messages=[
+            {"role": "system", "content": "You are a concise WhatsApp assistant."},
+            {"role": "user", "content": user_text},
+        ],
+    )
+    return resp.choices[0].message.content
+```
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Wiring it to WhatsApp
+
+The representative structure is: your server receives an inbound webhook, you extract the text, pass it to `answer()`, and send the reply back through your messaging provider. The field names and endpoints below are illustrative only.
+
+```python
+# Representative only, verify against your current WhatsApp provider docs.
+def on_inbound_webhook(request):
+    payload = request.json()
+    user_text = payload["message"]["text"]      # shape varies by provider
+    sender = payload["message"]["from"]
+    try:
+        reply = answer(user_text)
+    except Exception:
+        reply = "Sorry, I could not answer that right now."
+    send_whatsapp_message(to=sender, text=reply)
+    return "", 200
+```
+
+Keep the Nito key in a server-side environment variable on the host that receives webhooks. The `z_sk_` key never leaves your backend, so it is never exposed to the WhatsApp client.
+
+## Streaming or not
+
+WhatsApp delivers whole messages, so an assistant uses a non-streaming call and sends the reply once it is complete. Streaming to a phone is generally not useful here. Because `:e2e-tee` does not stream anyway, a non-streaming call keeps all privacy tiers available.
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+
+```python
+model="grok-4.3:tee"
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Handling errors
+
+Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` with no `type` field. Map the status to a graceful WhatsApp reply:
+
+- **429**: honor `Retry-After` and back off. This covers rate limits and quota exhaustion.
+- **402** or quota: send a short "temporarily unavailable" message and alert your team.
+- **400**: usually a bad model ID or malformed message. Confirm you used a catalog ID.
+
+Respond to the webhook quickly. If the Nito call may be slow, acknowledge the webhook first and send the reply asynchronously so the provider does not time out and retry.
+
+## Related
+
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Slack assistant](/cookbook/bots/slack-assistant)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+- [Rate limits](/resources/rate-limits)
+
+<!-- source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) -->

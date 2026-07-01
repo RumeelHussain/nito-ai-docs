@@ -1,0 +1,70 @@
+---
+title: Drop-in Privacy Upgrade
+description: Raise the privacy of an existing OpenAI-compatible app with a one-line change per call by adding the :tee suffix or choosing a private-tier model.
+---
+
+If you already have an app talking to an OpenAI-compatible endpoint, you do not need to rewrite it to get a stronger privacy posture on Nito. Privacy is selected by the **model ID**, not by a request field or a custom parameter. That means the upgrade is a one-line change per call: keep your existing request shape, and change the model you ask for.
+
+This recipe shows the smallest possible diff to move an existing app onto a private or attested tier.
+
+## How privacy selection works
+
+Nito exposes privacy as a **model-ID suffix**. A logical model ID is `<model>`, `<model>:tee`, or `<model>:e2e-tee`, and no other suffix is accepted. There is no `:tier` parameter and no request-body field that turns privacy on. So the whole upgrade is choosing the right model string.
+
+Two ways to raise privacy:
+
+1. **Pick a private-tier model.** Some models are stored at the `private` tier, which routes with zero-data-retention set on the upstream. You select these simply by using that model's ID.
+2. **Add the `:tee` suffix.** For a model whose provider supports a trusted execution environment, appending `:tee` requests the attested `tee` tier.
+
+Not every model supports every tier. The `:tee` suffix only works on attestation-capable models (NEAR or Phala providers in the current catalog). If you add `:tee` to a model that does not support it, the request is rejected. **Check the catalog first** by fetching `GET /v1/models` and choosing a model whose card advertises the tier you want.
+
+## The one-line change
+
+Here is a typical existing call. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` to get a real model ID for your account.
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-4.3",
+    "messages": [{"role": "user", "content": "Summarize this contract clause."}]
+  }'
+```
+
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+To upgrade, change only the `model` value. For an attested call, append `:tee` to an attestation-capable model:
+
+```bash
+curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL_ID:tee",
+    "messages": [{"role": "user", "content": "Summarize this contract clause."}]
+  }'
+```
+
+> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example (owner: Product). Confirm against `GET /v1/models`.
+
+Everything else stays the same: the same `/v1/chat/completions` path, the same `messages` shape, the same auth header, the same streaming behavior. Your response envelope is unchanged (`object: "chat.completion"`, one `choices` entry, `usage`).
+
+## What changes and what does not
+
+- **Retention:** the gateway is metadata-only by default. Prompts, completions, reasoning, tool payloads, and attachments are not persisted, and inference responses carry `Cache-Control: no-store`. A private or attested tier keeps that posture and, for `:tee`, adds an attestation you can fetch and verify.
+- **Feature compatibility on `:tee`:** an attested chat call still supports streaming and tools. (The stricter `:e2e-tee` mode is different: it is non-streaming and rejects tools, reasoning, prompt caching, and multi-part messages. See [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call).)
+- **Not a hardware proof by itself:** choosing `:tee` gives you an attested route. To confirm the attestation, fetch and check it. That is a separate, small step covered in [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
+
+## Rollout tip
+
+Because the only thing that changes is the model string, you can gate the upgrade behind config. Read the model ID from an environment variable and flip it per environment (for example, `grok-4.3` in dev and `MODEL_ID:tee` in production), so the privacy upgrade ships without touching request-building code.
+
+## Related
+
+- [Build a private chat app](/cookbook/private-ai/build-private-chat-app)
+- [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
+- [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call)
+- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+
+<!-- source: internal/models/models.go:34-46,485; internal/server/logical_models.go:81; internal/server/api_chat.go; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 -->

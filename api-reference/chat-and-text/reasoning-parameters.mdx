@@ -1,0 +1,83 @@
+---
+title: Reasoning parameters
+description: The reasoning request object on Nito chat, its fields and defaults, and the reasoning_details output it produces.
+---
+
+Capable models can think before they answer. You enable this with the `reasoning` object on a chat completions request. This page is the schema reference; for the conceptual model see [Reasoning](/features/reasoning).
+
+## The reasoning object
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `enabled` | boolean | | Turn reasoning on. |
+| `effort` | string | `low` | One of `low`, `medium`, `high`. How hard the model thinks. |
+| `summary` | string | `auto` | One of `auto`, `concise`, `detailed`. Granularity of the returned reasoning summary. |
+| `max_tokens` | integer | | Cap on reasoning tokens. |
+| `exclude` | boolean | | When set, suppress reasoning details from the output. |
+
+Defaults are `effort: low` and `summary: auto`.
+
+```json
+{
+  "model": "grok-4.3",
+  "messages": [ { "role": "user", "content": "Plan a three-step migration." } ],
+  "reasoning": { "enabled": true, "effort": "high", "summary": "detailed" }
+}
+```
+
+## Selecting reasoning via the model ID
+
+Reasoning can also be requested through a **model-ID feature suffix** instead of the `reasoning` object. Use whichever fits your client; the request-body object gives you per-call control over effort and summary.
+
+## Output
+
+When reasoning runs, the response message carries a `reasoning_details` array and `usage` reports the reasoning token count.
+
+### reasoning_details
+
+Each entry:
+
+| Field | Type | Notes |
+|---|---|---|
+| `type` | string | The kind of reasoning detail. |
+| `summary` | string | The summary text for this segment. |
+| `id` | string | Identifier for the segment. |
+| `format` | string | The format of the detail. |
+| `index` | integer | Ordering index. |
+
+```json
+{
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_details": [
+          { "type": "...", "summary": "First I considered...", "id": "...", "format": "...", "index": 0 }
+        ]
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 30, "completion_tokens": 80, "reasoning_tokens": 140, "total_tokens": 250 }
+}
+```
+
+`usage.reasoning_tokens` is billed like other tokens. Set `exclude: true` if you want the model to reason but do not want the details returned.
+
+### Streaming
+
+In a stream, `reasoning_details` arrives on deltas that carry a non-empty summary, in the same `[{type, summary, id, format, index}]` shape. See [Delta format](/api-reference/streaming-format/delta-format).
+
+## E2E-TEE constraint
+
+When the E2E-TEE encryption headers (`X-Z-TEE-*`) are present, **reasoning is rejected** along with streaming, tools, prompt caching, and multi-part messages. E2E-TEE chat is non-streaming and plain only.
+
+## Related
+
+- [Reasoning (feature guide)](/features/reasoning)
+- [Chat Completions API](/api-reference/chat-and-text/chat-completions)
+- [Delta format](/api-reference/streaming-format/delta-format)
+
+<!-- source: internal/server/api_chat.go (apiReasoning, apiChatMessage.reasoning_details, apiUsage.reasoning_tokens); internal/inference/validation.go (validateTEEEncryption); DOCS_SOURCE_OF_TRUTH.md §2, §7 (Reasoning) -->

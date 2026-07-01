@@ -1,0 +1,67 @@
+---
+title: Mastra
+description: Use Nito in Mastra via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and a Nito catalog model ID.
+---
+
+Mastra agents take a model from a provider, and it builds on the same model interface the Vercel AI SDK uses. Nito has no Mastra-specific package; you create an OpenAI-compatible provider configured for Nito and hand the model to your agent, because Nito exposes an OpenAI-compatible API. Your agent definitions, tools, and workflows stay the same.
+
+## The principle
+
+Configure an OpenAI-compatible provider with three values:
+
+- the Nito base URL ending in `/v1`,
+- a Nito API key (it starts with `z_sk_`),
+- a Nito catalog model ID from `GET /v1/models`.
+
+Pass the resulting model into your Mastra agent. Nothing about the agent or workflow changes.
+
+## Representative configuration
+
+```typescript
+import { createOpenAI } from "@ai-sdk/openai";
+import { Agent } from "@mastra/core/agent";
+
+const nito = createOpenAI({
+  apiKey: "z_sk_your_key_here",              // your Nito API key
+  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // Nito's OpenAI-compatible base URL
+});
+
+const agent = new Agent({
+  name: "assistant",
+  instructions: "Answer concisely.",
+  model: nito("grok-4.3"),                   // a Nito catalog ID, fetch from GET /v1/models
+});
+```
+
+> **TODO (needs SME):** verify the exact current configuration for Mastra against its official docs (owner: DevRel)
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+
+## Choosing a model and privacy
+
+Pass a Nito catalog ID to the provider factory, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+
+```typescript
+model: nito("grok-4.3:tee"),
+```
+
+Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note `:e2e-tee` does not stream, so prefer `:tee` for streamed agent responses. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Anthropic-shaped configuration
+
+If you wire Mastra to an Anthropic provider, it targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Use the OpenAI-compatible provider shown above to reach Nito instead.
+
+## Common mistakes
+
+- **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
+- **Forgetting `/v1` on the base URL.** The provider appends `/chat/completions` itself, so the base must end in `/v1`.
+- **Routing through an Anthropic provider.** Nito serves Chat Completions, not Messages.
+
+## Related
+
+- [Framework integrations overview](/sdks/framework-integrations)
+- [Vercel AI SDK](/sdks/framework-integrations/vercel-ai-sdk)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+
+<!-- source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) -->
