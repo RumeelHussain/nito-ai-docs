@@ -285,6 +285,12 @@
         "tab": "API Reference",
         "groups": [
           {
+            "group": "Accounts",
+            "pages": [
+              "api-reference/accounts/core-balance-by-address"
+            ]
+          },
+          {
             "group": "Overview",
             "pages": [
               "api-reference/index",
