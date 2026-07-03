@@ -35,8 +35,7 @@
               "get-started/authentication",
               "get-started/make-your-first-request",
               "get-started/stream-your-first-response",
-              "get-started/check-usage-and-credits",
-              "get-started/faq"
+              "get-started/check-usage-and-credits"
             ]
           }
         ]
@@ -68,7 +67,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["features/index"]
+            "pages": [
+              "features/index"
+            ]
           },
           {
             "group": "Core",
@@ -176,7 +177,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["sdks/index"]
+            "pages": [
+              "sdks/index"
+            ]
           },
           {
             "group": "OpenAI drop-in",
@@ -220,7 +223,9 @@
           },
           {
             "group": "Tools",
-            "pages": ["sdks/postman-bruno"]
+            "pages": [
+              "sdks/postman-bruno"
+            ]
           }
         ]
       },
@@ -229,7 +234,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["cookbook/index"]
+            "pages": [
+              "cookbook/index"
+            ]
           },
           {
             "group": "Getting started",
@@ -442,10 +449,26 @@
             "group": "More",
             "pages": [
               "resources/status-page",
-              "resources/faq",
               "resources/community",
               "resources/powered-by-z/index",
               "resources/powered-by-z/for-developers-building-agents"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "FAQ",
+        "groups": [
+          {
+            "group": "FAQ",
+            "pages": [
+              "faq/index",
+              "faq/getting-started",
+              "faq/models-and-pricing",
+              "faq/privacy-and-tee",
+              "faq/billing-and-usage",
+              "faq/errors-and-limits",
+              "faq/integrations"
             ]
           }
         ]

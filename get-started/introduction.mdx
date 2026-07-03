@@ -62,17 +62,6 @@ Knowing the boundaries prevents wrong assumptions:
 - New to the model? Read **[How Nito Works](/get-started/how-nito-works)**.
 - Want a response right now? Jump to the **[60-second quickstart](/get-started/quickstart-60-seconds)**.
 - Care most about the privacy guarantees? Start with the **[Privacy overview](/privacy/overview)**.
-
-## FAQ
-
-**Is Nito a model?** No. Nito is a gateway in front of many models from several providers. You pick the model per request.
-
-**Do I need a new SDK?** No. You can point the OpenAI or Anthropic SDK at Nito by changing the base URL. A native SDK exists and is documented separately.
-
-**Does every call run in a TEE?** No, and that is deliberate. TEE execution is the highest tier, selected per call with the `:tee` or `:e2e-tee` suffix. Most calls use lighter privacy modes. See [How Nito Works](/get-started/how-nito-works).
-
-**What does Nito store about my prompts?** By default, metadata only. Prompt and completion contents are not persisted by the gateway. See the [Privacy overview](/privacy/overview) for the precise contract.
-
-**What is "Powered by Z"?** Nito runs on an engine called Z. That relationship is described in [Powered by Z](/resources/powered-by-z). Everywhere else, the product is simply Nito.
+- Have a specific question? Browse the **[FAQ](/faq)**.
 
 {/* source: internal/models/models.go (PrivacyTier*, PublicPrivacyMode*, ParseLogicalModelIDForPublicMode), internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/standards/privacy-and-retention.md, docs/architecture/tee-attestation.md, internal/observability/attrs.go (SafeAttrs) */}

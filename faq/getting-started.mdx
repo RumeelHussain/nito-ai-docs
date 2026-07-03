@@ -1,0 +1,31 @@
+---
+title: FAQ - Getting started
+description: Common first questions about what Nito is, which base URL to use, and how to find available models.
+---
+
+The questions that come up in the first hour. Each answer links to the page with the full story.
+
+**Is Nito a model, or a gateway?**
+A gateway. Nito sits in front of many models from several providers, and you choose the model per request. There is no single "Nito model." See [How Nito Works](/get-started/how-nito-works).
+
+**How do I make my first call?**
+Send a chat request to the OpenAI-compatible endpoint with an API key, or use the OpenAI SDK with Nito's base URL. See the [60-second quickstart](/get-started/quickstart-60-seconds).
+
+**Which base URL do I use?**
+Nito serves an OpenAI-compatible path at `/v1/...` and a first-party path at `/api/v1/...`. For chat they behave the same. The production host is being finalized.
+
+> **TODO (needs SME):** canonical production base URL (owner: Product/Infra).
+
+**How do I find available models?**
+Call `GET /v1/models`. The catalog is discovered from providers at runtime, so the live list is authoritative. Do not hard-code model names. See [Model catalog](/models/model-catalog).
+
+**What is "Powered by Z"?**
+Nito runs on an engine called Z. That relationship is described in [Powered by Z](/resources/powered-by-z). Everywhere else, the product is simply Nito.
+
+## Related
+
+- [Introduction](/get-started/introduction)
+- [How Nito Works](/get-started/how-nito-works)
+- [Models and pricing FAQ](/faq/models-and-pricing)
+
+{/* source: internal/server/routes.go, internal/models/models.go (runtime model discovery), internal/server/api_models.go (apiModelsHandler) */}

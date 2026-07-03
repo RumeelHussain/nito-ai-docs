@@ -1,0 +1,35 @@
+---
+title: FAQ - Errors and limits
+description: Common questions about 401/400/402/429 errors, request size caps, streaming limits, and what is not available yet.
+---
+
+Why a request failed, and where the limits are. Each answer links to the page with the full story.
+
+**Why am I getting 401?**
+The key is missing, mistyped, revoked, or not sent as `Authorization: Bearer <key>`. API keys start with `z_sk_`.
+
+**Why am I getting 400 about the model?**
+The model ID is not in your catalog, or you used an invalid privacy suffix. Only `:tee` and `:e2e-tee` are valid. Pull a valid ID from `GET /v1/models`.
+
+**Why am I getting 402?**
+The account has no funded balance and the model is not free-tier eligible. Add credits or use a free-tier model.
+
+**Why am I getting 429?**
+You hit a rate limit. The response carries a `Retry-After` header telling you how long to wait. There are no `X-RateLimit-*` headers. See [Rate limits](/resources/rate-limits).
+
+**Is there a request size cap?**
+Yes. The chat request body is capped at 4 MiB. The attachments parser has a separate 10 MiB cap. Oversized requests are rejected before any inference runs.
+
+**Does streaming work with every mode?**
+No. The `:e2e-tee` mode is non-streaming only. Use `:tee` if you need streaming with attestation. See [Streaming](/features/streaming).
+
+**What is not available yet?**
+Audio and video input, audio and video generation, and image edits or variations are not available. Several endpoints return 404 today: `/v1/responses`, `/v1/messages`, `/v1/messages/count_tokens`, and `/v1/files`. See [Known limitations](/privacy/known-limitations).
+
+## Related
+
+- [Errors reference](/resources/errors-reference)
+- [Rate limits](/resources/rate-limits)
+- [Known limitations](/privacy/known-limitations)
+
+{/* source: internal/inference/errors.go (StatusCode 401/400/402/429), internal/server/rate_limit.go (Retry-After), internal/config/defaults.go (request/attachment size caps), internal/server/routes.go (unsupported routes), internal/inference/validation.go (e2e-tee non-streaming) */}
