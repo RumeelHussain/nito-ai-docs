@@ -1,6 +1,6 @@
 ---
-title: Get Started with Nito
-description: Everything you can do with AI, now private. One API key, many models, selectable privacy on every call.
+title: "Get Started with Nito"
+description: "Everything you can do with AI, now private. One API key, many models, selectable privacy on every call."
 ---
 
 Nito is a private multi-LLM inference gateway. You send one kind of request to one endpoint with one key, Nito routes it to the right model, and you choose how private each call is via the model ID. If you have used the OpenAI or Anthropic API, you already know the request shapes: in most cases you only change the base URL.
@@ -9,27 +9,27 @@ This section takes you from zero to a working integration. Read the first two pa
 
 ## Start here
 
-- **[Introduction](/get-started/introduction)** what Nito is, who it is for, and the principles it is built on.
-- **[How Nito Works](/get-started/how-nito-works)** the one-key, many-models, selectable-privacy model that the rest of the docs build on.
+- [**Introduction**](/get-started/introduction) what Nito is, who it is for, and the principles it is built on.
+- [**How Nito Works**](/get-started/how-nito-works) the one-key, many-models, selectable-privacy model that the rest of the docs build on.
 
 ## Make your first call
 
-- **[Quickstart, 60 seconds](/get-started/quickstart-60-seconds)** the fastest path to a first response, no SDK required.
-- **[OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)** point the OpenAI SDK at Nito and keep your code.
-- **[Anthropic SDK drop-in](/get-started/quickstart-anthropic-sdk)** the same, for the Anthropic SDK.
-- **[curl](/get-started/quickstart-curl)** raw HTTP with every header and field spelled out.
+- [**Quickstart, 60 seconds**](/get-started/quickstart-60-seconds) the fastest path to a first response, no SDK required.
+- [**OpenAI SDK drop-in**](/get-started/quickstart-openai-sdk) point the OpenAI SDK at Nito and keep your code.
+- [**Anthropic SDK drop-in**](/get-started/quickstart-anthropic-sdk) the same, for the Anthropic SDK.
+- [**curl**](/get-started/quickstart-curl) raw HTTP with every header and field spelled out.
 
 ## Go end to end
 
-- **[Authentication](/get-started/authentication)** get a key and understand the key types.
-- **[Make your first request](/get-started/make-your-first-request)** one non-streaming chat call, walked through.
-- **[Stream your first response](/get-started/stream-your-first-response)** read a token stream.
-- **[Check usage and credits](/get-started/check-usage-and-credits)** confirm a call was billed.
+- [**Authentication**](/get-started/authentication) get a key and understand the key types.
+- [**Make your first request**](/get-started/make-your-first-request) one non-streaming chat call, walked through.
+- [**Stream your first response**](/get-started/stream-your-first-response) read a token stream.
+- [**Check usage and credits**](/get-started/check-usage-and-credits) confirm a call was billed.
 
-For common questions, see the topic-based **[FAQ](/faq)**.
+For common questions, see the topic-based [**FAQ**](/faq).
 
 <Note>
-The native Nito SDK, the `z` CLI, and the MCP client live in separate packages and are documented in a later pass. The paths above cover the OpenAI drop-in, the Anthropic drop-in, and raw HTTP, which is everything you need to ship against the gateway today.
+  The native Nito SDK, the `z` CLI, and the MCP client live in separate packages and are documented in a later pass. The paths above cover the OpenAI drop-in, the Anthropic drop-in, and raw HTTP, which is everything you need to ship against the gateway today.
 </Note>
 
 {/* source: internal/server/routes.go (serverRoutes) */}

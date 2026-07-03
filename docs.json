@@ -502,5 +502,16 @@
       "claude"
     ],
     "display": "header"
+  },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "defaults": "all",
+      "languages": [
+        ""
+      ]
+    }
   }
 }
