@@ -460,5 +460,13 @@
   },
   "icons": {
     "library": "fontawesome"
+  },
+  "logo": {
+    "light": "/images/Logo-v2-black-bg.png",
+    "dark": "/images/Logo-v2-black-bg-1.png"
+  },
+  "favicon": {
+    "light": "/images/favicon.ico",
+    "dark": "/images/favicon.ico"
   }
 }
