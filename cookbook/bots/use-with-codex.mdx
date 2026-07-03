@@ -1,6 +1,6 @@
 ---
-title: Use with Codex
-description: A short recipe pointer for routing Codex through Nito via OpenAI compatibility. Use Chat Completions, since the Responses API is not served.
+title: "Use with Codex"
+description: "A short recipe pointer for routing Codex through Nito via OpenAI compatibility. Use Chat Completions, since the Responses API is not served."
 ---
 
 Codex is an OpenAI-oriented coding tool. You can route it through Nito because Nito exposes an OpenAI-compatible API. You override its base URL, key, and model rather than selecting a named "Nito" provider.
@@ -15,7 +15,7 @@ Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 Fetch a real model ID from the live catalog:
 
@@ -38,5 +38,3 @@ Nito's compatible surface is OpenAI **Chat Completions** at `POST /v1/chat/compl
 - [Codex editor integration](/sdks/editor-integrations/codex)
 - [Use with Claude Code](/cookbook/bots/use-with-claude-code)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; responses 404 routes.go:141) */}

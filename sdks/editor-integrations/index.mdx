@@ -1,6 +1,6 @@
 ---
-title: Editor and tool integrations
-description: Use Nito from any AI editor that supports a custom OpenAI-compatible provider by pointing it at the Nito base URL.
+title: "Editor and tool integrations"
+description: "Use Nito from any AI editor that supports a custom OpenAI-compatible provider by pointing it at the Nito base URL."
 ---
 
 Many AI coding editors and CLI tools let you bring your own model by configuring a custom OpenAI-compatible provider. Nito exposes an OpenAI-compatible API, so any of those tools can talk to Nito without a Nito-specific plugin. You are not using a named "Nito" provider built into the editor. You are using the editor's generic OpenAI-compatible endpoint setting and pointing it at Nito.
@@ -13,7 +13,7 @@ Every editor on these pages follows the same three-value setup. Wherever the edi
 - **API key:** a Nito key that starts with `z_sk_`.
 - **Model ID:** a Nito catalog ID, such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`. Fetch the live list with `GET /v1/models`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 That is the whole idea. The editor sends standard Chat Completions requests, and Nito serves them.
 
@@ -46,5 +46,3 @@ Each editor's exact settings screen, config-file name, and key names change ofte
 - [OpenClaw](/sdks/editor-integrations/openclaw)
 - [Zed](/sdks/editor-integrations/zed)
 - [Continue.dev](/sdks/editor-integrations/continue-dev)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; messages/responses 404 routes.go:141-147) */}

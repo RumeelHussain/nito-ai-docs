@@ -1,32 +1,36 @@
 ---
-title: FAQ - Billing and usage
-description: Common questions about API keys, checking your balance, spend caps, failed-request billing, and funding.
+title: "Billing and Usage"
+description: "Common questions about API keys, checking your balance, spend caps, failed-request billing, and funding."
 ---
 
 Questions about keys, credits, and spend. Each answer links to the page with the full story.
 
-**What does an API key look like?**
+#### What does an API key look like?
+
 It starts with `z_sk_`. Other prefixes (`nito_cli_`, `z_cli_`, `z_mcp_`) belong to the CLI and MCP surfaces, not the HTTP API. See [Authentication](/get-started/authentication).
 
-**Was I charged for a failed request?**
+#### Was I charged for a failed request?
+
 No. Nito places a hold before the call and releases it if the request fails before producing usage. See [Check usage and credits](/get-started/check-usage-and-credits).
 
-**Where do I see my balance?**
-`GET /api/v1/orgs/{orgId}/billing/balance`. Balance is scoped to the organization, not the individual key, and is returned in nanos (divide by 1,000,000,000 for whole credits).
+#### Where do I see my balance?
 
-**Can I cap what a key spends?**
+Using the API endpoint `GET /api/v1/orgs/{orgId}/billing/balance`. Balance is scoped to the organization, not the individual key, and is returned in nanos (divide by 1,000,000,000 for whole credits).
+
+#### Can I cap what a key spends?
+
 Yes. A key can carry a daily, monthly, or overall spend cap; when the cap is hit, the key is force-expired. Keys have no per-feature scopes; use organization roles to limit who can manage keys.
 
-**How do I add credits?**
+#### How do I add credits?
+
 Fund through Stripe checkout, or top up an x402 stored balance with on-chain USDC. See [Funding and billing](/api-reference/funding-and-billing).
 
-**Where do I see usage?**
-`GET /api/v1/orgs/{orgId}/api/overview` returns an aggregated usage summary (requests, tokens, and charge) over a window, with daily and per-model breakdowns. See [Check usage and credits](/get-started/check-usage-and-credits).
+#### Where do I see usage?
+
+Using the API endpoint `GET /api/v1/orgs/{orgId}/api/overview` returns an aggregated usage summary (requests, tokens, and charge) over a window, with daily and per-model breakdowns. See [Check usage and credits](/get-started/check-usage-and-credits).
 
 ## Related
 
 - [Authentication](/get-started/authentication)
 - [Check usage and credits](/get-started/check-usage-and-credits)
 - [Errors and limits FAQ](/faq/errors-and-limits)
-
-{/* source: internal/auth/tokens.go (prefixes), internal/billing/enforcement.go (hold lifecycle), internal/server/api_org_billing_balance.go, internal/server/api_org_api.go (api/overview), internal/billing/stripe_x402.go */}

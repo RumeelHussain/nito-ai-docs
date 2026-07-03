@@ -1,6 +1,6 @@
 ---
-title: Vercel AI SDK
-description: Use Nito in the Vercel AI SDK via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and model ID.
+title: "Vercel AI SDK"
+description: "Use Nito in the Vercel AI SDK via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and model ID."
 ---
 
 The Vercel AI SDK reaches Nito through its OpenAI-compatible provider. There is no Nito-specific provider package. Because Nito exposes an OpenAI-compatible API, you create an OpenAI provider instance configured for Nito and use it the same way you would use any other model in `generateText`, `streamText`, and tool calls.
@@ -36,9 +36,9 @@ console.log(text);
 
 For streaming, use `streamText` with the same `nito(...)` model. Note that `:e2e-tee` does not stream, so use `:tee` if you need attestation with a streamed response.
 
-> **TODO (needs SME):** verify the exact current configuration for the Vercel AI SDK against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for the Vercel AI SDK against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Choosing a model and privacy
 
@@ -66,5 +66,3 @@ The SDK's Anthropic provider targets the Anthropic Messages API (`/v1/messages`)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) */}

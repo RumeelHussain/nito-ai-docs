@@ -1,6 +1,6 @@
 ---
-title: Idempotency
-description: Send an Idempotency-Key so a retried request is not double-charged. The key flows into the billing authorization as a dedup key.
+title: "Idempotency"
+description: "Send an Idempotency-Key so a retried request is not double-charged. The key flows into the billing authorization as a dedup key."
 ---
 
 Networks fail in the worst possible way: your request reaches the gateway, runs, and then the connection drops before you see the response. You do not know whether it worked, so you retry. Idempotency exists to make that retry safe from a billing standpoint. You attach a key to the request, and that key flows into Nito's billing authorization so a retried request is not charged twice. This page is precise about what the key does, and equally precise about what it does not do, so you do not build on a guarantee that is not there.
@@ -10,7 +10,7 @@ Networks fail in the worst possible way: your request reaches the gateway, runs,
 Idempotency is controlled by one request header:
 
 | Header | Required | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `Idempotency-Key` | No | Must be a **UUID**. A non-UUID value is rejected with `400` and the message `Idempotency-Key must be a UUID`. If you omit the header, the gateway generates a key for you. |
 
 Because the gateway generates a key when you do not send one, every request already has an idempotency key internally. Sending your own is what makes a **retry** recognizable as the same logical request, since you control the value and can resend it.
@@ -25,7 +25,7 @@ The `Idempotency-Key` is scoped to **billing deduplication**. It flows into the 
 
 What it is **not**: there is no observed server-side response-replay cache in the server layer. The gateway does not store the first response and return it verbatim for a later request with the same key. So a retry is protected from double-billing, but it is not guaranteed to return the byte-identical body of the original call. Do not assume a replay window.
 
-> **TODO (needs SME):** confirm there is no idempotency response-replay or retention window anywhere below the server layer (for example in SQL migrations). The scanned Go shows only billing dedup and no 24h replay window; the source of truth flags the "24h replay" claim as unconfirmed (owner: Backend).
+> **TODO (needs SME):** confirm there is no idempotency response-replay or retention window anywhere below the server layer (for example in SQL migrations). The scanned Go shows only billing dedup and no 24h replay window; the source of truth flags the "24h replay" claim as unconfirmed.
 
 Specifically, **do not claim or rely on a 24-hour replay window.** No such window was found in the code. The only 24-hour constants in the system are unrelated (token TTLs and daily resets).
 
@@ -46,7 +46,7 @@ Keep in mind the honest limitation above: the key protects your bill on retry, b
 
 ## Example
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
 ```bash
 curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
@@ -70,5 +70,3 @@ Generate the UUID once for this operation. If the call times out, resend the exa
 - [Prompt caching](/features/prompt-caching)
 - [How Nito Works](/get-started/how-nito-works)
 - [Error reference](/api-reference/errors)
-
-{/* source: internal/server/api_billing.go (idempotencyKeyHeader, UUID validation "Idempotency-Key must be a UUID"), internal/billing/enforcement.go (AuthorizeInferenceRequest.IdempotencyKey), internal/server/api_chat_fusion.go (per-subcall key derivation), DOCS_SOURCE_OF_TRUTH.md §7, §10 (idempotency replay NOT confirmed) */}

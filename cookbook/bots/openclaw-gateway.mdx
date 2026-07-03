@@ -1,11 +1,11 @@
 ---
-title: OpenClaw gateway
-description: Route an OpenClaw gateway to Nito over the OpenAI-compatible endpoint, then call it from your bot with a Nito key and catalog model ID.
+title: "OpenClaw gateway"
+description: "Route an OpenClaw gateway to Nito over the OpenAI-compatible endpoint, then call it from your bot with a Nito key and catalog model ID."
 ---
 
 OpenClaw can act as a gateway in front of your bot or agent, forwarding requests to an upstream OpenAI-compatible provider. This recipe owns the Nito side: the base URL, key, model, privacy tier, and error handling. The OpenClaw side is shown only as a representative shape, because its configuration format and provider model change over time.
 
-> **TODO (needs SME):** verify the current OpenClaw gateway/provider setup against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the current OpenClaw gateway/provider setup against its official docs.
 
 If you instead want to use OpenClaw as an editor assistant rather than a gateway, see the [OpenClaw editor integration](/sdks/editor-integrations/openclaw). The values you enter are the same.
 
@@ -17,7 +17,7 @@ Wherever OpenClaw configures an upstream OpenAI-compatible provider, supply thes
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ```yaml
 # Representative only, verify against current OpenClaw docs.
@@ -80,5 +80,3 @@ Nito returns a JSON error envelope `{"error": {"message", "code", "param?}}` wit
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Rate limits](/resources/rate-limits)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

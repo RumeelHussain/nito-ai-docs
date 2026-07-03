@@ -1,6 +1,6 @@
 ---
-title: Tool Calling
-description: Let a model call functions. How Nito routes tool declarations and calls, why your code runs custom tools, and the full tool loop.
+title: "Tool Calling"
+description: "Let a model call functions. How Nito routes tool declarations and calls, why your code runs custom tools, and the full tool loop."
 ---
 
 Tool calling lets a model reach beyond text. Instead of guessing today's weather or your order status, the model can say "call this function with these arguments," you run the function, hand back the result, and the model continues with real data. Nito speaks the OpenAI tool-calling protocol, so the request and response shapes will be familiar. The one thing to internalize up front: **Nito routes the conversation but does not execute your custom function tools.** When the model asks for a function call, your code runs it. That division of labor is the whole mental model for this page.
@@ -56,7 +56,7 @@ Two rules the gateway enforces: each `function.name` must be unique within the r
 
 Here is the part people get wrong the first time. A tool call is not one request; it is at least two. The model pauses to ask for a tool, you run it, and you call again with the answer appended. Walk through both rounds.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra). `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
 
 ### Round one: the model asks for a tool
 
@@ -187,5 +187,3 @@ The end-to-end encrypted TEE mode (`:e2e-tee`) rejects tool use, along with stre
 - [Web search](/features/web-search)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/server/api_chat_tools.go, internal/server/api_chat.go (apiChatTool, apiChatToolChoice, apiChatMessage.tool_calls, apiChatChunk delta tool_calls), internal/inference/contracts.go (ToolType, FinishReason), internal/inference/validation.go (validateTEEEncryption) */}

@@ -1,6 +1,6 @@
 ---
-title: LangChain and LangGraph
-description: Use Nito in LangChain and LangGraph by pointing the OpenAI chat model at Nito's base URL with a Nito key and model ID.
+title: "LangChain and LangGraph"
+description: "Use Nito in LangChain and LangGraph by pointing the OpenAI chat model at Nito's base URL with a Nito key and model ID."
 ---
 
 LangChain and LangGraph build on the same model interface, so wiring Nito in once gives you both chains and graphs. Nito has no LangChain-specific package. You use LangChain's OpenAI-compatible chat model and redirect it at Nito, because Nito exposes an OpenAI-compatible API. Your prompts, tools, and graph state stay the same.
@@ -32,9 +32,9 @@ print(result.content)
 
 The same `llm` object is what you bind tools to and pass into a LangGraph node, so the redirect carries through to graphs unchanged.
 
-> **TODO (needs SME):** verify the exact current configuration for LangChain and LangGraph against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for LangChain and LangGraph against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
 
 ## Choosing a model and privacy
 
@@ -62,5 +62,3 @@ LangChain's Anthropic chat model targets the Anthropic Messages API (`/v1/messag
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) */}

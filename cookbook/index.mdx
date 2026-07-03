@@ -1,9 +1,9 @@
 ---
-title: Cookbook
-description: Practical, copy-paste recipes for building on Nito. Each one has a goal, prerequisites, runnable code, and next steps.
+title: "Cookbook"
+description: "Practical, copy-paste recipes for building on Nito. Each one has a goal, prerequisites, runnable code, and next steps."
 ---
 
-The Cookbook is task-first. Where the [Get Started](/get-started/index) tab teaches the mental model and the [API Reference](/api-reference/index) documents every field, the Cookbook hands you a working result you can paste into a terminal or an editor and adapt. Every recipe states a concrete goal, lists what you need first, walks through runnable code step by step, explains what the code does, and points to a sensible next step.
+The Cookbook is task-first. Where the [Get Started](/get-started/index) tab teaches the mental model and the [API Reference](/api-reference/index) documents every available endpoint, the Cookbook hands you a working result you can paste into a terminal or an editor and adapt. Every recipe states a concrete goal, lists what you need first, walks through runnable code step by step, explains what the code does, and points to a sensible next step.
 
 All recipes assume the same two facts about Nito. It is OpenAI-compatible, so you talk to `POST /v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, and `GET /v1/models`. And you authenticate with a single organization key sent as `Authorization: Bearer <z_sk_ key>`. Model IDs come from `GET /v1/models`, and privacy is selected per call by a suffix on the model ID (`:tee` or `:e2e-tee`). If those two ideas are new, read [How Nito works](/get-started/how-nito-works) before you start.
 
@@ -11,13 +11,13 @@ All recipes assume the same two facts about Nito. It is OpenAI-compatible, so yo
 
 These are the on-ramps. Start here if you are new, or jump straight to the migration recipe that matches the provider you are moving from.
 
-- **[Quickstart recipe](/cookbook/getting-started/quickstart-recipe)** the shortest end-to-end path: one key, one request, one response, with curl and Python side by side.
-- **[Migrate from OpenAI](/cookbook/getting-started/migrate-from-openai)** keep your OpenAI SDK code and repoint it at Nito. Chat Completions carries over; the Responses API does not.
-- **[Migrate from Anthropic](/cookbook/getting-started/migrate-from-anthropic)** move off the Anthropic Messages API onto Nito's OpenAI-compatible Chat Completions surface.
-- **[Migrate from OpenRouter](/cookbook/getting-started/migrate-from-openrouter)** swap the base URL and key, then map model names to Nito catalog IDs.
-- **[Migrate from other gateways](/cookbook/getting-started/migrate-from-others)** the same base-URL swap for Together, Fireworks, Replicate, Perplexity, and similar OpenAI-compatible providers.
-- **[Build a first chat app](/cookbook/getting-started/build-first-chat-app)** a minimal but complete app that sends a conversation and prints the reply.
-- **[Build a streaming chat UI](/cookbook/getting-started/build-streaming-chat-ui)** render tokens as they arrive over Server-Sent Events, with a framework-light front-end sketch.
+- [**Quickstart recipe**](/cookbook/getting-started/quickstart-recipe) the shortest end-to-end path: one key, one request, one response, with curl and Python side by side.
+- [**Migrate from OpenAI**](/cookbook/getting-started/migrate-from-openai) keep your OpenAI SDK code and repoint it at Nito. Chat Completions carries over; the Responses API does not.
+- [**Migrate from Anthropic**](/cookbook/getting-started/migrate-from-anthropic) move off the Anthropic Messages API onto Nito's OpenAI-compatible Chat Completions surface.
+- [**Migrate from OpenRouter**](/cookbook/getting-started/migrate-from-openrouter) swap the base URL and key, then map model names to Nito catalog IDs.
+- [**Migrate from other gateways**](/cookbook/getting-started/migrate-from-others) the same base-URL swap for Together, Fireworks, Replicate, Perplexity, and similar OpenAI-compatible providers.
+- [**Build a first chat app**](/cookbook/getting-started/build-first-chat-app) a minimal but complete app that sends a conversation and prints the reply.
+- [**Build a streaming chat UI**](/cookbook/getting-started/build-streaming-chat-ui) render tokens as they arrive over Server-Sent Events, with a framework-light front-end sketch.
 
 ## How to read a recipe
 
@@ -31,7 +31,7 @@ Each page follows the same shape so you can scan it fast:
 
 Wherever a recipe shows a full, concrete example, it uses `grok-4.3` as the example model and `https://YOUR-NITO-BASE-URL` as the base URL placeholder. Both are stand-ins: fetch the live catalog with `GET /v1/models` and substitute your real gateway URL.
 
-> **TODO (needs SME):** the canonical production base URL. Every recipe uses `https://YOUR-NITO-BASE-URL` as a placeholder until this is confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Every recipe uses `https://YOUR-NITO-BASE-URL` as a placeholder until this is confirmed.
 
 ## What is not here yet
 
@@ -43,5 +43,3 @@ Recipes that build autonomous agents (tool loops, planning, multi-step task exec
 - [Quickstart, 60 seconds](/get-started/quickstart-60-seconds)
 - [API Reference overview](/api-reference/index)
 - [SDKs overview](/sdks/index)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (route table), §5 (catalog, model IDs), §8 (z_sk_ tokens), §11 (Agent SDK deferred to separate repo) */}

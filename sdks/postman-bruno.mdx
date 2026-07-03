@@ -1,25 +1,25 @@
 ---
-title: Call Nito from Postman or Bruno
-description: Hit the Nito API by hand from Postman or Bruno. Base URL, bearer auth, and a sample chat completion request.
+title: "Call Nito from Postman or Bruno"
+description: "Hit the Nito API by hand from Postman or Bruno. Base URL, bearer auth, and a sample chat completion request."
 ---
 
 You do not need an SDK to call Nito. Because the gateway is OpenAI-compatible, an HTTP client like [Postman](https://www.postman.com/) or [Bruno](https://www.usebruno.com/) is enough to send requests and inspect raw responses. This is the fastest way to verify your key, explore the catalog, and debug request shapes.
 
 There is no ready-made collection file in this repository yet, so this page shows how to build the requests by hand.
 
-> **TODO (needs SME):** publish Postman/Bruno collection files (owner: DevRel).
+> **TODO (needs SME):** publish Postman/Bruno collection files.
 
 ## Setup
 
 Configure these once, ideally as environment variables in Postman or Bruno so you can switch them without editing each request.
 
 | Setting | Value |
-|---|---|
+| --- | --- |
 | Base URL | `https://YOUR-NITO-BASE-URL/v1` |
 | Auth header | `Authorization: Bearer z_sk_your_key_here` |
 | Content type | `Content-Type: application/json` |
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 Use a Nito `z_sk_` key, not an OpenAI `sk-` key. Store the key as a secret variable so it does not get committed or shared.
 
@@ -27,7 +27,7 @@ Use a Nito `z_sk_` key, not an OpenAI `sk-` key. Store the key as a secret varia
 
 Before sending a chat request, fetch the live model catalog so you use a valid ID:
 
-```
+```text
 GET https://YOUR-NITO-BASE-URL/v1/models
 Authorization: Bearer z_sk_your_key_here
 ```
@@ -36,7 +36,7 @@ The response lists the model IDs you can pass as `model`. The example `grok-4.3`
 
 ## Sample chat completion request
 
-```
+```text
 POST https://YOUR-NITO-BASE-URL/v1/chat/completions
 Authorization: Bearer z_sk_your_key_here
 Content-Type: application/json
@@ -71,7 +71,7 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 The same base URL and bearer auth reach the other compatible endpoints:
 
 | Method | Path | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | POST | `/v1/chat/completions` | Chat and text |
 | POST | `/v1/embeddings` | Vectors |
 | POST | `/v1/images/generations` | Text-to-image |
@@ -95,5 +95,3 @@ To stream, add `"stream": true` to the body. The response is Server-Sent Events:
 - [Chat completions feature](/features/chat-completions)
 - [Authentication](/get-started/authentication)
 - [Error format](/api-reference/overview/error-format)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (route table: /v1/chat/completions, /v1/embeddings, /v1/images/generations, /v1/models; /v1/responses, /v1/messages 404), §3 (SSE [DONE]), §5 (model ID suffixes), §8 (z_sk_ prefix, Retry-After only), §9 (no type field, system_fingerprint null, Cache-Control no-store). No collection file present in repo. */}

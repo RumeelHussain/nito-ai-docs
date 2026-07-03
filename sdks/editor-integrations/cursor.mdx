@@ -1,6 +1,6 @@
 ---
-title: Cursor
-description: Connect Cursor to Nito by setting a custom OpenAI-compatible base URL, a Nito API key, and a Nito catalog model ID.
+title: "Cursor"
+description: "Connect Cursor to Nito by setting a custom OpenAI-compatible base URL, a Nito API key, and a Nito catalog model ID."
 ---
 
 Cursor lets you configure a custom OpenAI-compatible API instead of its built-in models. Because Nito exposes an OpenAI-compatible API, you can route Cursor's chat and inline edits through Nito by filling in that custom-endpoint setting. You are not selecting a named "Nito" provider. You are using Cursor's OpenAI-compatible override and pointing it at Nito.
@@ -13,9 +13,9 @@ Wherever Cursor asks for OpenAI-compatible connection details, supply these thre
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Cursor against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the exact current settings path/config for Cursor against its official docs.
 
 ## Finding a model ID
 
@@ -49,5 +49,3 @@ Privacy is selected by the model ID, so you do not need a separate Cursor settin
 - [Editor and tool integrations](/sdks/editor-integrations)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

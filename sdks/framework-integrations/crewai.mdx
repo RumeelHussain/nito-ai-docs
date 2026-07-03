@@ -1,6 +1,6 @@
 ---
-title: CrewAI
-description: Use Nito in CrewAI by pointing its OpenAI-compatible LLM at Nito's base URL with a Nito key and a Nito catalog model ID.
+title: "CrewAI"
+description: "Use Nito in CrewAI by pointing its OpenAI-compatible LLM at Nito's base URL with a Nito key and a Nito catalog model ID."
 ---
 
 CrewAI agents call a model through an LLM configuration. Nito has no CrewAI-specific package; you configure CrewAI's OpenAI-compatible LLM and point it at Nito, because Nito exposes an OpenAI-compatible API. Your agents, tasks, and crews stay exactly as written.
@@ -34,9 +34,9 @@ researcher = Agent(
 )
 ```
 
-> **TODO (needs SME):** verify the exact current configuration for CrewAI against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for CrewAI against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
 
 CrewAI routes model calls through a provider layer, so depending on your version you may set the base URL and key via environment variables rather than constructor arguments. Confirm the current mechanism in CrewAI's official docs; the values you supply are the same three regardless.
 
@@ -66,5 +66,3 @@ If you configure CrewAI to use an Anthropic model, it targets the Anthropic Mess
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) */}

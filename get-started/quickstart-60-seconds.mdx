@@ -1,6 +1,6 @@
 ---
-title: Quickstart, 60 seconds
-description: The fastest path to a first response from Nito. One key, one request, no SDK.
+title: "Quickstart, 60 seconds"
+description: "The fastest path to a first response from Nito. One key, one request, no SDK."
 ---
 
 This is the shortest path from nothing to a working response. You need an API key and a terminal. No SDK, no project setup. If the call returns a message, your key works and you are ready to build.
@@ -14,7 +14,7 @@ export NITO_API_KEY="z_sk_your_key_here"
 export NITO_BASE_URL="https://YOUR-NITO-BASE-URL"
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra). The code default is a local development address.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL. The code default is a local development address.
 
 ## 2. Send one request
 
@@ -64,8 +64,6 @@ Three fields carry the result. `choices[0].message.content` holds the assistant'
 
 ## Next
 
-- Walk through the same call in detail: **[Make your first request](/get-started/make-your-first-request)**.
-- Keep your existing code: **[OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)** or **[Anthropic SDK drop-in](/get-started/quickstart-anthropic-sdk)**.
-- Turn on streaming: **[Stream your first response](/get-started/stream-your-first-response)**.
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions /v1/chat/completions), internal/server/api_chat.go (apiChatCompletionsHandler, apiChatResponse, apiChatChoice, apiUsage), internal/inference/contracts.go (FinishReason) */}
+- Walk through the same call in detail: [**Make your first request**](/get-started/make-your-first-request).
+- Keep your existing code: [**OpenAI SDK drop-in**](/get-started/quickstart-openai-sdk) or [**Anthropic SDK drop-in**](/get-started/quickstart-anthropic-sdk).
+- Turn on streaming: [**Stream your first response**](/get-started/stream-your-first-response).

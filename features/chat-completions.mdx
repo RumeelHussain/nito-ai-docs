@@ -1,6 +1,6 @@
 ---
-title: Chat Completions
-description: The primary text surface on Nito. One OpenAI-compatible endpoint for chat and text generation, with per-call privacy.
+title: "Chat Completions"
+description: "The primary text surface on Nito. One OpenAI-compatible endpoint for chat and text generation, with per-call privacy."
 ---
 
 Chat completions is the main way you talk to a model on Nito. You send a list of messages, name a model, and get back a reply. The shape is the OpenAI chat-completions shape, so if you have ever called that API the request and response will feel familiar. What is different is everything around it: one key reaches every model in the catalog, the model ID also selects how private the call is, and Nito handles routing, billing, and (for the strongest tiers) attestation underneath. This page is the deep reference for that one endpoint.
@@ -23,7 +23,7 @@ The body is decoded as **strict JSON**: unknown fields are rejected with a `400`
 Only `messages` is required. Everything else is optional and passed through when present.
 
 | Field | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `messages` | array | **Required.** The conversation so far. Empty array is rejected. |
 | `model` | string | Optional; falls back to a default. Add a `:tee` or `:e2e-tee` suffix to select a privacy mode. |
 | `temperature` | number | Sampling temperature, passed through. |
@@ -51,7 +51,7 @@ Each message has a `role` and `content`. The accepted roles are `system`, `user`
 
 ## A first call
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
 `grok-4.3` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
@@ -162,5 +162,3 @@ Chat completions is the right default for almost everything text. Reach elsewher
 - [How Nito Works](/get-started/how-nito-works)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/server/api_chat.go (apiChatCompletionsHandler, apiChatRequest, apiChatRequestMessage, apiChatResponse, apiChatChoice, apiChatMessage, apiUsage, apiErrorBody, decodeStrictJSON), internal/inference/validation.go (ValidateChatRequest), internal/inference/contracts.go (Role, FinishReason), internal/server/routes.go (routes.go:84,137) */}

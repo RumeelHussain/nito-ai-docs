@@ -1,6 +1,6 @@
 ---
-title: TEE-attested Call and Verify Nonce
-description: Make a :tee chat call, then fetch and verify its attestation with a fresh nonce, running the baseline checks the gateway supports.
+title: "TEE-attested Call and Verify Nonce"
+description: "Make a :tee chat call, then fetch and verify its attestation with a fresh nonce, running the baseline checks the gateway supports."
 ---
 
 This is the flagship private-AI flow: make an attested chat call, then **prove** the tier instead of trusting it. You do that by fetching the attestation with a fresh nonce and running a set of independent checks on what comes back. It combines the [drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade) with the [verify-it-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe).
@@ -21,7 +21,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace both once confirmed (owner: Security / Product).
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace both once confirmed.
 
 ## Step 2: Generate a fresh nonce
 
@@ -35,7 +35,7 @@ NONCE=$(openssl rand -hex 32)
 
 Fetch `GET /api/v1/tee/attestation` for the same model, passing your nonce.
 
-```bash
+```curl
 curl -sS \
   "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL_ID:tee&nonce=$NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
@@ -88,7 +88,7 @@ assert body.get("verified") is True, "baseline verification failed"
 
 print("baseline checks passed")
 
-# TODO (your responsibility, NOT done above):
+# TODO:
 # Independently verify the hardware quote in body["evidence"]:
 #   - Intel TDX quote validation
 #   - NVIDIA GPU evidence validation
@@ -107,5 +107,3 @@ Steps 1 through 4 give you a baseline-verified result. For full assurance you mu
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
 - [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call)
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
-
-{/* source: internal/server/api_tee_attestation.go; internal/server/api_tee_attestation_verification.go; tools/tee-attestation-smoke/main.go; docs/architecture/tee-attestation.md; DOCS_SOURCE_OF_TRUTH.md §6 */}

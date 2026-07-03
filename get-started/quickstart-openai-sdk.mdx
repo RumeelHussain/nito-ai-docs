@@ -1,6 +1,6 @@
 ---
-title: Quickstart, OpenAI SDK drop-in
-description: Point the OpenAI SDK at Nito by changing the base URL. Your existing code keeps working.
+title: "OpenAI SDK Drop-in"
+description: "Point the OpenAI SDK at Nito by changing the base URL. Your existing code keeps working."
 ---
 
 If your code already uses the OpenAI SDK, you do not need to rewrite it. Nito exposes an OpenAI-compatible endpoint, so you change three things: the base URL, the API key, and the model ID. Messages, streaming, tool calls, and the response shape stay the same.
@@ -45,7 +45,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends paths like `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`.
 
@@ -82,5 +82,3 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and a model must support that tie
 - [Make your first request](/get-started/make-your-first-request)
 - [Chat completions feature](/features/chat-completions)
 - [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions, compat.openai.responses.unsupported), internal/server/api_chat.go (apiChatRequest, apiChatResponse), internal/models/models.go (ParseLogicalModelIDForPublicMode) */}

@@ -1,25 +1,28 @@
 ---
-title: FAQ - Models and pricing
-description: Common questions about model IDs, multi-model calls, supported inputs, and how pricing works on Nito.
+title: "Models and Pricing"
+description: "Common questions about model IDs, multi-model calls, supported inputs, and how pricing works on Nito."
 ---
 
 Questions about choosing and paying for models. Each answer links to the page with the full story.
 
-**How are model IDs formatted?**
-A logical public ID is `model` with an optional privacy suffix, either `:tee` or `:e2e-tee`. No other suffix is valid. See [Model ID convention](/models/model-id-convention).
+**How are model IDs formatted?** A logical public ID is `model` with an optional privacy suffix, either `:tee` or `:e2e-tee`. No other suffix is valid. See [Model ID convention](/models/model-id-convention).
 
-**Can I call more than one model in one request?**
+#### Can I call more than one model in one request?
+
 Yes, through fusion: `POST /api/v1/chat/fusion` asks 2 to 3 distinct models the same prompt and runs one synthesis pass. It is non-streaming only. See [Multi-model routing](/features/multi-model-routing).
 
-**Which input types are supported?**
+#### Which input types are supported?
+
 Text, image input (PNG, JPEG, WebP), and document input (PDF, docx, pptx, xlsx, xls, text) parsed inline. Image generation is available. Audio and video input and generation are not available yet. See [Multimodal](/features/multimodal).
 
-**How does pricing work?**
+#### How does pricing work?
+
 Nito bills in credits, tracked in nanos (billionths of a unit). Inference is priced per token, with separate input and output rates plus rates for caching, reasoning, and server tools. Per-model prices are configured live and appear on each model's `GET /v1/models` entry. See [Pricing](/models/pricing).
 
-> **TODO (needs SME):** the master per-model price table and the credit-to-currency value (owner: Finance).
+> **TODO (needs SME):** the master per-model price table and the credit-to-currency value.
 
-**How do I choose the right model?**
+#### How do I choose the right model?
+
 Pick by task and sensitivity: a chat model for generation, an embedding model for search, then a privacy suffix if the call is sensitive. See [Choosing the right model](/models/choosing-a-model).
 
 ## Related
@@ -27,5 +30,3 @@ Pick by task and sensitivity: a chat model for generation, an embedding model fo
 - [Model ID convention](/models/model-id-convention)
 - [Pricing](/models/pricing)
 - [Privacy and TEE FAQ](/faq/privacy-and-tee)
-
-{/* source: internal/models/models.go (ParseLogicalModelIDForPublicMode), internal/server/api_chat_fusion.go, internal/server/api_models.go (pricing object), internal/server/api_chat.go (content parts) */}

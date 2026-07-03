@@ -1,6 +1,6 @@
 ---
-title: Build a streaming chat UI
-description: Render tokens as they arrive over Server-Sent Events, with a framework-light front-end sketch.
+title: "Build a streaming chat UI"
+description: "Render tokens as they arrive over Server-Sent Events, with a framework-light front-end sketch."
 ---
 
 ## Goal
@@ -36,7 +36,7 @@ curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 
 The `-N` flag disables curl buffering so you see chunks arrive. You will get a series of `data: {...}` lines and a final `data: [DONE]`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: Consume the stream in Python
 
@@ -128,5 +128,3 @@ Keeping the key server-side matters: the browser talks to your `/api/chat` endpo
 - [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
 - [Server-Sent Events reference](/api-reference/streaming-format/server-sent-events)
 - [Delta format reference](/api-reference/streaming-format/delta-format)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §3 (stream:true, SSE frame format, 15s heartbeat, data: [DONE], apiChatChunk delta), §2 (E2E-TEE streaming refused), §8 (z_sk_) */}

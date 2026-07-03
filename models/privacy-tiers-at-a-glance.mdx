@@ -1,6 +1,6 @@
 ---
-title: Privacy tiers at a glance
-description: The privacy modes you can select per call, in brief, with links to the full Privacy section.
+title: "Privacy tiers at a glance"
+description: "The privacy modes you can select per call, in brief, with links to the full Privacy section."
 ---
 
 Nito lets you choose how private each call is, and you make that choice per request rather than once for your whole account. This page is the short version: enough to pick a mode and keep building. The full treatment, including how attestation is verified and exactly what is retained, is in the [Privacy section](/privacy/overview).
@@ -16,7 +16,7 @@ The reason to offer a dial rather than simply maxing out privacy is that the str
 You select a mode by the model ID suffix. From lightest to strongest:
 
 | Mode | How you select it | What it gives you |
-|---|---|---|
+| --- | --- | --- |
 | **Ordinary** | `model` (no suffix) | Standard routing. Metadata-only retention by default, meaning the gateway keeps operational metadata, not your prompt or the reply. |
 | **Private** | `model` served by a private-tier model | Served by a privately configured backend with zero-data-retention enforced upstream. |
 | **TEE** | `model:tee` | Runs inside a Trusted Execution Environment. You can fetch an attestation and verify it. |
@@ -57,5 +57,3 @@ You may see the tiers referred to by marketing labels, for example T1 through T4
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Privacy tiers in depth](/privacy/tiers)
 - [Model ID convention](/models/model-id-convention)
-
-{/* source: internal/models/models.go (PrivacyTier* anon/private/tee, PublicPrivacyMode* ordinary/anon/private/tee/e2e-tee, validatePrivacyCapabilities, ParseLogicalModelIDForPublicMode suffix :tee/:e2e-tee), internal/server/api_chat_e2ee.go, internal/inference/validation.go (validateTEEEncryption) */}

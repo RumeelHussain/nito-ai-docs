@@ -1,6 +1,6 @@
 ---
-title: T4 Encrypted (E2E TEE)
-description: The top tier. Client-side encryption to the sealed environment on top of TEE, with the most constraints.
+title: "T4 Encrypted (E2E TEE)"
+description: "The top tier. Client-side encryption to the sealed environment on top of TEE, with the most constraints."
 ---
 
 T4 Encrypted is the top rung of the [privacy ladder](/privacy/tiers) and the strongest privacy Nito offers. In the code it is the `e2e-tee` mode, selected with the `:e2e-tee` suffix plus a set of encryption headers. It keeps everything [T3](/privacy/tiers/t3-private-plus-tee) gives you, the sealed and attestable execution of a Trusted Execution Environment, and adds end-to-end encryption: your data is encrypted client-side to the sealed environment itself. In exchange, T4 carries the most constraints of any tier. It is the choice for maximum assurance, used only where the call genuinely needs it.
@@ -50,7 +50,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** the exact `X-Z-TEE-*` header names and the client-side encryption procedure (key exchange, payload format) are needed to make this a complete, runnable example. Replace `MODEL-ID` with a model whose entry shows `e2ee_supported: true`, and the base URL with the production value. Owner: Product/Infra plus Backend for the encryption header contract.
+> **TODO (needs SME):** the exact `X-Z-TEE-*` header names and the client-side encryption procedure (key exchange, payload format) are needed to make this a complete, runnable example. Replace `MODEL-ID` with a model whose entry shows `e2ee_supported: true`, and the base URL with the production value.
 
 `:e2e-tee` is one of only two valid suffixes (the other is `:tee`). If the model does not support end-to-end encrypted TEE, the call fails; a privacy mode never silently downgrades to a weaker tier.
 
@@ -65,10 +65,8 @@ Choose T4 only when the call needs the maximum assurance that nobody between you
 ## Related
 
 - [Privacy tiers in depth](/privacy/tiers)
-- [T3 Private+ (TEE)](/privacy/tiers/t3-private-plus-tee)
+- [T3 Private\+ (TEE)](/privacy/tiers/t3-private-plus-tee)
 - [TEE attestation](/privacy/tee-attestation)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Privacy overview](/privacy/overview)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/models/models.go:34-46 (PublicPrivacyMode e2e-tee), internal/models/models.go:730 (validatePrivacyCapabilities: E2EE requires tee + attestation + subject), internal/server/api_chat_e2ee.go (X-Z-TEE-* headers -> TEEEncryption), internal/inference/validation.go (validateTEEEncryption: streaming/reasoning/tools/prompt-caching/multi-part rejected; NEAR/Phala only) */}

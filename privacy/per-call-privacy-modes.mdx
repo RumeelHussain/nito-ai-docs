@@ -1,6 +1,6 @@
 ---
-title: Per-Call Privacy Modes
-description: How to select a privacy mode per request using the model-ID suffix, the e2e-tee encryption headers, and worked examples for each mode.
+title: "Per-Call Privacy Modes"
+description: "How to select a privacy mode per request using the model-ID suffix, the e2e-tee encryption headers, and worked examples for each mode."
 ---
 
 This page is the how-to for the idea introduced in the [Privacy overview](/privacy/overview): on Nito you choose privacy per request, and you choose it through the `model` string. There is no privacy field in the request body and no account-level privacy switch. The model ID carries two decisions at once, which model and how private, and this page shows exactly how to spell each mode and what each spelling requires.
@@ -16,7 +16,7 @@ The `model` value is parsed into a base model ID and an optional suffix:
 The **only** valid suffixes are `:tee` and `:e2e-tee`. Anything else, `:standard`, `:zdr`, `:e2ee`, `:anon`, `:private`, and so on, is rejected. The router will return an error to the effect that the logical model ID must use `<model>`, `<model>:tee`, or `<model>:e2e-tee` form. If you want a different mode, you change the model string and nothing else.
 
 <Warning>
-There is no separate `tier` parameter in the request body. Privacy is selected only by the model-ID suffix, and only `:tee` and `:e2e-tee` are valid. Sending any other suffix, or trying to pass privacy as a body field, is an error.
+  There is no separate `tier` parameter in the request body. Privacy is selected only by the model-ID suffix, and only `:tee` and `:e2e-tee` are valid. Sending any other suffix, or trying to pass privacy as a body field, is an error.
 </Warning>
 
 ## Modes never silently downgrade
@@ -37,7 +37,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL before publishing copy-pasteable examples. The code default is a local address; `https://YOUR-NITO-BASE-URL` is a placeholder (owner: Product/Infra).
+> **TODO (needs SME):** confirm the canonical production base URL before publishing copy-pasteable examples. The code default is a local address; `https://YOUR-NITO-BASE-URL` is a placeholder.
 
 ## Worked example: private mode
 
@@ -76,7 +76,7 @@ TEE-capable backends are a subset of the catalog (NEAR and Phala). If you reques
 `:e2e-tee` is the strongest mode and has the most constraints. It adds client-side encryption so your content is encrypted to the sealed environment itself. Selecting it requires **both** the suffix **and** a set of `X-Z-TEE-*` encryption headers on the request:
 
 | Header | Role |
-|---|---|
+| --- | --- |
 | `X-Z-TEE-E2EE` | Marks the request as end-to-end encrypted. |
 | `X-Z-TEE-Client-Pub-Key` | The client's public key. |
 | `X-Z-TEE-Model-Pub-Key` | The model environment's public key. |
@@ -108,12 +108,12 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** confirm the exact construction of each `X-Z-TEE-*` header value (key encodings, supported signing algorithms, encryption version string, nonce/timestamp format) and provide a complete, runnable end-to-end example with real values (owner: Security/Backend).
+> **TODO (needs SME):** confirm the exact construction of each `X-Z-TEE-*` header value (key encodings, supported signing algorithms, encryption version string, nonce/timestamp format) and provide a complete, runnable end-to-end example with real values.
 
 ## Choosing among the modes
 
 | You send | Mode | Notable constraints |
-|---|---|---|
+| --- | --- | --- |
 | `model-id` (ordinary-tier model) | ordinary | Metadata-only default. |
 | `model-id` (private-tier model) | private | Provider-enforced ZDR. |
 | `model-id:tee` | tee | TEE-capable backends only; attestation available. |
@@ -127,5 +127,3 @@ Match the mode to the sensitivity of the call. Most work runs fine in ordinary o
 - [Privacy architecture](/privacy/privacy-architecture) - how the suffix is resolved and enforced across hops, and what attestation verifies.
 - [Zero data retention](/privacy/zero-data-retention) - the retention contract behind ordinary and private modes.
 - [How Nito works](/get-started/how-nito-works) - the request lifecycle and the model-ID-carries-two-decisions idea.
-
-{/* source: internal/models/models.go (ParseLogicalModelIDForPublicMode, valid suffixes :tee/:e2e-tee), internal/server/logical_models.go (logical model id format error, RequireZeroDataRetention), internal/server/api_chat_e2ee.go (X-Z-TEE-* headers → TEEEncryption), internal/inference/validation.go (validateTEEEncryption: streaming/tools/reasoning/caching/multipart rejected), internal/provider/near, internal/provider/phala; DOCS_SOURCE_OF_TRUTH.md §2, §5, §6 */}

@@ -1,6 +1,6 @@
 ---
-title: T1 Anonymous
-description: The lightest privacy tier and the default. Anonymized routing with metadata-only retention, on the broadest set of models.
+title: "T1 Anonymous"
+description: "The lightest privacy tier and the default. Anonymized routing with metadata-only retention, on the broadest set of models."
 ---
 
 T1 Anonymous is the first rung of the [privacy ladder](/privacy/tiers) and the one most calls use. In the code it is the stored tier `anon`, which is the default tier for every provider. It is the right choice for low-sensitivity work where you want the widest model selection and the least overhead, and where you do not need a proof that a specific sealed environment ran your call.
@@ -31,7 +31,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real `anon`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address). Owner: Product/Infra.
+> **TODO (needs SME):** replace `MODEL-ID` with a real `anon`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
 
 There is nothing to add to the request body. T1 is not requested with a suffix; it is simply what you get when the model's `privacy_tier` is `anon` and you supply no `:tee` or `:e2e-tee`. To confirm a model is `anon`, read its catalog entry:
 
@@ -56,9 +56,7 @@ Reach for T1 when the request is low-sensitivity and you want speed, choice, and
 
 - [Privacy tiers in depth](/privacy/tiers)
 - [T2 Private](/privacy/tiers/t2-private)
-- [T3 Private+ (TEE)](/privacy/tiers/t3-private-plus-tee)
+- [T3 Private\+ (TEE)](/privacy/tiers/t3-private-plus-tee)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Privacy overview](/privacy/overview)
 - [Model ID convention](/models/model-id-convention)
-
-{/* source: internal/models/models.go:34-46,176 (PrivacyTier anon default per provider), internal/models/models.go:730 (validatePrivacyCapabilities: anon carries no TEE metadata), internal/server/api_chat.go (Cache-Control: no-store), docs/standards/privacy-and-retention.md (metadata-only default) */}

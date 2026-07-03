@@ -1,12 +1,12 @@
 ---
-title: S3
-description: Exporting your own Nito call logs to S3-compatible object storage from the client. There is no first-party telemetry-to-S3 export in the gateway.
+title: "S3"
+description: "Exporting your own Nito call logs to S3-compatible object storage from the client. There is no first-party telemetry-to-S3 export in the gateway."
 ---
 
 The Nito gateway uses S3-compatible object storage internally, configured with `BLOB_STORAGE_*`. That storage is for the gateway's own data, not a customer-facing telemetry export. There is no verified "export telemetry to S3" feature you can turn on as a caller. What you can do is export your own client-side logs to an S3 bucket you control.
 
 <Warning>
-Nito does not write your telemetry to S3 for you. The `BLOB_STORAGE_*` configuration is internal to the gateway deployment. Any S3 export of Nito activity is something you build on your side.
+  Nito does not write your telemetry to S3 for you. The `BLOB_STORAGE_*` configuration is internal to the gateway deployment. Any S3 export of Nito activity is something you build on your side.
 </Warning>
 
 ## Client-side export
@@ -21,21 +21,19 @@ This gives you a queryable archive without depending on any gateway-side export.
 
 ## Example
 
-```
+```text
 POST https://YOUR-NITO-BASE-URL/api/v1/chat/completions
 -> capture X-Request-ID + usage from the response
 -> append to a local buffer
 -> flush the buffer to s3://your-bucket/nito-logs/ on an interval
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once Product/Infra confirm it.
+> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL.
 
-> **TODO (needs SME):** confirm whether a first-party "export telemetry to S3" feature is planned (owner: DevRel/Infra). The internal `BLOB_STORAGE_*` storage is not a customer-facing export today.
+> **TODO (needs SME):** confirm whether a first-party "export telemetry to S3" feature is planned. The internal `BLOB_STORAGE_*` storage is not a customer-facing export today.
 
 ## Related
 
 - [Observability overview](/resources/observability) - the request ID and usage primitives.
 - [Langfuse](/resources/observability/langfuse) - client-side LLM observability.
 - [Zero data retention](/privacy/zero-data-retention) - why the authoritative log is client-side.
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md section 9 (BLOB_STORAGE_* internal object storage), section 10 (metadata-only retention). No customer-facing telemetry-to-S3 export verified in code. */}

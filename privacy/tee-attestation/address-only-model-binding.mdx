@@ -1,6 +1,6 @@
 ---
-title: Address-Only Model Binding
-description: Why the binding uses the signing address only, why an entry without a model public key is not a binding, and why these invariants matter.
+title: "Address-Only Model Binding"
+description: "Why the binding uses the signing address only, why an entry without a model public key is not a binding, and why these invariants matter."
 ---
 
 The [report-data binding](/privacy/tee-attestation/freshness-binding) commits a report to `signing_address + nonce`. This page covers two precise invariants about how that address-based binding is validated in the nested model attestation (gate 6 of the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)). They are narrow, but getting them right is the difference between a binding that means something and one that does not.
@@ -25,7 +25,7 @@ This means the verifier **always validates the model public key** as part of acc
 
 ### Why this invariant matters
 
-Without it, the address-only binding would be weaker than it looks. An attacker who could present an evidence entry that matched the expected signing address but carried no model public key could try to pass it off as a valid binding without ever committing to a model identity. By refusing to count keyless entries as bindings, the verifier guarantees that every accepted binding ties together both the signing address *and* a concrete model public key. The two travel together or not at all. (Recall from the [pipeline page](/privacy/tee-attestation/attestation-pipeline) that the response's `signing_key` and `model_public_key` are aliases for this same model public key, so there is exactly one key value in play here.)
+Without it, the address-only binding would be weaker than it looks. An attacker who could present an evidence entry that matched the expected signing address but carried no model public key could try to pass it off as a valid binding without ever committing to a model identity. By refusing to count keyless entries as bindings, the verifier guarantees that every accepted binding ties together both the signing address _and_ a concrete model public key. The two travel together or not at all. (Recall from the [pipeline page](/privacy/tee-attestation/attestation-pipeline) that the response's `signing_key` and `model_public_key` are aliases for this same model public key, so there is exactly one key value in play here.)
 
 ## Gateway and model signing addresses are kept separate
 
@@ -41,5 +41,3 @@ Keeping the addresses distinct means the gateway-level report-data binding and t
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
 - [Freshness and binding](/privacy/tee-attestation/freshness-binding)
 - [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
-
-{/* source: internal/server/api_tee_attestation_verification.go (verifyModelAttestationBinding), docs/architecture/tee-attestation.md */}

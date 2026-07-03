@@ -1,6 +1,6 @@
 ---
-title: Use with Cursor
-description: A short recipe pointer for routing Cursor through Nito. The full setup lives in the Cursor editor integration page.
+title: "Use with Cursor"
+description: "A short recipe pointer for routing Cursor through Nito. The full setup lives in the Cursor editor integration page."
 ---
 
 Cursor can use Nito as its model provider because Nito exposes an OpenAI-compatible API. You do not select a named "Nito" provider. You use Cursor's OpenAI-compatible override and point it at Nito.
@@ -15,7 +15,7 @@ Wherever Cursor asks for OpenAI-compatible connection details, supply:
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 Fetch a real model ID from the live catalog:
 
@@ -35,5 +35,3 @@ curl https://YOUR-NITO-BASE-URL/v1/models \
 - [Cursor editor integration](/sdks/editor-integrations/cursor)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

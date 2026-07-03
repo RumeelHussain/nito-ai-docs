@@ -1,6 +1,6 @@
 ---
-title: Make your first request
-description: One non-streaming chat call to Nito, walked through end to end, from request body to response fields.
+title: "Make your first request"
+description: "One non-streaming chat call to Nito, walked through end to end, from request body to response fields."
 ---
 
 This page takes the single most common call, a non-streaming chat completion, and walks through every part of it. "Non-streaming" means you wait for the whole answer and get it back as one JSON document, which is the simplest shape to learn from. By the end you will understand each field you send and each field you get back, which makes everything else in the docs easier to read. The next page covers [streaming](/get-started/stream-your-first-response), where the same answer arrives piece by piece.
@@ -64,7 +64,7 @@ console.log(resp.usage);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 Notice that the Python and TypeScript examples use the official OpenAI SDK pointed at Nito's base URL. That is the whole integration: Nito speaks the OpenAI chat shape, so for most apps the change is the `base_url` and the key, nothing more.
 
@@ -75,7 +75,7 @@ Before reading the fields, it helps to know the path the call takes, because it 
 ## What you sent
 
 | Field | Type | Required | Meaning |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `model` | string | optional | The model ID. If omitted, a default model is used. Add `:tee` or `:e2e-tee` to raise privacy. |
 | `messages` | array | required | The conversation. Each item is `{ role, content }`. Roles: `system`, `user`, `assistant`, `tool`, `developer`. |
 | `temperature` | number | optional | Sampling randomness. Higher is more varied. Passed through to the model. |
@@ -148,5 +148,3 @@ Nothing else in the request changes. The privacy mode lives entirely in the mode
 - [Stream your first response](/get-started/stream-your-first-response)
 - [Check usage and credits](/get-started/check-usage-and-credits)
 - [Chat completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/server/api_chat.go (apiChatRequest, apiChatResponse, apiChatChoice, apiChatMessage, apiUsage, decodeStrictJSON DisallowUnknownFields, system_fingerprint always null), internal/inference/validation.go (ValidateChatRequest, validateMessage), internal/inference/contracts.go (Role, FinishReason stop/length/tool_calls/error), internal/models/models.go (ParseLogicalModelIDForPublicMode) */}

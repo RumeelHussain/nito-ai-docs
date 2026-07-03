@@ -1,6 +1,6 @@
 ---
-title: Image generation
-description: Turn a text prompt into a PNG image with the Nito image endpoint, including request and response shapes and a worked curl example.
+title: "Image generation"
+description: "Turn a text prompt into a PNG image with the Nito image endpoint, including request and response shapes and a worked curl example."
 ---
 
 Image generation is the one thing Nito produces beyond text. You send a prompt, you get back a PNG. This page covers the endpoint, every request field, the response shape, and a complete worked call, plus the two parameters you should not bother sending.
@@ -9,7 +9,7 @@ Image generation is the one thing Nito produces beyond text. You send a prompt, 
 
 Image generation is a dedicated endpoint, separate from chat. There are two paths and they share a handler:
 
-```
+```text
 POST /v1/images/generations
 POST /api/v1/images/generations
 ```
@@ -21,7 +21,7 @@ The endpoint is backed by the **fal** provider. The default model is a Z-Image m
 ## Request fields
 
 | Field | Required | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `prompt` | yes | The text description of the image to generate. |
 | `model` | no | Defaults to a Z-Image model if omitted. |
 | `n` | no | How many images to generate, 0 to 4. |
@@ -34,7 +34,7 @@ The endpoint is backed by the **fal** provider. The default model is a Z-Image m
 The `response_format` field decides how you receive the image. With `url` (the default) the response carries a link to the generated PNG; with `b64_json` the response carries the base64-encoded bytes inline.
 
 <Warning>
-`quality` and `style` are rejected for the fal provider. Even though the fields exist in the request shape, sending them to the fal-backed image models does not work. Leave them out. Plan your generation around `prompt`, `model`, `n`, `size`, and `response_format`.
+  `quality` and `style` are rejected for the fal provider. Even though the fields exist in the request shape, sending them to the fal-backed image models does not work. Leave them out. Plan your generation around `prompt`, `model`, `n`, `size`, and `response_format`.
 </Warning>
 
 ## Response shape
@@ -70,7 +70,7 @@ The fields:
 
 Image generation is **billed by pixels**. The cost scales with the size of the images you generate, not by a flat per-image rate, so a larger `size` or a higher `n` costs more.
 
-> **TODO (needs SME):** publish the per-pixel pricing (or the formula) and confirm how `n` and `size` combine into the billed amount, including any minimum charge. Pricing is not encoded in the gateway model card. Owner: Finance/Backend.
+> **TODO (needs SME):** publish the per-pixel pricing (or the formula) and confirm how `n` and `size` combine into the billed amount, including any minimum charge. Pricing is not encoded in the gateway model card.
 
 ## A worked example
 
@@ -90,7 +90,7 @@ curl https://YOUR-NITO-BASE-URL/v1/images/generations \
 
 Because `model` is omitted, this routes to the default Z-Image model. To receive the bytes inline instead of a URL, set `"response_format": "b64_json"` and read `data[0].b64_json` from the response.
 
-> **TODO (needs SME):** confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts. Owner: Product/Infra.
+> **TODO (needs SME):** confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts.
 
 ## What this is not
 
@@ -104,5 +104,3 @@ Because `model` is omitted, this routes to the default Z-Image model. To receive
 - [Image input](/features/multimodal/image-input)
 - [How Nito works](/get-started/how-nito-works)
 - [Models](/models)
-
-{/* source: internal/server/api_images.go (apiImageGenerationsHandler, apiImageGenerationRequest, apiImageGenerationResponse), internal/provider/fal/fal.go (default model fal/fal-ai/z-image/turbo, X-Fal-Store-IO:0, quality/style rejected, PNG output, billed by pixels) */}

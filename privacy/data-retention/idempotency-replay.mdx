@@ -1,6 +1,6 @@
 ---
-title: Idempotency and Replay
-description: The Idempotency-Key header drives billing dedup so a retried request is not double-charged. The replay-retention window is unconfirmed.
+title: "Idempotency and Replay"
+description: "The Idempotency-Key header drives billing dedup so a retried request is not double-charged. The replay-retention window is unconfirmed."
 ---
 
 Network calls fail and get retried. If a retry silently re-ran a paid inference call, you could be charged twice for one logical request. Nito addresses this with an **idempotency key**: a header you attach to a request so the gateway can recognize a retry of the same logical operation and avoid double-billing it. This page explains what the mechanism actually does, and is careful about what it does **not** confirm.
@@ -17,7 +17,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   -d '{"model":"grok-4.3","messages":[{"role":"user","content":"hello"}]}'
 ```
 
-> **TODO (needs SME):** confirm the canonical example request and base URL once the production gateway URL is fixed (owner: Product/Infra).
+> **TODO (needs SME):** confirm the canonical example request and base URL once the production gateway URL is fixed.
 
 The key must be a **UUID**. Its role in the code is scoped to **billing deduplication**: it is carried as the idempotency key on the billing authorization for the request, so that a retried request matching the same key is not double-charged. In other words, the value the key delivers is financial safety on retries, not a general-purpose response cache.
 
@@ -29,7 +29,7 @@ Product materials sometimes describe a **24-hour idempotency replay window** (th
 
 This is a case where honesty matters more than completeness. Do not treat "24h" as a fact.
 
-> **TODO (needs SME):** idempotency replay/retention window (owner: Backend). The mechanism exists for billing dedup; any specific replay-retention window is unconfirmed and may live in infrastructure or SQL migrations not covered by this scan.
+> **TODO (needs SME):** idempotency replay/retention window. The mechanism exists for billing dedup; any specific replay-retention window is unconfirmed and may live in infrastructure or SQL migrations not covered by this scan.
 
 ## What you can rely on today
 
@@ -44,5 +44,3 @@ So you can safely use the key to make retries financially safe. You should not, 
 - [Data retention](/privacy/data-retention): the retention contract and its unconfirmed-window framing.
 - [Metadata-only default](/privacy/data-retention/metadata-only-default): the baseline that the idempotency key sits alongside.
 - [How Nito works](/get-started/how-nito-works): the billing hold-and-settle lifecycle the key protects.
-
-{/* source: internal/server/api_billing.go (AuthorizeInferenceRequest.IdempotencyKey), internal/server/api_chat.go (Idempotency-Key header, UUID), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §7 (Idempotency), §10 (idempotency replay 24h: NOT CONFIRMED) */}

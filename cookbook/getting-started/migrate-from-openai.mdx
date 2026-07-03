@@ -1,5 +1,5 @@
 ---
-title: Migrate from OpenAI
+title: "Migrate from OpenAI"
 description: "Repoint your OpenAI SDK code at Nito by changing three things: base URL, key, and model ID."
 ---
 
@@ -61,7 +61,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: Map your model names
 
@@ -98,5 +98,3 @@ Do not assume OpenAI-specific behaviors that are not part of the Chat Completion
 - [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
 - [OpenAI drop-in compatibility notes](/sdks/openai-drop-in/compatibility-notes)
 - [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (/v1/responses -> 404), §2 (apiChatRequest fields), §5 (catalog discovery, model-ID suffix), §8 (z_sk_) */}

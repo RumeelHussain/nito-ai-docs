@@ -1,6 +1,6 @@
 ---
-title: Choosing the right model
-description: A practical guide from use case to model and privacy mode on Nito.
+title: "Choosing the right model"
+description: "A practical guide from use case to model and privacy mode on Nito."
 ---
 
 With many models behind one key, the useful question is not "what exists" but "what should I use for this." This page is a decision guide. It maps common situations to a kind of model and a privacy mode, so you can choose quickly and refine later. Throughout, treat the live catalog as the final word: always confirm exact model IDs against `GET /v1/models`, because the catalog is discovered from providers and changes over time rather than being a fixed list.
@@ -28,7 +28,7 @@ Answer those two and you have most of the decision. The rest is refinement.
 A privacy mode describes how protected your prompt and the reply are while the model runs. Pick the lightest mode that genuinely fits the call.
 
 | The call is... | Use | Why |
-|---|---|---|
+| --- | --- | --- |
 | Low-sensitivity, internal | Ordinary mode (`model`) | Lowest overhead; metadata-only retention by default. |
 | Sensitive, needs no provider retention | Private-tier model | Zero-data-retention enforced upstream. |
 | Highly sensitive, needs proof | `model:tee` | Sealed execution inside a hardware-isolated environment, with an attestation you can verify. |
@@ -63,5 +63,3 @@ Cost and latency vary by model and by privacy mode. Cheaper models and ordinary 
 - [Model families](/models/model-families)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Pricing](/models/pricing)
-
-{/* source: internal/server/api_models.go (capabilities), internal/inference/contracts.go (ReasoningEffort), internal/models/models.go (privacy modes), internal/server/logical_models.go (cost-ordered selection) */}

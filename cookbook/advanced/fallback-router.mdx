@@ -1,6 +1,6 @@
 ---
-title: Build an app-level fallback router
-description: Try a primary model, fall back to another on error. Layered on top of Nito's own backend fallback, with the privacy guarantee it never crosses.
+title: "Build an app-level fallback router"
+description: "Try a primary model, fall back to another on error. Layered on top of Nito's own backend fallback, with the privacy guarantee it never crosses."
 ---
 
 **Goal.** A wrapper that sends a request to a primary model and, if it errors, retries the same prompt against a fallback model, so a single model's outage does not take your feature down.
@@ -9,7 +9,7 @@ description: Try a primary model, fall back to another on error. Layered on top 
 
 ## Know what Nito already does
 
-Before you write a line, know that Nito already fails over for you at a level you cannot see. A single logical model can be served by more than one physical backend (the same model at different providers or tiers), and the router picks a healthy, eligible one. If a backend is unavailable, the gateway routes around it **within that logical model group**. This app-level router sits *on top* of that: it fails over from one model to a **different** model, which the gateway cannot do for you because choosing a different model is a product decision only you can make.
+Before you write a line, know that Nito already fails over for you at a level you cannot see. A single logical model can be served by more than one physical backend (the same model at different providers or tiers), and the router picks a healthy, eligible one. If a backend is unavailable, the gateway routes around it **within that logical model group**. This app-level router sits _on top_ of that: it fails over from one model to a **different** model, which the gateway cannot do for you because choosing a different model is a product decision only you can make.
 
 One guarantee this recipe must never break: **a privacy mode never silently downgrades.** If you ask for `:tee` and it cannot be served as asked, the call fails rather than dropping to a weaker backend. So your fallback list must respect privacy. Do not fall back from a `:tee` model to an ordinary one for a sensitive request; that would defeat the guarantee you asked for. Keep fallbacks within the same privacy tier.
 
@@ -18,12 +18,12 @@ One guarantee this recipe must never break: **a privacy mode never silently down
 Not every failure should trigger a fallback. A `400` (bad request) will fail on the fallback too, so retrying wastes time and money. Fall back on transient and availability failures, not on your own mistakes.
 
 | Status | Meaning | Fall back? |
-|---|---|---|
-| 400 | invalid_request / model_unavailable | No, fix the request |
+| --- | --- | --- |
+| 400 | invalid\_request / model\_unavailable | No, fix the request |
 | 401 / 403 | auth / forbidden | No |
-| 402 | payment_required | No, add credits |
-| 429 | rate_limited / insufficient_quota | Maybe, after `Retry-After` |
-| 502 | provider_error | Yes |
+| 402 | payment\_required | No, add credits |
+| 429 | rate\_limited / insufficient\_quota | Maybe, after `Retry-After` |
+| 502 | provider\_error | Yes |
 | 503 | unavailable | Yes |
 
 ## Step 2: Wrap the call with fallback
@@ -80,7 +80,7 @@ On a `429`, the response carries a `Retry-After` header telling you how long to 
 
 - **Do not fall back across privacy tiers.** A `:tee` request that fails should fall back to another `:tee` option, or fail. Silently answering a sensitive request in ordinary mode is exactly the downgrade the platform refuses to do, and your router should not reintroduce it.
 - **Do not fall back on `400`/`401`/`402`.** Those are deterministic and will fail identically on the next model.
-- **Do not duplicate the gateway's job.** You do not need to list every provider for one model; the gateway already load-balances within a logical model. Your list is about *alternative models*.
+- **Do not duplicate the gateway's job.** You do not need to list every provider for one model; the gateway already load-balances within a logical model. Your list is about _alternative models_.
 
 ## Related
 
@@ -88,5 +88,3 @@ On a `429`, the response carries a `Retry-After` header telling you how long to 
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Error format](/api-reference/overview/error-format)
 - [Model comparison tool](/cookbook/advanced/model-comparison-tool)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §5 (chooseLogicalRoute, backend selection within logical model group), how-nito-works.mdx (privacy never silently downgrades), §9 (status mapping, Retry-After only, X-Request-ID on every response) */}

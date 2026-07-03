@@ -1,6 +1,6 @@
 ---
-title: SDKs and tools
-description: Reach Nito from the SDKs you already use. A language matrix for the OpenAI and Anthropic SDKs, plus what is documented separately.
+title: "SDKs and tools"
+description: "Reach Nito from the SDKs you already use. A language matrix for the OpenAI and Anthropic SDKs, plus what is documented separately."
 ---
 
 You do not need a Nito-specific SDK to call Nito. The gateway is OpenAI-compatible on its main surfaces, so the official OpenAI SDK works as a drop-in: change the base URL, change the API key, and use a Nito catalog model ID. Codebases built around the Anthropic SDK can reach Nito too, with one honest caveat covered below.
@@ -18,7 +18,7 @@ Nito speaks the OpenAI shape on four surfaces:
 
 "Drop-in" means exactly this: set the SDK's `base_url` to your Nito base plus `/v1`, set the API key to a `z_sk_` key, and name a Nito catalog model ID. The request and response shapes are the ones the OpenAI SDK already expects.
 
-> **TODO (needs SME):** the canonical production base URL. Throughout these pages, replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Throughout these pages, replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
 Two surfaces from the broader OpenAI and Anthropic worlds are **not** served, and calling them returns `404`:
 
@@ -30,7 +30,7 @@ Two surfaces from the broader OpenAI and Anthropic worlds are **not** served, an
 The supported path today is the official OpenAI SDK (and, with the caveat below, the Anthropic SDK) in Python and TypeScript. Both languages call the same gateway surfaces with the same request shapes.
 
 | Language | SDK | Status | Surface used |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Python | `openai` | Supported drop-in | `/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, `/v1/models` |
 | TypeScript | `openai` | Supported drop-in | same as above |
 | Python | `anthropic` (Messages) | Not served (404) | native `/v1/messages` returns 404; route through Chat Completions instead |
@@ -67,5 +67,3 @@ Across every SDK path, privacy is selected by the model ID, not by a separate pa
 - [Anthropic drop-in: base URL swap](/sdks/anthropic-drop-in/base-url-swap)
 - [Call from Postman or Bruno](/sdks/postman-bruno)
 - [Chat completions feature](/features/chat-completions)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (route table, unsupported 404s), §5 (model IDs), §9 (error envelope), §11 (out of scope this pass: Native SDK, Agent SDK, CLI, MCP server), docs/get-started/quickstart-openai-sdk.mdx, docs/get-started/quickstart-anthropic-sdk.mdx */}

@@ -1,6 +1,6 @@
 ---
-title: Zero Data Retention
-description: What Nito retains and what it does not. Metadata-only by default, request-local prompts and completions, and ZDR enforced upstream at the providers.
+title: "Zero Data Retention"
+description: "What Nito retains and what it does not. Metadata-only by default, request-local prompts and completions, and ZDR enforced upstream at the providers."
 ---
 
 Zero data retention (ZDR) is a precise claim, so this page states it precisely. **ZDR means the content of your request, your prompt, the model's completion, its reasoning, your tool calls, and any uploaded file contents, is not persisted.** It is used to serve the request and then it is gone from the gateway's storage. What remains is metadata: the minimal usage and routing information needed to operate and bill the service. This page defines that line carefully, says exactly what falls on each side of it, and shows how the no-retention posture is enforced not just at the gateway but at the upstream providers that actually run the model.
@@ -21,7 +21,7 @@ Put together: the gateway sees your content in order to serve the request, and t
 It helps to be explicit about each content category, because "we don't keep your data" is easy to say and easy to get wrong.
 
 | Category | Retained by the gateway? |
-|---|---|
+| --- | --- |
 | Prompt / input messages | No. Request-local. |
 | Completion / output | No. Request-local, `no-store`. |
 | Reasoning content | No. Request-local. |
@@ -32,7 +32,7 @@ It helps to be explicit about each content category, because "we don't keep your
 
 If a number, a window, or a category is not on this list, do not assume it. Several retention windows that appear in earlier planning material (an idempotency replay window, a debug-capture window, a saved-chat window) are **not confirmed in code** and must not be stated as fact.
 
-> **TODO (needs SME):** confirm the exact retention windows, if any, for idempotency-key billing dedup, governed debug capture, and tenant saved chats. These were unverifiable in code and must be confirmed by Backend/Legal before being documented as facts.
+> **TODO (needs SME):** confirm the exact retention windows, if any, for idempotency-key billing dedup, governed debug capture, and tenant saved chats. These were unverifiable in code and must be confirmed before being documented as facts.
 
 ## How ZDR is enforced upstream
 
@@ -76,5 +76,3 @@ So ZDR is not a separate product tier you buy; it is the baseline behavior, stre
 - [Privacy overview](/privacy/overview) - what "private" means on Nito and why it is per call.
 - [Privacy architecture](/privacy/privacy-architecture) - where the metadata-only posture is enforced across hops.
 - [Per-call privacy modes](/privacy/per-call-privacy-modes) - selecting `private`, `:tee`, and `:e2e-tee`.
-
-{/* source: docs/standards/privacy-and-retention.md, internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR = RequireZeroDataRetention && !hasServerTools; embeddings/images force ZDR), internal/provider/fal/fal.go (X-Fal-Store-IO:0), internal/server/logical_models.go (RequireZeroDataRetention), internal/server/api_storage_key (GET /api/v1/me/storage-key, HMAC-SHA256), internal/server/observability.go (SafeAttrs allowlist); DOCS_SOURCE_OF_TRUTH.md §5, §10 */}

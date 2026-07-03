@@ -1,12 +1,12 @@
 ---
-title: Quickstart, Anthropic SDK drop-in
-description: Use Nito from Anthropic-shaped codebases. Note the current support boundary before you switch.
+title: "Anthropic SDK drop-in"
+description: "Use Nito from Anthropic-shaped codebases. Note the current support boundary before you switch."
 ---
 
 If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change, and where the current boundary is. Nito's compatible surface is the OpenAI Chat Completions shape. The Anthropic Messages endpoint is on the roadmap but is not served yet, so today you route Anthropic-based code through Chat Completions.
 
 <Warning>
-The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are not served by the gateway at this time. Requests to them return 404. Until they ship, use the OpenAI-compatible Chat Completions surface described below. This page will be updated when the Messages API is available.
+  The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are not served by the gateway at this time. Requests to them return 404. Until they ship, use the OpenAI-compatible Chat Completions surface described below. This page will be updated when the Messages API is available.
 </Warning>
 
 ## The recommended path today
@@ -56,7 +56,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Mapping notes
 
@@ -81,6 +81,4 @@ console.log(resp.choices[0].message.content);
 
 - [OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Chat completions feature](/features/chat-completions)
-- The Messages-shaped surface is tracked in [DOCS_DEFERRED](/resources/roadmap) until it ships.
-
-{/* source: internal/server/routes.go (compat.anthropic.messages.unsupported, compat.anthropic.messages_count_tokens.unsupported -> notFoundRouteHandler), internal/inference/contracts.go (Role), internal/server/api_chat.go */}
+- The Messages-shaped surface is tracked in [DOCS\_DEFERRED](/resources/roadmap) until it ships.

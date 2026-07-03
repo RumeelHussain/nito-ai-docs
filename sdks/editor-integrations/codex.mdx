@@ -1,6 +1,6 @@
 ---
-title: Codex
-description: Point Codex at Nito through the OpenAI-compatible Chat Completions path using a Nito base URL, key, and catalog model ID.
+title: "Codex"
+description: "Point Codex at Nito through the OpenAI-compatible Chat Completions path using a Nito base URL, key, and catalog model ID."
 ---
 
 Codex is an OpenAI-oriented coding tool. Since Nito exposes an OpenAI-compatible API, you can route Codex through Nito by overriding its base URL, key, and model. You are not selecting a named "Nito" provider. You are using Codex's OpenAI-compatible configuration and pointing it at Nito.
@@ -13,9 +13,9 @@ Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Codex against its official docs, including whether the running version targets Chat Completions or the Responses API (owner: DevRel).
+> **TODO (needs SME):** verify the exact current settings path/config for Codex against its official docs, including whether the running version targets Chat Completions or the Responses API.
 
 ## Use Chat Completions, not Responses
 
@@ -45,5 +45,3 @@ Privacy is selected by the model ID, so no separate Codex setting is required. A
 - [Editor and tool integrations](/sdks/editor-integrations)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Claude Code](/sdks/editor-integrations/claude-code)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; responses 404 routes.go:141) */}

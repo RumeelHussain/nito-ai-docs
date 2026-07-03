@@ -1,6 +1,6 @@
 ---
-title: Build a model comparison tool
-description: List the catalog, send one prompt to several models, and compare the answers side by side. Plus the gateway-native fusion endpoint.
+title: "Build a model comparison tool"
+description: "List the catalog, send one prompt to several models, and compare the answers side by side. Plus the gateway-native fusion endpoint."
 ---
 
 **Goal.** A small script that discovers the available chat models, sends the same prompt to a handful of them, and lays the answers out side by side so you can judge quality, tone, and latency for your own task.
@@ -102,5 +102,3 @@ Use your own loop (Steps 1 to 3) when you want raw side-by-side answers and stre
 - [Usage dashboard](/cookbook/advanced/usage-dashboard)
 - [Fallback router](/cookbook/advanced/fallback-router)
 - [How Nito works](/get-started/how-nito-works)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (GET /v1/models, /api/v1/chat/fusion), §2 (/api/v1/chat/fusion apiChatFusionHandler: 2-3 models, non-streaming, synthesis/judge, models[], no function tools, no mix TEE/non-TEE, e2e-tee rejected), §5 (catalog runtime-discovered), §9 (X-Request-ID) */}

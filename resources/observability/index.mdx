@@ -1,6 +1,6 @@
 ---
-title: Observability
-description: How to observe Nito traffic, using the request ID and usage block on every response plus the gateway's server-side OpenTelemetry and Sentry support.
+title: "Observability"
+description: "How to observe Nito traffic, using the request ID and usage block on every response plus the gateway's server-side OpenTelemetry and Sentry support."
 ---
 
 Observability for Nito (publicly Z Inference) has two halves: what the gateway emits server-side, and what you capture client-side from every response. This section documents both honestly, and marks any third-party integration that is not verified in the gateway as a TODO owned by DevRel or Infra.
@@ -26,16 +26,14 @@ This client-side pair is the most portable observability primitive Nito offers. 
 
 ## Pages in this section
 
-- **[Datadog](/resources/observability/datadog)** - route the gateway's OTLP export into Datadog through a collector or agent.
-- **[Langfuse](/resources/observability/langfuse)** - client-side LLM observability using request IDs and usage.
-- **[Sentry](/resources/observability/sentry)** - server-side error tracking with `SENTRY_*` configuration.
-- **[S3](/resources/observability/s3)** - exporting your own client-side logs to S3-compatible storage.
-- **[Webhooks](/resources/observability/webhooks)** - the honest status of outbound event delivery (not available today).
+- [**Datadog**](/resources/observability/datadog) - route the gateway's OTLP export into Datadog through a collector or agent.
+- [**Langfuse**](/resources/observability/langfuse) - client-side LLM observability using request IDs and usage.
+- [**Sentry**](/resources/observability/sentry) - server-side error tracking with `SENTRY_*` configuration.
+- [**S3**](/resources/observability/s3) - exporting your own client-side logs to S3-compatible storage.
+- [**Webhooks**](/resources/observability/webhooks) - the honest status of outbound event delivery (not available today).
 
 ## Related
 
 - [Status page](/resources/status-page) - planned uptime and incident surface.
 - [Latency and performance](/resources/best-practices/latency-and-performance) - client-side timing and retries.
 - [Privacy overview](/privacy/overview) - the metadata-only default retention model.
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md section 9 (config/observability: OTEL_*, SENTRY_*, OPENOBSERVE_*), section 9 headers (X-Request-ID), section 2 (usage block). */}

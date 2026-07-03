@@ -1,11 +1,11 @@
 ---
-title: Telegram bot
-description: Build a Telegram bot whose replies come from Nito. Receive a message, call Nito's Chat Completions, and send the answer back.
+title: "Telegram bot"
+description: "Build a Telegram bot whose replies come from Nito. Receive a message, call Nito's Chat Completions, and send the answer back."
 ---
 
 A chat bot has two halves. The Telegram half receives updates and sends replies. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Telegram half only as a representative shape, because the Telegram Bot API and its client libraries change over time.
 
-> **TODO (needs SME):** verify the current Telegram Bot API/library setup against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the current Telegram Bot API/library setup against its official docs.
 
 ## The Nito call
 
@@ -30,7 +30,7 @@ def answer(user_text: str) -> str:
     return resp.choices[0].message.content
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`. Do not hardcode a name like `gpt-4o`. Fetch the live list and pick one:
 
@@ -86,5 +86,3 @@ Always catch exceptions around the Nito call so a single failed reply does not c
 - [Discord bot](/cookbook/bots/discord-bot)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Rate limits](/resources/rate-limits)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

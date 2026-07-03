@@ -1,6 +1,6 @@
 ---
-title: Privacy Architecture
-description: Where privacy is enforced at each hop, from request through inference to billing. Auth, mode resolution, routing, provider boundary, metadata-only logging.
+title: "Privacy Architecture"
+description: "Where privacy is enforced at each hop, from request through inference to billing. Auth, mode resolution, routing, provider boundary, metadata-only logging."
 ---
 
 The [Privacy overview](/privacy/overview) makes the promises. This page shows how they are kept. It follows a single request from the moment it arrives at the gateway to the moment it is billed, and it points at the exact hop where each privacy property is enforced. The theme throughout: privacy is not a single switch flipped in one place; it is a sequence of constraints applied at every hop, so that a request cannot reach a provider in a weaker mode than you asked for.
@@ -28,7 +28,7 @@ The load-bearing property here is the refusal to downgrade. If the privacy filte
 Once a backend is chosen, the gateway calls the provider inside the privacy boundary the mode requires, and each provider enforces privacy in its own way:
 
 | Provider | Privacy enforcement at the boundary |
-|---|---|
+| --- | --- |
 | xAI (Grok) | `Store: false` is forced on every request, so the upstream is told not to retain the exchange. |
 | OpenRouter | A zero-data-retention data policy is applied when the route requires it. It is relaxed only when OpenRouter server-side web tools are used; embeddings and images force ZDR regardless. Models without a ZDR policy are never imported. |
 | NEAR | Runs in a TEE; produces a domain-based attestation. Supports the end-to-end encrypted path. |
@@ -63,7 +63,7 @@ Billing brackets the provider call. Before the call, the gateway places a hold a
 
 ## The shape of the guarantee
 
-Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no hop at which a request becomes *less* private than you asked for. The only thing that can happen if the mode cannot be honored is that the call fails.
+Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no hop at which a request becomes _less_ private than you asked for. The only thing that can happen if the mode cannot be honored is that the call fails.
 
 ## Related
 
@@ -71,5 +71,3 @@ Read top to bottom, the architecture is a funnel that only ever narrows: the mod
 - [Per-call privacy modes](/privacy/per-call-privacy-modes) - how the suffix selects the mode at hop 2.
 - [Zero data retention](/privacy/zero-data-retention) - the metadata-only contract behind hops 4 and 5.
 - [How Nito works](/get-started/how-nito-works) - the full request lifecycle including billing.
-
-{/* source: internal/server/routes.go, internal/models/models.go (ParseLogicalModelIDForPublicMode), internal/server/logical_models.go (chooseLogicalRoute, RequireZeroDataRetention), internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR), internal/provider/near, internal/provider/phala, internal/provider/fal/fal.go (X-Fal-Store-IO), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), internal/billing/enforcement.go, docs/architecture/tee-attestation.md, docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 */}

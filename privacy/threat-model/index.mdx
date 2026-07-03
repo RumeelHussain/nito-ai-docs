@@ -1,11 +1,11 @@
 ---
-title: Threat Model
-description: An explicit statement of what Nito protects and what it does not, so a security reviewer can judge the system on its real boundaries.
+title: "Threat Model"
+description: "An explicit statement of what Nito protects and what it does not, so a security reviewer can judge the system on its real boundaries."
 ---
 
 A threat model is only useful if it is honest about both sides. A page that lists defenses and goes quiet on gaps tells a reviewer nothing they can trust, because they cannot tell whether a missing protection was considered and scoped out, or simply forgotten. So this section does the opposite of a marketing page: it states plainly what Nito defends against, and then, with equal specificity, what it does not. If you are evaluating Nito for sensitive workloads, this is the section to read closely, because it draws the boundaries you will be designing around.
 
-The framing is deliberate. Everywhere these docs make a privacy claim, we want you to be able to check it, and checking requires knowing the edges. Honesty about limits is what makes the defenses credible: if we are specific about what the gateway does *not* verify, you can believe us about what it does.
+The framing is deliberate. Everywhere these docs make a privacy claim, we want you to be able to check it, and checking requires knowing the edges. Honesty about limits is what makes the defenses credible: if we are specific about what the gateway does _not_ verify, you can believe us about what it does.
 
 ## How to read this section
 
@@ -39,5 +39,3 @@ Each step has defenses and each step has limits. The two pages walk them in that
 - [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against) - the boundaries, stated frankly.
 - [Provider-side enforcement](/privacy/provider-side-enforcement) - how each provider hop is constrained.
 - [Known limitations](/privacy/known-limitations) - the broader list of current gaps and unverifiable claims.
-
-{/* source: internal/server/routes.go, internal/models/models.go, internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), internal/auth/tokens.go (hashed credentials), internal/websearch/redaction.go, docs/architecture/tee-attestation.md, docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §6, §8, §10 */}

@@ -1,6 +1,6 @@
 ---
-title: TEE Attestation
-description: How Nito turns a privacy promise into something you can check. The map to attestation, the seven-gate baseline, freshness, and the verify-yourself path.
+title: "TEE Attestation"
+description: "How Nito turns a privacy promise into something you can check. The map to attestation, the seven-gate baseline, freshness, and the verify-yourself path."
 ---
 
 Every other page in the privacy section makes a claim: that a call ran inside a sealed, hardware-isolated environment the host could not read or tamper with. Attestation is what turns that claim from a promise into something you can check. This section is the security-sensitive core of the Nito docs, so it is written to be read slowly and audited line by line. If you are a security reviewer, this is your map.
@@ -15,7 +15,7 @@ The gateway checks that the evidence is present and well-formed, that the proof 
 
 So the right words for a Nito attestation result are **baseline-verified**, **attested**, and **verifiable**. We never call it "trustless" or "fully verified," because the gateway alone does not establish full hardware trust. It gives you a fast baseline answer and hands you everything you need to do the rest yourself.
 
-> **Diagram placeholder (attestation verification).** Show: client generates a fresh nonce; client calls `GET /api/v1/tee/attestation?model=...&nonce=...`; gateway resolves the public model to an attestation-capable physical model; gateway calls the provider attestation client; gateway runs the seven-gate baseline; gateway returns evidence plus summary; client independently verifies the hardware quote (TDX / GPU / cert chains). Marked TODO for design. No ASCII art.
+> **Diagram placeholder (attestation verification).** Show: client generates a fresh nonce; client calls `GET /api/v1/tee/attestation?model=...&nonce=...`; gateway resolves the public model to an attestation-capable physical model; gateway calls the provider attestation client; gateway runs the seven-gate baseline; gateway returns evidence plus summary; client independently verifies the hardware quote (TDX / GPU / cert chains).
 
 ## What anti-replay actually rests on
 
@@ -25,13 +25,13 @@ Attestation freshness on Nito is **caller-driven**. You supply a fresh random no
 
 This section is deliberately split so each idea can be checked on its own.
 
-- **[What a TEE is](/privacy/tee-attestation/what-a-tee-is)** a short, plain-language primer on the hardware concept, for readers new to the term.
-- **[The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)** the end-to-end flow of `GET /api/v1/tee/attestation`: the allow-listed query keys, how the model is resolved, and every field in the response.
-- **[The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)** the exact pass-or-fail checks the gateway runs, enumerated, with the scope limit stated plainly.
-- **[Freshness and binding](/privacy/tee-attestation/freshness-binding)** how `report_data = signing_address + nonce` is recomputed and compared, and why anti-replay is your responsibility.
-- **[Address-only model binding](/privacy/tee-attestation/address-only-model-binding)** why the binding uses the signing address only, and why an evidence entry without a model public key never counts as a binding.
-- **[Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)** how NEAR (domain-based) and Phala (appid-based) differ, and what they share.
-- **[Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)** a runnable recipe, including a curl call and a verification sketch, plus a pointer to the reference verifier.
+- [**What a TEE is**](/privacy/tee-attestation/what-a-tee-is) a short, plain-language primer on the hardware concept, for readers new to the term.
+- [**The attestation pipeline**](/privacy/tee-attestation/attestation-pipeline) the end-to-end flow of `GET /api/v1/tee/attestation`: the allow-listed query keys, how the model is resolved, and every field in the response.
+- [**The seven-gate baseline**](/privacy/tee-attestation/seven-gate-baseline) the exact pass-or-fail checks the gateway runs, enumerated, with the scope limit stated plainly.
+- [**Freshness and binding**](/privacy/tee-attestation/freshness-binding) how `report_data = signing_address + nonce` is recomputed and compared, and why anti-replay is your responsibility.
+- [**Address-only model binding**](/privacy/tee-attestation/address-only-model-binding) why the binding uses the signing address only, and why an evidence entry without a model public key never counts as a binding.
+- [**Per-provider attestation**](/privacy/tee-attestation/per-provider-attestation) how NEAR (domain-based) and Phala (appid-based) differ, and what they share.
+- [**Verify it yourself**](/privacy/tee-attestation/verify-yourself-recipe) a runnable recipe, including a curl call and a verification sketch, plus a pointer to the reference verifier.
 
 ## How to read this section
 
@@ -44,5 +44,3 @@ If you only want the mental model, read the next two pages: [what a TEE is](/pri
 - [How Nito works](/get-started/how-nito-works)
 - [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go, docs/architecture/tee-attestation.md */}

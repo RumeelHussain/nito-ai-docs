@@ -1,6 +1,6 @@
 ---
-title: Governed Debug Capture
-description: The designed, opt-in concept of bounded debug captures. The capture mechanism and its retention bound are not yet verifiable in code.
+title: "Governed Debug Capture"
+description: "The designed, opt-in concept of bounded debug captures. The capture mechanism and its retention bound are not yet verifiable in code."
 ---
 
 Sometimes you need to debug a request, and debugging is easier when you can see what actually went through. That capability is in tension with a metadata-only default, which deliberately does **not** keep request bodies. **Governed debug capture** is the name for the controlled way to resolve that tension: an explicit, opt-in capture of request detail, kept only for a bounded time. This page describes the concept as designed, and is explicit that the mechanism and its duration are not confirmed in code.
@@ -21,7 +21,7 @@ Here is where accuracy matters. The standard says "bounded retention" **without 
 
 Do not state "7 days" as fact, and do not describe a capture subsystem as if it is implemented and verifiable. Describe the concept as designed and opt-in, and mark the duration and the mechanism as pending SME confirmation.
 
-> **TODO (needs SME):** debug capture mechanism and retention bound (owner: Backend/Security). The concept (explicit opt-in, bounded retention) is described in the privacy standard; the implementing subsystem and the specific retention duration are not verifiable in the scanned code.
+> **TODO (needs SME):** debug capture mechanism and retention bound (owner: Backend/Security). The concept (explicit opt-in, bounded retention) is described in the privacy standard; the implementing subsystem and the specific retention duration are not verifiable in the provided codebase.
 
 ## What you can rely on today
 
@@ -34,5 +34,3 @@ Do not state "7 days" as fact, and do not describe a capture subsystem as if it 
 - [Data retention](/privacy/data-retention): the contract and its unconfirmed-window framing.
 - [Metadata-only default](/privacy/data-retention/metadata-only-default): the baseline a debug capture is a deliberate exception to.
 - [Data visibility](/privacy/data-visibility): what is and is not normally retained.
-
-{/* source: docs/standards/privacy-and-retention.md (explicit opt-in debug captures, bounded retention); DOCS_SOURCE_OF_TRUTH.md §10 (Governed debug capture up to 7d: NOT CONFIRMED) */}

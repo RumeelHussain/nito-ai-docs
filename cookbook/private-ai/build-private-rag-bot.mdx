@@ -1,6 +1,6 @@
 ---
-title: Build a Private RAG Bot
-description: Build retrieval-augmented generation on Nito with private-tier embeddings for retrieval and a private or attested chat model for answering.
+title: "Build a Private RAG Bot"
+description: "Build retrieval-augmented generation on Nito with private-tier embeddings for retrieval and a private or attested chat model for answering."
 ---
 
 Retrieval-augmented generation (RAG) has two model calls in its hot path: **embeddings** to find relevant context, and **chat** to answer using that context. On Nito, both surfaces take the same privacy selection, so you can keep the whole pipeline at a private or attested tier. This recipe wires up a minimal private RAG bot.
@@ -11,7 +11,7 @@ Privacy is chosen by model ID on every call. That includes embeddings: `POST /v1
 
 Fetch `GET /v1/models?capability=embeddings` (via `GET /api/v1/model-groups?capability=embeddings`) to pick an embedding model, and `GET /v1/models` for a chat model. The example IDs below are placeholders.
 
-> **TODO (needs SME):** the canonical production base URL, plus concrete attestation-capable embedding and chat `MODEL_ID`s. The code default is a local address (owner: Product/Infra). Confirm against `GET /v1/models`.
+> **TODO (needs SME):** the canonical production base URL, plus concrete attestation-capable embedding and chat `MODEL_ID`s. The code default is a local address. Confirm against `GET /v1/models`.
 
 ## Step 1: Embed your documents
 
@@ -83,5 +83,3 @@ print(answer(question, top))
 - [Build document Q&A](/cookbook/private-ai/build-document-qa)
 - [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_embeddings.go; internal/embeddings/validation.go; internal/server/api_chat.go; internal/models/models.go:34-46,485; DOCS_SOURCE_OF_TRUTH.md §4, §6, §10 */}

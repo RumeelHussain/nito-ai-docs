@@ -1,6 +1,6 @@
 ---
-title: Provider-Side Enforcement
-description: How Nito constrains upstream providers so privacy holds past the gateway boundary, through concrete per-provider request settings.
+title: "Provider-Side Enforcement"
+description: "How Nito constrains upstream providers so privacy holds past the gateway boundary, through concrete per-provider request settings."
 ---
 
 A gateway can promise not to keep your data, but the call still leaves the gateway and runs on someone else's hardware. So the honest question a reviewer asks is not "what does Nito store?" but "what happens to my prompt once it crosses into the provider?" This page answers that. The short version is that Nito does not rely on a provider's general reputation or a marketing page. For each provider it sends a concrete, per-request setting that constrains what the upstream is allowed to do, and it refuses to import backends that cannot be constrained that way. Privacy holds past Nito's own boundary because of these specific switches, not in spite of the boundary.
@@ -46,22 +46,22 @@ The attestation carries a provider-specific subject so you can confirm which sea
 This is the difference between a promise and a proof. For xAI, OpenRouter, and fal, you are relying on a setting the gateway sends and the provider honors. For NEAR and Phala, you can fetch the attestation and verify, independently, that the call ran in the sealed environment it claims. The mechanics of that verification, and its deliberate limits, are covered in [Privacy architecture](/privacy/privacy-architecture) and the [threat model](/privacy/threat-model).
 
 <Warning>
-Attestation is **baseline-verified** at the gateway and **verifiable** by you. The gateway does not perform full hardware-quote verification (Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies). That deeper verification is the client's job. See [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against).
+  Attestation is **baseline-verified** at the gateway and **verifiable** by you. The gateway does not perform full hardware-quote verification (Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies). That deeper verification is the client's job. See [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against).
 </Warning>
 
 ## How the pieces fit
 
 | Provider | What Nito sends or requires | What it constrains |
-|---|---|---|
+| --- | --- | --- |
 | xAI (grok) | `Store: false` per request | Provider told not to retain the exchange |
-| OpenRouter | ZDR-only import + per-request ZDR policy (embeddings/images always ZDR) | Non-conforming models never reachable; retention off except the named web-tool case |
+| OpenRouter | ZDR-only import \+ per-request ZDR policy (embeddings/images always ZDR) | Non-conforming models never reachable; retention off except the named web-tool case |
 | fal (images) | `X-Fal-Store-IO: 0` | Provider told not to store image input and output |
-| NEAR | Sealed TEE + attestation, subject = `domain` | Verifiable sealed execution |
-| Phala | Sealed TEE + attestation, subject = `appid` (required) | Verifiable sealed execution |
+| NEAR | Sealed TEE \+ attestation, subject = `domain` | Verifiable sealed execution |
+| Phala | Sealed TEE \+ attestation, subject = `appid` (required) | Verifiable sealed execution |
 
 The throughline: a privacy claim that ends at the gateway boundary is not a privacy claim. Nito makes each provider hop carry an explicit setting, refuses to import backends that cannot be constrained, and for the top tiers replaces the setting with an attestation you can check yourself.
 
-> **TODO (needs SME):** the exact contractual data-processing terms behind each provider's no-retention setting, beyond the per-request technical flag enforced in code (owner: Legal/Security).
+> **TODO (needs SME):** the exact contractual data-processing terms behind each provider's no-retention setting, beyond the per-request technical flag enforced in code.
 
 ## Related
 
@@ -69,5 +69,3 @@ The throughline: a privacy claim that ends at the gateway boundary is not a priv
 - [Privacy architecture](/privacy/privacy-architecture) - where enforcement happens at each hop, request to billing.
 - [Threat model](/privacy/threat-model) - what these settings do and do not protect against.
 - [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against) - the limits of attestation verification.
-
-{/* source: internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR import + per-request policy), internal/provider/fal/fal.go (X-Fal-Store-IO), internal/provider/near, internal/provider/phala, internal/provider/oaiadapter (ParseAttestationResponse), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 */}

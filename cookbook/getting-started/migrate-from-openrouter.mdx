@@ -1,6 +1,6 @@
 ---
-title: Migrate from OpenRouter
-description: Swap the base URL and key, then map OpenRouter model names to Nito catalog IDs.
+title: "Migrate from OpenRouter"
+description: "Swap the base URL and key, then map OpenRouter model names to Nito catalog IDs."
 ---
 
 ## Goal
@@ -53,7 +53,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: Map your model names
 
@@ -92,5 +92,3 @@ Treat anything not documented for Nito as unverified rather than carrying it ove
 - [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
 - [Migrate from OpenAI](/cookbook/getting-started/migrate-from-openai)
 - [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (OpenAI-compat /v1 routes), §5 (catalog discovery, model-ID suffix), §7 (app attribution not wired), §8 (z_sk_) */}

@@ -1,6 +1,6 @@
 ---
-title: Verify It Yourself
-description: A runnable recipe for fetching and checking a Nito attestation, with a curl call and a Python sketch, plus the boundary you must verify on top.
+title: "Verify It Yourself"
+description: "A runnable recipe for fetching and checking a Nito attestation, with a curl call and a Python sketch, plus the boundary you must verify on top."
 ---
 
 Attestation is only worth anything if you check it. This page is a runnable recipe: generate a fresh nonce, fetch the attestation, and run a set of independent checks on what comes back. It closes the section by turning the [pipeline](/privacy/tee-attestation/attestation-pipeline) and the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline) into something you can execute.
@@ -26,7 +26,7 @@ curl -sS \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` and `MODEL_ID` once confirmed (owner: Security / Product).
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` and `MODEL_ID` once confirmed.
 
 ## Step 3: Run the independent checks
 
@@ -109,5 +109,3 @@ Nito ships a reference verifier you can read and run: **`tools/tee-attestation-s
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
 - [Freshness and binding](/privacy/tee-attestation/freshness-binding)
 - [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)
-
-{/* source: tools/tee-attestation-smoke/main.go, internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go, docs/architecture/tee-attestation.md */}

@@ -1,6 +1,6 @@
 ---
-title: Pydantic AI
-description: Use Nito in Pydantic AI via its OpenAI-compatible model, pointed at Nito's base URL with a Nito key and a Nito catalog model ID.
+title: "Pydantic AI"
+description: "Use Nito in Pydantic AI via its OpenAI-compatible model, pointed at Nito's base URL with a Nito key and a Nito catalog model ID."
 ---
 
 Pydantic AI agents take a model object, and it supports OpenAI-compatible providers. Nito has no Pydantic AI-specific package; you configure its OpenAI-compatible model for Nito and pass it to your agent, because Nito exposes an OpenAI-compatible API. Your typed outputs, tools, and agent logic stay the same.
@@ -35,9 +35,9 @@ result = agent.run_sync("Say hello in one short sentence.")
 print(result.output)
 ```
 
-> **TODO (needs SME):** verify the exact current configuration for Pydantic AI against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for Pydantic AI against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Choosing a model and privacy
 
@@ -65,5 +65,3 @@ Pydantic AI's Anthropic model targets the Anthropic Messages API (`/v1/messages`
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) */}

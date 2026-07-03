@@ -1,6 +1,6 @@
 ---
-title: Build a usage dashboard
-description: Read org usage and balance from the API and render a small dashboard of requests, tokens, charge, and per-model and daily breakdowns.
+title: "Build a usage dashboard"
+description: "Read org usage and balance from the API and render a small dashboard of requests, tokens, charge, and per-model and daily breakdowns."
 ---
 
 **Goal.** A small dashboard that reads your organization's usage over a window and its current balance, then shows totals, a daily trend, and a per-model breakdown so you can see what you are consuming and where.
@@ -18,7 +18,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_day
 
 `window_days` sets how far back the window reaches. It defaults to 30 and accepts up to 365.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
 
 The response is aggregated, not a transaction log. The fields you build on:
 
@@ -82,7 +82,7 @@ for d in overview["daily"]:
 
 That is a complete, if plain, dashboard. Swap the `print` calls for your charting library of choice: the `daily[]` array feeds a trend line, `models[]` feeds a bar chart, and the totals feed the top-line cards. The exact key names inside `daily[]` beyond the documented shape may vary, so inspect one real response before wiring a chart.
 
-> **TODO (needs SME):** the full field list inside `daily[]` and `models[]` entries (beyond `requests`, token counts, `customer_charge_nanos`, and the daily top model). Confirm against a live response (owner: Backend).
+> **TODO (needs SME):** the full field list inside `daily[]` and `models[]` entries (beyond `requests`, token counts, `customer_charge_nanos`, and the daily top model). Confirm against a live response.
 
 ## Notes
 
@@ -95,5 +95,3 @@ That is a complete, if plain, dashboard. Swap the `print` calls for your chartin
 - [Cost monitoring dashboard](/cookbook/advanced/cost-monitoring-dashboard)
 - [Get usage reference](/api-reference/usage-and-credits/get-usage)
 - [Get balance reference](/api-reference/usage-and-credits/get-balance)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (orgs nested api/overview, billing/balance), §9 (window_days default 30 max 365, Retry-After only); internal/server/api_org_api.go, internal/billing/api_usage.go (all_time/current_window/daily/models, customer_charge_nanos), internal/server/api_org_billing_balance.go (available_nanos decimal string) */}

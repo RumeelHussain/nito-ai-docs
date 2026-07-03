@@ -1,19 +1,19 @@
 ---
-title: Rate limits
-description: The canonical Nito rate-limit reference. Policy-table defaults across scopes, signalled only with Retry-After on 429.
+title: "Rate limits"
+description: "The canonical Nito rate-limit reference. Policy-table defaults across scopes, signalled only with Retry-After on 429."
 ---
 
 This is the canonical rate-limit reference for Nito. It covers how the limiter is structured, the selected published defaults, what you get on a `429`, and how the limiter behaves when its own infrastructure fails. The narrower [rate-limits page in the API reference](/api-reference/errors-and-rate-limits/rate-limits) mirrors these facts scoped to the error-handling flow; this page is the consolidated view.
 
 ## How the limiter works
 
-Nito enforces rate limits from a **policy table**. The table defines limiter groups (for example `inference_generate`, `inference_count`, `model_list`) and, within each group, limits per scope. Scopes include global, ip, org, api_key, oauth_token, session, user, oauth_client, the `mcp_*` groups, subject, and command.
+Nito enforces rate limits from a **policy table**. The table defines limiter groups (for example `inference_generate`, `inference_count`, `model_list`) and, within each group, limits per scope. Scopes include global, ip, org, api\_key, oauth\_token, session, user, oauth\_client, the `mcp_*` groups, subject, and command.
 
 The key structural fact: **per-key values are global group defaults, not values stored per individual key.** Two API keys in the same group share the same default rate. The policy table does not hold a custom number for each key; it holds one default that applies to every subject in that scope.
 
 Values are **deployment-configurable** via a policy file, so a given production environment may differ from the defaults listed here.
 
-> **TODO (needs SME):** confirm published production rate limits (owner: Backend/Product).
+> **TODO (needs SME):** confirm published production rate limits.
 
 ## Selected defaults
 
@@ -24,19 +24,19 @@ These are the defaults for the listed limiter groups.
 Covers chat, fusion, image, and embeddings generation.
 
 | Scope | Limit |
-|---|---|
+| --- | --- |
 | org | 600 / min |
-| api_key | 120 / min |
+| api\_key | 120 / min |
 | session | 120 / min |
 | org (in-flight) | 25 concurrent |
-| api_key (in-flight) | 10 concurrent |
+| api\_key (in-flight) | 10 concurrent |
 
 ### Other groups
 
 | Group | Scope | Limit |
-|---|---|---|
-| `inference_count` | api_key | 300 / min |
-| `model_list` | api_key | 600 / min |
+| --- | --- | --- |
+| `inference_count` | api\_key | 300 / min |
+| `model_list` | api\_key | 600 / min |
 
 ## Per-key versus global
 
@@ -62,7 +62,7 @@ Content-Type: application/json; charset=utf-8
 {"error":{"message":"...","code":"rate_limited"}}
 ```
 
-> **TODO (needs SME):** confirm published production rate limits and any per-deployment `Retry-After` sizing (owner: Backend/Product).
+> **TODO (needs SME):** confirm published production rate limits and any per-deployment `Retry-After` sizing.
 
 ## Fail-open versus fail-closed
 
@@ -94,5 +94,3 @@ For these groups, a limiter outage surfaces to the caller as a rejection rather 
 - [Backoff](/api-reference/errors-and-rate-limits/backoff)
 - [Errors reference](/resources/errors-reference)
 - [Resources overview](/resources)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §8.2 (internal/ratelimit: policy-table defaults; per-key values are global group defaults; inference_generate org 600 / api_key 120 / session 120 / in-flight org 25 / api_key 10; inference_count api_key 300; model_list api_key 600; Retry-After only, no X-RateLimit-*; fail-open except fail-closed set auth_interactive, inference_generate, inference_count, mcp_*, oauth, org_admin, spa_api_account_org; deployment-configurable via policy file) */}

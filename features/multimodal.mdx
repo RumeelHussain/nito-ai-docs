@@ -1,6 +1,6 @@
 ---
-title: Multimodal
-description: What Nito accepts beyond text and what it can generate. An honest map of supported input and output modalities.
+title: "Multimodal"
+description: "What Nito accepts beyond text and what it can generate. An honest map of supported input and output modalities."
 ---
 
 Most of what you send Nito is text, but the gateway is not limited to text. You can put images into a chat request and let a vision-capable model read them, you can attach documents (including PDFs) and have them parsed into text the model can reason over, and you can ask a model to generate an image from a prompt. This page is the map of what is and is not multimodal on Nito, so you know the edges before you build against them.
@@ -40,10 +40,10 @@ There are also no image edit or image variation endpoints; image generation is p
 
 If your application needs any of these, treat them as not present today rather than as something to work around. They are tracked on the deferred capabilities list.
 
-> **TODO (needs SME):** confirm the canonical location and link for the deferred-capabilities list (audio in, video in, audio generation, video generation) so this page can point readers to a single source. Owner: Product.
+> **TODO:** confirm the canonical location and link for the deferred-capabilities list (audio in, video in, audio generation, video generation) so this page can point readers to a single source.
 
 <Warning>
-Audio and video are rejected on purpose, not skipped quietly. If you send an audio or video content part to a chat model, the request fails with a validation error rather than dropping the part and answering from the text alone. Build for the rejection, not for a silent fallback.
+  Audio and video are rejected on purpose, not skipped quietly. If you send an audio or video content part to a chat model, the request fails with a validation error rather than dropping the part and answering from the text alone. Build for the rejection, not for a silent fallback.
 </Warning>
 
 ## How the inputs travel
@@ -54,10 +54,10 @@ Document input has a second path worth knowing about: a standalone parser endpoi
 
 ## Where to go next
 
-- **[Image input](/features/multimodal/image-input)** send PNG, JPEG, or WebP into a vision model, with limits and a worked `image_url` example.
-- **[PDF and document input](/features/multimodal/pdf-input)** attach PDFs and office documents for server-side parsing, inline or via the parser endpoint.
-- **[Image generation](/features/multimodal/image-generation)** prompt-to-PNG with the request and response shapes and a worked curl call.
-- **[Embeddings](/features/embeddings)** not multimodal, but the other non-chat capability you will likely reach for next.
+- [**Image input**](/features/multimodal/image-input) send PNG, JPEG, or WebP into a vision model, with limits and a worked `image_url` example.
+- [**PDF and document input**](/features/multimodal/pdf-input) attach PDFs and office documents for server-side parsing, inline or via the parser endpoint.
+- [**Image generation**](/features/multimodal/image-generation) prompt-to-PNG with the request and response shapes and a worked curl call.
+- [**Embeddings**](/features/embeddings) not multimodal, but the other non-chat capability you will likely reach for next.
 
 ## Related
 
@@ -66,5 +66,3 @@ Document input has a second path worth knowing about: a standalone parser endpoi
 - [PDF and document input](/features/multimodal/pdf-input)
 - [Image generation](/features/multimodal/image-generation)
 - [File parser](/features/file-parser)
-
-{/* source: internal/server/api_chat.go (apiChatContentPartToInference, content parts: text/image/file; audio/video rejected), internal/server/api_images.go (apiImageGenerationsHandler), internal/server/api_attachments_parse.go */}

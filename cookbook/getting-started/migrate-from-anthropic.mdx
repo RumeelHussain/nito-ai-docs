@@ -1,6 +1,6 @@
 ---
-title: Migrate from Anthropic
-description: Move off the Anthropic Messages API onto Nito's OpenAI-compatible Chat Completions surface.
+title: "Migrate from Anthropic"
+description: "Move off the Anthropic Messages API onto Nito's OpenAI-compatible Chat Completions surface."
 ---
 
 ## Goal
@@ -59,7 +59,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: Map your model names
 
@@ -73,7 +73,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 ## Translation reference
 
 | Anthropic Messages | Nito Chat Completions |
-|---|---|
+| --- | --- |
 | top-level `system` string | a message with `role: "system"` |
 | `messages: [{role, content}]` | `messages: [{role, content}]` (same) |
 | `max_tokens` (required) | `max_tokens` (optional) |
@@ -100,6 +100,4 @@ Do not carry Anthropic-specific behaviors over as if they were Nito's. Features 
 
 - [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
 - [Anthropic drop-in mapping notes](/sdks/anthropic-drop-in/mapping-notes)
-- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (/v1/messages, /v1/messages/count_tokens -> 404), §2 (roles include system), §3 (SSE, data: [DONE]), §5 (model-ID suffix), §8 (z_sk_) */}
+- [`POST /v1/chat/completions` reference](/api-reference/chat-and-text/chat-completions)

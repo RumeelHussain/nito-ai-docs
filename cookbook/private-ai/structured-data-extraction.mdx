@@ -1,6 +1,6 @@
 ---
-title: Structured Data Extraction
-description: Extract structured JSON from text on Nito using prompt-based JSON plus client-side validation, since server-side JSON-schema enforcement is not exposed.
+title: "Structured Data Extraction"
+description: "Extract structured JSON from text on Nito using prompt-based JSON plus client-side validation, since server-side JSON-schema enforcement is not exposed."
 ---
 
 You often want a model to return structured data (a JSON object with known fields) rather than prose. This recipe does that on Nito while being honest about a limitation: **the chat API does not expose server-side JSON-schema enforcement.** So the reliable approach is prompt-based JSON: ask the model to return JSON, then parse and validate it yourself on the client.
@@ -45,7 +45,7 @@ def extract(text):
     return resp.json()["choices"][0]["message"]["content"]
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address (owner: Product/Infra). Confirm the model against `GET /v1/models`.
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address. Confirm the model against `GET /v1/models`.
 
 Setting `temperature: 0` makes the output more deterministic. This helps consistency but is not a guarantee of valid JSON.
 
@@ -53,7 +53,7 @@ Setting `temperature: 0` makes the output more deterministic. This helps consist
 
 Because nothing on the server enforces the shape, your client must do it. Strip any stray formatting, parse the JSON, and validate the fields. If validation fails, either retry with a correction message or reject the result; do not pass unvalidated model output downstream.
 
-```python
+````python
 def coerce_json(raw):
     raw = raw.strip()
     # Defensive: strip accidental code fences if the model added them.
@@ -82,7 +82,7 @@ def extract_validated(text, max_retries=2):
                 raise
             # Feed the error back and try again.
             text = f"{text}\n\nYour previous output was invalid: {e}. Return corrected JSON only."
-```
+````
 
 For richer validation, use a schema library (for example `pydantic` or `jsonschema`) instead of hand-written asserts. The important point is that the enforcement lives in your code, not the gateway.
 
@@ -100,5 +100,3 @@ Extraction often runs over sensitive text (resumes, contracts, support tickets).
 - [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_chat.go; DOCS_SOURCE_OF_TRUTH.md §7 (Structured outputs: NOT EXPOSED), §6, §10 */}

@@ -1,6 +1,6 @@
 ---
-title: Build a first chat app
-description: A minimal, complete app that holds a conversation and prints the reply, in curl and Python.
+title: "Build a first chat app"
+description: "A minimal, complete app that holds a conversation and prints the reply, in curl and Python."
 ---
 
 ## Goal
@@ -17,7 +17,7 @@ Build a small but complete chat app that keeps a conversation going across turns
 
 Start by confirming a bare request works:
 
-```bash
+```curl
 curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
@@ -30,7 +30,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: A multi-turn loop in Python
 
@@ -73,7 +73,7 @@ while True:
 
 Set your environment first:
 
-```bash
+```javascript
 export NITO_API_KEY="z_sk_your_key_here"
 export NITO_BASE_URL="https://YOUR-NITO-BASE-URL"
 ```
@@ -100,5 +100,3 @@ The message list grows every turn, and long conversations cost more tokens and c
 - [Quickstart recipe](/cookbook/getting-started/quickstart-recipe)
 - [Chat completions feature](/features/chat-completions)
 - [Message format reference](/api-reference/chat-and-text/message-format)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (routes), §2 (roles, apiChatResponse, finish reasons), §5 (model-ID suffix), §8 (z_sk_), §10 (metadata-only, no server-side history) */}

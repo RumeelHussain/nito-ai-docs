@@ -1,13 +1,13 @@
 ---
-title: Per-Provider Attestation
-description: How NEAR (domain-based) and Phala (appid-based) attestation differ in subject, default proof format, and requirements, and what they share.
+title: "Per-Provider Attestation"
+description: "How NEAR (domain-based) and Phala (appid-based) attestation differ in subject, default proof format, and requirements, and what they share."
 ---
 
 Two providers back Nito's TEE modes, NEAR and Phala, and both produce attestation evidence through the same gateway pipeline. They differ in one structural way: how they identify the attestation **subject**. This page lays out the difference and the shared machinery, so you know what to expect in the [response](/privacy/tee-attestation/attestation-pipeline) for each.
 
 ## First, what a "subject" is
 
-When a TEE produces an attestation, the signed statement has to say *what* it is vouching for. The **attestation subject** is that identity anchor: the name the proof is bound to, so you can confirm the evidence belongs to the workload you meant to run and not some other environment. Think of it as the name on a notarized document. The notary's stamp (the hardware signature) proves the document is genuine; the name on it tells you whose document it is. NEAR and Phala both stamp the document, but they write the name in different fields.
+When a TEE produces an attestation, the signed statement has to say _what_ it is vouching for. The **attestation subject** is that identity anchor: the name the proof is bound to, so you can confirm the evidence belongs to the workload you meant to run and not some other environment. Think of it as the name on a notarized document. The notary's stamp (the hardware signature) proves the document is genuine; the name on it tells you whose document it is. NEAR and Phala both stamp the document, but they write the name in different fields.
 
 Why two providers at all? Each runs its own TEE infrastructure, so each has its own way of naming the workload it sealed. The gateway normalizes everything else, but it cannot erase this structural difference, so it surfaces it to you in the response. Knowing the difference means you can read an attestation from either provider without surprise.
 
@@ -20,7 +20,7 @@ Both providers expose attestation through the same endpoint on their side, `atte
 NEAR uses **domain-based** attestation.
 
 | Aspect | NEAR |
-|---|---|
+| --- | --- |
 | Subject sent as | `domain` |
 | Default proof format | `near-attestation-report-v1` |
 | Subject required? | Optional |
@@ -32,7 +32,7 @@ The subject for NEAR is a **domain**, and it is **optional**. A NEAR attestation
 Phala uses **appid-based** attestation.
 
 | Aspect | Phala |
-|---|---|
+| --- | --- |
 | Subject sent as | `appid` |
 | Default proof format | `redpill-attestation-report-v1` |
 | Subject required? | Required |
@@ -41,8 +41,8 @@ The subject for Phala is an **appid**, and it is **required**. A Phala attestati
 
 ## Side by side
 
-| | NEAR | Phala |
-|---|---|---|
+|  | NEAR | Phala |
+| --- | --- | --- |
 | Subject key | `domain` | `appid` |
 | Subject requirement | Optional | Required |
 | Default proof format | `near-attestation-report-v1` | `redpill-attestation-report-v1` |
@@ -55,7 +55,7 @@ In the [attestation response](/privacy/tee-attestation/attestation-pipeline), th
 
 This per-provider distinction does not change the verification contract you run as a client. Whichever provider served the call, the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline) and the [verify-yourself path](/privacy/tee-attestation/verify-yourself-recipe) apply the same way. The subject naming is something to be aware of when you read the response, not a separate verification flow.
 
-> **TODO (needs SME):** confirmation of which public models map to NEAR versus Phala backends, and whether any model exposes both. The mapping is runtime-discovered, so there is no static list to publish here (owner: Security / Product).
+> **TODO (needs SME):** confirmation of which public models map to NEAR versus Phala backends, and whether any model exposes both. The mapping is runtime-discovered, so there is no static list to publish here.
 
 ## Related
 
@@ -63,5 +63,3 @@ This per-provider distinction does not change the verification contract you run 
 - [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/provider/near/attestation.go, internal/provider/phala/attestation.go, internal/provider/oaiadapter (ParseAttestationResponse), docs/architecture/tee-attestation.md */}

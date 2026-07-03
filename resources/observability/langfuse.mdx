@@ -1,12 +1,12 @@
 ---
-title: Langfuse
-description: Client-side LLM observability for Nito calls using request IDs, usage counts, and any prompt data you choose to keep on your side.
+title: "Langfuse"
+description: "Client-side LLM observability for Nito calls using request IDs, usage counts, and any prompt data you choose to keep on your side."
 ---
 
 There is no verified native Langfuse integration in the Nito gateway. The gateway does not send traces to Langfuse and has no Langfuse configuration. What you can do today is client-side LLM observability: instrument your own application to record each Nito call in Langfuse using the data every response returns.
 
 <Warning>
-Nito does not push data to Langfuse. Any Langfuse tracing described here runs entirely in your application code, using values you already hold.
+  Nito does not push data to Langfuse. Any Langfuse tracing described here runs entirely in your application code, using values you already hold.
 </Warning>
 
 ## What to log per call
@@ -23,7 +23,7 @@ Nito's default is metadata-only retention: prompts and completions are not persi
 
 ## A minimal shape
 
-```
+```text
 1. Start a Langfuse trace / generation in your app.
 2. Send the request to https://YOUR-NITO-BASE-URL/api/v1/chat/completions
    (send your own X-Request-ID so the value is known up front).
@@ -32,14 +32,12 @@ Nito's default is metadata-only retention: prompts and completions are not persi
 4. End the Langfuse generation.
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once Product/Infra confirm it.
+> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL.
 
-> **TODO (needs SME):** confirm Langfuse integration path (owner: DevRel). Determine whether a first-party Langfuse export is planned, and if so what it would send.
+> **TODO (needs SME):** confirm Langfuse integration path. Determine whether a first-party Langfuse export is planned, and if so what it would send.
 
 ## Related
 
 - [Observability overview](/resources/observability) - the request ID and usage primitives.
 - [Datadog](/resources/observability/datadog) - server-side OTLP export.
 - [Zero data retention](/privacy/zero-data-retention) - why prompts live client-side.
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md section 9 (X-Request-ID), section 2 (usage block), section 10 (metadata-only retention). No native Langfuse integration verified in code. */}

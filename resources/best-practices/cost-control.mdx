@@ -1,6 +1,6 @@
 ---
-title: Cost Control
-description: Keep spend predictable on Nito with model choice, prompt caching, output caps, per-key spend limits, and the org usage overview.
+title: "Cost Control"
+description: "Keep spend predictable on Nito with model choice, prompt caching, output caps, per-key spend limits, and the org usage overview."
 ---
 
 Cost on Nito is mostly under your control, because most of what you pay for is a direct result of choices you make on each request: which model you route to, how much input you send, how much output you allow, and which extra features you turn on. This page collects the levers that keep spend predictable, plus the guardrails you can put in place so a runaway workload cannot drain your balance. It deliberately avoids quoting prices, which live in billing and change; check current rates in the product before you plan a budget.
@@ -15,7 +15,7 @@ The largest single factor in cost is usually the model. A compact model that han
 
 If a long prefix repeats across requests, prompt caching lets a supporting provider serve that prefix from cache instead of reprocessing it, which reduces the input cost of those tokens. Set `prompt_cache_key` or `cache_control` and Nito forwards the directive; the response `usage` reports `cache_read_input_tokens` so you can see how much was served cheaply from cache. This only helps when the prefix is large and genuinely repeated, so put stable content first and the variable question last. Full detail is in [Prompt caching](/features/prompt-caching).
 
-## Cap output with max_tokens
+## Cap output with max\_tokens
 
 Output tokens are billed too, and generation length is easy to let run long. Set `max_tokens` (or `max_completion_tokens`) to bound how much the model can produce per call. This is both a cost control and a safety valve against a model that rambles. Pick a limit that fits the task rather than leaving it unbounded.
 
@@ -29,7 +29,7 @@ A good pattern is one key per workload, each with a cap sized to that workload. 
 
 Caps prevent disasters; monitoring catches drift before it becomes one. Spend and usage are tracked at the organization level and surfaced through the org usage overview (`GET /api/v1/orgs/{id}/api/overview`) and the org billing balance. Check these regularly so you notice a workload trending up before it hits a cap. Usage windows default to a 30-day view.
 
-> **TODO (needs SME):** confirm the exact fields and granularity returned by the org usage overview for a cost-monitoring dashboard (owner: Backend).
+> **TODO (needs SME):** confirm the exact fields and granularity returned by the org usage overview for a cost-monitoring dashboard.
 
 ## Watch the features that bill extra
 
@@ -57,5 +57,3 @@ Neither is bad; both are worth the money when the task needs them. The point is 
 - [Prompt caching](/features/prompt-caching)
 - [Secure API key handling](/resources/best-practices/secure-api-key-handling)
 - [Latency and performance](/resources/best-practices/latency-and-performance)
-
-{/* source: internal/auth/api_keys.go (per-key spend caps daily/monthly/overall, force-expire), internal/server/api_orgs.go (api/overview, billing/balance), internal/server/api_chat.go (max_tokens, usage), docs/planning/DOCS_SOURCE_OF_TRUTH.md §2, §7, §8 */}

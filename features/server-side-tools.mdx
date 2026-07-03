@@ -1,6 +1,6 @@
 ---
-title: Server-Side Tools
-description: Tools Nito or the provider runs for you mid-generation, turned on with a request field instead of a separate API call.
+title: "Server-Side Tools"
+description: "Tools Nito or the provider runs for you mid-generation, turned on with a request field instead of a separate API call."
 ---
 
 A server-side tool is a capability the model can reach for while it is generating a response, where Nito or the upstream provider does the actual work. You turn it on with a field on your chat request, and the gateway handles the rest: it decides whether the tool should run, runs it, feeds the result back into the model, and reports what happened in the response. You never make a second API call, and you never wire up the tool yourself.
@@ -11,8 +11,8 @@ This is the line that matters most on this page, so it is worth stating plainly.
 
 Nito supports two different things that both get called "tools," and they behave oppositely. Keeping them straight saves a lot of confusion.
 
-| | Server-side tools | Your own function tools |
-|---|---|---|
+|  | Server-side tools | Your own function tools |
+| --- | --- | --- |
 | Who runs the tool | Nito or the provider | Your code |
 | How you enable it | A request field (for example `web_search`) or a hosted entry in `tools` | A `function` entry in `tools` |
 | The loop | The gateway runs the tool mid-generation and continues | The model asks, you run it, you send the result back |
@@ -26,11 +26,11 @@ For the mechanics of the function-tool loop, see [How Nito works](/get-started/h
 
 These are the server-side tools implemented today. Each links to its own page.
 
-- **[Web search](/features/server-side-tools/web-search)** lets the model search the web and pull fresh sources into its context. Enabled with the top-level `web_search` field, or as `tools:[{type:web_search}]`. Backed by a gateway-native pipeline.
-- **[Web fetch](/features/server-side-tools/web-fetch)** retrieves and reads a specific URL during generation. Enabled with the `web_fetch` field, or as `tools:[{type:web_fetch}]`.
-- **[File parser](/features/server-side-tools/file-parser)** extracts text from uploaded documents. Unlike the others, this is a **REST endpoint** (`POST /api/v1/attachments/parse`), not a chat tool, though the same parser also runs inline when you send a file in a chat message.
-- **[Code interpreter](/features/server-side-tools/code-interpreter)** runs code in a sandbox. Available on **xAI models only**, as a passthrough to xAI; there is no gateway-native sandbox.
-- **x_search** searches X (formerly Twitter). Available on **xAI models only**, as `tools:[{type:x_search}]`.
+- [**Web search**](/features/server-side-tools/web-search) lets the model search the web and pull fresh sources into its context. Enabled with the top-level `web_search` field, or as `tools:[{type:web_search}]`. Backed by a gateway-native pipeline.
+- [**Web fetch**](/features/server-side-tools/web-fetch) retrieves and reads a specific URL during generation. Enabled with the `web_fetch` field, or as `tools:[{type:web_fetch}]`.
+- [**File parser**](/features/server-side-tools/file-parser) extracts text from uploaded documents. Unlike the others, this is a **REST endpoint** (`POST /api/v1/attachments/parse`), not a chat tool, though the same parser also runs inline when you send a file in a chat message.
+- [**Code interpreter**](/features/server-side-tools/code-interpreter) runs code in a sandbox. Available on **xAI models only**, as a passthrough to xAI; there is no gateway-native sandbox.
+- **x\_search** searches X (formerly Twitter). Available on **xAI models only**, as `tools:[{type:x_search}]`.
 
 ## How you turn them on
 
@@ -69,7 +69,7 @@ Server-side tools are billed in addition to the model's own token usage. The spe
 
 ## Provider routing
 
-Server-side tools are not available on every model, because they depend on what the underlying provider supports. The eligible providers differ per tool (web search is the broadest; code interpreter and x_search are xAI-only). If you enable a tool on a model whose provider cannot serve it, the request is rejected rather than silently ignored. Each sub-page lists its own provider requirements.
+Server-side tools are not available on every model, because they depend on what the underlying provider supports. The eligible providers differ per tool (web search is the broadest; code interpreter and x\_search are xAI-only). If you enable a tool on a model whose provider cannot serve it, the request is rejected rather than silently ignored. Each sub-page lists its own provider requirements.
 
 ## A note on the datetime tool
 
@@ -82,5 +82,3 @@ Server-side tools are not available on every model, because they depend on what 
 - [Web fetch](/features/server-side-tools/web-fetch)
 - [File parser](/features/server-side-tools/file-parser)
 - [Code interpreter](/features/server-side-tools/code-interpreter)
-
-{/* source: internal/server/api_chat.go (apiChatRequest web_search/web_fetch fields), internal/server/api_chat_tools.go, internal/inference/contracts.go (ToolType: web_search/web_fetch/x_search/code_interpreter), internal/inference/service.go (routeServerTool), internal/inference/validation.go (duplicate feature fields) */}

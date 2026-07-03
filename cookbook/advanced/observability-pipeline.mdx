@@ -1,6 +1,6 @@
 ---
-title: Build an observability pipeline
-description: Capture request IDs and usage on the client side, and point the gateway's OpenTelemetry and Sentry hooks at your backends.
+title: "Build an observability pipeline"
+description: "Capture request IDs and usage on the client side, and point the gateway's OpenTelemetry and Sentry hooks at your backends."
 ---
 
 **Goal.** A two-sided observability setup: a client-side log of every request (its `X-Request-ID`, model, latency, and token usage) that you can ship anywhere, plus the server-side signals the gateway already emits.
@@ -53,7 +53,7 @@ def emit(record):
     print(json.dumps(record))   # replace with your exporter
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
 
 Note two IDs in the record. You send `X-Request-ID` so you control the value; the gateway echoes it back in `server_request_id`. If you supply a value, use a UUID and log both to confirm they match.
 
@@ -68,7 +68,7 @@ The gateway supports two server-side observability integrations, configured by e
 
 These are operator-side settings, not request parameters. You cannot turn them on from an API call; they are part of deploying the gateway.
 
-> **TODO (needs SME):** the exact `OTEL_*` and `SENTRY_*` variable names, required values, and which exporters/protocols are wired. Confirm against the gateway's `.env` configuration (owner: Infra/Backend).
+> **TODO (needs SME):** the exact `OTEL_*` and `SENTRY_*` variable names, required values, and which exporters/protocols are wired. Confirm against the gateway's `.env` configuration.
 
 ## Choosing a destination
 
@@ -86,5 +86,3 @@ The `X-Request-ID` is the thread that ties your application record to the gatewa
 - [Cost monitoring dashboard](/cookbook/advanced/cost-monitoring-dashboard)
 - [Usage dashboard](/cookbook/advanced/usage-dashboard)
 - [Headers reference](/api-reference/overview/headers)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §9 (X-Request-ID read/set, config OTEL_* and SENTRY_* in .env.example observability group), §10 (metadata-only posture); internal/server/observability.go */}

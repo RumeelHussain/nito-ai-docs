@@ -1,6 +1,6 @@
 ---
-title: Model catalog
-description: List and filter every model available on Nito. The catalog is discovered live, so the models endpoint is the source of truth.
+title: "Model catalog"
+description: "List and filter every model available on Nito. The catalog is discovered live, so the models endpoint is the source of truth."
 ---
 
 The catalog is the list of everything you can call. Nito discovers models from its providers and keeps the list current, so the catalog is something you query at runtime, not a static page you bookmark. This page shows how to list it, how to filter it, and how to use the result in code.
@@ -36,7 +36,7 @@ The `id` is what you pass back in the `model` field of a request. `type` separat
 
 Note that pricing and context window are not on the entry by default; pricing appears as a separate `pricing` object only when it is configured for that model. See [Pricing](/models/pricing).
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Filtering
 
@@ -62,7 +62,7 @@ print([m.id for m in chat_models])
 
 This keeps your integration resilient: when a model is added or retired, your code adapts instead of breaking on a missing name.
 
-> **Interactive catalog widget:** the docs site will host a live, filterable catalog table. That component is a TODO for the docs build; until then, query `GET /v1/models` directly.
+Query `GET /v1/models` directly for the list of available models.
 
 ## Common mistakes
 
@@ -76,5 +76,3 @@ This keeps your integration resilient: when a model is added or retired, your co
 - [Models overview](/models/overview)
 - [Model ID convention](/models/model-id-convention)
 - [GET /v1/models reference](/api-reference/models-catalog/list-models)
-
-{/* source: internal/server/api_models.go (apiModelsHandler, apiModelListResponse, apiModel), internal/server/api_models_filters.go (parseAPIModelsFilter, defaultAPIModelsFilter), internal/models/models.go (Syncer.SyncProvider, runtime discovery) */}

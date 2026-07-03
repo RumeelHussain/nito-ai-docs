@@ -1,6 +1,6 @@
 ---
-title: Introduction
-description: Nito is a private multi-LLM inference gateway. One key reaches many models, and you choose how private every single call is.
+title: "Introduction"
+description: "Nito is a private multi-LLM inference gateway. One key reaches many models, and you choose how private every single call is."
 ---
 
 Nito lets you use modern AI models the way you already do, with one important addition: privacy you can select per request. It is a single gateway that sits in front of many language and embedding models from several providers. You authenticate once, send a familiar request, and get back a familiar response. What changes is that you decide, on each call, how much protection that request gets, from lightweight routing up to execution inside a sealed, attested environment.
@@ -59,9 +59,7 @@ Knowing the boundaries prevents wrong assumptions:
 
 ## Where to go next
 
-- New to the model? Read **[How Nito Works](/get-started/how-nito-works)**.
-- Want a response right now? Jump to the **[60-second quickstart](/get-started/quickstart-60-seconds)**.
-- Care most about the privacy guarantees? Start with the **[Privacy overview](/privacy/overview)**.
-- Have a specific question? Browse the **[FAQ](/faq)**.
-
-{/* source: internal/models/models.go (PrivacyTier*, PublicPrivacyMode*, ParseLogicalModelIDForPublicMode), internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/standards/privacy-and-retention.md, docs/architecture/tee-attestation.md, internal/observability/attrs.go (SafeAttrs) */}
+- New to the model? Read [**How Nito Works**](/get-started/how-nito-works).
+- Want a response right now? Jump to the [**60-second quickstart**](/get-started/quickstart-60-seconds).
+- Care most about the privacy guarantees? Start with the [**Privacy overview**](/privacy/overview).
+- Have a specific question? Browse the [**FAQ**](/faq).

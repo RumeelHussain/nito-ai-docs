@@ -1,6 +1,6 @@
 ---
-title: What Nito Does Not Defend Against
-description: A frank statement of Nito's privacy boundaries, so you design around the system's real limits rather than an imagined version of it.
+title: "What Nito Does Not Defend Against"
+description: "A frank statement of Nito's privacy boundaries, so you design around the system's real limits rather than an imagined version of it."
 ---
 
 This page is the half that most documentation leaves out. It states, specifically, the things Nito does **not** protect you from, so you can decide where you need to add your own controls. None of this is a confession of a bug. Each item is a deliberate scope boundary, and naming it is what makes the defenses on the [companion page](/privacy/threat-model/what-nito-defends-against) trustworthy. A reviewer who knows exactly where a system stops can rely on what it claims; a reviewer kept in the dark cannot.
@@ -36,7 +36,7 @@ For ordinary and private modes, your call runs on the provider's normal infrastr
 ## Summary
 
 | Boundary | Where it stops | Your responsibility |
-|---|---|---|
+| --- | --- | --- |
 | Attestation verification | Baseline only; no TDX/GPU/cert-chain/CRL/TCB checks | Run the client-side hardware verification |
 | Anti-replay | Only as strong as the nonce you send | Supply a fresh random nonce; confirm the echo |
 | Content safety | Only outbound web-search query redaction | Add moderation / injection defense yourself |
@@ -48,5 +48,3 @@ For ordinary and private modes, your call runs on the provider's normal infrastr
 - [Provider-side enforcement](/privacy/provider-side-enforcement) - what the per-request settings do and do not promise.
 - [Known limitations](/privacy/known-limitations) - the broader list of gaps and unverifiable claims.
 - [Privacy architecture](/privacy/privacy-architecture) - the attestation baseline, gate by gate.
-
-{/* source: docs/architecture/tee-attestation.md (baseline scope limit, lines 52-54), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline, verifyGatewayAttestationObject), internal/websearch/redaction.go (outbound-only), internal/provider/* (Store:false / ZDR / X-Fal-Store-IO are instructions, not sealing); DOCS_SOURCE_OF_TRUTH.md §0, §6, §7 */}

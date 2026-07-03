@@ -1,6 +1,6 @@
 ---
-title: Backend selection
-description: How Nito chooses which backend serves a request, and how latency, cost, and privacy shape that choice.
+title: "Backend selection"
+description: "How Nito chooses which backend serves a request, and how latency, cost, and privacy shape that choice."
 ---
 
 When you name a logical model, more than one backend may be able to serve it. A backend here means one specific model on one specific provider. Nito has to pick exactly one of them for each call, and it does so with a defined order of preference rather than at random. This page explains that order, because understanding it lets you reason about why a call went where it did, predict how cost and privacy interact, and avoid being surprised when the "same" model lands on a different provider tomorrow.
@@ -57,7 +57,7 @@ You shape backend selection mostly through the model ID:
 
 Beyond the model ID and privacy suffix, this page does not claim a mechanism for pinning one exact physical backend.
 
-> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (for example a provider-scoped `provider/model` ID) from the public API, beyond the model ID and privacy mode. The routing logic chooses among candidates; confirm the intended public contract for explicit pinning (owner: Backend/Product).
+> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (for example a provider-scoped `provider/model` ID) from the public API, beyond the model ID and privacy mode. The routing logic chooses among candidates; confirm the intended public contract for explicit pinning.
 
 ## Why a call went where it did
 
@@ -74,5 +74,3 @@ For attested calls, the attestation response names the provider and physical mod
 - [Model groups](/models/model-groups)
 - [Providers](/models/providers)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
-
-{/* source: internal/server/logical_models.go (chooseLogicalRoute, logicalRouteCandidates, logicalCandidateCompatible, logicalProviderCompatible, providerSupportsRequestedServerTools, RequireZeroDataRetention), internal/models/models.go */}

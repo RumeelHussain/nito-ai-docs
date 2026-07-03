@@ -1,6 +1,6 @@
 ---
-title: Prompt Caching
-description: Pass provider prompt-cache directives through Nito to cut the cost of long, repeated prompt prefixes. The gateway forwards the hints; the provider does the caching.
+title: "Prompt Caching"
+description: "Pass provider prompt-cache directives through Nito to cut the cost of long, repeated prompt prefixes. The gateway forwards the hints; the provider does the caching."
 ---
 
 If you send the same long preamble on call after call, a system prompt, a big set of instructions, a document the model keeps re-reading, you are paying to process those tokens every single time. Prompt caching lets a provider remember that prefix so the next request with the same prefix skips most of the work and bills you at a reduced rate for the cached part. Nito supports this as a **passthrough**: you set the cache directives on your request and the gateway forwards them to the provider that serves your model. This page explains exactly what Nito does and, just as importantly, what it does not do.
@@ -20,13 +20,13 @@ One consequence: caching only works on models whose backend supports it. If you 
 There are two top-level fields, plus per-part and per-tool variants for finer control.
 
 | Field | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `prompt_cache_key` | string | A key that identifies a reusable prompt prefix. Maximum **256 bytes**; longer is rejected with `400`. The model must support caching or the call is rejected. |
 | `cache_control` | object | A JSON object of provider cache directives (Anthropic-style ephemeral breakpoints), forwarded as-is. The model must support caching. |
 
 Both are optional. Send them only when you actually have a stable prefix worth caching.
 
-### Per-content-part and per-tool cache_control
+### Per-content-part and per-tool cache\_control
 
 Beyond the top-level fields, you can attach `cache_control` to finer-grained pieces of the request so the provider knows precisely where the cacheable boundary sits:
 
@@ -61,7 +61,7 @@ It is easy to confuse prompt caching with **response caching**, returning a prev
 
 ## Example
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
 The model below is illustrative. Fetch `GET /v1/models` for the live catalog and select a caching-capable model by capability at runtime, because models are added and retired over time.
 
@@ -97,5 +97,3 @@ On the first call the stable system block is written to the provider's cache (`c
 - [Reasoning](/features/reasoning)
 - [How Nito Works](/get-started/how-nito-works)
 - [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/inference/prompt_cache.go, internal/server/api_chat.go (apiChatRequest prompt_cache_key, cache_control; apiUsage cache_read_input_tokens, cache_write_input_tokens, prompt_tokens_details.cached_tokens; apiChatTool cache_control; text part cache_control), DOCS_SOURCE_OF_TRUTH.md §2, §7 */}

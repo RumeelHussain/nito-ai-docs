@@ -1,6 +1,6 @@
 ---
-title: Framework integrations
-description: Point any framework that speaks the OpenAI-compatible API at Nito by changing the base URL, the key, and the model ID.
+title: "Framework integrations"
+description: "Point any framework that speaks the OpenAI-compatible API at Nito by changing the base URL, the key, and the model ID."
 ---
 
 Nito does not ship a bespoke plugin for each agent framework. It does not need to. Nito exposes an OpenAI-compatible API (`POST /v1/chat/completions`, `POST /v1/embeddings`, `GET /v1/models`), so any framework that can talk to an OpenAI-compatible provider can talk to Nito with no custom adapter. You change three things and reuse everything else the framework gives you.
@@ -15,7 +15,7 @@ Every integration on the following pages is the same move, expressed in that fra
 
 That is the whole contract. Messages, streaming, and tool-call shapes follow the OpenAI Chat Completions format the framework already targets.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Selecting privacy
 
@@ -46,5 +46,3 @@ Some frameworks default to the Anthropic Messages API (`/v1/messages`). Nito doe
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions, compat.openai.embeddings at /v1/embeddings, compat.openai.models at /v1/models) */}

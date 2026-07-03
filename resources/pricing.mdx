@@ -1,6 +1,6 @@
 ---
-title: Pricing
-description: How Nito meters and bills inference in credits, what each rate covers, and where the authoritative per-model numbers live.
+title: "Pricing"
+description: "How Nito meters and bills inference in credits, what each rate covers, and where the authoritative per-model numbers live."
 ---
 
 This is the authoritative reference for how Nito prices inference. It covers the billing unit, every rate that can apply to a call, and where to read the live per-model numbers. It does not print a master price table: the per-model figures and the value of one credit are configured live and are not asserted in these docs. See the TODO callouts below for the owning teams.
@@ -13,14 +13,14 @@ Nito bills in **credits**, tracked internally in **nanos** (billionths of a unit
 
 Prices are configured live in the billing system and surfaced on each model's catalog entry, so the authoritative figures always come from the live catalog rather than a static table.
 
-> **TODO (needs SME):** master per-model price table and credit unit (owner: Finance).
+> **TODO (needs SME):** master per-model price table and credit unit.
 
 ## What gets billed
 
 A single call can accrue charges across several rate categories. Each is priced separately.
 
 | Category | Priced by | Notes |
-|---|---|---|
+| --- | --- | --- |
 | Input tokens | Per token | Separate rate from output. |
 | Output tokens | Per token | Separate rate from input. |
 | Cached input tokens | Per token | Cache read and cache write are metered separately from ordinary input. |
@@ -42,7 +42,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 # each entry includes a "pricing" object in nanos when configured
 ```
 
-> **TODO (needs SME):** a worked example response showing the exact `pricing` object field names and sample nanos values (owner: Finance/Backend).
+> **TODO (needs SME):** a worked example response showing the exact `pricing` object field names and sample nanos values.
 
 The `pricing` object appears only when configured for that model. If it is absent, pricing is not yet set for that model, which is not the same as the model being free.
 
@@ -52,7 +52,7 @@ Before a call, Nito places a hold sized to the expected cost. After the call com
 
 A rough estimate for a text call is:
 
-```
+```text
 input_tokens * input_rate
   + output_tokens * output_rate
   + reasoning_tokens * reasoning_rate
@@ -71,7 +71,7 @@ Server-side tools such as web search and web fetch are billed in addition to the
 
 Image generation is priced by output rather than by token. The image output rate is carried in the same `pricing` object as the token rates.
 
-> **TODO (needs SME):** image output pricing basis and per-model rates (owner: Finance).
+> **TODO (needs SME):** image output pricing basis and per-model rates.
 
 ## Common mistakes
 
@@ -88,5 +88,3 @@ Image generation is priced by output rather than by token. The image output rate
 - [List models](/api-reference/models-catalog/list-models)
 - [Tool pricing](/api-reference/server-tools/tool-pricing)
 - [Resources overview](/resources)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §8.1 (credits tracked in nanos; per-token input/output rates + cache/reasoning/server-tool rates; images by output; GET /v1/models pricing object; master price table and credit unit are TODO), §5 (pricing/context not on model card, joined from billing) */}

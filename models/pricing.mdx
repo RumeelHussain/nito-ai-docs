@@ -1,6 +1,6 @@
 ---
-title: Pricing
-description: How model pricing works on Nito and where to read per-model cost.
+title: "Pricing"
+description: "How model pricing works on Nito and where to read per-model cost."
 ---
 
 This page explains how Nito prices inference and where to read the numbers. The per-model rates are configured in the billing system and surfaced on each model's catalog entry, so the authoritative figures come from the live catalog, not a static table here.
@@ -19,7 +19,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 # each entry includes a "pricing" object in nanos when configured
 ```
 
-> **TODO (needs SME):** the master per-model price table (input and output cost per model) and the human-facing credit unit (what one credit is worth in currency). These numbers live in the billing system and provider catalogs and are not asserted in these docs. Owners: Finance and Backend.
+> **TODO (needs SME):** the master per-model price table (input and output cost per model) and the human-facing credit unit (what one credit is worth in currency). These numbers live in the billing system and provider catalogs and are not asserted in these docs.
 
 ## Server-side tool pricing
 
@@ -43,5 +43,3 @@ A rough estimate for a text call is `input_tokens * input_rate + output_tokens *
 - [Check usage and credits](/get-started/check-usage-and-credits)
 - [Resources: Pricing](/resources/pricing)
 - [Tool pricing](/api-reference/server-tools/tool-pricing)
-
-{/* source: internal/server/api_models.go (apiModel pricing object, *_nanos fields), internal/billing/pricing.go, internal/billing/store_prices.go, internal/billing/enforcement.go (hold/settle), internal/server/api_chat.go (usage) */}

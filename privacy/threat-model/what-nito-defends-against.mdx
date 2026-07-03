@@ -1,6 +1,6 @@
 ---
-title: What Nito Defends Against
-description: The concrete privacy defenses that exist in Nito today, each tied to a real mechanism a reviewer can check.
+title: "What Nito Defends Against"
+description: "The concrete privacy defenses that exist in Nito today, each tied to a real mechanism a reviewer can check."
 ---
 
 This page lists the defenses Nito actually implements, and only those. Every item is tied to a specific mechanism in the system, not to a posture or an aspiration. Read it alongside its companion, [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against); a defense is only meaningful next to its boundary.
@@ -35,7 +35,7 @@ API keys and tokens are never stored in raw form. A token is 32 random bytes, an
 
 When a request triggers web search, the query that goes to the search backend is passed through a redaction step that strips secrets and personally identifiable information first. The query the model formed is cleaned before it leaves to the search provider.
 
-**What this defends against:** leaking secrets or PII into a third-party search backend through a tool call. It is a targeted, outbound defense on the web-search path. Note its scope precisely: it redacts *outbound web-search queries*. It is not a general moderation or prompt-injection defense, which the [companion page](/privacy/threat-model/what-nito-does-not-defend-against) covers.
+**What this defends against:** leaking secrets or PII into a third-party search backend through a tool call. It is a targeted, outbound defense on the web-search path. Note its scope precisely: it redacts _outbound web-search queries_. It is not a general moderation or prompt-injection defense, which the [companion page](/privacy/threat-model/what-nito-does-not-defend-against) covers.
 
 ## Standard web security controls
 
@@ -50,10 +50,10 @@ The gateway ships the ordinary, expected web-security hardening rather than leav
 ## Summary
 
 | Defense | Mechanism | Guards against |
-|---|---|---|
+| --- | --- | --- |
 | Metadata-only retention | Content request-local; `Cache-Control: no-store` | A gateway-side prompt/reply store |
 | Provider no-retention | `Store:false` / ZDR / `X-Fal-Store-IO:0` per request | Retention past the gateway boundary |
-| Sealed, attested TEE | NEAR/Phala TEE + verifiable attestation | Taking provider placement on faith |
+| Sealed, attested TEE | NEAR/Phala TEE \+ verifiable attestation | Taking provider placement on faith |
 | Hashed credentials | HMAC-SHA256 of 32-byte tokens | Credential theft from the datastore |
 | Outbound query redaction | Secret/PII stripping before search | Leaking PII into the search backend |
 | Web security controls | Security headers, CSRF, attachment-URL rules | Clickjacking, CSRF, SSRF, MIME sniffing |
@@ -64,5 +64,3 @@ The gateway ships the ordinary, expected web-security hardening rather than leav
 - [Provider-side enforcement](/privacy/provider-side-enforcement) - the per-provider settings behind no-retention.
 - [Privacy architecture](/privacy/privacy-architecture) - the attestation baseline gate by gate.
 - [Known limitations](/privacy/known-limitations) - the broader list of current gaps.
-
-{/* source: docs/standards/privacy-and-retention.md (metadata-only), internal/provider/* (Store:false, ZDR, X-Fal-Store-IO), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), internal/auth/tokens.go (HMAC-SHA256 token storage), internal/websearch/redaction.go, internal/server/observability.go (security headers), internal/server (CSRF double-submit), internal/server (validateAttachmentURL); DOCS_SOURCE_OF_TRUTH.md §6, §7, §8, §9, §10 */}

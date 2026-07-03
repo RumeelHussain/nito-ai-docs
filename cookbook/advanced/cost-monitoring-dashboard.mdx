@@ -1,6 +1,6 @@
 ---
-title: Build a cost monitoring dashboard
-description: Track spend over time and per model from the org overview, convert nanos to credits correctly, and alert when a window crosses a threshold.
+title: "Build a cost monitoring dashboard"
+description: "Track spend over time and per model from the org overview, convert nanos to credits correctly, and alert when a window crosses a threshold."
 ---
 
 **Goal.** A cost view focused on money, not tokens: spend over the last N days, spend per model, and a simple threshold alert when the current window crosses a budget you set.
@@ -24,7 +24,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_day
 
 `window_days` defaults to 30 and accepts up to 365. You get `current_window` and `all_time` totals (each with `customer_charge_nanos`), a `daily[]` breakdown, and a `models[]` breakdown sorted by charge.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
 
 ## Step 2: Convert and chart spend
 
@@ -87,5 +87,3 @@ Spend answers "what did we use." Balance answers "what is left." Read `available
 - [Check usage and credits](/get-started/check-usage-and-credits)
 - [Observability pipeline](/cookbook/advanced/observability-pipeline)
 - [Get usage reference](/api-reference/usage-and-credits/get-usage)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (orgs api/overview, billing/balance), §5 (pricing not on model card, joined from billing at runtime), §9 (window_days default 30 max 365, nanos = billionths); internal/billing/api_usage.go (customer_charge_nanos, current_window/all_time/daily/models) */}

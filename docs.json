@@ -448,7 +448,6 @@
           {
             "group": "More",
             "pages": [
-              "resources/status-page",
               "resources/community",
               "resources/powered-by-z/index",
               "resources/powered-by-z/for-developers-building-agents"

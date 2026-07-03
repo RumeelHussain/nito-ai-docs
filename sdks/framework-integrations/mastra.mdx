@@ -1,6 +1,6 @@
 ---
-title: Mastra
-description: Use Nito in Mastra via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and a Nito catalog model ID.
+title: "Mastra"
+description: "Use Nito in Mastra via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and a Nito catalog model ID."
 ---
 
 Mastra agents take a model from a provider, and it builds on the same model interface the Vercel AI SDK uses. Nito has no Mastra-specific package; you create an OpenAI-compatible provider configured for Nito and hand the model to your agent, because Nito exposes an OpenAI-compatible API. Your agent definitions, tools, and workflows stay the same.
@@ -33,9 +33,9 @@ const agent = new Agent({
 });
 ```
 
-> **TODO (needs SME):** verify the exact current configuration for Mastra against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for Mastra against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
 
 ## Choosing a model and privacy
 
@@ -63,5 +63,3 @@ If you wire Mastra to an Anthropic provider, it targets the Anthropic Messages A
 - [Vercel AI SDK](/sdks/framework-integrations/vercel-ai-sdk)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions; /v1/messages wired to notFoundRouteHandler) */}

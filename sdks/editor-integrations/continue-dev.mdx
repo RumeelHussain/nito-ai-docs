@@ -1,6 +1,6 @@
 ---
-title: Continue.dev
-description: Add Nito to Continue.dev as a custom OpenAI-compatible model with a Nito base URL, key, and catalog model ID.
+title: "Continue.dev"
+description: "Add Nito to Continue.dev as a custom OpenAI-compatible model with a Nito base URL, key, and catalog model ID."
 ---
 
 Continue.dev lets you add models from custom OpenAI-compatible providers. Because Nito exposes an OpenAI-compatible API, you can add a Nito model to Continue by configuring it as an OpenAI-compatible endpoint. You are not selecting a named "Nito" provider. You are using Continue's OpenAI-compatible model configuration and pointing it at Nito.
@@ -13,9 +13,9 @@ Wherever Continue.dev defines an OpenAI-compatible model, supply:
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Continue.dev against its official docs, including the configuration key names for an OpenAI-compatible model entry (owner: DevRel).
+> **TODO (needs SME):** verify the exact current settings path/config for Continue.dev against its official docs, including the configuration key names for an OpenAI-compatible model entry.
 
 ## Finding a model ID
 
@@ -49,5 +49,3 @@ Privacy is selected by the model ID, so no separate Continue setting is required
 - [Editor and tool integrations](/sdks/editor-integrations)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Zed](/sdks/editor-integrations/zed)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

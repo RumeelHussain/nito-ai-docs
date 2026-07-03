@@ -1,6 +1,6 @@
 ---
-title: Web Search
-description: Let the model search the web mid-generation with a gateway-native pipeline backed by Brave, controlled by the web_search request field.
+title: "Web Search"
+description: "Let the model search the web mid-generation with a gateway-native pipeline backed by Brave, controlled by the web_search request field."
 ---
 
 Web search lets a model pull fresh information from the web into its answer without you running anything. You set one field on your chat request, and the gateway decides whether a search is actually warranted, runs it through a native pipeline, folds the results into the model's context, and tells you in the response what it did. This page covers how to turn it on, every option you can pass, how the gateway decides whether to search, where it runs, and how it is billed.
@@ -32,16 +32,16 @@ The chat request is decoded strictly: unknown fields inside the `web_search` obj
 When `web_search` is an object, these fields are available.
 
 | Field | Type | Default | Notes |
-|---|---|---|---|
-| `mode` | string | | `on`, `off`, or `auto`. `auto` lets the rules engine and router decide. |
+| --- | --- | --- | --- |
+| `mode` | string |  | `on`, `off`, or `auto`. `auto` lets the rules engine and router decide. |
 | `retrieval_mode` | string | `llm_context` | One of `llm_context` (default), `web_search`, or `web_fetch`. |
 | `max_sources` | int | `10` | Maximum sources to retrieve. Capped at `50`. |
 | `max_context_tokens` | int | `6000` | Token budget for search context folded into the prompt. |
-| `freshness` | string | | Recency constraint on results. |
-| `country` | string | | Country bias for results. |
-| `search_lang` | string | | Language for the search. |
-| `safesearch` | string | | Safe-search level. |
-| `location` | object | | Geographic hint (see below). |
+| `freshness` | string |  | Recency constraint on results. |
+| `country` | string |  | Country bias for results. |
+| `search_lang` | string |  | Language for the search. |
+| `safesearch` | string |  | Safe-search level. |
+| `location` | object |  | Geographic hint (see below). |
 
 The `location` object accepts `city`, `state`, `country`, `timezone`, `postal_code`, `latitude`, and `longitude`. Use it to localize results when the query is location-sensitive.
 
@@ -65,7 +65,7 @@ The `location` object accepts `city`, `state`, `country`, `timezone`, `postal_co
 }
 ```
 
-> **TODO (needs SME):** the exact accepted value sets and formats for `freshness`, `country`, `search_lang`, and `safesearch` (for example whether `freshness` uses Brave-style codes like `pd`/`pw`/`pm`/`py` or date ranges). Confirm against `internal/websearch/` before publishing literal values (owner: Backend).
+> **TODO (needs SME):** the exact accepted value sets and formats for `freshness`, `country`, `search_lang`, and `safesearch` (for example whether `freshness` uses Brave-style codes like `pd`/`pw`/`pm`/`py` or date ranges). Confirm against `internal/websearch/` before publishing literal values.
 
 ## How the gateway decides whether to search
 
@@ -109,7 +109,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once confirmed.
 
 The response is an ordinary chat completion with two additions:
 
@@ -132,7 +132,7 @@ The response is an ordinary chat completion with two additions:
 }
 ```
 
-> **TODO (needs SME):** the exact field layout of the response-level `web_search` object (source URLs, titles, snippets, ordering). Document against the actual serialized shape before publishing (owner: Backend).
+> **TODO (needs SME):** the exact field layout of the response-level `web_search` object (source URLs, titles, snippets, ordering). Document against the actual serialized shape before publishing.
 
 ## Billing
 
@@ -143,5 +143,3 @@ Web search is billed in addition to the model's own token usage. The search step
 - [Server-side tools](/features/server-side-tools) for how hosted tools work in general.
 - [Web fetch](/features/server-side-tools/web-fetch) for reading a specific URL instead of searching.
 - [How Nito works](/get-started/how-nito-works) for routing and billing fundamentals.
-
-{/* source: internal/server/api_chat.go (apiChatRequest web_search), internal/websearch/* (rules engine, retrieval_mode, redaction.go), internal/websearchbilling (brave/llm_context, brave/web_search), internal/inference/contracts.go (server_tool_use), internal/inference/service.go (routeServerTool) */}

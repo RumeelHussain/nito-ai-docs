@@ -1,12 +1,12 @@
 ---
-title: Compliance Posture
-description: What can and cannot be said about Nito's compliance today. This page asserts no certification and is gated on Legal and Security sign-off.
+title: "Compliance Posture"
+description: "What can and cannot be said about Nito's compliance today. This page asserts no certification and is gated on Legal and Security sign-off."
 ---
 
 This page is deliberately conservative. Compliance claims, certifications, residency commitments, and regulatory alignment are statements with legal weight, and none of them are established in the codebase that these docs are built from. So this page does not assert any of them. It exists to draw a clean line between what is observably true in the system today and what is roadmap or aspiration, and to make clear that nothing in this section is published as a compliance claim until Legal and Security have reviewed and signed off.
 
 <Warning>
-Nothing on this page claims a certification or a regulatory status. Frameworks such as HIPAA, SOC 2, and EU data residency are **not asserted anywhere in code**, and they are not asserted here. Any final compliance language must be authored and approved by Legal and Security before publication.
+  Nothing on this page claims a certification or a regulatory status. Frameworks such as HIPAA, SOC 2, and EU data residency are **not asserted anywhere in code**, and they are not asserted here. Any final compliance language must be authored and approved by Legal and Security before publication.
 </Warning>
 
 ## What is true today
@@ -25,17 +25,17 @@ These are engineering facts, not compliance assertions. They describe behavior, 
 
 The following are commonly requested and are **not** claimed by Nito at this time. Each is a TODO owned by Legal and Security, and must not be stated as fact, implied, or published until they sign off.
 
-> **TODO (needs SME):** HIPAA posture. Whether Nito is "HIPAA-adjacent," supports a BAA, or handles PHI in any defined way is not established in code and is not asserted. Do not imply HIPAA alignment (owner: Legal/Security).
+> **TODO (needs SME):** HIPAA posture. Whether Nito is "HIPAA-adjacent," supports a BAA, or handles PHI in any defined way is not established in code and is not asserted. Do not imply HIPAA alignment.
 
-> **TODO (needs SME):** SOC 2. There is no SOC 2 report, audit status, or trust-services-criteria claim in the codebase. Do not state or imply SOC 2 Type I or Type II (owner: Legal/Security).
+> **TODO (needs SME):** SOC 2. There is no SOC 2 report, audit status, or trust-services-criteria claim in the codebase. Do not state or imply SOC 2 Type I or Type II.
 
-> **TODO (needs SME):** EU data residency. There are no regional deployment variants in code (the base URL has no regional form), and no residency commitment is established. Do not assert EU-only processing or storage (owner: Legal/Security).
+> **TODO (needs SME):** EU data residency. There are no regional deployment variants in code (the base URL has no regional form), and no residency commitment is established. Do not assert EU-only processing or storage.
 
-> **TODO (needs SME):** subprocessor list and data-flow documentation, including the providers behind each privacy mode, framed for a compliance audience (owner: Legal/Security).
+> **TODO (needs SME):** subprocessor list and data-flow documentation, including the providers behind each privacy mode, framed for a compliance audience.
 
-> **TODO (needs SME):** GDPR and CCPA roles and processes (controller vs processor, data-subject request handling, lawful basis), to the extent any are claimed (owner: Legal/Security).
+> **TODO (needs SME):** GDPR and CCPA roles and processes (controller vs processor, data-subject request handling, lawful basis), to the extent any are claimed .
 
-> **TODO (needs SME):** any SLA or uptime commitment. None is established in code and none is asserted here (owner: Legal/Security).
+> **TODO (needs SME):** any SLA or uptime commitment. None is established in code and none is asserted here.
 
 ## How to read the gap between the two lists
 
@@ -49,5 +49,3 @@ If you are evaluating Nito under a specific framework, treat this page as a star
 - [Provider-side enforcement](/privacy/provider-side-enforcement) - the verifiable per-provider settings.
 - [DPA](/privacy/dpa) - the contractual data-processing terms, also pending Legal.
 - [Known limitations](/privacy/known-limitations) - current gaps and unverifiable claims.
-
-{/* source: docs/standards/privacy-and-retention.md, internal/auth/tokens.go, internal/provider/*, internal/config/* (no regional base URL variants); DOCS_SOURCE_OF_TRUTH.md §9, §10, §12 item 4 (compliance always-TODO) */}

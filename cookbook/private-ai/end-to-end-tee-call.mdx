@@ -1,6 +1,6 @@
 ---
-title: End-to-end TEE Call
-description: Make an :e2e-tee chat call on NEAR or Phala models, a non-streaming request that requires the X-Z-TEE-* encryption headers.
+title: "End-to-end TEE Call"
+description: "Make an :e2e-tee chat call on NEAR or Phala models, a non-streaming request that requires the X-Z-TEE-* encryption headers."
 ---
 
 The `:e2e-tee` mode is the strictest privacy tier on Nito. Where `:tee` gives you an attested route, `:e2e-tee` adds end-to-end encryption between your client and the model inside the trusted execution environment, negotiated through a set of `X-Z-TEE-*` request headers. This recipe covers how to select the mode and the constraints it imposes. The exact encryption handshake is owner-confirmed work, marked below.
@@ -28,7 +28,7 @@ An `:e2e-tee` request carries this set of headers, parsed by the gateway into it
 
 The model public key you place in `X-Z-TEE-Model-Pub-Key` is the same model public key returned by the attestation endpoint (`signing_key` / `model_public_key` are aliases for it). So a typical flow is: fetch the attestation for the `:e2e-tee` model, take the model public key from it, perform the key exchange, and set these headers on the chat call.
 
-> **TODO (needs SME):** exact E2E-TEE encryption handshake and header value construction (owner: Security)
+> **TODO (needs SME):** exact E2E-TEE encryption handshake and header value construction.
 
 The precise steps (how the client keypair is generated, how the shared secret is derived from the client and model public keys, how the request body is encrypted, and the exact string encodings for each header value) are not documented here because they must be confirmed against the implementation. Do not infer them; the placeholder request below shows only the header **shape**, not real values.
 
@@ -53,7 +53,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete `e2e-tee`-capable `MODEL_ID`. The code default is a local address (owner: Security / Product). Confirm the model against `GET /v1/models`.
+> **TODO (needs SME):** the canonical production base URL and a concrete `e2e-tee`-capable `MODEL_ID`. The code default is a local address. Confirm the model against `GET /v1/models`.
 
 Because the mode is non-streaming, the response is a single `chat.completion` envelope, not an SSE stream.
 
@@ -70,5 +70,3 @@ Either way, attestation is still how you gain assurance: fetch and verify the at
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
 - [Confidential enterprise inference](/cookbook/private-ai/confidential-enterprise-inference)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_chat_e2ee.go; internal/inference/validation.go: validateTEEEncryption; internal/models/models.go:485; DOCS_SOURCE_OF_TRUTH.md §2 (E2E-TEE constraints), §6 */}

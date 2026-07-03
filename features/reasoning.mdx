@@ -1,6 +1,6 @@
 ---
-title: Reasoning
-description: Ask a capable model to think before it answers. Control reasoning effort and summaries, read reasoning output, and budget for the extra tokens.
+title: "Reasoning"
+description: "Ask a capable model to think before it answers. Control reasoning effort and summaries, read reasoning output, and budget for the extra tokens."
 ---
 
 Some models can think before they answer: they work through a problem internally, then produce a final reply informed by that work. On Nito you turn this on with the `reasoning` field on a chat-completions request, and you control how much effort the model spends and how much of its thinking it shows you. Reasoning trades tokens (and therefore cost and latency) for quality on hard problems. This page covers when to use it, how to configure it, how to read the output, and what it costs.
@@ -24,7 +24,7 @@ Add a `reasoning` object to your chat request:
 The fields on `reasoning`:
 
 | Field | Values | Meaning |
-|---|---|---|
+| --- | --- | --- |
 | `enabled` | boolean | Turn reasoning on. |
 | `effort` | `low`, `medium`, `high` | How hard the model thinks. More effort means more reasoning tokens. |
 | `summary` | `auto`, `concise`, `detailed` | How much of the model's thinking is summarized back to you. |
@@ -39,7 +39,7 @@ Reasoning can also be requested through a feature suffix on the model ID, the sa
 
 ## A full call
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra). `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog and confirm `supports_reasoning`.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog and confirm `supports_reasoning`.
 
 ```bash
 curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
@@ -105,5 +105,3 @@ Reasoning works in ordinary, private, and `:tee` modes. The end-to-end encrypted
 - [Tool Calling](/features/tool-calling)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: internal/server/api_chat.go (apiReasoning, apiChatMessage.reasoning_details, apiUsage.reasoning_tokens, apiChatChunk delta reasoning_details), internal/inference/validation.go (validateTEEEncryption), internal/models/models.go (supports_reasoning capability) */}

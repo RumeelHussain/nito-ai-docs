@@ -1,11 +1,11 @@
 ---
-title: Slack assistant
-description: Build a Slack assistant powered by Nito. Receive an event, call Nito's Chat Completions, and post the reply in the channel or thread.
+title: "Slack assistant"
+description: "Build a Slack assistant powered by Nito. Receive an event, call Nito's Chat Completions, and post the reply in the channel or thread."
 ---
 
 A Slack assistant has two halves. The Slack half subscribes to events such as mentions or messages and posts replies through the Slack API. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Slack half only as a representative shape, because the Slack app model and SDKs change over time.
 
-> **TODO (needs SME):** verify the current Slack app/API/SDK setup against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the current Slack app/API/SDK setup against its official docs.
 
 ## The Nito call
 
@@ -30,7 +30,7 @@ def answer(user_text: str) -> str:
     return resp.choices[0].message.content
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
 
@@ -86,5 +86,3 @@ Slack expects a fast acknowledgement to events. If the Nito call may be slow, ac
 - [WhatsApp assistant](/cookbook/bots/whatsapp-assistant)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Rate limits](/resources/rate-limits)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

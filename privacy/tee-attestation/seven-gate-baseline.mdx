@@ -1,6 +1,6 @@
 ---
-title: The Seven-Gate Baseline
-description: The exact pass-or-fail checks the Nito gateway runs over attestation evidence, enumerated, with the hardware-verification scope limit stated plainly.
+title: "The Seven-Gate Baseline"
+description: "The exact pass-or-fail checks the Nito gateway runs over attestation evidence, enumerated, with the hardware-verification scope limit stated plainly."
 ---
 
 When the gateway fetches attestation evidence, it runs a fixed sequence of checks called the **baseline**, implemented in `verifyTEEAttestationBaseline`. The result is the `verified` flag in the [response](/privacy/tee-attestation/attestation-pipeline). This page enumerates the seven gates exactly, and then states, as plainly as possible, what the baseline is and is not.
@@ -50,5 +50,3 @@ Gate 4 and gate 5 both depend on the nonce. Because there is no server-side nonc
 - [Freshness and binding](/privacy/tee-attestation/freshness-binding)
 - [Address-only model binding](/privacy/tee-attestation/address-only-model-binding)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_tee_attestation_verification.go, docs/architecture/tee-attestation.md */}

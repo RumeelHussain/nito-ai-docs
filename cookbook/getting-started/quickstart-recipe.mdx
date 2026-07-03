@@ -1,6 +1,6 @@
 ---
-title: Quickstart recipe
-description: Go from a key to a working chat response with curl and Python, then read the response fields that matter.
+title: "Quickstart recipe"
+description: "Go from a key to a working chat response with curl and Python, then read the response fields that matter."
 ---
 
 ## Goal
@@ -13,7 +13,7 @@ Send one chat request to Nito and read the reply, using nothing but your API key
 - Your gateway base URL. This recipe uses `https://YOUR-NITO-BASE-URL` as a placeholder.
 - Either curl (already on most systems) or Python 3 with the `openai` package installed.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 1: Set your key and base URL
 
@@ -114,6 +114,4 @@ To send a request through a stronger privacy mode, add a suffix to the model ID,
 
 - [Quickstart, 60 seconds](/get-started/quickstart-60-seconds)
 - [Chat completions feature](/features/chat-completions)
-- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (routes), §2 (apiChatRequest/Response, finish reasons), §5 (catalog discovery, model-ID suffix), §8 (z_sk_) */}
+- [`POST /v1/chat/completions` reference](/api-reference/chat-and-text/chat-completions)

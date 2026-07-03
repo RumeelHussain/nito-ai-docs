@@ -1,6 +1,6 @@
 ---
-title: Migrate from other gateways
-description: Move Together, Fireworks, Replicate, Perplexity, and similar OpenAI-compatible providers onto Nito.
+title: "Migrate from other gateways"
+description: "Move Together, Fireworks, Replicate, Perplexity, and similar OpenAI-compatible providers onto Nito."
 ---
 
 ## Goal
@@ -61,7 +61,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Step 2: Map your model names
 
@@ -77,7 +77,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 The swap works the same for each, but the model-name step differs:
 
 | Coming from | What to change |
-|---|---|
+| --- | --- |
 | Together | Base URL, key, and remap Together model slugs to Nito IDs. |
 | Fireworks | Base URL, key, and remap `accounts/.../models/...` slugs to Nito IDs. |
 | Replicate | Base URL and key; use the OpenAI-compatible Chat Completions call, and remap model refs to Nito IDs. |
@@ -99,5 +99,3 @@ Do not carry any provider-specific behavior over as if it were Nito's. Custom re
 - [Migrate from OpenAI](/cookbook/getting-started/migrate-from-openai)
 - [Migrate from OpenRouter](/cookbook/getting-started/migrate-from-openrouter)
 - [OpenAI drop-in base-URL swap](/sdks/openai-drop-in/base-url-swap)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (OpenAI-compat /v1 routes), §5 (catalog discovery, model-ID suffix), §8 (z_sk_) */}

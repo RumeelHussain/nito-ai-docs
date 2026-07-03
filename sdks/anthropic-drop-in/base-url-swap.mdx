@@ -1,12 +1,12 @@
 ---
-title: Anthropic drop-in, base URL swap
-description: Reach Nito from Anthropic-shaped codebases. Read the support boundary first, then route through Chat Completions.
+title: "Anthropic drop-in, base URL swap"
+description: "Reach Nito from Anthropic-shaped codebases. Read the support boundary first, then route through Chat Completions."
 ---
 
 If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change, and is honest about where the boundary is today.
 
 <Warning>
-The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are **not served** by the gateway. Requests to them return `404`. This means a native Anthropic SDK call such as `client.messages.create(...)` will not reach Nito today. Until the Messages API ships, route Anthropic-shaped code through Nito's OpenAI-compatible Chat Completions surface, as shown below.
+  The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are **not served** by the gateway. Requests to them return `404`. This means a native Anthropic SDK call such as `client.messages.create(...)` will not reach Nito today. Until the Messages API ships, route Anthropic-shaped code through Nito's OpenAI-compatible Chat Completions surface, as shown below.
 </Warning>
 
 ## What this means in practice
@@ -62,7 +62,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
 
 The example model `grok-4.3` is illustrative. Fetch `GET /v1/models` for the live catalog and pick by capability; Anthropic model names are not Nito IDs.
 
@@ -89,5 +89,3 @@ As everywhere on Nito, privacy rides on the model ID. Add `:tee` or `:e2e-tee` t
 - [OpenAI drop-in: base URL swap](/sdks/openai-drop-in/base-url-swap)
 - [Chat completions feature](/features/chat-completions)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (/v1/messages, /v1/messages/count_tokens -> notFoundRouteHandler 404; /v1/chat/completions compatible surface), §5 (model IDs, :tee/:e2e-tee), docs/get-started/quickstart-anthropic-sdk.mdx */}

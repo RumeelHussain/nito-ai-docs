@@ -1,9 +1,9 @@
 ---
-title: T3 Private+ (TEE)
-description: Sealed, hardware-isolated execution with an attestation you can fetch and verify. Supports streaming.
+title: "T3 Private+ (TEE)"
+description: "Sealed, hardware-isolated execution with an attestation you can fetch and verify. Supports streaming."
 ---
 
-T3 Private+ is the third rung of the [privacy ladder](/privacy/tiers) and the first one backed by hardware you can check. In the code it is the `tee` mode, selected with the `:tee` suffix on the model ID. It keeps the guarantees of the tiers below it and adds the one thing none of them can: your call runs inside a sealed environment, and you can obtain a signed statement that proves it did.
+T3 Private\+ is the third rung of the [privacy ladder](/privacy/tiers) and the first one backed by hardware you can check. In the code it is the `tee` mode, selected with the `:tee` suffix on the model ID. It keeps the guarantees of the tiers below it and adds the one thing none of them can: your call runs inside a sealed environment, and you can obtain a signed statement that proves it did.
 
 ## What a TEE is
 
@@ -36,7 +36,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address). Owner: Product/Infra.
+> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
 
 `:tee` is one of only two valid suffixes (the other is `:e2e-tee`). If the model does not support TEE, the call fails rather than quietly downgrading to a weaker tier.
 
@@ -53,7 +53,7 @@ curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL-ID&nonce=YOU
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real attestation-capable model, `YOUR-NONCE` with a fresh random nonce, and the base URL with the production value. Owner: Product/Infra.
+> **TODO (needs SME):** replace `MODEL-ID` with a real attestation-capable model, `YOUR-NONCE` with a fresh random nonce, and the base URL with the production value.
 
 The gateway resolves the model to a physical attestation-capable backend, asks the provider for its attestation, and runs a **baseline verification** before returning. The baseline checks that the provider evidence is present and parseable, that the proof format and signing material are present, that your nonce matches the one observed from the provider, and that the report-data binding holds. It then returns the result, including the raw `evidence`, so you can perform **full client-side verification yourself**.
 
@@ -77,5 +77,3 @@ Choose T3 for sensitive calls where you need to verify that a sealed environment
 - [TEE attestation](/privacy/tee-attestation)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Streaming](/features/streaming)
-
-{/* source: internal/models/models.go:34-46 (PublicPrivacyMode tee), internal/models/models.go:730 (validatePrivacyCapabilities: tee requires TEEProvider in {near, phala}, attestation requires tier tee), internal/server/api_tee_attestation.go (GET /api/v1/tee/attestation), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/architecture/tee-attestation.md:32-54 (baseline scope limit) */}

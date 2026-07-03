@@ -1,6 +1,6 @@
 ---
-title: Multi-Model Routing (Fusion)
-description: Ask two or three models the same prompt at once, then have a judge model merge their answers into one. A separate, non-streaming Nito endpoint.
+title: "Multi-Model Routing (Fusion)"
+description: "Ask two or three models the same prompt at once, then have a judge model merge their answers into one. A separate, non-streaming Nito endpoint."
 ---
 
 Ordinary chat picks one model to answer your prompt. Fusion does something different: it asks **two or three models the same prompt at the same time**, then runs a single extra pass where a "judge" model reads all their answers and synthesizes one merged reply. You get back both the merged answer and every participant's raw output, so you can see where the models agreed, where they diverged, and what the judge did with the difference. This is useful when an answer matters enough to be worth more than one model's opinion, and when you would rather have the gateway run the ensemble than orchestrate it yourself.
@@ -20,7 +20,7 @@ Fusion is **non-streaming and batched only.** There is no token-by-token stream;
 
 Fusion lives at a single first-party path:
 
-```
+```text
 POST /api/v1/chat/fusion
 ```
 
@@ -31,7 +31,7 @@ There is **no `/v1` OpenAI-compatible alias** for fusion. This is a first-party 
 The body is `apiFusionRequest`. It looks like a chat request with a `models[]` array in place of a single `model`.
 
 | Field | Type | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `messages` | array | **Required.** The conversation, same shape as chat completions. |
 | `models` | array of strings | **Required. 2 to 3 distinct models** (minimum 2, maximum 3). These are the participants asked in parallel. |
 | `temperature` | number | Optional, passed through to participants. |
@@ -61,7 +61,7 @@ The `:tee` suffix is allowed, in which case the response can carry attestations 
 The body is `apiFusionResponse` with `object` set to `"fusion.completion"`.
 
 | Field | Notes |
-|---|---|
+| --- | --- |
 | `object` | Always `"fusion.completion"`. |
 | `judge` | The model that performed the synthesis pass. |
 | `synthesis` | The merged answer text. This is the main output. |
@@ -74,7 +74,7 @@ The body is `apiFusionResponse` with `object` set to `"fusion.completion"`.
 Each entry in `models` is an `apiFusionModelResult`:
 
 | Field | Notes |
-|---|---|
+| --- | --- |
 | `id` | The participant's result identifier. |
 | `model` | The model that produced this result. |
 | `provider` | The provider that served it. |
@@ -93,7 +93,7 @@ Fusion is built to degrade gracefully. If one or two participants fail but at le
 
 ## A worked example
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
 The model IDs below are illustrative. Fetch `GET /v1/models` for the live catalog and select participants by capability at runtime, because models are added and retired over time.
 
@@ -164,5 +164,3 @@ Use fusion when the extra cost of running several models is worth it: high-stake
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [How Nito Works](/get-started/how-nito-works)
 - [Chat fusion API reference](/api-reference/chat-and-text/fusion)
-
-{/* source: internal/server/api_chat_fusion.go (apiChatFusionHandler, apiFusionRequest, apiFusionResponse, apiFusionModelResult, fusionMinModels=2, fusionMaxModels=3, hosted-tools-only, mixed-TEE rejection, :e2e-tee rejection, per-participant 150s budget, partial-failure 200), DOCS_SOURCE_OF_TRUTH.md §2 (/api/v1/chat/fusion) */}

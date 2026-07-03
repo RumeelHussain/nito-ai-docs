@@ -1,6 +1,6 @@
 ---
-title: Claude Code
-description: Route Claude Code through Nito using the OpenAI-compatible path. The Anthropic-native Messages endpoint is not served.
+title: "Claude Code"
+description: "Route Claude Code through Nito using the OpenAI-compatible path. The Anthropic-native Messages endpoint is not served."
 ---
 
 Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default. To use it with Nito, you route it through Nito's **OpenAI-compatible** surface rather than the Anthropic-native one. Nito does not serve the Anthropic Messages API: `POST /v1/messages` returns 404. So any path that expects native Anthropic calls will not work. Use a configuration that points Claude Code at an OpenAI-compatible endpoint.
@@ -13,9 +13,9 @@ Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an Anthropic name like `claude-3-5-sonnet` or an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all (owner: DevRel).
+> **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all.
 
 ## The Anthropic path does not apply
 
@@ -45,5 +45,3 @@ Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a v
 - [Editor and tool integrations](/sdks/editor-integrations)
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Codex](/sdks/editor-integrations/codex)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140; anthropic messages 404 routes.go:142-143) */}

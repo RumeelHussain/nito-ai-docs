@@ -1,6 +1,6 @@
 ---
-title: Model ID convention
-description: How model IDs are named on Nito, and how the optional suffix selects a privacy mode.
+title: "Model ID convention"
+description: "How model IDs are named on Nito, and how the optional suffix selects a privacy mode."
 ---
 
 Every request you send to Nito names a model in its `model` field. That short string is doing more work than it looks. It decides two things at once: which model answers your request, and how private that answer is. This page explains the small grammar those strings follow, because once you can read a model ID, every code sample in these docs becomes self-explanatory, and you stop guessing about privacy.
@@ -13,7 +13,7 @@ A model ID is the name you put in the `model` field of a request. On most AI pla
 
 The shape is:
 
-```
+```text
 <model>[:<privacy-suffix>]
 ```
 
@@ -31,7 +31,7 @@ grok-4.3:e2e-tee      # end-to-end encrypted TEE (if the model supports it)
 ```
 
 <Warning>
-`:tee` and `:e2e-tee` are the only accepted suffixes. Any other suffix (for example `:standard`, `:zdr`, `:anon`, `:private`, `:e2ee`) is rejected with a `400`. There is no separate `tier` field in the request body. Privacy is chosen here, in the model ID, and nowhere else.
+  `:tee` and `:e2e-tee` are the only accepted suffixes. Any other suffix (for example `:standard`, `:zdr`, `:anon`, `:private`, `:e2ee`) is rejected with a `400`. There is no separate `tier` field in the request body. Privacy is chosen here, in the model ID, and nowhere else.
 </Warning>
 
 ## Why privacy lives in the ID
@@ -41,7 +41,7 @@ It is reasonable to ask why privacy is glued to the model name instead of being 
 ## How the suffix maps to a privacy mode
 
 | Model ID | Mode | Requires |
-|---|---|---|
+| --- | --- | --- |
 | `model` | Ordinary or private (per the model's tier) | nothing extra |
 | `model:tee` | TEE | the model must report `attestation_available: true` |
 | `model:e2e-tee` | End-to-end encrypted TEE | the model must report `e2ee_supported: true`, plus encryption headers |
@@ -59,7 +59,7 @@ An analogy: the logical ID is like a phone number you dial, and the physical ID 
 
 Whether the public API supports pinning a specific physical backend directly is not something this page asserts.
 
-> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (a provider-scoped `provider/model` ID) from the public API, beyond the model ID plus privacy suffix. Confirm the intended public contract (owner: Backend/Product).
+> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (a provider-scoped `provider/model` ID) from the public API, beyond the model ID plus privacy suffix. Confirm the intended public contract.
 
 ## Selecting a model with no ID
 
@@ -78,5 +78,3 @@ If you omit `model` entirely, Nito uses a default model for that surface (chat, 
 - [Models overview](/models/overview)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Backend selection](/models/backend-selection)
-
-{/* source: internal/models/models.go (ParseLogicalModelIDForPublicMode, LogicalModelIDForPublicMode, ScopedModelID, ParseScopedModelID, PublicPrivacyMode*), internal/server/logical_models.go (routeChatRequest, suffix error string) */}

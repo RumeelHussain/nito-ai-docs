@@ -1,6 +1,6 @@
 ---
-title: Models
-description: How model access works on Nito. One key reaches the whole catalog; you pick a model and a privacy mode per request.
+title: "Models"
+description: "How model access works on Nito. One key reaches the whole catalog; you pick a model and a privacy mode per request."
 ---
 
 One Nito account reaches many models from several providers. You do not sign up with each provider or hold their keys. You name a model by its ID in your request, and you choose how private that call is with an optional suffix on the same ID. The catalog is discovered live from providers, so `GET /v1/models` is always the source of truth for what you can call.
@@ -9,25 +9,23 @@ Start with the first three pages; the rest are reference you reach for as needed
 
 ## Start here
 
-- **[Models overview](/models/overview)** how model access works and how to read a model entry.
-- **[Model ID convention](/models/model-id-convention)** the grammar for naming a model and selecting privacy.
-- **[Model catalog](/models/model-catalog)** how to list and filter every available model.
+- [**Models overview**](/models/overview) how model access works and how to read a model entry.
+- [**Model ID convention**](/models/model-id-convention) the grammar for naming a model and selecting privacy.
+- [**Model catalog**](/models/model-catalog) how to list and filter every available model.
 
 ## Choosing and selecting
 
-- **[Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)** the privacy modes, in brief.
-- **[Model families](/models/model-families)** text, reasoning, embedding, and vision, and what each is for.
-- **[Choosing the right model](/models/choosing-a-model)** a decision guide from use case to model.
+- [**Privacy tiers at a glance**](/models/privacy-tiers-at-a-glance) the privacy modes, in brief.
+- [**Model families**](/models/model-families) text, reasoning, embedding, and vision, and what each is for.
+- [**Choosing the right model**](/models/choosing-a-model) a decision guide from use case to model.
 
 ## How routing works
 
-- **[Providers](/models/providers)** who actually serves a call, and how each enforces privacy.
-- **[Model groups](/models/model-groups)** grouping, aliases, and fallbacks.
-- **[Backend selection](/models/backend-selection)** how Nito picks a backend, and how to influence it.
+- [**Providers**](/models/providers) who actually serves a call, and how each enforces privacy.
+- [**Model groups**](/models/model-groups) grouping, aliases, and fallbacks.
+- [**Backend selection**](/models/backend-selection) how Nito picks a backend, and how to influence it.
 
 ## Reference
 
-- **[Pricing](/models/pricing)** how cost is structured and where to read per-model rates.
-- **[Deprecations and lifecycle](/models/deprecations-and-lifecycle)** how models are added and retired.
-
-{/* source: internal/server/api_models.go (apiModelsHandler), internal/models/models.go, internal/server/api_model_groups.go */}
+- [**Pricing**](/models/pricing) how cost is structured and where to read per-model rates.
+- [**Deprecations and lifecycle**](/models/deprecations-and-lifecycle) how models are added and retired.

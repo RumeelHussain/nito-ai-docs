@@ -1,6 +1,6 @@
 ---
-title: OpenAI drop-in, base URL swap
-description: Point the official OpenAI SDK at Nito by changing three things, the base URL, the API key, and the model ID.
+title: "OpenAI drop-in, base URL swap"
+description: "Point the official OpenAI SDK at Nito by changing three things, the base URL, the API key, and the model ID."
 ---
 
 If your code already uses the OpenAI SDK, you reach Nito by changing three things and nothing else: the base URL, the API key, and the model ID. The request shape, the response shape, streaming, and tool calls all stay the same, because Nito serves the OpenAI-compatible Chat Completions surface.
@@ -51,7 +51,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The example model `grok-4.3` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
@@ -64,7 +64,7 @@ The OpenAI SDK appends the operation path itself. When you call `client.chat.com
 The same base URL swap covers every OpenAI-compatible surface Nito serves:
 
 | SDK call | HTTP surface |
-|---|---|
+| --- | --- |
 | `client.chat.completions.create(...)` | `POST /v1/chat/completions` |
 | `client.embeddings.create(...)` | `POST /v1/embeddings` |
 | `client.images.generate(...)` | `POST /v1/images/generations` |
@@ -104,5 +104,3 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 - [Compatibility notes](/sdks/openai-drop-in/compatibility-notes)
 - [Chat completions feature](/features/chat-completions)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §1 (route table: /v1/chat/completions, /v1/embeddings, /v1/images/generations, /v1/models; /v1/responses 404), §5 (model IDs, :tee/:e2e-tee suffix), §8 (z_sk_ prefix), §9 (system_fingerprint null), docs/get-started/quickstart-openai-sdk.mdx */}

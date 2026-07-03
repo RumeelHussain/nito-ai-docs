@@ -1,6 +1,6 @@
 ---
-title: OpenAI drop-in, compatibility notes
-description: What carries over from the OpenAI SDK to Nito, what differs, and which surfaces return 404.
+title: "OpenAI drop-in, compatibility notes"
+description: "What carries over from the OpenAI SDK to Nito, what differs, and which surfaces return 404."
 ---
 
 The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatible Chat Completions shape. Most of your code is unaffected. A handful of things differ, and a few surfaces are not served at all. This page is the honest, complete list so you never wire up against something that returns `404` or quietly behaves differently.
@@ -44,7 +44,7 @@ Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported.
 ## A quick compatibility table
 
 | Capability | Status on Nito |
-|---|---|
+| --- | --- |
 | Chat Completions | Supported |
 | Streaming | Supported (not with `:e2e-tee`) |
 | Tool calling (function tools) | Supported (you execute them) |
@@ -67,5 +67,3 @@ Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported.
 - [Streaming](/features/streaming)
 - [Error format](/api-reference/overview/error-format)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §2 (request fields, strict JSON, rejected inputs, file_id rejected), §3 (streaming), §1 (/v1/responses, /v1/files 404), §5 (model ID suffixes), §7 (structured outputs not exposed), §8 (Retry-After only), §9 (no type field, system_fingerprint null), docs/get-started/quickstart-openai-sdk.mdx */}

@@ -1,6 +1,6 @@
 ---
-title: Known Limitations
-description: A frank inventory of Nito's current gaps, so you build on what the system actually does today rather than on an imagined version of it.
+title: "Known Limitations"
+description: "A frank inventory of Nito's current gaps, so you build on what the system actually does today rather than on an imagined version of it."
 ---
 
 This page exists to set accurate expectations. It is a plain list of where Nito stops, drawn from the code as it stands, so you do not design around a capability that is not there. None of these is hidden, and none is dressed up. Some are deliberate scope decisions, some are not-yet-built, and a few are claims we simply cannot verify in code and therefore will not assert. Naming all of them in one place is more useful than discovering them one failed request at a time.
@@ -67,13 +67,13 @@ Three retention windows that appear in earlier planning material could **not** b
 
 > **TODO (needs SME):** tenant saved-chat retention. No server-side saved-chat store with a retention window exists in code; share links persist only an object key and a token hash with no TTL. Verify with Backend.
 
-What *is* confirmed is the metadata-only default itself and the 15-minute object-storage presign lifetime. The three windows above must not be presented as guarantees until Backend confirms them.
+What _is_ confirmed is the metadata-only default itself and the 15-minute object-storage presign lifetime. The three windows above must not be presented as guarantees until Backend confirms them.
 
 ## A note on context windows and pricing
 
 Per-model pricing and context-window sizes are **not** on the model card; they are joined from billing at response time. Treat `GET /v1/models` as the live source for what exists, and do not hard-code a model's price or context length from these docs.
 
-> **TODO (needs SME):** per-model pricing and context windows, and per-model embedding output dimensions, are not encoded on the model card and are not published here (owner: Finance/Backend).
+> **TODO (needs SME):** per-model pricing and context windows, and per-model embedding output dimensions, are not encoded on the model card and are not published here.
 
 ## Related
 
@@ -81,5 +81,3 @@ Per-model pricing and context-window sizes are **not** on the model card; they a
 - [What Nito does not defend against](/privacy/threat-model/what-nito-does-not-defend-against) - the privacy boundaries in depth.
 - [Privacy overview](/privacy/overview) - the per-call privacy model and the metadata-only default.
 - [Compliance posture](/privacy/compliance-posture) - what is and is not asserted about compliance.
-
-{/* source: internal/server/api_tee_attestation_verification.go (baseline scope), internal/inference/validation.go (validateTEEEncryption, audio/video rejection), internal/server/routes.go (404 routes 141-147), internal/websearch/redaction.go (outbound-only, no chat guardrails), internal/inference (ResponseFormat not exposed), internal/billing (BYOK absent), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §2, §4, §6, §7, §10, §11 */}

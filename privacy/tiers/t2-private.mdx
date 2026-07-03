@@ -1,6 +1,6 @@
 ---
-title: T2 Private
-description: Privately served models with zero-data-retention enforced upstream, so the provider is told not to keep your request.
+title: "T2 Private"
+description: "Privately served models with zero-data-retention enforced upstream, so the provider is told not to keep your request."
 ---
 
 T2 Private is the second rung of the [privacy ladder](/privacy/tiers). In the code it is the stored tier `private`. It keeps the metadata-only posture of [T1](/privacy/tiers/t1-anonymous) and adds one thing on top: the upstream provider is held to **zero-data-retention**, so it is told, contractually and technically, not to keep your request after serving it. Choose T2 when you want assurance about the provider's own retention, but do not need the sealed, attested execution of the TEE tiers.
@@ -37,7 +37,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real `private`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address). Owner: Product/Infra.
+> **TODO (needs SME):** replace `MODEL-ID` with a real `private`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
 
 To know whether a model is private, read its catalog entry and look at `privacy_tier`:
 
@@ -56,9 +56,7 @@ Choose T2 for moderately sensitive work where the deciding factor is the provide
 
 - [Privacy tiers in depth](/privacy/tiers)
 - [T1 Anonymous](/privacy/tiers/t1-anonymous)
-- [T3 Private+ (TEE)](/privacy/tiers/t3-private-plus-tee)
+- [T3 Private\+ (TEE)](/privacy/tiers/t3-private-plus-tee)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Privacy overview](/privacy/overview)
 - [Providers](/models/providers)
-
-{/* source: internal/models/models.go:34-46 (PrivacyTier private), internal/models/models.go (OpenRouter owner mapping: anthropic/google/openai -> anon, else private), internal/server/logical_models.go:910 (chooseLogicalRoute sets RequireZeroDataRetention on private route), internal/provider/openrouter/request.go:118 (ZDR endpoint selection; non-ZDR models not imported) */}

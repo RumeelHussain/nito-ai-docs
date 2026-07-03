@@ -1,6 +1,6 @@
 ---
-title: Stream your first response
-description: Turn on streaming and read Nito's token stream. Streaming is a first-class default, not an advanced topic.
+title: "Stream your first response"
+description: "Turn on streaming and read Nito's token stream. Streaming is a first-class default, not an advanced topic."
 ---
 
 Streaming sends the response back token by token as the model produces it, instead of making you wait for the whole answer. A token is a small chunk of text, often a word fragment, and a model generates them one after another. Without streaming you hold the connection open until the last token is done and then receive everything at once. With streaming you receive each token as it is produced, so a person reading the output sees it appear live, the way it does in a chat app. For anything a human reads in real time, streaming is what makes the experience feel fast. On Nito, streaming is a first-class part of the chat API: you turn it on with one field and read a stream of small JSON chunks.
@@ -60,7 +60,7 @@ for await (const chunk of stream) {
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The `-N` flag in the curl example disables curl's own buffering so you see tokens arrive as they come rather than all at once at the end. The SDKs handle the stream for you: you just iterate over the chunks, and each loop pass gives you the next delta.
 
@@ -68,7 +68,7 @@ The `-N` flag in the curl example disables curl's own buffering so you see token
 
 Each SSE event carries one chunk. Here is a complete short stream, start to finish:
 
-```
+```text
 data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
 
 data: {"id":"...","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Sealed "},"finish_reason":null}]}
@@ -115,5 +115,3 @@ Streaming changes how errors arrive, and this trips people up. Once the stream h
 - [Streaming format reference](/api-reference/streaming-format)
 - [Make your first request](/get-started/make-your-first-request)
 - [Tool call streaming](/api-reference/streaming-format/tool-call-streaming)
-
-{/* source: internal/server/sse.go (prepareSSE, sseHeartbeatInterval 15s, ": keep-alive", text/event-stream), internal/server/api_chat.go (streamAPIChatCompletion, apiChatChunk, choices[]), internal/server/api_chat_response.go (writeChatChunk, writeChatUsageChunk include_usage, writeChatStreamError, [DONE]), internal/inference/contracts.go (FinishReason), internal/inference/validation.go (streaming not supported with E2E-TEE) */}

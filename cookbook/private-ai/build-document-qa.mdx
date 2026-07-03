@@ -1,6 +1,6 @@
 ---
-title: Build Document Q&A
-description: Extract text from PDF, DOCX, PPTX, XLSX, and text files with the Nito file parser, then answer questions about them with a private or attested chat model.
+title: "Build Document Q&A"
+description: "Extract text from PDF, DOCX, PPTX, XLSX, and text files with the Nito file parser, then answer questions about them with a private or attested chat model."
 ---
 
 Document Q&A is a two-step pipeline: turn a file into text, then ask a chat model about that text. Nito ships a server-side **file parser** for the first step, so you do not have to run your own PDF and Office extractors. This recipe parses a document and answers questions about it at a private or attested tier.
@@ -46,7 +46,7 @@ def parse_file(path, trust_tier="tee"):
     return body["text"]
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address.
 
 ## Step 2: Answer questions over the text
 
@@ -73,7 +73,7 @@ text = parse_file("contract.pdf")
 print(ask_document(text, "What is the termination notice period?"))
 ```
 
-> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example (owner: Product). Confirm against `GET /v1/models`.
+> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example. Confirm against `GET /v1/models`.
 
 ## Handling large documents
 
@@ -94,5 +94,3 @@ The parser caps output at 300k characters and PDFs at 80 pages. For anything lar
 - [Structured data extraction](/cookbook/private-ai/structured-data-extraction)
 - [Build a private chat app](/cookbook/private-ai/build-private-chat-app)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_attachments_parse.go; internal/server/api_chat.go: apiChatContentPartToInference; internal/models/models.go:485; DOCS_SOURCE_OF_TRUTH.md §4, §6, §10 */}

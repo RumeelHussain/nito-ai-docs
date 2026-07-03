@@ -1,6 +1,6 @@
 ---
-title: What a TEE Is
-description: A plain-language explanation of Trusted Execution Environments, the attestation they produce, and why both matter for private inference on Nito.
+title: "What a TEE Is"
+description: "A plain-language explanation of Trusted Execution Environments, the attestation they produce, and why both matter for private inference on Nito."
 ---
 
 When you send a prompt to an AI model, it normally runs on a computer you do not control, owned and operated by some provider. Even if that provider promises not to look at your prompt or keep it, you are taking their word for it. Nothing stops an administrator, a compromised server, or the operating system itself from reading the data while the model processes it. For most requests that is an acceptable risk. For sensitive ones, it is not. A Trusted Execution Environment is the hardware that turns "trust us" into "check for yourself." This page explains what it is, in plain terms, before the rest of this section gets into the mechanics.
@@ -41,5 +41,3 @@ One honest caution, which the rest of this section expands on. Producing an atte
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
 - [Privacy overview](/privacy/overview)
-
-{/* source: docs/architecture/tee-attestation.md, internal/server/api_tee_attestation.go, internal/server/api_tee_attestation_verification.go */}

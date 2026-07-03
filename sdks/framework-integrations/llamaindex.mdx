@@ -1,6 +1,6 @@
 ---
-title: LlamaIndex
-description: Use Nito in LlamaIndex via its OpenAI-compatible LLM, pointed at Nito's base URL with a Nito key and a Nito catalog model ID.
+title: "LlamaIndex"
+description: "Use Nito in LlamaIndex via its OpenAI-compatible LLM, pointed at Nito's base URL with a Nito key and a Nito catalog model ID."
 ---
 
 LlamaIndex uses an LLM object across its query engines, agents, and pipelines. Nito has no LlamaIndex-specific package; you configure its OpenAI-compatible LLM for Nito and use it everywhere LlamaIndex expects a model, because Nito exposes an OpenAI-compatible API. Your indexes, retrievers, and query engines stay the same. Nito also serves an OpenAI-compatible `POST /v1/embeddings`, so the same redirect works for an embedding model.
@@ -32,9 +32,9 @@ print(llm.complete("Say hello in one short sentence."))
 
 For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
 
-> **TODO (needs SME):** verify the exact current configuration for LlamaIndex (LLM and embeddings) against its official docs (owner: DevRel)
+> **TODO (needs SME):** verify the exact current configuration for LlamaIndex (LLM and embeddings) against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## Choosing a model and privacy
 
@@ -62,5 +62,3 @@ LlamaIndex's Anthropic LLM targets the Anthropic Messages API (`/v1/messages`), 
 - [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/routes.go (compat.openai.chat_completions at /v1/chat/completions, compat.openai.embeddings at /v1/embeddings; /v1/messages wired to notFoundRouteHandler) */}

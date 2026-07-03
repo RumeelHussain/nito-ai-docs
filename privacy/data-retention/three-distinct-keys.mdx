@@ -1,6 +1,6 @@
 ---
-title: Three Secret Roles
-description: Nito separates session, storage-key, and chat-share secrets as an HMAC domain-separated key hierarchy, independent only under explicit override.
+title: "Three Secret Roles"
+description: "Nito separates session, storage-key, and chat-share secrets as an HMAC domain-separated key hierarchy, independent only under explicit override."
 ---
 
 A common security claim is "we use three distinct keys for three distinct purposes." On Nito the spirit of that claim is true, but the precise mechanism is more interesting than "three unrelated secrets," and getting it right matters for a security reviewer. What actually exists is a small **key hierarchy**: three secret **roles** with separate purposes, where two of the three are, by default, **HMAC-derived from the first** using distinct domain-separation labels, and become **fully independent keys only when each is set explicitly**. This page states that accurately.
@@ -53,5 +53,3 @@ The consequence: a dump of the credential store does not yield usable secrets, b
 - [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat): where the derived storage key is used.
 - [Data retention](/privacy/data-retention): the broader retention contract.
 - [Data visibility](/privacy/data-visibility): who sees what across a request.
-
-{/* source: internal/config/auth.go (SESSION_SECRET root, STORAGE_KEY_SECRET / CHAT_SHARE_TOKEN_SECRETS HMAC derivation + labels), internal/server/api_storage_key.go (HMAC-SHA256(StorageKeySecret, userID)), internal/auth/tokens.go (HMAC-SHA256(token, SESSION_SECRET), hashes never plaintext); DOCS_SOURCE_OF_TRUTH.md §8, §10 (Three-distinct-keys: PARTIAL) */}

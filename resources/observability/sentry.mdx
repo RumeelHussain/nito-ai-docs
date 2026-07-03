@@ -1,12 +1,12 @@
 ---
-title: Sentry
-description: Server-side error tracking for a Nito deployment using the gateway's built-in Sentry support, configured with SENTRY_ENABLED and SENTRY_DSN.
+title: "Sentry"
+description: "Server-side error tracking for a Nito deployment using the gateway's built-in Sentry support, configured with SENTRY_ENABLED and SENTRY_DSN."
 ---
 
 The Nito gateway has real, built-in Sentry support for server-side error tracking. Unlike some of the other backends in this section, this is a first-party integration: the gateway itself reports errors to Sentry when configured to do so.
 
 <Info>
-Sentry here is a deployment-side capability. It captures errors from inside the gateway process, not from your client. Enabling it is the job of whoever operates the Nito deployment.
+  Sentry here is a deployment-side capability. It captures errors from inside the gateway process, not from your client. Enabling it is the job of whoever operates the Nito deployment.
 </Info>
 
 ## Configuration
@@ -14,7 +14,7 @@ Sentry here is a deployment-side capability. It captures errors from inside the 
 Two environment variables control it:
 
 | Variable | Purpose |
-|---|---|
+| --- | --- |
 | `SENTRY_ENABLED` | Turns Sentry error reporting on. |
 | `SENTRY_DSN` | The Sentry DSN the gateway reports to. |
 
@@ -26,7 +26,7 @@ Sentry captures errors that occur inside the gateway. This is distinct from the 
 
 To line up a client-observed failure with a Sentry event, log the `X-Request-ID` from the response. It is the shared identifier that lets an operator find the corresponding server-side error.
 
-> **TODO (needs SME):** confirm whether `X-Request-ID` is attached to Sentry events as a tag or context field (owner: DevRel/Infra). If it is not automatic, correlation may require matching on timestamp and route.
+> **TODO (needs SME):** confirm whether `X-Request-ID` is attached to Sentry events as a tag or context field. If it is not automatic, correlation may require matching on timestamp and route.
 
 ## What it is not
 
@@ -37,5 +37,3 @@ Sentry is for errors and exceptions, not for request tracing or usage metering. 
 - [Observability overview](/resources/observability) - the request ID and usage primitives.
 - [Datadog](/resources/observability/datadog) - OTLP traces and metrics.
 - [Errors and status codes](/api-reference/errors) - the client-facing error envelope.
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md section 9 (SENTRY_ENABLED, SENTRY_DSN config; error envelope has code not type; X-Request-ID header). */}

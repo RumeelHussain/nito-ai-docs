@@ -1,11 +1,11 @@
 ---
-title: Discord bot
-description: Build a Discord bot that answers with Nito. Receive a message event, call Nito's Chat Completions, and reply in the channel.
+title: "Discord bot"
+description: "Build a Discord bot that answers with Nito. Receive a message event, call Nito's Chat Completions, and reply in the channel."
 ---
 
 A Discord bot has two halves. The Discord half connects over the gateway, receives message events, and posts replies. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the Discord half only as a representative shape, because Discord's API and client libraries change over time.
 
-> **TODO (needs SME):** verify the current Discord API/library setup against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the current Discord API/library setup against its official docs.
 
 ## The Nito call
 
@@ -30,7 +30,7 @@ def answer(user_text: str) -> str:
     return resp.choices[0].message.content
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
 
@@ -87,5 +87,3 @@ Wrap the Nito call in a try/except so one failed reply does not tear down your e
 - [Telegram bot](/cookbook/bots/telegram-bot)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Rate limits](/resources/rate-limits)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

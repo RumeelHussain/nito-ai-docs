@@ -1,6 +1,6 @@
 ---
-title: Model families
-description: The kinds of models Nito serves, what each is for, and which modalities are available today.
+title: "Model families"
+description: "The kinds of models Nito serves, what each is for, and which modalities are available today."
 ---
 
 Models on Nito fall into a few families grouped by what they do. A family is just a category of model with a shared job: generating text, turning text into vectors, reading an image, making an image. This page describes the families that are available so you can match a task to the right kind of model, and it is deliberate about which families are not served yet. Where a kind of model in the broader roadmap is not available, this page says so plainly rather than implying it exists, so you do not build against something that will return an error.
@@ -25,7 +25,7 @@ Embedding models turn text into an **embedding**: a vector, meaning a list of nu
 
 You call them through the [embeddings endpoint](/api-reference/embeddings/create-embeddings), passing one or more input strings, and get back one vector per input. Embeddings inherit the same privacy options as chat. The default embedding model is a Qwen embedding model, and the exact length of the returned vector is determined by the provider at call time rather than fixed in the gateway.
 
-> **TODO (needs SME):** the per-model embedding output dimensions. The gateway does not encode a fixed dimension per model; the vector length is returned by the provider at runtime (owner: Backend).
+> **TODO (needs SME):** the per-model embedding output dimensions. The gateway does not encode a fixed dimension per model; the vector length is returned by the provider at runtime.
 
 ## Vision (image input)
 
@@ -56,5 +56,3 @@ One detail can mislead you here, so it is worth being explicit. The model catalo
 - [Chat completions](/features/chat-completions)
 - [Embeddings](/features/embeddings)
 - [Image generation](/api-reference/multimodal/image-generation)
-
-{/* source: internal/models/models.go (ModelType chat/embedding/image/audio/video/other), internal/server/api_chat.go (image/file content parts; audio/video rejected), internal/server/api_embeddings.go, internal/embeddings (DefaultEmbeddingModel Qwen/Qwen3-Embedding-0.6B, per-model dimensions not encoded), internal/server/api_images.go, internal/provider/fal (DefaultPublicModel fal/fal-ai/z-image/turbo), internal/inference/contracts.go (ReasoningEffort) */}

@@ -1,12 +1,12 @@
 ---
-title: Datadog
-description: Route the Nito gateway's OpenTelemetry OTLP export into Datadog through an OTLP-compatible collector or the Datadog Agent.
+title: "Datadog"
+description: "Route the Nito gateway's OpenTelemetry OTLP export into Datadog through an OTLP-compatible collector or the Datadog Agent."
 ---
 
 The Nito gateway does not have a native Datadog integration. What it does have is an OpenTelemetry exporter that ships traces and metrics over OTLP. Datadog can ingest OTLP, so the supported pattern is **OTLP to Datadog** through a collector or the Datadog Agent, not a first-party Datadog client inside the gateway.
 
 <Info>
-The gateway speaks OTLP. Datadog is one of several backends that can sit behind that OTLP stream. Nothing in the gateway is Datadog-specific.
+  The gateway speaks OTLP. Datadog is one of several backends that can sit behind that OTLP stream. Nothing in the gateway is Datadog-specific.
 </Info>
 
 ## The OTLP export
@@ -14,7 +14,7 @@ The gateway speaks OTLP. Datadog is one of several backends that can sit behind 
 When observability is enabled, the gateway exports OpenTelemetry using these settings:
 
 | Variable | Purpose |
-|---|---|
+| --- | --- |
 | `OTEL_ENABLED` | Turns OpenTelemetry export on. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | The OTLP collector or agent endpoint. |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | The OTLP protocol (for example gRPC or HTTP). |
@@ -24,13 +24,13 @@ These are deployment-side settings for whoever operates the gateway. Point `OTEL
 
 ## The routing shape
 
-```
+```text
 Nito gateway  --OTLP-->  OTLP-compatible collector / Datadog Agent  -->  Datadog
 ```
 
 The gateway's job ends at the OTLP endpoint. The collector or agent is responsible for authenticating to Datadog and mapping OTLP resources onto Datadog's data model.
 
-> **TODO (needs SME):** Datadog OTLP ingestion setup (owner: DevRel/Infra). Confirm the exact collector or Datadog Agent configuration, the Datadog API key handling, and any attribute mapping required for spans and metrics to land correctly in Datadog.
+> **TODO (needs SME):** Datadog OTLP ingestion setup. Confirm the exact collector or Datadog Agent configuration, the Datadog API key handling, and any attribute mapping required for spans and metrics to land correctly in Datadog.
 
 ## Client-side correlation
 
@@ -38,16 +38,14 @@ Independent of the server-side OTLP stream, you can correlate calls in Datadog f
 
 An example endpoint would look like:
 
-```
+```text
 POST https://YOUR-NITO-BASE-URL/api/v1/chat/completions
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once Product/Infra confirm it.
+> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL.
 
 ## Related
 
 - [Observability overview](/resources/observability) - the request ID and usage primitives.
 - [Sentry](/resources/observability/sentry) - server-side error tracking.
 - [Status page](/resources/status-page) - planned uptime surface.
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md section 9 (OTEL_ENABLED, OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_PROTOCOL, OTEL_SERVICE_NAME). No native Datadog integration in code; OTLP->Datadog framing only. */}

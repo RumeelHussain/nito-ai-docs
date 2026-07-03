@@ -1,6 +1,6 @@
 ---
-title: Latency and Performance
-description: Practical ways to make Nito calls feel fast and stay within limits, from streaming and prompt caching to model choice and the body-size cap.
+title: "Latency and Performance"
+description: "Practical ways to make Nito calls feel fast and stay within limits, from streaming and prompt caching to model choice and the body-size cap."
 ---
 
 Latency is two different things, and it helps to keep them apart. There is the total time a request takes, and there is the time until the user sees something happen. You optimize them with different tools. This page walks through the levers Nito gives you, from the ones that change perceived speed to the ones that change real work, and it flags the privacy modes that trade latency for stronger guarantees.
@@ -61,5 +61,3 @@ The right move is to match the privacy mode to the sensitivity of each call, pay
 - [Choosing a model](/models/choosing-a-model)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Cost control](/resources/best-practices/cost-control)
-
-{/* source: internal/server/api_chat.go (streamAPIChatCompletion, apiMaxRequestBytes), internal/inference/validation.go (validateTEEEncryption), internal/models/models.go (ParseLogicalModelIDForPublicMode), docs/planning/DOCS_SOURCE_OF_TRUTH.md §2, §3, §5, §9 */}

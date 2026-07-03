@@ -1,6 +1,6 @@
 ---
-title: Secure API Key Handling
-description: A z_sk_ key is full org-scoped access with no per-key scopes. Store it like a password, isolate workloads, cap spend, and rotate by revoking.
+title: "Secure API Key Handling"
+description: "A z_sk_ key is full org-scoped access with no per-key scopes. Store it like a password, isolate workloads, cap spend, and rotate by revoking."
 ---
 
 A Nito API key is more powerful than it looks. A `z_sk_` key grants full, organization-scoped access to your account. There are no per-key scopes or permissions and no "read-only" or "management-only" key type. Any valid key can reach the entire catalog and spend against your balance. That single fact drives every recommendation on this page: treat these keys exactly as you would treat a password with full account access, because that is what they are.
@@ -40,7 +40,7 @@ curl -X POST https://YOUR-NITO-BASE-URL/api/v1/orgs/ORG_ID/api-keys/KEY_ID/revok
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** confirm `ORG_ID` and `KEY_ID` retrieval flow and any UI equivalent for teams that do not script rotation (owner: Product).
+> **TODO (needs SME):** confirm `ORG_ID` and `KEY_ID` retrieval flow and any UI equivalent for teams that do not script rotation
 
 Rotate on a schedule, and rotate immediately if you suspect exposure. Because you capture the raw token only once at creation, script the deploy step to read it straight into your secrets store rather than pasting it around.
 
@@ -62,5 +62,3 @@ Key management is restricted to organization roles. Only `owner` and `admin` can
 - [Cost control](/resources/best-practices/cost-control)
 - [Privacy-safe logging](/resources/best-practices/privacy-safe-logging)
 - [Production readiness checklist](/resources/best-practices/production-readiness-checklist)
-
-{/* source: internal/auth/tokens.go (z_sk_ APIKeyTokenPrefix, HMAC-SHA256 storage), internal/auth/api_keys.go (org-scoped, no per-key scopes, create/list/revoke, spend caps, owner/admin only), docs/planning/DOCS_SOURCE_OF_TRUTH.md §8 */}

@@ -1,6 +1,6 @@
 ---
-title: Web Fetch
-description: Have the model retrieve and read a specific URL during generation, enabled with the web_fetch request field.
+title: "Web Fetch"
+description: "Have the model retrieve and read a specific URL during generation, enabled with the web_fetch request field."
 ---
 
 A model only knows what was in its training data, which has a cutoff and never included the specific page you care about right now. Web fetch closes that gap for a single, known page: it retrieves a specific URL and reads its contents into the model's context while it generates an answer. Where [web search](/features/server-side-tools/web-search) starts from a query and goes looking for sources, web fetch starts from a URL you (or the prompt) already have and pulls that one page in.
@@ -41,8 +41,8 @@ Web fetch requires a model whose provider can serve it. Today that means an **Op
 
 They solve different problems and you pick based on what you start with.
 
-| | Web fetch | Web search |
-|---|---|---|
+|  | Web fetch | Web search |
+| --- | --- | --- |
 | Starts from | A specific URL | A query |
 | What it does | Retrieves and reads that page | Finds and retrieves relevant sources |
 | Triggered when | Explicit URLs appear in the prompt | The rules engine decides a search would help |
@@ -54,7 +54,7 @@ If your prompt names a page, reach for web fetch. If it asks a question that nee
 
 Fetch activity shows up in `usage.server_tool_use` as `web_fetch_requests`, so you can see how many pages were retrieved and reconcile it against your bill.
 
-> **TODO (needs SME):** the response-level metadata shape for web fetch (fetched URL, content length, any per-page status). Confirm against the serialized response before publishing literal fields (owner: Backend).
+> **TODO (needs SME):** the response-level metadata shape for web fetch (fetched URL, content length, any per-page status). Confirm against the serialized response before publishing literal fields.
 
 ## Common mistakes
 
@@ -67,5 +67,3 @@ Fetch activity shows up in `usage.server_tool_use` as `web_fetch_requests`, so y
 
 - [Web search](/features/server-side-tools/web-search) for query-driven retrieval.
 - [Server-side tools](/features/server-side-tools) for how hosted tools work in general.
-
-{/* source: internal/server/api_chat.go (apiChatRequest web_fetch), internal/websearch/* (web pipeline, fetch-on-URL trigger, retrieval_mode), internal/inference/contracts.go (server_tool_use web_fetch_requests), internal/inference/service.go (routeServerTool) */}

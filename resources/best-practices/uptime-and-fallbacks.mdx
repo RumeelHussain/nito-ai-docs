@@ -1,6 +1,6 @@
 ---
-title: Uptime and Fallbacks
-description: Nito already fails over within a model group and never silently downgrades TEE. Add app-level fallback, retry transient errors, and honor Retry-After.
+title: "Uptime and Fallbacks"
+description: "Nito already fails over within a model group and never silently downgrades TEE. Add app-level fallback, retry transient errors, and honor Retry-After."
 ---
 
 Resilience on Nito is a shared responsibility. The gateway already does a lot of failover work for you underneath a single model name, but there are failure modes only your application can handle well, because only your application knows what an acceptable substitute for a failed call is. This page draws that line clearly: what Nito handles, and what you should build on top.
@@ -20,12 +20,12 @@ Gateway failover handles backends inside one model group. It cannot decide that 
 
 Build fallback for the server errors: `502` (`provider_error`) and `503` (`unavailable`). On one of these, fall back to an alternate model that fits the task, ideally one you selected from `GET /v1/models` at startup so you know it exists. Keep the alternate at the same privacy tier as the original when the call is sensitive, so you never weaken privacy through the fallback path.
 
-```
+```text
 try MODEL_ID
   on 502 / 503 -> try FALLBACK_MODEL_ID  (same privacy tier)
 ```
 
-> **TODO (needs SME):** confirm recommended primary and fallback model pairings once canonical model IDs are published (owner: Product).
+> **TODO (needs SME):** confirm recommended primary and fallback model pairings once canonical model IDs are published.
 
 ## What you should add: retry with backoff
 
@@ -37,7 +37,7 @@ Some failures are transient and the same request will succeed a moment later. Re
 
 Back off exponentially between attempts, add jitter so many clients do not retry in lockstep, and cap the number of attempts. Always honor `Retry-After` when it is present; treat it as a floor on your wait, not a suggestion.
 
-```
+```text
 attempt 1 -> fail 503 -> wait base * 2^0 + jitter
 attempt 2 -> fail 503 -> wait base * 2^1 + jitter
 attempt 3 -> fail 503 -> give up, fall back or surface error
@@ -70,5 +70,3 @@ Never let any of these steps quietly relax a privacy mode, and never retry the n
 - [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
 - [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
 - [Production readiness checklist](/resources/best-practices/production-readiness-checklist)
-
-{/* source: internal/server/logical_models.go (chooseLogicalRoute), internal/inference/errors.go (StatusCode, ErrorKind provider_error/unavailable/rate_limited/insufficient_quota), internal/server/rate_limit.go (Retry-After), internal/config/* (PROVIDER_CIRCUIT_BREAKER threshold 3, cooldown 30s), docs/planning/DOCS_SOURCE_OF_TRUTH.md §5, §8, §9 */}

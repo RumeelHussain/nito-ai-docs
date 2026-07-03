@@ -1,6 +1,6 @@
 ---
-title: Privacy-Safe Logging
-description: Log request IDs for correlation, not prompt or response bodies. Keep metadata, never log the Authorization header, and match Nito's metadata-only posture.
+title: "Privacy-Safe Logging"
+description: "Log request IDs for correlation, not prompt or response bodies. Keep metadata, never log the Authorization header, and match Nito's metadata-only posture."
 ---
 
 Good logging and good privacy are not at odds, but the default habits of most logging setups quietly work against both. It is tempting to log the full request and response so you can debug later, but for an AI gateway that means writing prompts, completions, and possibly sensitive user content into your log store, where it lives far longer and is seen by far more people than the model call itself. This page describes a logging posture that keeps you able to debug while keeping content out of your logs, and it mirrors Nito's own metadata-only stance.
@@ -11,13 +11,13 @@ Every response from Nito carries an `X-Request-ID` header. The gateway echoes th
 
 So the rule is simple: log the request ID and the metadata around a call, not the prompt or the response. When a user reports a bad answer, you look up the request ID rather than reading back what they typed.
 
-```
+```text
 # Good: correlation-friendly, content-free
 level=info event=inference.done request_id=<X-Request-ID> model=MODEL_ID \
   status=200 latency_ms=812 prompt_tokens=... completion_tokens=...
 ```
 
-> **TODO (needs SME):** confirm any gateway-side lookup or support flow that consumes a client-supplied `X-Request-ID`, so docs can tell users how to hand an ID to support (owner: Product/Support).
+> **TODO (needs SME):** confirm any gateway-side lookup or support flow that consumes a client-supplied `X-Request-ID`, so docs can tell users how to hand an ID to support.
 
 To make correlation reliable end to end, set your own `X-Request-ID` on the way in (it accepts up to 128 characters, sanitized) and log that same value, so the ID in your logs matches the ID the gateway used.
 
@@ -60,5 +60,3 @@ If your own logs capture full content while the gateway deliberately does not, y
 - [Metadata-only default](/privacy/data-retention/metadata-only-default)
 - [Secure API key handling](/resources/best-practices/secure-api-key-handling)
 - [Production readiness checklist](/resources/best-practices/production-readiness-checklist)
-
-{/* source: internal/server/observability.go (X-Request-ID echo/generate, SafeAttrs allowlist), internal/server/api_chat.go (Cache-Control: no-store), docs/standards/privacy-and-retention.md, docs/planning/DOCS_SOURCE_OF_TRUTH.md §9, §10 */}

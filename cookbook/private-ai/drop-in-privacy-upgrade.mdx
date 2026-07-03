@@ -1,6 +1,6 @@
 ---
-title: Drop-in Privacy Upgrade
-description: Raise the privacy of an existing OpenAI-compatible app with a one-line change per call by adding the :tee suffix or choosing a private-tier model.
+title: "Drop-in Privacy Upgrade"
+description: "Raise the privacy of an existing OpenAI-compatible app with a one-line change per call by adding the :tee suffix or choosing a private-tier model."
 ---
 
 If you already have an app talking to an OpenAI-compatible endpoint, you do not need to rewrite it to get a stronger privacy posture on Nito. Privacy is selected by the **model ID**, not by a request field or a custom parameter. That means the upgrade is a one-line change per call: keep your existing request shape, and change the model you ask for.
@@ -32,7 +32,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
 
 To upgrade, change only the `model` value. For an attested call, append `:tee` to an attestation-capable model:
 
@@ -46,7 +46,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example (owner: Product). Confirm against `GET /v1/models`.
+> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example. Confirm against `GET /v1/models`.
 
 Everything else stays the same: the same `/v1/chat/completions` path, the same `messages` shape, the same auth header, the same streaming behavior. Your response envelope is unchanged (`object: "chat.completion"`, one `choices` entry, `usage`).
 
@@ -66,5 +66,3 @@ Because the only thing that changes is the model string, you can gate the upgrad
 - [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
 - [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/models/models.go:34-46,485; internal/server/logical_models.go:81; internal/server/api_chat.go; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 */}

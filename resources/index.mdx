@@ -1,6 +1,6 @@
 ---
-title: Resources
-description: Reference tables you reach for while building on Nito. Pricing, rate limits, and the full error catalog in one place.
+title: "Resources"
+description: "Reference tables you reach for while building on Nito. Pricing, rate limits, and the full error catalog in one place."
 ---
 
 This tab collects the flat reference material you keep open in a second tab while you build: how billing works and where the numbers live, what the rate limiter does and the defaults it applies, and the complete catalog of error kinds with their HTTP mappings. Nothing here is a tutorial. Each page is a lookup surface, deliberately dense, cross-linked back to the deeper explanations in [Features](/features), [API Reference](/api-reference), and [Privacy](/privacy).
@@ -9,9 +9,9 @@ If you are new to Nito, read [How Nito Works](/get-started/how-nito-works) first
 
 ## What is here
 
-- **[Pricing](/resources/pricing)** how Nito meters and bills inference. Nito bills in credits tracked in nanos (billionths of a unit) for precision, with separate per-token rates for input and output plus rates for cache, reasoning, and server-side tools. The master per-model price table and the credit-to-currency value are not asserted in these docs; they are configured live and surfaced on each model entry. Read this page to learn where to pull the authoritative numbers from.
-- **[Rate limits](/resources/rate-limits)** the canonical rate-limit reference. Limits come from a policy table, per-key values are global group defaults rather than per-key stored numbers, and the only signal on a `429` is the `Retry-After` header. Selected `inference_generate` defaults and the fail-open versus fail-closed behavior are documented here.
-- **[Errors reference](/resources/errors-reference)** the full error catalog in one place: the response envelope, every error kind the gateway emits, and the HTTP status each one maps to. This is the consolidated version of the per-topic error pages in the API reference.
+- [**Pricing**](/resources/pricing) how Nito meters and bills inference. Nito bills in credits tracked in nanos (billionths of a unit) for precision, with separate per-token rates for input and output plus rates for cache, reasoning, and server-side tools. The master per-model price table and the credit-to-currency value are not asserted in these docs; they are configured live and surfaced on each model entry. Read this page to learn where to pull the authoritative numbers from.
+- [**Rate limits**](/resources/rate-limits) the canonical rate-limit reference. Limits come from a policy table, per-key values are global group defaults rather than per-key stored numbers, and the only signal on a `429` is the `Retry-After` header. Selected `inference_generate` defaults and the fail-open versus fail-closed behavior are documented here.
+- [**Errors reference**](/resources/errors-reference) the full error catalog in one place: the response envelope, every error kind the gateway emits, and the HTTP status each one maps to. This is the consolidated version of the per-topic error pages in the API reference.
 
 ## How these pages relate to the rest of the docs
 
@@ -28,5 +28,3 @@ Two categories of figures are intentionally absent here: the master per-model pr
 - [API Reference](/api-reference)
 - [Errors and rate limits (API reference)](/api-reference/errors-and-rate-limits/error-envelope)
 - [Privacy overview](/privacy/overview)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §8.1 (pricing), §8.2 (rate limits), §8.3 (errors); §5 (models, GET /v1/models pricing object) */}

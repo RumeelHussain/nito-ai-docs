@@ -1,11 +1,11 @@
 ---
-title: WhatsApp assistant
-description: Build a WhatsApp assistant backed by Nito. Receive an inbound message webhook, call Nito's Chat Completions, and send the reply.
+title: "WhatsApp assistant"
+description: "Build a WhatsApp assistant backed by Nito. Receive an inbound message webhook, call Nito's Chat Completions, and send the reply."
 ---
 
 A WhatsApp assistant has two halves. The WhatsApp half receives inbound-message webhooks and sends replies through a messaging provider. The Nito half turns the user's text into an answer. This recipe owns the Nito half and shows the WhatsApp half only as a representative shape, because WhatsApp messaging APIs and providers change over time.
 
-> **TODO (needs SME):** verify the current WhatsApp messaging API/provider setup against its official docs (owner: DevRel).
+> **TODO (needs SME):** verify the current WhatsApp messaging API/provider setup against its official docs.
 
 ## The Nito call
 
@@ -30,7 +30,7 @@ def answer(user_text: str) -> str:
     return resp.choices[0].message.content
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the live list and pick one:
 
@@ -89,5 +89,3 @@ Respond to the webhook quickly. If the Nito call may be slow, acknowledge the we
 - [Slack assistant](/cookbook/bots/slack-assistant)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Rate limits](/resources/rate-limits)
-
-{/* source: internal/server/routes.go (compat openai chat_completions routes.go:137, models routes.go:140) */}

@@ -1,6 +1,6 @@
 ---
-title: Streaming
-description: What streaming is on Nito and when to use it. Server-Sent Events, incremental chunks, usage, and mid-stream errors at a glance.
+title: "Streaming"
+description: "What streaming is on Nito and when to use it. Server-Sent Events, incremental chunks, usage, and mid-stream errors at a glance."
 ---
 
 Streaming changes when you receive a reply, not what the reply is. Without it, you wait for the whole completion and get it in one response. With it, Nito sends the answer as it is generated, a few tokens at a time, over a single long-lived connection. For anything a person watches happen (a chat UI, a writing assistant), streaming is the difference between a blank screen for several seconds and words appearing as the model produces them. This page is the short version: what streaming is, when to use it, and the shape of what arrives. The exact wire format lives in the [streaming format reference](/api-reference/streaming-format).
@@ -21,7 +21,7 @@ Skip streaming when:
 
 Set `stream: true` on a chat-completions request. Nito responds with a stream of Server-Sent Events (SSE) instead of a single JSON body.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra). `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
 
 ```bash
 curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
@@ -68,5 +68,3 @@ The full SSE wire format, every field on a chunk, and exact framing are document
 - [Reasoning](/features/reasoning)
 - [Streaming format reference](/api-reference/streaming-format)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: internal/server/api_chat.go (streamAPIChatCompletion, apiChatChunk, writeChatStreamError), internal/server/sse.go (prepareSSE, writeSSEEvent, sseHeartbeatInterval), internal/inference/validation.go (validateTEEEncryption) */}

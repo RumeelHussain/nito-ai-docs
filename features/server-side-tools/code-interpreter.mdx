@@ -1,9 +1,9 @@
 ---
-title: Code Interpreter
-description: Let a model run code mid-generation for real computation. On Nito this is an xAI-only passthrough with no gateway-native sandbox.
+title: "Code Interpreter"
+description: "Let a model run code mid-generation for real computation. On Nito this is an xAI-only passthrough with no gateway-native sandbox."
 ---
 
-Language models are good at reasoning about code but unreliable at *being* a calculator. Ask one to compute the variance of a list or parse a messy CSV in its head and it will often produce a confident, wrong answer, because it is predicting text, not executing arithmetic. A code interpreter fixes that by letting the model actually run code while it answers: it writes a small program, the program runs, and the real result comes back into the conversation. For anything involving exact computation, data manipulation, or verification, this is the difference between a plausible guess and a correct answer.
+Language models are good at reasoning about code but unreliable at _being_ a calculator. Ask one to compute the variance of a list or parse a messy CSV in its head and it will often produce a confident, wrong answer, because it is predicting text, not executing arithmetic. A code interpreter fixes that by letting the model actually run code while it answers: it writes a small program, the program runs, and the real result comes back into the conversation. For anything involving exact computation, data manipulation, or verification, this is the difference between a plausible guess and a correct answer.
 
 This page explains how the capability works on Nito, and it is honest up front about an important limitation: on Nito, code interpreter is a thin passthrough to one provider, not a gateway-native feature.
 
@@ -21,7 +21,7 @@ For tasks that are pure language (summarizing, rewriting, answering from knowled
 
 Code interpreter is available on **xAI models only**. Enabling it routes the request to xAI's own `code_interpreter` tool. If you enable it on any other provider's model, the request is rejected with a `400`:
 
-```
+```text
 code_interpreter requires an xAI model
 ```
 
@@ -53,7 +53,7 @@ Because execution happens at xAI, any data the model passes into the interpreter
 
 Because this is a passthrough, the exact shape of the interpreter's output as relayed by the gateway is defined by the xAI path rather than by Nito.
 
-> **TODO (needs SME):** the response shape for code-interpreter output as relayed by the gateway (tool-result content parts, execution metadata, and billing treatment). Confirm against the xAI passthrough path before publishing specifics (owner: Backend).
+> **TODO (needs SME):** the response shape for code-interpreter output as relayed by the gateway (tool-result content parts, execution metadata, and billing treatment). Confirm against the xAI passthrough path before publishing specifics.
 
 ## Common mistakes
 
@@ -67,5 +67,3 @@ Because this is a passthrough, the exact shape of the interpreter's output as re
 - [Server-side tools](/features/server-side-tools) for the family overview and the hosted-tool shape.
 - [Web search](/features/server-side-tools/web-search) and [web fetch](/features/server-side-tools/web-fetch) for the gateway-native tools.
 - [Tool calling](/features/tool-calling) for your own (non-hosted) function tools.
-
-{/* source: internal/inference/contracts.go (ToolType code_interpreter), internal/inference/service.go (routeServerTool, xai:code_interpreter passthrough, "code_interpreter requires an xAI model"), internal/server/api_chat_tools.go */}

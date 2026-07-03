@@ -1,23 +1,28 @@
 ---
-title: FAQ - Integrations
-description: Common questions about SDK drop-ins, framework and editor integrations, and the CLI, MCP, and native SDK.
+title: "Integrations"
+description: "Common questions about SDK drop-ins, framework and editor integrations, and the CLI, MCP, and native SDK."
 ---
 
 Questions about connecting existing tools to Nito. Each answer links to the page with the full story.
 
-**Do I need a special SDK?**
+#### Do I need a special SDK?
+
 No. Nito is OpenAI-compatible. Point the OpenAI SDK at Nito's base URL, use a Nito model ID, and your existing code keeps working. See the [OpenAI drop-in](/sdks/openai-drop-in/base-url-swap).
 
-**Can I use my existing OpenAI or Anthropic code?**
+#### Can I use my existing OpenAI or Anthropic code?
+
 OpenAI code: yes, via the base-URL swap. Anthropic code: route it through Nito's OpenAI-compatible Chat Completions surface, because the native Anthropic Messages endpoint (`/v1/messages`) is not served yet and returns 404. See the [Anthropic drop-in](/sdks/anthropic-drop-in/base-url-swap).
 
-**Which frameworks and editors work?**
+#### Which frameworks and editors work?
+
 Any framework or editor that supports a custom OpenAI-compatible endpoint can point at Nito (LangChain, Vercel AI SDK, LiteLLM, Cursor, Zed, Continue.dev, and more). See [Framework integrations](/sdks/framework-integrations) and [Editor integrations](/sdks/editor-integrations).
 
-**Is there a native SDK, CLI, or MCP server?**
+#### Is there a native SDK, CLI, or MCP server?
+
 The gateway exposes an MCP transport at `/mcp` and defines the CLI and MCP token types. The native Nito SDK, the Agent SDK, the `z` CLI, and the MCP server live in separate repositories and are documented in a later pass.
 
-**How do I select privacy from an SDK?**
+#### How do I select privacy from an SDK?
+
 The same way as everywhere: add `:tee` or `:e2e-tee` to the model ID. No other code change is needed.
 
 ## Related
@@ -25,5 +30,3 @@ The same way as everywhere: add `:tee` or `:e2e-tee` to the model ID. No other c
 - [SDKs overview](/sdks)
 - [OpenAI drop-in](/sdks/openai-drop-in/base-url-swap)
 - [Framework integrations](/sdks/framework-integrations)
-
-{/* source: internal/server/routes.go (compat.openai.*, compat.anthropic.messages.unsupported, mcp.streamable_http), internal/auth/tokens.go (token prefixes), internal/models/models.go (privacy suffix) */}

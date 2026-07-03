@@ -1,6 +1,6 @@
 ---
-title: Data Visibility
-description: Who sees what on Nito. A three-column model of what the gateway sees, what the provider sees, and what is never stored.
+title: "Data Visibility"
+description: "Who sees what on Nito. A three-column model of what the gateway sees, what the provider sees, and what is never stored."
 ---
 
 When you send a request to Nito, three different parties are involved, and they do not all see the same thing. Confusing them is the most common source of privacy misunderstandings, so this page draws the lines explicitly. There is **Nito**, the gateway you call. There is the **upstream provider**, the model host that actually runs the inference. And there is the category of data that is **never stored at all** by the gateway, regardless of mode. Once you can place a given piece of data in the right column, the rest of the privacy section reads cleanly.
@@ -10,7 +10,7 @@ If you read only one thing, read the table. Everything else explains a cell in i
 ## The three columns
 
 | Data | What Nito (the gateway) sees | What the upstream provider sees | Never stored by the gateway |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Your prompt / messages | Sees it in transit to route and serve the call; does not persist it | Serves the call, so it may see the prompt, subject to provider-side enforcement (`Store: false`, ZDR, or TEE) | Prompt bodies are request-local, not persisted |
 | The model's completion | Sees it in transit to return it to you; does not persist it | Produces it | Completion bodies are request-local, not persisted |
 | Reasoning / chain-of-thought | In transit only | Produces it | Not persisted |
@@ -64,5 +64,3 @@ The practical consequence: clearing your browser storage clears the history, bec
 - [Data retention](/privacy/data-retention): the full retention contract and its sub-pages.
 - [Privacy overview](/privacy/overview): how privacy modes are selected and what each enforces.
 - [How Nito works](/get-started/how-nito-works): the request lifecycle these three columns sit on.
-
-{/* source: docs/standards/privacy-and-retention.md, internal/observability/attrs.go (SafeAttrs allowlist), internal/server/api_chat.go (Cache-Control: no-store), internal/server/api_storage_key.go, internal/provider/openairesponses/request.go (Store:false), internal/provider/openrouter/request.go (ZDR); DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 */}

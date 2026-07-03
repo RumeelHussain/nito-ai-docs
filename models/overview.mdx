@@ -1,6 +1,6 @@
 ---
-title: Models overview
-description: How model access works on Nito through one key, and how to read a model entry from the catalog.
+title: "Models overview"
+description: "How model access works on Nito through one key, and how to read a model entry from the catalog."
 ---
 
 On Nito, a single API key reaches every model in the catalog. You do not hold accounts with the underlying providers, you do not manage their keys, and you do not learn each one's request format. To use a model, you name it in the `model` field of your request. To change how private the call is, you add a suffix to that same name. This page builds the mental model for the catalog: what a "model" is on Nito, why the list is discovered rather than fixed, and how to read everything a single model entry tells you.
@@ -26,14 +26,14 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 
 This returns a list of model entries. By default it returns chat models; pass a `type` filter to see other kinds (for example embedding or image models). The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
 
 ## How to read a model entry
 
 Each entry describes one model you can call. The important fields:
 
 | Field | What it tells you |
-|---|---|
+| --- | --- |
 | `id` | The model ID you pass back in a request. |
 | `type` | `chat`, `embedding`, or `image`. |
 | `display_name`, `description` | Human-friendly name and summary. |
@@ -69,5 +69,3 @@ A model entry's `privacy_tier` and TEE fields tell you which privacy modes that 
 - [Model ID convention](/models/model-id-convention)
 - [Model catalog](/models/model-catalog)
 - [GET /v1/models reference](/api-reference/models-catalog/list-models)
-
-{/* source: internal/server/api_models.go (apiModelsHandler, apiModel, apiModelListResponse, capabilities, pricing, privacy_tier), internal/models/models.go (SupportedModel, DiscoveredModel, ModelType, pricing/context joined from billing), internal/server/api_models_filters.go */}

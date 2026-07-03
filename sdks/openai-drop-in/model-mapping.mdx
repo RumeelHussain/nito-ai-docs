@@ -1,6 +1,6 @@
 ---
-title: OpenAI drop-in, model mapping
-description: Why OpenAI model names are not Nito IDs, and how to pick the right Nito catalog ID at runtime.
+title: "OpenAI drop-in, model mapping"
+description: "Why OpenAI model names are not Nito IDs, and how to pick the right Nito catalog ID at runtime."
 ---
 
 The one thing that does not carry over from an OpenAI codebase is the model name. `gpt-4o`, `gpt-4o-mini`, and similar strings are OpenAI catalog names. They are not Nito IDs, and sending one names a model the gateway does not have. This page explains the principle and how to choose the right ID.
@@ -53,7 +53,7 @@ The example `grok-4.3` used elsewhere in these docs is illustrative only. Pick a
 
 A Nito public model ID is a canonical model name with an optional privacy suffix:
 
-```
+```text
 <canonical-model-id>[:tee | :e2e-tee]
 ```
 
@@ -66,7 +66,7 @@ So `grok-4.3` and `grok-4.3:tee` are the same model at two privacy tiers. The pr
 
 There is no mapping table inside the gateway that translates an OpenAI name to a Nito ID, so this documentation does not invent one. The correct move is always to look up an equivalent in the live catalog by the capability you need (chat, embeddings, image generation, reasoning, attestation support) rather than by matching brand names.
 
-> **TODO (needs SME):** an explicit OpenAI-name to Nito-ID equivalence table (for example, which Nito catalog IDs teams should reach for when migrating from `gpt-4o` or `text-embedding-3-large`). This requires a curated mapping owned by an SME and must not be guessed (owner: DevRel / Product).
+> **TODO (needs SME):** an explicit OpenAI-name to Nito-ID equivalence table (for example, which Nito catalog IDs teams should reach for when migrating from `gpt-4o` or `text-embedding-3-large`). This requires a curated mapping owned by an SME and must not be guessed.
 
 ## A migration checklist
 
@@ -83,5 +83,3 @@ There is no mapping table inside the gateway that translates an OpenAI name to a
 - [Model ID convention](/models/model-id-convention)
 - [List models API reference](/api-reference/models-catalog/list-models)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §5 (catalog runtime-discovered, no static list; logical public ID = canonicalModelID[:tee|:e2e-tee], other suffixes rejected), §1 (GET /v1/models), docs/get-started/quickstart-openai-sdk.mdx */}

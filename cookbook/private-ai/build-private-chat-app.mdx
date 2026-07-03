@@ -1,6 +1,6 @@
 ---
-title: Build a Private Chat App
-description: Build a chat app on Nito that uses a private or attested model from the start, with metadata-only retention by default.
+title: "Build a Private Chat App"
+description: "Build a chat app on Nito that uses a private or attested model from the start, with metadata-only retention by default."
 ---
 
 This recipe builds a chat app that is private by design: it talks to a private-tier or attested (`:tee`) model from the first request, and it relies on the gateway's metadata-only retention rather than bolting privacy on later. If you already have a chat app, see the [drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade) instead; this page assumes you are starting fresh.
@@ -43,7 +43,7 @@ def ask(user_text):
 print(ask("Draft a two-line out-of-office reply."))
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address (owner: Product/Infra). Confirm the model against `GET /v1/models`.
+> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address. Confirm the model against `GET /v1/models`.
 
 ## Streaming responses
 
@@ -67,5 +67,3 @@ If you chose a `:tee` model, you can prove the tier rather than trust it. Make t
 - [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
 - [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
-
-{/* source: internal/server/api_chat.go; internal/server/sse.go; internal/inference/contracts.go: Role; internal/models/models.go:34-46,485; DOCS_SOURCE_OF_TRUTH.md §2, §3, §6, §10 */}

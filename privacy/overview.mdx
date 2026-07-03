@@ -1,6 +1,6 @@
 ---
-title: Privacy Overview
-description: What "private" means on Nito. Privacy is selectable per call, metadata-only by default, and verifiable on the top tiers through attestation.
+title: "Privacy Overview"
+description: 'What "private" means on Nito. Privacy is selectable per call, metadata-only by default, and verifiable on the top tiers through attestation.'
 ---
 
 Most AI platforms treat privacy as an account setting. You pick a plan, and every request you ever send inherits whatever that plan promises. Nito does not work that way. On Nito, privacy is a property of **each request**, chosen at call time, and on the strongest tiers it comes with a proof you can check yourself instead of a promise you have to trust. This page is the narrative entry to that idea. If you are a security reviewer, read this first; it frames everything in the rest of this section.
@@ -18,7 +18,7 @@ This matters because the strongest modes have real costs (fewer eligible backend
 Nito exposes a small, fixed set of public privacy modes. Internally these map onto three stored tiers (`anon`, `private`, `tee`), but what you select from is this list:
 
 | Mode | How you get it | What it means in plain terms |
-|---|---|---|
+| --- | --- | --- |
 | `ordinary` | No suffix, on an ordinary-tier model | Standard routing. By default the gateway keeps metadata only, not your prompt or the reply. |
 | `private` | No suffix, on a private-tier model | Routed to a privately configured backend with zero-data-retention enforced at the provider. |
 | `tee` | `:tee` suffix | Runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box. You can fetch an attestation and verify the call really ran there. |
@@ -57,5 +57,3 @@ This is the single most important behavior for a security reviewer to internaliz
 - [Privacy architecture](/privacy/privacy-architecture) - where privacy is enforced at each hop, request to billing.
 - [Zero data retention](/privacy/zero-data-retention) - exactly what is and is not retained, and how it is enforced upstream.
 - [How Nito works](/get-started/how-nito-works) - the request lifecycle this section builds on.
-
-{/* source: internal/models/models.go (ParseLogicalModelIDForPublicMode, PublicPrivacyMode*, privacy tiers lines 34-46), internal/server/logical_models.go (chooseLogicalRoute), internal/server/api_tee_attestation_verification.go (verifyTEEAttestationBaseline), docs/architecture/tee-attestation.md, docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §5, §6, §10 */}

@@ -1,6 +1,6 @@
 ---
-title: Build an image and document app
-description: Combine image input, document parsing, and image generation into one app. Audio and video are not supported today.
+title: "Build an image and document app"
+description: "Combine image input, document parsing, and image generation into one app. Audio and video are not supported today."
 ---
 
 **Goal.** A small app that does the three multimodal things Nito actually supports: read an image in a chat request, parse a document into a prompt, and generate an image from text. One workflow, three real capabilities.
@@ -17,7 +17,7 @@ Honesty up front, because it is easy to assume a modern gateway does everything.
 
 **Audio and video are not available**, as input or as generation. There are no audio or video endpoints today. Do not design a step around them. See [Multimodal](/features/multimodal) and [Known limitations](/privacy/known-limitations) for the full boundary. This recipe builds only on the three capabilities above.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
 
 ## Step 1: Image input into chat
 
@@ -117,5 +117,3 @@ A realistic flow chains all three: parse an uploaded document (Step 2), ask a ch
 - [PDF and document input](/features/multimodal/pdf-input)
 - [Image generation](/features/multimodal/image-generation)
 - [Known limitations](/privacy/known-limitations)
-
-{/* source: DOCS_SOURCE_OF_TRUTH.md §4 (image input PNG/JPEG/WebP + limits, document parse kinds + caps, image gen FAL PNG, audio/video rejected), §11 (audio/video absent, only image input + document input + image generation) */}

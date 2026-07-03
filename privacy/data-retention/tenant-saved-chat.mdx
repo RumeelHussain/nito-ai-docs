@@ -1,6 +1,6 @@
 ---
-title: Tenant and Saved-chat Retention
-description: Chat history on Nito is client-side, encrypted in the browser with a per-user key. No server-side saved-chat store with retention exists in code.
+title: "Tenant and Saved-chat Retention"
+description: "Chat history on Nito is client-side, encrypted in the browser with a per-user key. No server-side saved-chat store with retention exists in code."
 ---
 
 A natural question for anyone building or evaluating a chat product on Nito is: "where do conversations live, and how long are they kept?" The honest answer today is that chat history is a **client-side** concern, not a server-side store the gateway retains and ages out. This page describes that reality and is explicit that the server-side tenant retention dials sometimes cited in product materials are not present in the current code.
@@ -16,7 +16,7 @@ curl https://YOUR-NITO-BASE-URL/api/v1/me/storage-key \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** confirm the example request and base URL once the production gateway URL is fixed (owner: Product/Infra).
+> **TODO (needs SME):** confirm the example request and base URL once the production gateway URL is fixed.
 
 The key is derived server-side as `HMAC-SHA256(StorageKeySecret, userID)`, so each user gets a distinct key that the client uses to encrypt its local history. The derivation and how `StorageKeySecret` relates to the other secrets are covered in [Three secret roles](/privacy/data-retention/three-distinct-keys).
 
@@ -32,7 +32,7 @@ Product materials sometimes describe a **tenant saved-chat policy** with specifi
 
 So do not state "30-day default / 90-day cap" as a fact about saved-chat retention. That dial is not present in the current code.
 
-> **TODO (needs SME):** tenant saved-chat retention (30d/90d) is not present in current code; confirm roadmap (owner: Product/Backend).
+> **TODO (needs SME):** tenant saved-chat retention (30d/90d) is not present in current code; confirm roadmap.
 
 ## What you can rely on today
 
@@ -46,5 +46,3 @@ So do not state "30-day default / 90-day cap" as a fact about saved-chat retenti
 - [Data retention](/privacy/data-retention): the contract and its unconfirmed-window framing.
 - [Data visibility](/privacy/data-visibility): why browser history sits outside what the gateway sees.
 - [Metadata-only default](/privacy/data-retention/metadata-only-default): the gateway-side baseline.
-
-{/* source: internal/server/api_storage_key.go (GET /api/v1/me/storage-key, HMAC-SHA256(StorageKeySecret, userID)), internal/server/api_chatshares.go (object-key + token-hash, no TTL), docs/standards/privacy-and-retention.md; DOCS_SOURCE_OF_TRUTH.md §10 (Tenant saved chat 30d/90d: NOT CONFIRMED) */}
