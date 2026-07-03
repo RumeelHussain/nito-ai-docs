@@ -54,4 +54,4 @@ The consequence: a dump of the credential store does not yield usable secrets, b
 - [Data retention](/privacy/data-retention): the broader retention contract.
 - [Data visibility](/privacy/data-visibility): who sees what across a request.
 
-<!-- source: internal/config/auth.go (SESSION_SECRET root, STORAGE_KEY_SECRET / CHAT_SHARE_TOKEN_SECRETS HMAC derivation + labels), internal/server/api_storage_key.go (HMAC-SHA256(StorageKeySecret, userID)), internal/auth/tokens.go (HMAC-SHA256(token, SESSION_SECRET), hashes never plaintext); DOCS_SOURCE_OF_TRUTH.md §8, §10 (Three-distinct-keys: PARTIAL) -->
+{/* source: internal/config/auth.go (SESSION_SECRET root, STORAGE_KEY_SECRET / CHAT_SHARE_TOKEN_SECRETS HMAC derivation + labels), internal/server/api_storage_key.go (HMAC-SHA256(StorageKeySecret, userID)), internal/auth/tokens.go (HMAC-SHA256(token, SESSION_SECRET), hashes never plaintext); DOCS_SOURCE_OF_TRUTH.md §8, §10 (Three-distinct-keys: PARTIAL) */}
