@@ -1,9 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "aspen",
   "name": "Nito",
   "colors": {
-    "primary": "#0B6BCB"
+    "primary": "#3FB58A",
+    "light": "#3FB58A",
+    "dark": "#3FB58A"
   },
   "navigation": {
     "tabs": [
@@ -449,5 +451,14 @@
         ]
       }
     ]
+  },
+  "background": {
+    "color": {
+      "light": "#F6F5F1",
+      "dark": "#16161A"
+    }
+  },
+  "icons": {
+    "library": "fontawesome"
   }
 }
