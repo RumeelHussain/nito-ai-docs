@@ -468,5 +468,16 @@
   "favicon": {
     "light": "/images/favicon.ico",
     "dark": "/images/favicon.ico"
+  },
+  "contextual": {
+    "options": [
+      "view",
+      "assistant",
+      "download-spec",
+      "download-pdf",
+      "chatgpt",
+      "claude"
+    ],
+    "display": "header"
   }
 }
