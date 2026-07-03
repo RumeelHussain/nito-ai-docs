@@ -462,7 +462,6 @@
           {
             "group": "FAQ",
             "pages": [
-              "faq/index",
               "faq/getting-started",
               "faq/models-and-pricing",
               "faq/privacy-and-tee",
