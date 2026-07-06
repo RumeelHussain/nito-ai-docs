@@ -510,6 +510,7 @@
       "languages": [
         ""
       ]
-    }
+    },
+    "openapi": "nito.openapi.json"
   }
 }
