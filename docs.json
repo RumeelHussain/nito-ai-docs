@@ -483,8 +483,8 @@
     "library": "fontawesome"
   },
   "logo": {
-    "light": "/images/nito-logo-white.png",
-    "dark": "/images/nito-logo-black.png"
+    "light": "/images/nito-logo-black.png",
+    "dark": "/images/nito-logo-white.png"
   },
   "favicon": {
     "light": "/images/favicon.ico",
