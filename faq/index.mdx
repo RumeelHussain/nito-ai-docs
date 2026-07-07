@@ -1,0 +1,37 @@
+---
+title: FAQ
+description: "Answers to common Nito questions, grouped by topic: getting started, models, privacy, billing, errors, and integrations."
+---
+
+Short answers to the questions that come up most, grouped by topic. Each answer links to the page with the full story. If you are brand new, start with [How Nito Works](/get-started/how-nito-works).
+
+## Browse by topic
+
+- **[Getting started](/faq/getting-started)** what Nito is, base URLs, finding models.
+- **[Models and pricing](/faq/models-and-pricing)** model IDs, multi-model calls, inputs, cost.
+- **[Privacy and TEE](/faq/privacy-and-tee)** privacy modes, attestation, retention.
+- **[Billing and usage](/faq/billing-and-usage)** API keys, balance, spend caps, funding.
+- **[Errors and limits](/faq/errors-and-limits)** 401/400/402/429, size caps, what is not available.
+- **[Integrations](/faq/integrations)** SDK drop-ins, frameworks, editors, CLI and MCP.
+
+## Top questions
+
+**Is Nito a model, or a gateway?**
+A gateway. Nito sits in front of many models from several providers, and you choose the model per request. See [How Nito Works](/get-started/how-nito-works).
+
+**Do I need a special SDK?**
+No. Nito is OpenAI-compatible: point the OpenAI SDK (or plain HTTP) at Nito's base URL and use a Nito model ID. See [Integrations](/faq/integrations).
+
+**Does every call run in a TEE?**
+No, and that is deliberate. TEE execution is the highest tier, selected per call by adding `:tee` to the model ID. Most calls use lighter modes. See [Privacy and TEE](/faq/privacy-and-tee).
+
+**What does Nito keep about my prompts?**
+By default, metadata only. Prompt and completion contents are treated as request-local and are not persisted by the gateway. See [Zero Data Retention](/privacy/zero-data-retention).
+
+## Related
+
+- [How Nito Works](/get-started/how-nito-works)
+- [Privacy overview](/privacy/overview)
+- [Community](/resources/community)
+
+{/* source: internal/server/routes.go, internal/models/models.go (ParseLogicalModelIDForPublicMode), internal/server/api_tee_attestation.go, docs/standards/privacy-and-retention.md */}
