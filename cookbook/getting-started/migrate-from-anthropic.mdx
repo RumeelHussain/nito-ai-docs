@@ -5,7 +5,7 @@ description: "Move off the Anthropic Messages API onto Nito's OpenAI-compatible 
 
 ## Goal
 
-Move an application built on the Anthropic Messages API onto Nito. Because Nito does not serve the native Messages API, this recipe routes your calls through the OpenAI-compatible Chat Completions surface instead.
+Move an application built on the Anthropic Messages API onto Nito. This recipe routes your calls through Nito's OpenAI-compatible Chat Completions surface, a supported and stable path. Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages`, but this recipe uses the Chat Completions route.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Move an application built on the Anthropic Messages API onto Nito. Because Nito 
 
 ## The key difference
 
-Nito does not serve the Anthropic native surface. `POST /v1/messages` and `POST /v1/messages/count_tokens` return `404`. So this is not a base-URL-only swap: you also translate the request shape from Messages to Chat Completions. The good news is the translation is mechanical, and the easiest path is to use the OpenAI SDK against Nito.
+This recipe translates the request shape from Messages to Chat Completions rather than doing a base-URL-only swap. The translation is mechanical, and the easiest path is to use the OpenAI SDK against Nito. Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages` and `POST /v1/messages/count_tokens`; the Chat Completions translation below remains a fully supported option.
 
 ## Step 1: Translate the request shape
 
@@ -88,7 +88,7 @@ Do not carry Anthropic-specific behaviors over as if they were Nito's. Features 
 
 ## What does not carry over
 
-- **The native Messages API is not served.** `/v1/messages` and `/v1/messages/count_tokens` return `404`. Route through Chat Completions.
+- **This recipe uses Chat Completions.** It routes through `/v1/chat/completions`. Nito now also serves an Anthropic Messages-compatible endpoint at `/v1/messages` and `/v1/messages/count_tokens` if you prefer the native shape.
 - **Anthropic model names.** Substitute Nito catalog IDs.
 
 ## Next steps

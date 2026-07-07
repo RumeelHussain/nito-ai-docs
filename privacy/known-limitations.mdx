@@ -34,16 +34,16 @@ There is no audio or video support, in either direction:
 
 Supported input modalities are text, image, and parsed documents (PDF, docx, pptx, xlsx, xls, text). The only generation modality is image, served by fal. Do not plan an audio or video workflow on the current gateway.
 
-## Several endpoints return 404
+## Some endpoints return 404
 
 A number of endpoints are mounted but deliberately return `404`. They are not implemented as of the analyzed commit:
 
-- **Responses API:** `/v1/responses` and its lifecycle paths.
-- **Anthropic Messages:** `/v1/messages` and `/v1/messages/count_tokens`.
 - **Files API:** `/v1/files` and `/v1/files/*`.
 - **Jobs:** `/jobs/*`.
 
 If your integration assumes any of these, it will fail. Use `/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, and the other documented routes instead. Whether these are roadmap or cut is a Product decision.
+
+Nito does now serve an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`) and an OpenAI Responses-compatible endpoint at `POST /v1/responses` (and `/v1/responses/compact`). You can try them in the [API Playground](/api-playground).
 
 ## No chat-prompt guardrails or moderation
 

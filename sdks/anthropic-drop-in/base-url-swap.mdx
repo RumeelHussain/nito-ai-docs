@@ -1,23 +1,25 @@
 ---
 title: "Anthropic drop-in, base URL swap"
-description: "Reach Nito from Anthropic-shaped codebases. Read the support boundary first, then route through Chat Completions."
+description: "Reach Nito from Anthropic-shaped codebases. Target Nito's Anthropic Messages-compatible endpoint, or route through Chat Completions."
 ---
 
-If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change, and is honest about where the boundary is today.
+If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change.
 
-<Warning>
-  The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are **not served** by the gateway. Requests to them return `404`. This means a native Anthropic SDK call such as `client.messages.create(...)` will not reach Nito today. Until the Messages API ships, route Anthropic-shaped code through Nito's OpenAI-compatible Chat Completions surface, as shown below.
-</Warning>
+<Note>
+  Nito now serves an Anthropic Messages-compatible endpoint: `POST /v1/messages` and token counting at `POST /v1/messages/count_tokens`. The gateway validates the Anthropic Messages shape and maps it to Nito's canonical chat contracts, so a native Anthropic SDK call such as `client.messages.create(...)` can target Nito. Nito's OpenAI-compatible Chat Completions surface remains a valid alternative for teams that prefer the OpenAI shape, as shown below. Explore both in the [API Playground](/api-playground).
+
+  > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
+</Note>
 
 ## What this means in practice
 
-Nito's compatible surface is the OpenAI Chat Completions shape, not the Anthropic Messages shape. So the "drop-in" for an Anthropic codebase is not "swap the base URL on the Anthropic client and keep going." The native Messages calls would `404`. Instead, you point an OpenAI-style client at Nito and adapt the small set of shape differences (covered in the [mapping notes](/sdks/anthropic-drop-in/mapping-notes)).
+You have two working paths into Nito from an Anthropic codebase. You can point the Anthropic SDK at Nito's Anthropic Messages-compatible endpoint (`/v1/messages`), or you can point an OpenAI-style client at Nito's Chat Completions surface and adapt the small set of shape differences (covered in the [mapping notes](/sdks/anthropic-drop-in/mapping-notes)). The OpenAI path is an alternative for teams that already standardize on the OpenAI shape.
 
-Most Anthropic-based applications keep a thin abstraction over the model call, so this change is usually confined to one client-setup file.
+Most Anthropic-based applications keep a thin abstraction over the model call, so either choice is usually confined to one client-setup file.
 
-## The recommended path today
+## Routing through Chat Completions
 
-Use the OpenAI SDK pointed at Nito, and use the Chat Completions message shape.
+For teams that prefer the OpenAI shape, use the OpenAI SDK pointed at Nito, and use the Chat Completions message shape.
 
 <CodeGroup>
 
@@ -68,7 +70,7 @@ The example model `grok-4.3` is illustrative. Fetch `GET /v1/models` for the liv
 
 ## Can I keep the Anthropic SDK?
 
-Not against the gateway today. The Anthropic SDK's primary call is `messages.create`, which targets `/v1/messages`. That path returns `404` on the gateway, and so does `/v1/messages/count_tokens`. There is no shim in the gateway that accepts the Messages shape. The path that works is the OpenAI-compatible client shown above. This page will be updated if and when a Messages-shaped surface ships.
+Yes. The Anthropic SDK's primary call is `messages.create`, which targets `/v1/messages`. Nito now serves an Anthropic Messages-compatible endpoint at that path, along with `/v1/messages/count_tokens`, so the gateway accepts the Messages shape and maps it to Nito's canonical contracts. The OpenAI-compatible client shown above remains a valid alternative. Try both against the [API Playground](/api-playground).
 
 ## Privacy
 
@@ -76,9 +78,7 @@ As everywhere on Nito, privacy rides on the model ID. Add `:tee` or `:e2e-tee` t
 
 ## Common mistakes
 
-- **Calling `/v1/messages`.** It returns `404` today. Use `/v1/chat/completions`.
-- **Keeping the native Anthropic client.** `client.messages.create(...)` will not reach Nito. Use an OpenAI-style client against `/v1`.
-- **Carrying over an Anthropic model name.** Replace it with a Nito catalog ID.
+- **Carrying over an Anthropic model name.** Replace it with a Nito catalog ID, whichever path you use.
 - **Keeping a top-level `system` string.** Move it into the messages array; see the [mapping notes](/sdks/anthropic-drop-in/mapping-notes).
 
 ## Related

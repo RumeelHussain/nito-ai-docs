@@ -48,13 +48,13 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 
 ## Do not use the Anthropic route
 
-If you call LiteLLM with an `anthropic/` route, it targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Route through the OpenAI-compatible path shown above to reach Nito.
+If you call LiteLLM with an `anthropic/` route, it targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page routes through the OpenAI-compatible path shown above for the widest framework support.
 
 ## Common mistakes
 
 - **Using a real OpenAI model name.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** LiteLLM's OpenAI client appends `/chat/completions` itself, so the base must end in `/v1`.
-- **Choosing the `anthropic/` route.** Nito serves Chat Completions, not Messages.
+- **Choosing the `anthropic/` route.** This guide targets Chat Completions for the widest support.
 
 ## Related
 

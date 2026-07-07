@@ -34,12 +34,12 @@ Start with the [Overview](#overview-conventions) pages: they cover the base URL,
 | Billing | checkout, portal, x402 top-up | Implemented |
 | Account & auth | session, CSRF, account security, OAuth | Implemented |
 
+Nito also serves an **Anthropic Messages-compatible** endpoint (`POST /v1/messages`, `/v1/messages/count_tokens`) and an **OpenAI Responses-compatible** endpoint (`POST /v1/responses`, `/v1/responses/compact`). You can try them in the [API Playground](/api-playground).
+
 ### Not implemented yet
 
 These surfaces are mounted but return `404`, or have no route at all, as of the analyzed build:
 
-- `/v1/responses` (and lifecycle routes)
-- `/v1/messages`, `/v1/messages/count_tokens`
 - `/v1/files`, `/v1/files/*`
 - `/jobs/*`
 - Audio and video input or generation; image edits and variations

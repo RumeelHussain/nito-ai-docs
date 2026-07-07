@@ -29,8 +29,8 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the ti
 ## What works and what does not
 
 - The compatible surface is **Chat Completions** (`POST /v1/chat/completions`). Messages, streaming, and tool calls work as in the OpenAI SDK.
-- The OpenAI **Responses API** (`/v1/responses`) is not served.
-- The **Anthropic Messages API** (`/v1/messages`) is not served and returns 404. Tools that default to Anthropic-native calls must be pointed at the OpenAI-compatible path instead.
+- The OpenAI **Responses API** (`/v1/responses`) is now served as an OpenAI Responses-compatible endpoint, though these pages target Chat Completions for the widest tool support.
+- The **Anthropic Messages API** (`/v1/messages`) is now served as an Anthropic Messages-compatible endpoint; tools that default to Anthropic-native calls can use it, but these pages target the OpenAI-compatible path for the widest support.
 
 ## A note on settings paths
 

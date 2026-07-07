@@ -142,9 +142,11 @@ Usage is what you are billed on, settled against the hold placed before the call
 
 All responses set `Cache-Control: no-store`.
 
-## Related endpoints that return 404
+## Related compatibility endpoints
 
-The OpenAI Responses endpoint (`/v1/responses`) and the Anthropic Messages endpoints (`/v1/messages`, `/v1/messages/count_tokens`) are wired to a not-found handler and return `404` at this commit. They are not implemented.
+Nito also serves an OpenAI Responses-compatible endpoint at `POST /v1/responses` (and `/v1/responses/compact`) and an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`). Each validates its native request shape and maps it into the gateway's canonical chat contracts. You can try them in the [API Playground](/api-playground).
+
+> **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
 ## Related
 

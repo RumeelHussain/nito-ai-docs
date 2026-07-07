@@ -68,7 +68,7 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and a model must support that tie
 
 - **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with a Nito model ID from `GET /v1/models`. Model mapping is covered in [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping).
 - **Forgetting `/v1` on the base URL.** The OpenAI SDK appends paths like `/chat/completions`, so the base URL must end in `/v1`.
-- **Expecting the Responses API.** Nito's compatible surface is Chat Completions. The OpenAI Responses API (`/v1/responses`) is not served at this time.
+- **Assuming the Responses API is unavailable.** Nito now serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`. Chat Completions remains the primary, fully supported surface and is what this page uses.
 - **Streaming with end-to-end TEE.** The `:e2e-tee` mode does not stream. Use `:tee` if you need streaming with attestation.
 
 ## Notes

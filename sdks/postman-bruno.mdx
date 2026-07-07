@@ -77,7 +77,9 @@ The same base URL and bearer auth reach the other compatible endpoints:
 | POST | `/v1/images/generations` | Text-to-image |
 | GET | `/v1/models` | List the catalog |
 
-The OpenAI Responses API (`/v1/responses`) and the Anthropic Messages API (`/v1/messages`) are not served and return `404`.
+The OpenAI Responses API (`/v1/responses`) is served as an OpenAI Responses-compatible endpoint, and the Anthropic Messages API (`/v1/messages`, `/v1/messages/count_tokens`) is served as an Anthropic Messages-compatible endpoint. Chat Completions remains the primary documented surface; explore the others in the [API Playground](/api-playground).
+
+> **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
 ## Reading errors
 

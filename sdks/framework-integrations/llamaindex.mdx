@@ -48,13 +48,13 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 
 ## If you reach for the Anthropic LLM
 
-LlamaIndex's Anthropic LLM targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Use the OpenAI-compatible LLM shown above to reach Nito, not the Anthropic class.
+LlamaIndex's Anthropic LLM targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible LLM shown above for the widest framework support.
 
 ## Common mistakes
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
-- **Selecting the Anthropic LLM.** Nito serves Chat Completions, not Messages.
+- **Selecting the Anthropic LLM.** This guide targets Chat Completions for the widest support.
 
 ## Related
 

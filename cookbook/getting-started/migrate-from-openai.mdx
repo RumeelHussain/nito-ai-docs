@@ -82,7 +82,7 @@ To select a privacy mode, add a suffix to the model ID (`grok-4.3:tee`). No requ
 
 ## What does not carry over
 
-- **The Responses API is not served.** `POST /v1/responses` returns `404` on Nito. If your code calls `client.responses.create(...)`, port it to `client.chat.completions.create(...)` first. Chat Completions is the supported surface.
+- **This recipe uses Chat Completions.** Chat Completions is the primary, fully supported surface. Nito now also serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`; if your code calls `client.responses.create(...)`, you can either target that endpoint or port the call to `client.chat.completions.create(...)`.
 - **OpenAI model names.** `gpt-4o` and friends are not catalog IDs. Always substitute a Nito ID.
 - **End-to-end TEE and streaming together.** `:e2e-tee` does not stream. Use `:tee` if you need streaming with attestation.
 

@@ -1,9 +1,9 @@
 ---
 title: "Use with Claude Code"
-description: "A short recipe pointer for routing Claude Code through Nito via OpenAI compatibility. The Anthropic Messages path is not served."
+description: "A short recipe pointer for routing Claude Code through Nito via OpenAI compatibility."
 ---
 
-Claude Code is an Anthropic-oriented CLI. To use it with Nito, you route it through Nito's **OpenAI-compatible** surface, not the Anthropic-native one. Nito does not serve the Anthropic Messages API: `POST /v1/messages` returns 404. Any path that expects native Anthropic calls will not reach Nito.
+Claude Code is an Anthropic-oriented CLI. This recipe routes it through Nito's **OpenAI-compatible** surface, which is a supported, working path. Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages`; full drop-in guidance for it is documented in a later pass.
 
 This page is a recipe pointer. The full, maintained setup lives in the [Claude Code editor integration](/sdks/editor-integrations/claude-code).
 
@@ -24,9 +24,9 @@ curl https://YOUR-NITO-BASE-URL/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-## The Anthropic path does not apply
+## Which surface to use
 
-Nito's compatible surface is OpenAI Chat Completions at `POST /v1/chat/completions`. The Anthropic Messages API and its token-counting endpoint return 404. If your version of Claude Code can only speak the Anthropic-native protocol, it cannot reach Nito. Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
+This recipe uses OpenAI Chat Completions at `POST /v1/chat/completions`. Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `POST /v1/messages/count_tokens`). Confirm in the official Claude Code docs which surface your version targets, and prefer the OpenAI-compatible provider setting where it is available.
 
 ## Notes
 

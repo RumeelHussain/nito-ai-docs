@@ -27,7 +27,7 @@ curl https://YOUR-NITO-BASE-URL/v1/models \
 ## Notes
 
 - Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
-- Nito serves OpenAI Chat Completions at `POST /v1/chat/completions`. The Responses API is not served, so leave any "use Responses API" option off.
+- Nito serves OpenAI Chat Completions at `POST /v1/chat/completions`, which is what this recipe uses. Nito now also serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`; where Cursor works best with Chat Completions, leave any "use Responses API" option off.
 - For the current settings path, model picker behavior, and troubleshooting, follow the [Cursor editor integration](/sdks/editor-integrations/cursor) page.
 
 ## Related

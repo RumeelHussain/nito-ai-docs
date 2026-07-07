@@ -3,11 +3,13 @@ title: "Anthropic SDK drop-in"
 description: "Use Nito from Anthropic-shaped codebases. Note the current support boundary before you switch."
 ---
 
-If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change, and where the current boundary is. Nito's compatible surface is the OpenAI Chat Completions shape. The Anthropic Messages endpoint is on the roadmap but is not served yet, so today you route Anthropic-based code through Chat Completions.
+If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change. Nito's most widely used compatible surface is the OpenAI Chat Completions shape, and routing Anthropic-based code through Chat Completions is a supported, working path. Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `POST /v1/messages/count_tokens`), so the native shape reaches the gateway too.
 
-<Warning>
-  The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) are not served by the gateway at this time. Requests to them return 404. Until they ship, use the OpenAI-compatible Chat Completions surface described below. This page will be updated when the Messages API is available.
-</Warning>
+<Note>
+  Nito now serves an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `POST /v1/messages/count_tokens`): the gateway validates the Anthropic Messages request shape and maps it into its canonical chat contracts. You can try it in the [API Playground](/api-playground). The OpenAI-compatible Chat Completions route described below also remains fully supported.
+
+  > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
+</Note>
 
 ## The recommended path today
 
@@ -67,7 +69,7 @@ console.log(resp.choices[0].message.content);
 
 ## Common mistakes
 
-- **Calling `/v1/messages`.** It returns 404 today. Use `/v1/chat/completions`.
+- **Assuming `/v1/messages` is unavailable.** It is now served as an Anthropic Messages-compatible endpoint. This page routes through `/v1/chat/completions`, which also works.
 - **Keeping a top-level `system` field.** It will not be read on the Chat Completions surface. Convert it to a `system` message.
 - **Carrying over an Anthropic model name.** Replace it with a Nito ID.
 
@@ -81,4 +83,4 @@ console.log(resp.choices[0].message.content);
 
 - [OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
 - [Chat completions feature](/features/chat-completions)
-- The Messages-shaped surface is tracked in [DOCS\_DEFERRED](/resources/roadmap) until it ships.
+- The Anthropic Messages-compatible surface is now served at `POST /v1/messages`; full drop-in guidance is documented in a later pass.

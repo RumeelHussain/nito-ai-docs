@@ -26,10 +26,12 @@ The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatib
 - **Rate-limit headers.** On a `429`, Nito sends `Retry-After`. It does not emit `X-RateLimit-*` headers. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
 - **Model names.** OpenAI names are not Nito IDs. See [model mapping](/sdks/openai-drop-in/model-mapping).
 
-## What is not served (returns 404)
+## Additional surfaces
 
-- **The Responses API** (`/v1/responses`). The SDK's `client.responses.create(...)` will hit `404`. Use Chat Completions, which is the compatible surface.
-- **The Files API** (`/v1/files`). Not implemented. For document input, send the file inline to a capable model or use the file-parser endpoint; see [Multimodal](/features/multimodal).
+- **The Responses API** (`/v1/responses`) is served as an OpenAI Responses-compatible endpoint; `client.responses.create(...)` reaches Nito. Chat Completions remains the primary documented text surface. See the [API Playground](/api-playground).
+- **The Files API** (`/v1/files`). Not implemented; it returns `404`. For document input, send the file inline to a capable model or use the file-parser endpoint; see [Multimodal](/features/multimodal).
+
+> **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
 ## Inputs the chat surface rejects
 
@@ -53,7 +55,7 @@ Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported.
 | Embeddings | Supported |
 | Image generation | Supported |
 | `GET /v1/models` | Supported |
-| Responses API | Not served (404) |
+| Responses API | Served (OpenAI Responses-compatible); see the API Playground |
 | Files API | Not served (404) |
 | Audio / video input | Rejected |
 | Structured outputs (schema enforced) | Not exposed |

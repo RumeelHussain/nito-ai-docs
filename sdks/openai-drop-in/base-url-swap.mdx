@@ -70,7 +70,9 @@ The same base URL swap covers every OpenAI-compatible surface Nito serves:
 | `client.images.generate(...)` | `POST /v1/images/generations` |
 | `client.models.list()` | `GET /v1/models` |
 
-One surface is intentionally not served: the OpenAI **Responses API** (`client.responses.create(...)`, `POST /v1/responses`) returns `404`. Chat Completions is the compatible text surface. See the [compatibility notes](/sdks/openai-drop-in/compatibility-notes) for the full list of what differs.
+Nito also serves the OpenAI **Responses API** (`client.responses.create(...)`, `POST /v1/responses`) as an OpenAI Responses-compatible endpoint. Chat Completions remains the primary documented text surface. See the [compatibility notes](/sdks/openai-drop-in/compatibility-notes) for the full list of what differs, and the [API Playground](/api-playground) to try the Responses endpoint.
+
+> **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
 ## Reading the response
 
@@ -94,7 +96,7 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 - **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. See [model mapping](/sdks/openai-drop-in/model-mapping).
 - **Forgetting `/v1` on the base URL.** The SDK appends the operation path, so the base URL must end in `/v1`.
 - **Using an OpenAI `sk-` key.** Nito keys are prefixed `z_sk_`.
-- **Expecting the Responses API.** `/v1/responses` returns `404`. Use Chat Completions.
+- **Assuming Chat Completions is the only text surface.** It is the primary documented path, but Nito also serves the OpenAI Responses-compatible `/v1/responses` endpoint.
 
 ## Related
 

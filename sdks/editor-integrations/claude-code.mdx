@@ -1,9 +1,9 @@
 ---
 title: "Claude Code"
-description: "Route Claude Code through Nito using the OpenAI-compatible path. The Anthropic-native Messages endpoint is not served."
+description: "Route Claude Code through Nito using the OpenAI-compatible path. Nito also now serves an Anthropic Messages-compatible endpoint."
 ---
 
-Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default. To use it with Nito, you route it through Nito's **OpenAI-compatible** surface rather than the Anthropic-native one. Nito does not serve the Anthropic Messages API: `POST /v1/messages` returns 404. So any path that expects native Anthropic calls will not work. Use a configuration that points Claude Code at an OpenAI-compatible endpoint.
+Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default. This guide routes it through Nito's **OpenAI-compatible** surface for the widest support. Nito now also serves an Anthropic Messages-compatible endpoint (`POST /v1/messages`); this page targets the OpenAI-compatible path. Use a configuration that points Claude Code at an OpenAI-compatible endpoint.
 
 ## Values to enter
 
@@ -17,9 +17,9 @@ Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
 
 > **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all.
 
-## The Anthropic path does not apply
+## This guide uses the OpenAI-compatible path
 
-The important constraint is the protocol. Nito's compatible surface is OpenAI Chat Completions at `POST /v1/chat/completions`. The Anthropic Messages API and its token-counting endpoint are not implemented and return 404. If Claude Code can only speak the Anthropic-native protocol in your version, it cannot reach Nito. Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
+This page targets OpenAI Chat Completions at `POST /v1/chat/completions` for the widest support. Nito now also serves an Anthropic Messages-compatible endpoint (`/v1/messages`) and its token-counting endpoint (`/v1/messages/count_tokens`). Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
 
 ## Finding a model ID
 
@@ -36,7 +36,7 @@ Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a v
 
 ## Common mistakes
 
-- **Relying on the Anthropic Messages path.** It returns 404. Use the OpenAI-compatible path.
+- **Assuming only the Anthropic Messages path works.** This guide targets the OpenAI-compatible path; use it for the widest support.
 - **Leaving a Claude or GPT model name in.** Replace it with a Nito catalog ID from `GET /v1/models`.
 - **Dropping `/v1` from the base URL.** The route will not be reached without it.
 

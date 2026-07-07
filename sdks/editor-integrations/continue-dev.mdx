@@ -35,7 +35,7 @@ Privacy is selected by the model ID, so no separate Continue setting is required
 ## What to expect
 
 - Continue.dev sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
-- The OpenAI Responses API and the Anthropic Messages API are not served. Keep Continue on the Chat Completions path.
+- Nito now also serves an OpenAI Responses-compatible endpoint (`/v1/responses`) and an Anthropic Messages-compatible endpoint (`/v1/messages`), but this guide keeps Continue on the Chat Completions path for the widest support.
 - If a model entry fails, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
 
 ## Common mistakes

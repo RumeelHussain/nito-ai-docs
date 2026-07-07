@@ -29,7 +29,7 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 
 ## A note on Anthropic-shaped frameworks
 
-Some frameworks default to the Anthropic Messages API (`/v1/messages`). Nito does not serve that surface; it returns 404. Route those frameworks through their OpenAI-compatible provider option instead, using the base URL, key, and model ID above. There is no Anthropic-native path to Nito.
+Some frameworks default to the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but these pages route frameworks through their OpenAI-compatible provider option for the widest support, using the base URL, key, and model ID above.
 
 ## Pages
 

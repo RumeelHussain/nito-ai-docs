@@ -20,10 +20,12 @@ Nito speaks the OpenAI shape on four surfaces:
 
 > **TODO (needs SME):** the canonical production base URL. Throughout these pages, replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
 
-Two surfaces from the broader OpenAI and Anthropic worlds are **not** served, and calling them returns `404`:
+Nito also serves compatible endpoints for the broader OpenAI and Anthropic worlds:
 
-- The OpenAI **Responses API** (`/v1/responses`). Use Chat Completions instead.
-- The Anthropic **Messages API** (`/v1/messages`) and token counting (`/v1/messages/count_tokens`). See the [Anthropic drop-in pages](/sdks/anthropic-drop-in/base-url-swap) for what this means in practice.
+- The OpenAI **Responses API** (`/v1/responses`) as an OpenAI Responses-compatible endpoint. Chat Completions remains the primary documented text surface.
+- The Anthropic **Messages API** (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) as Anthropic Messages-compatible endpoints. See the [Anthropic drop-in pages](/sdks/anthropic-drop-in/base-url-swap) for what this means in practice.
+
+> **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
 ## Language matrix
 
@@ -33,10 +35,10 @@ The supported path today is the official OpenAI SDK (and, with the caveat below,
 | --- | --- | --- | --- |
 | Python | `openai` | Supported drop-in | `/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, `/v1/models` |
 | TypeScript | `openai` | Supported drop-in | same as above |
-| Python | `anthropic` (Messages) | Not served (404) | native `/v1/messages` returns 404; route through Chat Completions instead |
-| TypeScript | `@anthropic-ai/sdk` (Messages) | Not served (404) | same as above |
+| Python | `anthropic` (Messages) | Served (Anthropic Messages-compatible) | native `/v1/messages`, or route through Chat Completions |
+| TypeScript | `@anthropic-ai/sdk` (Messages) | Served (Anthropic Messages-compatible) | same as above |
 
-For the Anthropic SDKs the practical answer is to route Anthropic-shaped code through the OpenAI-compatible Chat Completions surface. The native Messages calls will not reach the gateway today. This is covered honestly on both Anthropic pages.
+For the Anthropic SDKs you can target Nito's Anthropic Messages-compatible `/v1/messages` endpoint directly, or route Anthropic-shaped code through the OpenAI-compatible Chat Completions surface. Both paths are covered on the Anthropic pages.
 
 ## Documented separately (deferred this pass)
 

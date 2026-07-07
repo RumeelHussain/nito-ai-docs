@@ -52,13 +52,13 @@ Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that t
 
 ## Anthropic-shaped configuration
 
-If you configure CrewAI to use an Anthropic model, it targets the Anthropic Messages API (`/v1/messages`), which Nito does not serve; that path returns 404. Configure CrewAI's OpenAI-compatible LLM as shown above to reach Nito instead.
+If you configure CrewAI to use an Anthropic model, it targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses CrewAI's OpenAI-compatible LLM as shown above for the widest framework support.
 
 ## Common mistakes
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
-- **Selecting an Anthropic-native path.** Nito serves Chat Completions, not Messages.
+- **Selecting an Anthropic-native path.** This guide targets Chat Completions for the widest support.
 
 ## Related
 

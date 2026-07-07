@@ -19,7 +19,7 @@ Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
 
 ## Use Chat Completions, not Responses
 
-The protocol matters. Nito's compatible surface is OpenAI **Chat Completions** at `POST /v1/chat/completions`. The OpenAI **Responses API** (`/v1/responses`) is not served. Newer OpenAI-oriented tools sometimes default to the Responses API, so confirm that your Codex version can target Chat Completions before relying on this route. If Codex only speaks the Responses API in your version, it will not reach Nito.
+The protocol matters. This guide targets OpenAI **Chat Completions** at `POST /v1/chat/completions` for the widest support. Nito now also serves an OpenAI Responses-compatible endpoint (`/v1/responses`), but this page targets Chat Completions, so confirm that your Codex version can target it before relying on this route.
 
 ## Finding a model ID
 
@@ -36,7 +36,7 @@ Privacy is selected by the model ID, so no separate Codex setting is required. A
 
 ## Common mistakes
 
-- **Expecting the Responses API.** Nito serves Chat Completions, not `/v1/responses`.
+- **Assuming only the Responses API works.** This guide targets Chat Completions; use it for the widest support.
 - **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
 - **Dropping `/v1` from the base URL.** The Chat Completions route will not be reached without it.
 

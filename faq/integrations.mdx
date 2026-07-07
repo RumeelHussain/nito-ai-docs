@@ -11,7 +11,7 @@ No. Nito is OpenAI-compatible. Point the OpenAI SDK at Nito's base URL, use a Ni
 
 #### Can I use my existing OpenAI or Anthropic code?
 
-OpenAI code: yes, via the base-URL swap. Anthropic code: route it through Nito's OpenAI-compatible Chat Completions surface, because the native Anthropic Messages endpoint (`/v1/messages`) is not served yet and returns 404. See the [Anthropic drop-in](/sdks/anthropic-drop-in/base-url-swap).
+OpenAI code: yes, via the base-URL swap. Anthropic code: you can route it through Nito's OpenAI-compatible Chat Completions surface, and Nito now also serves an Anthropic Messages-compatible endpoint at `POST /v1/messages`. See the [Anthropic drop-in](/sdks/anthropic-drop-in/base-url-swap).
 
 #### Which frameworks and editors work?
 

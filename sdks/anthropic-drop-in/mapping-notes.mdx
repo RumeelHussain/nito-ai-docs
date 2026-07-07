@@ -3,11 +3,13 @@ title: "Anthropic drop-in, mapping notes"
 description: "Translate Anthropic Messages concepts to Nito's OpenAI-compatible Chat Completions shape, with the support boundary noted."
 ---
 
-Because the native Anthropic Messages endpoint is not served by the gateway, Anthropic-shaped code reaches Nito through the OpenAI-compatible Chat Completions surface. This page maps the concepts you know from the Anthropic Messages API onto that shape, so the translation is mechanical.
+Nito now serves an Anthropic Messages-compatible endpoint (`/v1/messages` and `/v1/messages/count_tokens`), so Anthropic-shaped code can target Nito directly. For teams that prefer the OpenAI shape, Anthropic-shaped code can also reach Nito through the OpenAI-compatible Chat Completions surface. This page maps the concepts you know from the Anthropic Messages API onto the Chat Completions shape, so that translation is mechanical when you choose it.
 
-<Warning>
-  The native Anthropic Messages endpoint (`/v1/messages`) and token counting (`/v1/messages/count_tokens`) return `404` on the gateway. The mappings below are for routing Anthropic-shaped code through `/v1/chat/completions`, not for calling a native Messages surface, which does not exist on the gateway today.
-</Warning>
+<Note>
+  Nito serves an Anthropic Messages-compatible endpoint at `POST /v1/messages`, with token counting at `POST /v1/messages/count_tokens`. The mappings below are for teams that prefer to route Anthropic-shaped code through `/v1/chat/completions` instead; both paths are available. Explore them in the [API Playground](/api-playground).
+
+  > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
+</Note>
 
 ## Field-by-field mapping
 
@@ -61,7 +63,7 @@ Privacy is selected by the model ID, the same as everywhere on Nito. Add `:tee` 
 - **`system_fingerprint` is always `null`** on the response. Do not branch on it.
 - **The error envelope has no `type` field.** Errors are `{"error": {"message", "code", "param"}}`; the family is in `code`.
 - **There is always exactly one choice** in the response.
-- **Token counting** has no endpoint. `/v1/messages/count_tokens` returns `404`. Read token counts from `usage` on the response instead.
+- **Token counting** on the Chat Completions surface comes from `usage` on the response. If you need a dedicated count-tokens call, Nito serves the Anthropic Messages-compatible `/v1/messages/count_tokens` endpoint.
 
 ## Related
 

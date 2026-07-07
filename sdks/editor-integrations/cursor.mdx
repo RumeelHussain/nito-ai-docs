@@ -35,7 +35,7 @@ Privacy is selected by the model ID, so you do not need a separate Cursor settin
 ## What to expect
 
 - Cursor sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
-- The OpenAI Responses API is not served, so leave any "use Responses API" option off if Cursor exposes one.
+- The OpenAI Responses API (`/v1/responses`) is now served as an OpenAI Responses-compatible endpoint, but this guide targets Chat Completions, so leave any "use Responses API" option off if Cursor exposes one.
 - If a model or feature is rejected, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
 
 ## Common mistakes

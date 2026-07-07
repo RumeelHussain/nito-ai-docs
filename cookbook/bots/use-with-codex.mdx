@@ -1,6 +1,6 @@
 ---
 title: "Use with Codex"
-description: "A short recipe pointer for routing Codex through Nito via OpenAI compatibility. Use Chat Completions, since the Responses API is not served."
+description: "A short recipe pointer for routing Codex through Nito via OpenAI compatibility, using Chat Completions."
 ---
 
 Codex is an OpenAI-oriented coding tool. You can route it through Nito because Nito exposes an OpenAI-compatible API. You override its base URL, key, and model rather than selecting a named "Nito" provider.
@@ -24,9 +24,9 @@ curl https://YOUR-NITO-BASE-URL/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-## Use Chat Completions, not Responses
+## Use Chat Completions
 
-Nito's compatible surface is OpenAI **Chat Completions** at `POST /v1/chat/completions`. The OpenAI **Responses API** (`/v1/responses`) is not served and returns 404. Newer OpenAI-oriented tools sometimes default to the Responses API, so confirm that your Codex version can target Chat Completions before relying on this route. If Codex only speaks the Responses API in your version, it will not reach Nito.
+This recipe uses OpenAI **Chat Completions** at `POST /v1/chat/completions`, the primary supported surface. Nito now also serves an OpenAI **Responses-compatible** endpoint at `POST /v1/responses` (and `/v1/responses/compact`). Newer OpenAI-oriented tools sometimes default to the Responses API; confirm which surface your Codex version targets, and use Chat Completions where it is available.
 
 ## Notes
 
