@@ -53,7 +53,7 @@ Everything else stays the same: the same `/v1/chat/completions` path, the same `
 ## What changes and what does not
 
 - **Retention:** the gateway is metadata-only by default. Prompts, completions, reasoning, tool payloads, and attachments are not persisted, and inference responses carry `Cache-Control: no-store`. A private or attested tier keeps that posture and, for `:confidential`, adds an attestation you can fetch and verify.
-- **Feature compatibility on `:confidential`:** an attested chat call still supports streaming and tools. (The stricter `:encrypted` mode is different: it is non-streaming and rejects tools, reasoning, prompt caching, and multi-part messages. See [Encrypted call](/cookbook/private-ai/end-to-end-tee-call).)
+- **Feature compatibility on `:confidential`:** an attested chat call still supports streaming and tools. (The stricter `:encrypted` mode is different: it is non-streaming and rejects tools, reasoning, prompt caching, and multi-part messages. See [Encrypted call](/cookbook/private-ai/encrypted-call).)
 - **Not a hardware proof by itself:** choosing `:confidential` gives you an attested route. To confirm the attestation, fetch and check it. That is a separate, small step covered in [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
 
 ## Rollout tip
@@ -64,5 +64,5 @@ Because the only thing that changes is the model string, you can gate the upgrad
 
 - [Build a private chat app](/cookbook/private-ai/build-private-chat-app)
 - [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
-- [Encrypted call](/cookbook/private-ai/end-to-end-tee-call)
+- [Encrypted call](/cookbook/private-ai/encrypted-call)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)

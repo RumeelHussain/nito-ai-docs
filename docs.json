@@ -259,7 +259,7 @@
               "cookbook/private-ai/build-document-qa",
               "cookbook/private-ai/structured-data-extraction",
               "cookbook/private-ai/tee-attested-call-verify-nonce",
-              "cookbook/private-ai/end-to-end-tee-call",
+              "cookbook/private-ai/encrypted-call",
               "cookbook/private-ai/confidential-enterprise-inference"
             ]
           },
