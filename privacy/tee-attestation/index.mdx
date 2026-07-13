@@ -5,7 +5,7 @@ description: "How Nito turns a privacy promise into something you can check. The
 
 Every other page in the privacy section makes a claim: that a call ran inside a sealed, hardware-isolated environment the host could not read or tamper with. Attestation is what turns that claim from a promise into something you can check. This section is the security-sensitive core of the Nito docs, so it is written to be read slowly and audited line by line. If you are a security reviewer, this is your map.
 
-An **attestation** is a signed statement, produced by the hardware that ran your call, describing what was running inside the sealed environment. When you select an attested mode (the `:confidential` or `:encrypted` suffix on a model ID), the provider can produce one of these statements, and Nito exposes it to you through a single endpoint: `GET /api/v1/attestation`. You hand the gateway a model and a fresh random nonce; it returns the raw evidence plus a structured summary, and it tells you whether the evidence passed its baseline checks.
+An **attestation** is a signed statement, produced by the hardware that ran your call, describing what was running inside the sealed environment. When you select Confidential or Encrypted (the `:confidential` or `:encrypted` suffix on a model ID), the provider can produce one of these statements, and Nito exposes it to you through a single endpoint: `GET /api/v1/attestation`. You hand the gateway a model and a fresh random nonce; it returns the raw evidence plus a structured summary, and it tells you whether the evidence passed its baseline checks.
 
 ## The one boundary to understand first
 
