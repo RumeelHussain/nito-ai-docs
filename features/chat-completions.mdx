@@ -144,15 +144,15 @@ A few details worth internalizing:
 
 ## Errors
 
-Validation and decoding problems return `400` with an error envelope of the shape `{"error": {"message", "code", "param"}}`. Note there is no `type` field; the error family lives in `code`. A non-POST request returns `405` with an `Allow` header. Authentication, quota, and provider failures map to their own status codes. All responses carry `Cache-Control: no-store`. The full status mapping is in the [error reference](/api-reference/errors).
+Validation and decoding problems return `400` with an error envelope of the shape `{"error": {"message", "code", "param"}}`. Note there is no `type` field; the error family lives in `code`. A non-POST request returns `405` with an `Allow` header. Authentication, quota, and provider failures map to their own status codes. All responses carry `Cache-Control: no-store`. The full status mapping is in the [error reference](/api-reference/errors-and-rate-limits/error-codes).
 
 ## When to reach for something else
 
 Chat completions is the right default for almost everything text. Reach elsewhere when:
 
-- You want several models to answer and a judge to merge them: that is [chat fusion](/api-reference/chat-and-text/fusion), a separate non-streaming endpoint.
+- You want several models to answer and a judge to merge them: that is [chat fusion](/api-reference/chat-and-text/chat-fusion), a separate non-streaming endpoint.
 - You need vectors for search or retrieval: use [embeddings](/features/embeddings).
-- You want text-to-image: use [image generation](/features/image-generation).
+- You want text-to-image: use [image generation](/api-reference/multimodal/image-generation).
 
 ## Related
 

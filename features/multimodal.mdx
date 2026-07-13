@@ -50,7 +50,7 @@ If your application needs any of these, treat them as not present today rather t
 
 Image input and document input both ride inside a normal chat request, as entries in a message's `content` array. Instead of a plain string, `content` becomes a list of typed parts: a `text` part for your words, an `image_url` part for a picture, a `file` part for a document. The model reads them together. The two sub-pages below show the exact shapes.
 
-Document input has a second path worth knowing about: a standalone parser endpoint that turns a file into text you can then place into any prompt yourself. That is covered on the document page and in the [file parser](/features/file-parser) feature.
+Document input has a second path worth knowing about: a standalone parser endpoint that turns a file into text you can then place into any prompt yourself. That is covered on the document page and in the [file parser](/api-reference/server-tools/file-parser) feature.
 
 ## Where to go next
 
@@ -65,4 +65,4 @@ Document input has a second path worth knowing about: a standalone parser endpoi
 - [Image input](/features/multimodal/image-input)
 - [PDF and document input](/features/multimodal/pdf-input)
 - [Image generation](/features/multimodal/image-generation)
-- [File parser](/features/file-parser)
+- [File parser](/api-reference/server-tools/file-parser)

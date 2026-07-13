@@ -25,7 +25,7 @@ When a Nito API call fails, the gateway returns a JSON error envelope and a matc
 
 **There is no `type` field.** If you have used other APIs that split an error into `type` and `code`, note that Nito carries the family in `code` only. Branch your error handling on `code`.
 
-The `code` values map to HTTP status codes (for example `invalid_request` → `400`, `unauthorized` → `401`, `rate_limited` → `429`). For the full list of codes, their statuses, and rate-limit behavior, see [Errors & rate limits](/api-reference/errors-and-rate-limits).
+The `code` values map to HTTP status codes (for example `invalid_request` → `400`, `unauthorized` → `401`, `rate_limited` → `429`). For the full list of codes, their statuses, and rate-limit behavior, see [Errors & rate limits](/api-reference/errors-and-rate-limits/error-codes).
 
 ## The OAuth exception
 
@@ -42,7 +42,7 @@ So when you are working with `/oauth/*` endpoints, read `error` and `error_descr
 
 ## Related
 
-- [Errors & rate limits](/api-reference/errors-and-rate-limits)
+- [Errors & rate limits](/api-reference/errors-and-rate-limits/error-codes)
 - [Authentication](/api-reference/overview/authentication)
 - [Response format](/api-reference/overview/response-format)
 

@@ -166,7 +166,7 @@ A model may request several tools in one turn, or request more tools after seein
 
 ## Streaming tool calls
 
-When you stream a response (`stream: true`), tool calls arrive in fragments across chunks rather than all at once. The first chunk for a call carries the structure: `tool_calls` with an `index`, an `id`, `type: "function"`, and the `function.name`. Subsequent chunks carry `function.arguments` fragments under the same `index`. You assemble the full arguments string by concatenating those fragments per index, then run the tool exactly as in the non-streaming loop. The wire details are in [Streaming](/features/streaming) and the [streaming format reference](/api-reference/streaming-format).
+When you stream a response (`stream: true`), tool calls arrive in fragments across chunks rather than all at once. The first chunk for a call carries the structure: `tool_calls` with an `index`, an `id`, `type: "function"`, and the `function.name`. Subsequent chunks carry `function.arguments` fragments under the same `index`. You assemble the full arguments string by concatenating those fragments per index, then run the tool exactly as in the non-streaming loop. The wire details are in [Streaming](/features/streaming) and the [streaming format reference](/api-reference/streaming-format/server-sent-events).
 
 ## What Nito does and does not do
 
@@ -184,6 +184,6 @@ The Encrypted mode (`:encrypted`) rejects tool use, along with streaming, reason
 
 - [Chat Completions](/features/chat-completions)
 - [Streaming](/features/streaming)
-- [Web search](/features/web-search)
+- [Web search](/api-reference/server-tools/web-search)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)

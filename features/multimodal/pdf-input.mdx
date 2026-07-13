@@ -75,7 +75,7 @@ POST /api/v1/attachments/parse
 
 You send the file as a multipart form. The endpoint returns the extracted text plus metadata about what was parsed (the MIME type, the detected file kind, the byte count, page counts for paged formats, and any truncation warnings). This is the right path when you want the text as a reusable artifact rather than a one-shot inline parse, or when the same document feeds several later prompts.
 
-The parser endpoint has its own dedicated feature page with the complete request and response shape, the trust-tier option, and parse modes. See [File parser](/features/file-parser) for the full treatment; this page only points at it.
+The parser endpoint has its own dedicated feature page with the complete request and response shape, the trust-tier option, and parse modes. See [File parser](/api-reference/server-tools/file-parser) for the full treatment; this page only points at it.
 
 ## PDF parsing caps
 
@@ -107,7 +107,7 @@ Both use the same server-side parser, so the supported kinds and the parsing beh
 ## Related
 
 - [Multimodal overview](/features/multimodal)
-- [File parser](/features/file-parser)
+- [File parser](/api-reference/server-tools/file-parser)
 - [Image input](/features/multimodal/image-input)
 - [How Nito works](/get-started/how-nito-works)
 

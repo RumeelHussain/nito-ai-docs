@@ -132,7 +132,7 @@ To run the same request inside a Trusted Execution Environment (a TEE: a hardwar
 { "model": "grok-4.3:confidential", "messages": [ ... ] }
 ```
 
-Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:confidential` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation).
+Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:confidential` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation/get-attestation).
 
 ## Common mistakes
 
