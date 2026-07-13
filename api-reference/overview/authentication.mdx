@@ -6,13 +6,13 @@ description: Authenticate every Nito API request with a z_sk_ organization key s
 Every Nito API request is authenticated with an organization API key, sent as a bearer token in the `Authorization` header. There is no query-parameter or cookie auth for the API.
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 ## The key
 

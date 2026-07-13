@@ -16,7 +16,7 @@ Set `stream: true` on the same chat request you already know:
 <CodeGroup>
 
 ```bash curl
-curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -N "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -29,7 +29,7 @@ curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 ```python Python
 from openai import OpenAI
 
-client = OpenAI(api_key="z_sk_your_key_here", base_url="https://YOUR-NITO-BASE-URL/v1")
+client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
 
 stream = client.chat.completions.create(
     model="grok-4.3",
@@ -45,7 +45,7 @@ for chunk in stream:
 ```typescript TypeScript
 import OpenAI from "openai";
 
-const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://YOUR-NITO-BASE-URL/v1" });
+const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://nito.dev.zprotocol.org/v1" });
 
 const stream = await client.chat.completions.create({
   model: "grok-4.3",
@@ -60,7 +60,7 @@ for await (const chunk of stream) {
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 The `-N` flag in the curl example disables curl's own buffering so you see tokens arrive as they come rather than all at once at the end. The SDKs handle the stream for you: you just iterate over the chunks, and each loop pass gives you the next delta.
 

@@ -20,13 +20,13 @@ The grouping is computed per surface, so the chat catalog, the embeddings catalo
 ## Listing groups
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/model-groups?capability=chat" \
+curl "https://nito.dev.zprotocol.org/api/v1/model-groups?capability=chat" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 The `capability` query parameter selects the surface: `chat` (the default), `embeddings`, or `images`. The response is a set of groups, each with a label and a list of options, where each option corresponds to a logical ID for a supported privacy mode. An optional org context can scope the result.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 ## How aliasing actually works
 

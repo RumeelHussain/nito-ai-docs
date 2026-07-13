@@ -106,7 +106,7 @@ Embeddings inherit the **same privacy options as chat**. The privacy mode is sel
 Embed two short texts and get float vectors back:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/embeddings \
+curl https://nito.dev.zprotocol.org/v1/embeddings \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -126,7 +126,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_NITO_API_KEY",
-    base_url="https://YOUR-NITO-BASE-URL/v1",
+    base_url="https://nito.dev.zprotocol.org/v1",
 )
 
 resp = client.embeddings.create(
@@ -138,7 +138,7 @@ for item in resp.data:
     print(item.index, len(item.embedding))
 ```
 
-> **TODO (needs SME):** confirm the production base URL replacing `https://YOUR-NITO-BASE-URL` and supply a canonical `EMBEDDING_MODEL_ID` to show in examples. Owner: Product/Infra.
+> **TODO (needs SME):** confirm the production base URL replacing `https://nito.dev.zprotocol.org` and supply a canonical `EMBEDDING_MODEL_ID` to show in examples. Owner: Product/Infra.
 
 A simple similarity check, once you have vectors, is the cosine similarity between two embeddings; the higher the value, the closer in meaning. Compute it in your application or let your vector database do it at query time.
 

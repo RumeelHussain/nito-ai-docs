@@ -9,11 +9,11 @@ Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default
 
 Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an Anthropic name like `claude-3-5-sonnet` or an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 > **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all.
 
@@ -26,7 +26,7 @@ This page targets OpenAI Chat Completions at `POST /v1/chat/completions` for the
 Fetch the catalog and use one of the returned IDs as the model name:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

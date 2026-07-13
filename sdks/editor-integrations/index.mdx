@@ -9,11 +9,11 @@ Many AI coding editors and CLI tools let you bring your own model by configuring
 
 Every editor on these pages follows the same three-value setup. Wherever the editor asks for OpenAI-compatible connection details, supply:
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append routes like `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append routes like `/chat/completions` themselves.
 - **API key:** a Nito key that starts with `z_sk_`.
 - **Model ID:** a Nito catalog ID, such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`. Fetch the live list with `GET /v1/models`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 That is the whole idea. The editor sends standard Chat Completions requests, and Nito serves them.
 

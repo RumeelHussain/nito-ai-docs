@@ -10,7 +10,7 @@ Network calls fail and get retried. If a retry silently re-ran a paid inference 
 You attach the key as a header:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Idempotency-Key: 3f1a9c2e-7b4d-4e1a-9f2c-8a6b5d4e3c21" \
   -H "Content-Type: application/json" \

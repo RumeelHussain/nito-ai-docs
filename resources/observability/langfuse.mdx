@@ -25,14 +25,14 @@ Nito's default is metadata-only retention: prompts and completions are not persi
 
 ```text
 1. Start a Langfuse trace / generation in your app.
-2. Send the request to https://YOUR-NITO-BASE-URL/api/v1/chat/completions
+2. Send the request to https://nito.dev.zprotocol.org/api/v1/chat/completions
    (send your own X-Request-ID so the value is known up front).
 3. On the response, record: X-Request-ID, model, usage.*, finish_reason,
    and any prompt/completion text you chose to keep client-side.
 4. End the Langfuse generation.
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL.
+> **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL.
 
 > **TODO (needs SME):** confirm Langfuse integration path. Determine whether a first-party Langfuse export is planned, and if so what it would send.
 

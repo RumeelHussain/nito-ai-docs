@@ -6,11 +6,11 @@ description: The single Nito gateway host and the two version prefixes every end
 Every Nito API call goes to one gateway host, under one of two version prefixes. There are no regional variants and no per-service hostnames.
 
 ```text
-https://YOUR-NITO-BASE-URL/v1/...        # OpenAI-compatible
-https://YOUR-NITO-BASE-URL/api/v1/...    # first-party
+https://nito.dev.zprotocol.org/v1/...        # OpenAI-compatible
+https://nito.dev.zprotocol.org/api/v1/...    # first-party
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address (`http://127.0.0.1:8080`); replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address (`http://127.0.0.1:8080`); replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 ## The two prefixes
 

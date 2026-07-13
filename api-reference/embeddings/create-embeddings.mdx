@@ -64,7 +64,7 @@ The `data` array preserves input order: `data[i]` is the embedding for `input[i]
 ## Worked call
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/embeddings" \
+curl "https://nito.dev.zprotocol.org/v1/embeddings" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -73,7 +73,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/embeddings" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 The example model id `Qwen/Qwen3-Embedding-0.6B` is the native default embedding model. To discover what is actually available in your deployment, call `GET /v1/models?type=embedding`; see [Embedding models](/api-reference/embeddings/embedding-models).
 

@@ -54,12 +54,12 @@ A document that exceeds the page cap, times out, or overflows the output budget 
 If you want the extracted text without running inference, post the file to the parser endpoint directly:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
+curl "https://nito.dev.zprotocol.org/api/v1/attachments/parse" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -F "file=@report.pdf"
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 This is a `multipart/form-data` upload. It returns the parsed text plus metadata (`mime_type`, `file_kind`, `bytes`, `page_count`, `truncated`, `warnings`). The same caps above apply.
 

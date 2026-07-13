@@ -67,7 +67,7 @@ The response is served with `Cache-Control: no-store`. Attestation results are r
 
 This pipeline produces a **baseline-verified** result, not a fully verified one. The `verified` flag means the evidence passed the gateway's baseline contract. It does **not** mean the gateway validated the Intel TDX quote, the NVIDIA GPU evidence, the certificate chains, the CRLs, or the TCB policy. Those checks are deliberately out of scope for the gateway and are your responsibility on the client side. The `evidence` field is returned in full precisely so you can run them. See [verify it yourself](/privacy/tee-attestation/verify-yourself-recipe).
 
-> **TODO (needs SME):** a full worked request and response example against the production endpoint, including the canonical base URL. Until confirmed, use `https://YOUR-NITO-BASE-URL` as the placeholder.
+> **TODO (needs SME):** a full worked request and response example against the production endpoint, including the canonical base URL. Until confirmed, use `https://nito.dev.zprotocol.org` as the placeholder.
 
 ## Related
 

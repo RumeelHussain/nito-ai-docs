@@ -32,11 +32,11 @@ There is no key update or edit operation. The key lifecycle is create, list, rev
 
 ```bash
 # Create a new key for an org (owner/admin only)
-curl -X POST https://YOUR-NITO-BASE-URL/api/v1/orgs/ORG_ID/api-keys \
+curl -X POST https://nito.dev.zprotocol.org/api/v1/orgs/ORG_ID/api-keys \
   -H "Authorization: Bearer $NITO_API_KEY"
 
 # Revoke the old key
-curl -X POST https://YOUR-NITO-BASE-URL/api/v1/orgs/ORG_ID/api-keys/KEY_ID/revoke \
+curl -X POST https://nito.dev.zprotocol.org/api/v1/orgs/ORG_ID/api-keys/KEY_ID/revoke \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

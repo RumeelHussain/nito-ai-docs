@@ -46,14 +46,14 @@ Keep the balance above a threshold automatically.
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/billing/portal/sessions" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/billing/portal/sessions" \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
   -d '{"org_id":"'"$ORG_ID"'"}'
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+> **TODO (needs SME):** confirm the canonical production base URL.
 
 ## Related
 

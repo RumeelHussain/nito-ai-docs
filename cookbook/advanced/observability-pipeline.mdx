@@ -16,7 +16,7 @@ Every Nito response returns an `X-Request-ID` header (echoed from your request i
 ```python
 import os, json, time, urllib.request, urllib.error, uuid
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
 
 def observed_chat(model, messages):
@@ -53,7 +53,7 @@ def emit(record):
     print(json.dumps(record))   # replace with your exporter
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
 Note two IDs in the record. You send `X-Request-ID` so you control the value; the gateway echoes it back in `server_request_id`. If you supply a value, use a UUID and log both to confirm they match.
 

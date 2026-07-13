@@ -9,11 +9,11 @@ Cursor lets you configure a custom OpenAI-compatible API instead of its built-in
 
 Wherever Cursor asks for OpenAI-compatible connection details, supply these three values:
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 > **TODO (needs SME):** verify the exact current settings path/config for Cursor against its official docs.
 
@@ -22,7 +22,7 @@ Wherever Cursor asks for OpenAI-compatible connection details, supply these thre
 Cursor will not auto-discover Nito's catalog. Pick a model ID from the live list:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

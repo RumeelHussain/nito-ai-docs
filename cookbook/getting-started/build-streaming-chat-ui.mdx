@@ -22,7 +22,7 @@ One constraint: the `:encrypted` privacy mode does not stream. Use ordinary mode
 ## Step 1: See the raw stream with curl
 
 ```bash
-curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -N "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -36,7 +36,7 @@ curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 
 The `-N` flag disables curl buffering so you see chunks arrive. You will get a series of `data: {...}` lines and a final `data: [DONE]`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Step 2: Consume the stream in Python
 

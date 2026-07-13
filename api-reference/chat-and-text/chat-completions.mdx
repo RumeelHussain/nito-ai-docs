@@ -45,12 +45,12 @@ Each entry in `messages` carries `role`, `content`, and optionally `tool_call_id
 
 ## Worked call
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 `grok-4.3` below is a realistic example only. Do not hard-code it; fetch `GET /v1/models` for the live catalog and select by capability at runtime.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

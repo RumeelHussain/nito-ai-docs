@@ -22,13 +22,13 @@ This gives you a queryable archive without depending on any gateway-side export.
 ## Example
 
 ```text
-POST https://YOUR-NITO-BASE-URL/api/v1/chat/completions
+POST https://nito.dev.zprotocol.org/api/v1/chat/completions
 -> capture X-Request-ID + usage from the response
 -> append to a local buffer
 -> flush the buffer to s3://your-bucket/nito-logs/ on an interval
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL.
+> **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL.
 
 > **TODO (needs SME):** confirm whether a first-party "export telemetry to S3" feature is planned. The internal `BLOB_STORAGE_*` storage is not a customer-facing export today.
 

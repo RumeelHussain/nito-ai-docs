@@ -16,7 +16,7 @@ from openai import OpenAI
 
 nito = OpenAI(
     api_key="z_sk_your_key_here",              # your Nito API key, keep it server-side
-    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
 )
 
 def answer(user_text: str) -> str:
@@ -30,12 +30,12 @@ def answer(user_text: str) -> str:
     return resp.choices[0].message.content
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 The base URL must end in `/v1`, because the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`. Do not hardcode a name like `gpt-4o`. Fetch the live list and pick one:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

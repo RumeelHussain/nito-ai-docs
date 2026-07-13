@@ -23,7 +23,7 @@ from llama_index.llms.openai_like import OpenAILike
 llm = OpenAILike(
     model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
     api_key="z_sk_your_key_here",              # your Nito API key
-    api_base="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    api_base="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
     is_chat_model=True,
 )
 
@@ -34,7 +34,7 @@ For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against
 
 > **TODO (needs SME):** verify the exact current configuration for LlamaIndex (LLM and embeddings) against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Choosing a model and privacy
 

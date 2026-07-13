@@ -46,10 +46,10 @@ Keep in mind the honest limitation above: the key protects your bill on retry, b
 
 ## Example
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: 3f9a1c2e-7b04-4d6a-9e21-6c8b5a0f1d23" \

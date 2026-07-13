@@ -14,7 +14,7 @@ Nito bills in credits, tracked internally in nanos (billionths of a unit) for pr
 Pricing and context window are not on the model card by default. When pricing is configured for a model, its `GET /v1/models` entry carries a separate `pricing` object, joined from the billing system at response time. Its fields are expressed in nanos and cover input and output token rates, cache read and write rates, the reasoning output rate, web search and fetch rates, an image output rate, and the model's context limit. Read pricing from the entry so your estimates track the live configuration.
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models" \
+curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 # each entry includes a "pricing" object in nanos when configured
 ```

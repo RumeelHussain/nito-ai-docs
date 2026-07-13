@@ -9,13 +9,13 @@ Nito does not ship a bespoke plugin for each agent framework. It does not need t
 
 Every integration on the following pages is the same move, expressed in that framework's configuration:
 
-1. **Base URL.** Point the framework's OpenAI client at the Nito base plus `/v1`, for example `https://YOUR-NITO-BASE-URL/v1`. The client appends paths like `/chat/completions` itself, so the base must end in `/v1`.
+1. **Base URL.** Point the framework's OpenAI client at the Nito base plus `/v1`, for example `https://nito.dev.zprotocol.org/v1`. The client appends paths like `/chat/completions` itself, so the base must end in `/v1`.
 2. **API key.** Use a Nito key (it starts with `z_sk_`) wherever the framework expects an OpenAI API key.
 3. **Model ID.** Use a Nito catalog ID, not an OpenAI name like `gpt-4o`. Fetch the current catalog from `GET /v1/models` and pick an ID such as `grok-4.3`.
 
 That is the whole contract. Messages, streaming, and tool-call shapes follow the OpenAI Chat Completions format the framework already targets.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Selecting privacy
 

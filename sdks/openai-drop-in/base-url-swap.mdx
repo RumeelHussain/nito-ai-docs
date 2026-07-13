@@ -18,7 +18,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="z_sk_your_key_here",              # your Nito API key
-    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
 )
 
 resp = client.chat.completions.create(
@@ -36,7 +36,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "z_sk_your_key_here",              // your Nito API key
-  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // Nito's OpenAI-compatible base URL
+  baseURL: "https://nito.dev.zprotocol.org/v1",  // Nito's OpenAI-compatible base URL
 });
 
 const resp = await client.chat.completions.create({
@@ -51,7 +51,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 The example model `grok-4.3` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 

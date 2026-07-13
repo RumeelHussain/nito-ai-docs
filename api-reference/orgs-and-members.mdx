@@ -47,14 +47,14 @@ Invitees complete the flow via the [invitation acceptance](/api-reference/auth/i
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/invitations" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/invitations" \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: $CSRF" -H "X-Org-ID: $ORG_ID" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
   -d '{"role":"member","target_identity_kind":"email","target_value":"teammate@example.com"}'
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+> **TODO (needs SME):** confirm the canonical production base URL.
 
 ## Related
 

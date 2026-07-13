@@ -16,7 +16,7 @@ That receipt is what separates Confidential from [Private](/privacy/tiers/privat
 Confidential is offered by specific providers only, so not every model can run in a TEE. A model supports it when its catalog entry reports `attestation_available: true` (with `privacy_tier: "confidential"`). The TEE providers are **NEAR** and **Phala**; the gateway's invariants require a `confidential`-tier model to name one of them as its TEE provider, and require attestation to be present for the tier. Filter the catalog for attestation support before you rely on it:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -27,7 +27,7 @@ Look for `attestation_available: true` on the entry. If it is absent, the model 
 Append `:confidential` to the model ID. Nothing else in the request body changes.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -36,7 +36,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
+> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://nito.dev.zprotocol.org` with the canonical production base URL (code default is a local address).
 
 `:confidential` is one of only two attested suffixes (the other is `:encrypted`). If the model does not support it, the call fails rather than quietly downgrading to a weaker tier.
 
@@ -49,7 +49,7 @@ A key reason to choose Confidential over [Encrypted](/privacy/tiers/encrypted): 
 The attestation is what makes Confidential verifiable. You fetch it from a dedicated endpoint:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL-ID&nonce=YOUR-NONCE" \
+curl "https://nito.dev.zprotocol.org/api/v1/attestation?model=MODEL-ID&nonce=YOUR-NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

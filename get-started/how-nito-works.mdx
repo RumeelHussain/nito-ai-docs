@@ -43,13 +43,13 @@ A single API key reaches the entire catalog. You do not hold accounts with the u
 To see what is available, ask the gateway:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 Each entry includes the model `id` you pass back in a request, its `type` (chat, embedding, image), its `capabilities` (which features it supports), and its `privacy_tier`. One detail matters for how you write code: **the catalog is discovered from providers and kept current, not hard-coded.** Models are added and retired over time. So treat `GET /v1/models` as the live source of truth and select models by capability at runtime, rather than pasting a model name into your source and hoping it still exists next quarter.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 ## Selectable privacy per call
 

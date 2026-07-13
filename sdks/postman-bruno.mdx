@@ -15,11 +15,11 @@ Configure these once, ideally as environment variables in Postman or Bruno so yo
 
 | Setting | Value |
 | --- | --- |
-| Base URL | `https://YOUR-NITO-BASE-URL/v1` |
+| Base URL | `https://nito.dev.zprotocol.org/v1` |
 | Auth header | `Authorization: Bearer z_sk_your_key_here` |
 | Content type | `Content-Type: application/json` |
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 Use a Nito `z_sk_` key, not an OpenAI `sk-` key. Store the key as a secret variable so it does not get committed or shared.
 
@@ -28,7 +28,7 @@ Use a Nito `z_sk_` key, not an OpenAI `sk-` key. Store the key as a secret varia
 Before sending a chat request, fetch the live model catalog so you use a valid ID:
 
 ```text
-GET https://YOUR-NITO-BASE-URL/v1/models
+GET https://nito.dev.zprotocol.org/v1/models
 Authorization: Bearer z_sk_your_key_here
 ```
 
@@ -37,7 +37,7 @@ The response lists the model IDs you can pass as `model`. The example `grok-4.3`
 ## Sample chat completion request
 
 ```text
-POST https://YOUR-NITO-BASE-URL/v1/chat/completions
+POST https://nito.dev.zprotocol.org/v1/chat/completions
 Authorization: Bearer z_sk_your_key_here
 Content-Type: application/json
 ```

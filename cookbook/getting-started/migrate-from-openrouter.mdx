@@ -22,7 +22,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="z_sk_your_key_here",              # was your OpenRouter key
-    base_url="https://YOUR-NITO-BASE-URL/v1",  # was https://openrouter.ai/api/v1
+    base_url="https://nito.dev.zprotocol.org/v1",  # was https://openrouter.ai/api/v1
 )
 
 resp = client.chat.completions.create(
@@ -40,7 +40,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "z_sk_your_key_here",              // was your OpenRouter key
-  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // was https://openrouter.ai/api/v1
+  baseURL: "https://nito.dev.zprotocol.org/v1",  // was https://openrouter.ai/api/v1
 });
 
 const resp = await client.chat.completions.create({
@@ -53,14 +53,14 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Step 2: Map your model names
 
 OpenRouter model slugs are not Nito catalog IDs. Fetch the live catalog and pick equivalents by capability:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models" \
+curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

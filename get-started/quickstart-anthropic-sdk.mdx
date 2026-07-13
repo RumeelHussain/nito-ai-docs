@@ -23,7 +23,7 @@ from openai import OpenAI
 # Route Anthropic-style code through Nito's OpenAI-compatible surface.
 client = OpenAI(
     api_key="z_sk_your_key_here",
-    base_url="https://YOUR-NITO-BASE-URL/v1",
+    base_url="https://nito.dev.zprotocol.org/v1",
 )
 
 resp = client.chat.completions.create(
@@ -42,7 +42,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "z_sk_your_key_here",
-  baseURL: "https://YOUR-NITO-BASE-URL/v1",
+  baseURL: "https://nito.dev.zprotocol.org/v1",
 });
 
 const resp = await client.chat.completions.create({
@@ -58,7 +58,7 @@ console.log(resp.choices[0].message.content);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Mapping notes
 

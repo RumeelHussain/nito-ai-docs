@@ -77,7 +77,7 @@ Image generation is **billed by pixels**. The cost scales with the size of the i
 This generates a single 1024x1024 image and returns a URL to it. Replace the base URL.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/images/generations \
+curl https://nito.dev.zprotocol.org/v1/images/generations \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -90,7 +90,7 @@ curl https://YOUR-NITO-BASE-URL/v1/images/generations \
 
 Because `model` is omitted, this routes to the default Z-Image model. To receive the bytes inline instead of a URL, set `"response_format": "b64_json"` and read `data[0].b64_json` from the response.
 
-> **TODO (needs SME):** confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts.
+> **TODO (needs SME):** confirm the production base URL that replaces `https://nito.dev.zprotocol.org`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts.
 
 ## What this is not
 

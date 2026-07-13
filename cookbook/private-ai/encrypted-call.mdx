@@ -37,7 +37,7 @@ The precise steps (how the client keypair is generated, how the shared secret is
 The example model `MODEL_ID:encrypted` is a placeholder for a NEAR or Phala model that supports the mode; fetch `GET /v1/models` and pick one whose card advertises `encrypted` support.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-Z-ENCRYPTED-E2EE: <TODO>" \

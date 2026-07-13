@@ -13,11 +13,11 @@ Generate a fresh 32-byte nonce, fetch the attestation with it, and verify the re
 
 ```bash
 NONCE=$(openssl rand -hex 32)
-curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL:confidential&nonce=$NONCE" \
+curl "https://nito.dev.zprotocol.org/api/v1/attestation?model=MODEL:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 ## Key checks
 

@@ -23,7 +23,7 @@ from crewai import LLM, Agent
 llm = LLM(
     model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
     api_key="z_sk_your_key_here",              # your Nito API key
-    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
 )
 
 researcher = Agent(
@@ -36,7 +36,7 @@ researcher = Agent(
 
 > **TODO (needs SME):** verify the exact current configuration for CrewAI against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
 
 CrewAI routes model calls through a provider layer, so depending on your version you may set the base URL and key via environment variables rather than constructor arguments. Confirm the current mechanism in CrewAI's official docs; the values you supply are the same three regardless.
 

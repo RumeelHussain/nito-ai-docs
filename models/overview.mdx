@@ -20,13 +20,13 @@ The catalog is not a fixed list baked into the product. Nito discovers models fr
 ## Listing models
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models" \
+curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 This returns a list of model entries. By default it returns chat models; pass a `type` filter to see other kinds (for example embedding or image models). The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## How to read a model entry
 

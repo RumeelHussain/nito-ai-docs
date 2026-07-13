@@ -23,7 +23,7 @@ Not every model supports every tier. The `:confidential` suffix only works on at
 Here is a typical existing call. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` to get a real model ID for your account.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -32,12 +32,12 @@ curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
 To upgrade, change only the `model` value. For an attested call, append `:confidential` to an attestation-capable model:
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

@@ -28,7 +28,7 @@ What ZDR does **not** give you is a hardware-backed proof. Private is an enforce
 You do not select Private with a suffix. Private is determined by the model's stored tier: name a `private`-tier model with no suffix and you are served in Private.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -37,12 +37,12 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real `private`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
+> **TODO (needs SME):** replace `MODEL-ID` with a real `private`-tier model from `GET /v1/models`, and replace `https://nito.dev.zprotocol.org` with the canonical production base URL (code default is a local address).
 
 To know whether a model is private, read its catalog entry and look at `privacy_tier`:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

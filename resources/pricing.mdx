@@ -37,7 +37,7 @@ Pricing and context window are **not** on the model card by default. When pricin
 Read pricing from the entry so your estimates track the live configuration:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models" \
+curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 # each entry includes a "pricing" object in nanos when configured
 ```

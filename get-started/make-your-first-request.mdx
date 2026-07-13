@@ -12,7 +12,7 @@ If you are new to chat APIs, the mental model is a transcript. You send a list o
 <CodeGroup>
 
 ```bash curl
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -29,7 +29,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 ```python Python
 from openai import OpenAI
 
-client = OpenAI(api_key="z_sk_your_key_here", base_url="https://YOUR-NITO-BASE-URL/v1")
+client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
 
 resp = client.chat.completions.create(
     model="grok-4.3",
@@ -47,7 +47,7 @@ print(resp.usage)
 ```typescript TypeScript
 import OpenAI from "openai";
 
-const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://YOUR-NITO-BASE-URL/v1" });
+const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://nito.dev.zprotocol.org/v1" });
 
 const resp = await client.chat.completions.create({
   model: "grok-4.3",
@@ -64,7 +64,7 @@ console.log(resp.usage);
 
 </CodeGroup>
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 Notice that the Python and TypeScript examples use the official OpenAI SDK pointed at Nito's base URL. That is the whole integration: Nito speaks the OpenAI chat shape, so for most apps the change is the `base_url` and the key, nothing more.
 

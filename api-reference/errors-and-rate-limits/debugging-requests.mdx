@@ -12,14 +12,14 @@ Every response carries an `X-Request-ID` header. If you supply one (sanitized to
 When you contact support, include the `X-Request-ID`. It is how the gateway correlates your failing call to its server-side trace.
 
 ```bash
-curl -i "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -i "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
 # look for: X-Request-ID: <value>
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` once confirmed (owner: Product/Infra).
 
 ## Read the code, then the message
 

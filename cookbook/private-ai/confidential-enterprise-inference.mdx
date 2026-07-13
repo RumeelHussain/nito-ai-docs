@@ -12,7 +12,7 @@ Enterprises often ask for three things together: **bring-your-own-key (BYOK)** s
 The attested tier is real and shippable. Select it with the `:confidential` model-ID suffix on an attestation-capable model (NEAR or Phala in the current catalog). Fetch `GET /v1/models` and pick a model whose card advertises attestation. The example model `grok-4.3` is a placeholder for a non-attested tier and does **not** support `:confidential`.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

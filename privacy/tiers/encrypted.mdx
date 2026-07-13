@@ -16,7 +16,7 @@ This is the maximum-assurance posture. It is also the most constrained, because 
 Encrypted is available on TEE providers only — **NEAR and Phala** — and only for models whose catalog entry reports `encrypted_supported: true`. The gateway's invariants require end-to-end encryption to sit on a `confidential`-tier model that has attestation and an encryption subject, so a model must already qualify for Confidential before it can offer Encrypted. Confirm support on the catalog entry:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -39,7 +39,7 @@ It is also restricted to the **NEAR and Phala** providers. If you need any of th
 Append `:encrypted` to the model ID **and** supply the `X-Z-ENCRYPTED-*` encryption headers. Both are required: the suffix alone is not enough, and the headers without a supporting model are rejected.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-Z-ENCRYPTED-...: ..." \

@@ -10,11 +10,11 @@ The embeddings endpoint accepts an optional `model`. When you omit it, the gatew
 The model catalog is discovered from providers at runtime, not published as a static list. To see the embedding models your deployment actually serves, list models and filter by type:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models?type=embedding" \
+curl "https://nito.dev.zprotocol.org/v1/models?type=embedding" \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 Pass the `model` value from a returned model card into the [Create embeddings](/api-reference/embeddings/create-embeddings) request.
 

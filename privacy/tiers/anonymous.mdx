@@ -22,7 +22,7 @@ What Anonymous does **not** carry is any attestation metadata. By design, an `an
 You select Anonymous by naming an `anon`-tier model with no suffix.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -31,12 +31,12 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real `anon`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
+> **TODO (needs SME):** replace `MODEL-ID` with a real `anon`-tier model from `GET /v1/models`, and replace `https://nito.dev.zprotocol.org` with the canonical production base URL (code default is a local address).
 
 There is nothing to add to the request body. Anonymous is not requested with a suffix; it is simply what you get when the model's `privacy_tier` is `anon` and you supply no `:confidential` or `:encrypted`. To confirm a model is `anon`, read its catalog entry:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

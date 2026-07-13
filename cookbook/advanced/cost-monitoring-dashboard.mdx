@@ -18,20 +18,20 @@ A second rule matters for honesty: **do not hard-code per-model prices.** Actual
 ## Step 1: Pull the overview
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
+curl -sS "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 `window_days` defaults to 30 and accepts up to 365. You get `current_window` and `all_time` totals (each with `customer_charge_nanos`), a `daily[]` breakdown, and a `models[]` breakdown sorted by charge.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
 ## Step 2: Convert and chart spend
 
 ```python
 import os, json, urllib.request
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
 ORG_ID = os.environ["ORG_ID"]
 BUDGET_CREDITS = 100.0   # your own threshold

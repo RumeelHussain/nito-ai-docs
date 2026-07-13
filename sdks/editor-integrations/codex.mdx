@@ -9,11 +9,11 @@ Codex is an OpenAI-oriented coding tool. Since Nito exposes an OpenAI-compatible
 
 Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 > **TODO (needs SME):** verify the exact current settings path/config for Codex against its official docs, including whether the running version targets Chat Completions or the Responses API.
 
@@ -26,7 +26,7 @@ The protocol matters. This guide targets OpenAI **Chat Completions** at `POST /v
 Codex will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

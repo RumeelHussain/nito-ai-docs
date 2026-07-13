@@ -58,14 +58,14 @@ The parser bounds its work to keep responses predictable:
 ## Worked example
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/api/v1/attachments/parse \
+curl https://nito.dev.zprotocol.org/api/v1/attachments/parse \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -F "file=@/path/to/report.pdf" \
   -F "trust_tier=private" \
   -F "parse_mode=auto"
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once confirmed.
+> **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL once confirmed.
 
 A typical response:
 

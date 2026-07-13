@@ -23,7 +23,7 @@ import { Agent } from "@mastra/core/agent";
 
 const nito = createOpenAI({
   apiKey: "z_sk_your_key_here",              // your Nito API key
-  baseURL: "https://YOUR-NITO-BASE-URL/v1",  // Nito's OpenAI-compatible base URL
+  baseURL: "https://nito.dev.zprotocol.org/v1",  // Nito's OpenAI-compatible base URL
 });
 
 const agent = new Agent({
@@ -35,7 +35,7 @@ const agent = new Agent({
 
 > **TODO (needs SME):** verify the exact current configuration for Mastra against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
 
 ## Choosing a model and privacy
 

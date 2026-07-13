@@ -48,7 +48,7 @@ If you use `stream: true`, parse the stream correctly. Naive parsing is a common
 
 - **Model IDs are confirmed against the catalog.** Every model ID you use has been verified against `GET /v1/models`, and ideally selected by capability at runtime rather than hard-coded, because the catalog is discovered live and models are added and retired over time. See [Model catalog](/models/model-catalog).
 - **Request bodies stay under 4 MiB.** You have confirmed your largest realistic request fits under the body cap.
-- **The base URL is the confirmed production URL.** You have replaced `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+- **The base URL is the confirmed production URL.** You have replaced `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 > **TODO (needs SME):** confirm the canonical production base URL before launch; the code default is a local address.
 

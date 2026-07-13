@@ -14,13 +14,13 @@ Because you reach every model through one key and one base URL, comparing models
 Never hard-code a model name. Ask the gateway what exists and pick from the live catalog.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/models" \
+curl -sS "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 Each entry has an `id` (what you pass back in a request), a `type` (`chat`, `embedding`, `image`), its `capabilities`, and its `privacy_tier`. Filter to `type == "chat"` and take the IDs you want to compare.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed (owner: Product/Infra).
 
 ## Step 2: Send one prompt to several models
 
@@ -29,7 +29,7 @@ The example below uses `grok-4.3` as a stand-in; substitute IDs you pulled from 
 ```python
 import os, json, time, urllib.request
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
 MODELS = ["grok-4.3"]  # add more IDs fetched from GET /v1/models
 

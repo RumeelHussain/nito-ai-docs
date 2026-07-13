@@ -59,11 +59,11 @@ The provider redirects here after consent. The gateway completes the exchange an
 
 ```bash
 # Start the flow (follow the redirect in a browser)
-curl -i "https://YOUR-NITO-BASE-URL/auth/google/start?flow=login&next=/dashboard"
+curl -i "https://nito.dev.zprotocol.org/auth/google/start?flow=login&next=/dashboard"
 # → 303  Location: https://accounts.google.com/o/oauth2/v2/auth?...
 ```
 
-> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL — replace `https://nito.dev.zprotocol.org` once confirmed (owner: Product/Infra).
 
 ## Related
 

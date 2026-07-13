@@ -67,14 +67,14 @@ A three-step lifecycle:
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/account/profile" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/account/profile" \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
   -d '{"display_name":"Ada Lovelace"}'
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+> **TODO (needs SME):** confirm the canonical production base URL.
 
 ## Related
 

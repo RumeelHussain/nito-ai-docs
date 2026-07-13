@@ -10,13 +10,13 @@ Most Nito endpoints take a JSON request body. File-handling endpoints take `mult
 Send `Content-Type: application/json` with a JSON object. Decoding is **strict**: unknown fields are rejected.
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 | Rule | Behavior |
 |---|---|

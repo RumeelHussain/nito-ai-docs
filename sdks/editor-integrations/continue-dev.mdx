@@ -9,11 +9,11 @@ Continue.dev lets you add models from custom OpenAI-compatible providers. Becaus
 
 Wherever Continue.dev defines an OpenAI-compatible model, supply:
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 > **TODO (needs SME):** verify the exact current settings path/config for Continue.dev against its official docs, including the configuration key names for an OpenAI-compatible model entry.
 
@@ -22,7 +22,7 @@ Wherever Continue.dev defines an OpenAI-compatible model, supply:
 Continue.dev will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name in the configuration:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

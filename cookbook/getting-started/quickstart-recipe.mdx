@@ -10,16 +10,16 @@ Send one chat request to Nito and read the reply, using nothing but your API key
 ## Prerequisites
 
 - A Nito API key that starts with `z_sk_`. If you do not have one, see [Authentication](/get-started/authentication).
-- Your gateway base URL. This recipe uses `https://YOUR-NITO-BASE-URL` as a placeholder.
+- Your gateway base URL. This recipe uses `https://nito.dev.zprotocol.org` as a placeholder.
 - Either curl (already on most systems) or Python 3 with the `openai` package installed.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Step 1: Set your key and base URL
 
 ```bash
 export NITO_API_KEY="z_sk_your_key_here"
-export NITO_BASE_URL="https://YOUR-NITO-BASE-URL"
+export NITO_BASE_URL="https://nito.dev.zprotocol.org"
 ```
 
 ## Step 2: Discover a model

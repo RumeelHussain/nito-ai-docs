@@ -12,7 +12,7 @@ One thing up front, because it governs everything below. These checks confirm a 
 Select the attested tier with the `:confidential` model-ID suffix. The suffix only works on attestation-capable models (NEAR or Phala in the current catalog); fetch `GET /v1/models` and pick one whose card advertises attestation.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -37,7 +37,7 @@ Fetch `GET /api/v1/attestation` for the same model, passing your nonce.
 
 ```curl
 curl -sS \
-  "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL_ID:confidential&nonce=$NONCE" \
+  "https://nito.dev.zprotocol.org/api/v1/attestation?model=MODEL_ID:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -58,7 +58,7 @@ Here is a compact Python sketch that fetches and checks, using only the standard
 ```python
 import os, secrets, json, urllib.parse, urllib.request
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"  # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"  # TODO: confirm canonical base URL
 MODEL = "MODEL_ID:confidential"                   # TODO: confirm an attestation-capable model
 API_KEY = os.environ["NITO_API_KEY"]
 

@@ -8,7 +8,7 @@ The catalog is the list of everything you can call. Nito discovers models from i
 ## Listing the catalog
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/models" \
+curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -36,7 +36,7 @@ The `id` is what you pass back in the `model` field of a request. `type` separat
 
 Note that pricing and context window are not on the entry by default; pricing appears as a separate `pricing` object only when it is configured for that model. See [Pricing](/models/pricing).
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Filtering
 
@@ -53,7 +53,7 @@ Fetch the catalog at startup, cache it briefly, and pick a model by capability r
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="z_sk_your_key_here", base_url="https://YOUR-NITO-BASE-URL/v1")
+client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
 
 models = client.models.list()
 chat_models = [m for m in models.data if getattr(m, "type", None) == "chat"]

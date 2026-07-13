@@ -40,7 +40,7 @@ Error statuses: `400`, `401`, `403`, `409`, `429`, `500`, `503`.
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/auth/email/verify" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/auth/email/verify" \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_csrf=$CSRF" \
@@ -66,14 +66,14 @@ curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/auth/email/verify" \
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/auth/email/resend" \
+curl -X POST "https://nito.dev.zprotocol.org/auth/email/resend" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_csrf=$CSRF" \
   --data-urlencode "email=user@example.com"
 ```
 
-> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL — replace `https://nito.dev.zprotocol.org` once confirmed (owner: Product/Infra).
 
 ## Related
 

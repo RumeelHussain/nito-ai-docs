@@ -23,7 +23,7 @@ from litellm import completion
 resp = completion(
     model="openai/grok-4.3",                   # OpenAI-compatible route; grok-4.3 is a Nito catalog ID
     api_key="z_sk_your_key_here",              # your Nito API key
-    base_url="https://YOUR-NITO-BASE-URL/v1",  # Nito's OpenAI-compatible base URL
+    base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
     messages=[{"role": "user", "content": "Say hello in one short sentence."}],
 )
 
@@ -34,7 +34,7 @@ The `openai/` prefix tells LiteLLM to use its OpenAI-compatible client; the part
 
 > **TODO (needs SME):** verify the exact current configuration for LiteLLM (SDK and proxy) against its official docs
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
 
 ## Choosing a model and privacy
 

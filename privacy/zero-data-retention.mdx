@@ -52,11 +52,11 @@ Nito does not keep your conversation history on the server. Where a chat history
 ```bash
 # Fetch the per-user storage key the browser client uses to
 # encrypt chat history locally. Replace the base URL with your gateway.
-curl https://YOUR-NITO-BASE-URL/api/v1/me/storage-key \
+curl https://nito.dev.zprotocol.org/api/v1/me/storage-key \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL before publishing a copy-pasteable example. The code default is a local address; `https://YOUR-NITO-BASE-URL` is a placeholder (owner: Product/Infra).
+> **TODO (needs SME):** confirm the canonical production base URL before publishing a copy-pasteable example. The code default is a local address (owner: Product/Infra).
 
 The practical consequence: if you clear local browser storage, that history is gone, because there is no server-side copy to restore from. That is the trade Nito makes on purpose. Server-side convenience features that would require retaining your chats are not part of the default contract.
 

@@ -45,7 +45,7 @@ Not every chat model can read images. A model advertises vision support through 
 Because the catalog is discovered at runtime and changes over time, do not hard-code a vision model name. Ask the gateway which models support image inputs and select one at request time:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -72,7 +72,7 @@ A request that exceeds any of these is rejected. The accepted-format list is the
 Here is a complete non-streaming chat request that sends one image by URL and asks a question about it. Replace the base URL and pick a model that supports image inputs.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -95,7 +95,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** supply a real `VISION_MODEL_ID` value (a catalog model that advertises image input) once a canonical example model is chosen, and confirm the production base URL that replaces `https://YOUR-NITO-BASE-URL`. Owner: Product/Infra.
+> **TODO (needs SME):** supply a real `VISION_MODEL_ID` value (a catalog model that advertises image input) once a canonical example model is chosen, and confirm the production base URL that replaces `https://nito.dev.zprotocol.org`. Owner: Product/Infra.
 
 To send the bytes inline instead of a URL, swap the `url` value for a data URL:
 

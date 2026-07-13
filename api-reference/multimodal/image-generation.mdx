@@ -68,7 +68,7 @@ Each `data` entry carries either `url` or `b64_json`, matching the `response_for
 ## Worked call
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/images/generations" \
+curl "https://nito.dev.zprotocol.org/v1/images/generations" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -78,7 +78,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/images/generations" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 The default image model native id is `fal/fal-ai/z-image/turbo` (a Z-Image model). Use `GET /v1/models?type=image` to discover image models in your deployment.
 

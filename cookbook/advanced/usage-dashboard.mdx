@@ -12,13 +12,13 @@ The one fact that shapes this whole recipe: there is no flat, account-wide usage
 ## Step 1: Read the usage overview
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
+curl -sS "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 `window_days` sets how far back the window reaches. It defaults to 30 and accepts up to 365.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
 The response is aggregated, not a transaction log. The fields you build on:
 
@@ -29,7 +29,7 @@ The response is aggregated, not a transaction log. The fields you build on:
 ## Step 2: Read the balance
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
+curl -sS "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/billing/balance" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -44,7 +44,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
 ```python
 import os, json, urllib.request
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
 ORG_ID = os.environ["ORG_ID"]
 

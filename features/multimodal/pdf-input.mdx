@@ -46,7 +46,7 @@ There is no `file_id` for documents. You cannot upload a file once and reference
 A full chat request using this looks like:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -63,7 +63,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** supply a real `CHAT_MODEL_ID` and confirm the production base URL replacing `https://YOUR-NITO-BASE-URL`. Owner: Product/Infra.
+> **TODO (needs SME):** supply a real `CHAT_MODEL_ID` and confirm the production base URL replacing `https://nito.dev.zprotocol.org`. Owner: Product/Infra.
 
 ### 2. The standalone parser endpoint
 

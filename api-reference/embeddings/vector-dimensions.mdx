@@ -14,7 +14,7 @@ The embeddings endpoint accepts an optional `dimensions` field that requests a s
 A `dimensions` value outside `1`–`3072` is rejected with `400`. The bound is validated by the gateway before the request reaches the provider.
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/embeddings" \
+curl "https://nito.dev.zprotocol.org/v1/embeddings" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
@@ -24,7 +24,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/embeddings" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 ## Output length is set at runtime, not by the gateway
 

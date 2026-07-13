@@ -20,13 +20,13 @@ To create or manage keys programmatically, see the [API Keys reference](/api-ref
 Send the key as a bearer token in the `Authorization` header on every request:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 Reading that header left to right: `Authorization` is the standard HTTP header for credentials, `Bearer` is the scheme (it tells the server "what follows is a bearer token"), and `z_sk_your_key_here` is your key. There is no query-parameter or cookie auth for the inference API. The `Authorization: Bearer <key>` header is the one way in. A missing, malformed, revoked, or expired key returns `401 Unauthorized`.
 

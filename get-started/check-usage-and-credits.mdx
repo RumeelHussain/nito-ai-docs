@@ -28,7 +28,7 @@ You can find your org IDs from `GET /api/v1/orgs`.
 Read the balance from the org billing endpoint:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
+curl "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/billing/balance" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -45,7 +45,7 @@ curl "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
 For a usage summary over a time window, use the org API overview:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
+curl "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

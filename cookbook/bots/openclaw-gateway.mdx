@@ -13,17 +13,17 @@ If you instead want to use OpenClaw as an editor assistant rather than a gateway
 
 Wherever OpenClaw configures an upstream OpenAI-compatible provider, supply these three values. This is a generic OpenAI-compatible upstream, not a named "Nito" provider.
 
-- **Base URL:** `https://YOUR-NITO-BASE-URL/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
+- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
 - **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ```yaml
 # Representative only, verify against current OpenClaw docs.
 upstream:
   provider: openai-compatible
-  base_url: https://YOUR-NITO-BASE-URL/v1
+  base_url: https://nito.dev.zprotocol.org/v1
   api_key: z_sk_your_key_here
   model: grok-4.3
 ```
@@ -33,7 +33,7 @@ upstream:
 OpenClaw will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/models \
+curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

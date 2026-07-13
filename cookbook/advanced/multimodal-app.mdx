@@ -17,7 +17,7 @@ Honesty up front, because it is easy to assume a modern gateway does everything.
 
 **Audio and video are not available**, as input or as generation. There are no audio or video endpoints today. Do not design a step around them. See [Multimodal](/features/multimodal) and [Known limitations](/privacy/known-limitations) for the full boundary. This recipe builds only on the three capabilities above.
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
 ## Step 1: Image input into chat
 
@@ -26,7 +26,7 @@ Send an image as a content part alongside your text. Formats are PNG, JPEG, WebP
 ```python
 import os, json, urllib.request
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm canonical base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
 
 def post(path, body):

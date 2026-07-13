@@ -61,14 +61,14 @@ Responses: `200` (accepted, HTML) or `303` (redirect into the org). Errors: `400
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/invitations/INVITATION_ID/accept" \
+curl -X POST "https://nito.dev.zprotocol.org/invitations/INVITATION_ID/accept" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
   --data-urlencode "verified_challenge_id=CHALLENGE_ID"
 ```
 
-> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL — replace `https://nito.dev.zprotocol.org` once confirmed (owner: Product/Infra).
 
 ## Related
 

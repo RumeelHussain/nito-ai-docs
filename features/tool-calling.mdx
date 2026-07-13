@@ -56,14 +56,14 @@ Two rules the gateway enforces: each `function.name` must be unique within the r
 
 Here is the part people get wrong the first time. A tool call is not one request; it is at least two. The model pauses to ask for a tool, you run it, and you call again with the answer appended. Walk through both rounds.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
 
 ### Round one: the model asks for a tool
 
 You send the conversation plus the tool declaration.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -123,7 +123,7 @@ This step happens entirely in your code. Nito has already done its job for this 
 Append two messages to the conversation: the assistant's tool-call message (echoed back so the model sees its own request) and a new `tool` message carrying the result. The `tool` message must include the `tool_call_id` that matches the `id` from round one.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

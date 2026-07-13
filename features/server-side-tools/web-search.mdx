@@ -92,7 +92,7 @@ The pipeline is **gateway-native**, backed by **Brave** as the search backend. "
 A request that asks for fresh information and localizes results:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -109,7 +109,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL once confirmed.
+> **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL once confirmed.
 
 The response is an ordinary chat completion with two additions:
 

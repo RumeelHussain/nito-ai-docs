@@ -51,12 +51,12 @@ Each message has a `role` and `content`. The accepted roles are `system`, `user`
 
 ## A first call
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 `grok-4.3` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -72,7 +72,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://YOUR-NITO-BASE-URL/v1",
+    base_url="https://nito.dev.zprotocol.org/v1",
     api_key="YOUR_NITO_API_KEY",
 )
 
@@ -91,7 +91,7 @@ print(resp.choices[0].message.content)
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://YOUR-NITO-BASE-URL/v1",
+  baseURL: "https://nito.dev.zprotocol.org/v1",
   apiKey: process.env.NITO_API_KEY,
 });
 

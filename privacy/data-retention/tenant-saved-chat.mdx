@@ -12,7 +12,7 @@ Where a chat history exists (for example in a browser chat app built on Nito), i
 The encryption uses a **per-user storage key**. The browser obtains that key from the gateway:
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/api/v1/me/storage-key \
+curl https://nito.dev.zprotocol.org/api/v1/me/storage-key \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 

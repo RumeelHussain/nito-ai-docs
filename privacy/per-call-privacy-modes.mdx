@@ -28,7 +28,7 @@ Before the examples, internalize the one rule that makes these modes trustworthy
 Send the plain model ID, no suffix, on an ordinary-tier model. You get standard routing with the metadata-only default.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -37,14 +37,14 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** confirm the canonical production base URL before publishing copy-pasteable examples. The code default is a local address; `https://YOUR-NITO-BASE-URL` is a placeholder.
+> **TODO (needs SME):** confirm the canonical production base URL before publishing copy-pasteable examples. The code default is a local address.
 
 ## Worked example: private mode
 
 Private mode is also selected with **no suffix**. The difference from ordinary is the model: send a model whose stored tier is private, and the route sets `RequireZeroDataRetention`, which drives provider-enforced ZDR. There is nothing extra to add to the request; the model's tier does the work.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -60,7 +60,7 @@ To find out which models are private-tier, consult the catalog (`GET /v1/models`
 Add `:confidential` to a model that supports it. The call runs inside a sealed environment, and you can fetch an attestation afterward to verify it really did.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -91,7 +91,7 @@ Two hard constraints come with this mode:
 - **It is supported on NEAR and Phala only.** No other provider serves `:encrypted`.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-Z-ENCRYPTED-E2EE: true" \

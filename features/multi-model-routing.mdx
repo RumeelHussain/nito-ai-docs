@@ -93,12 +93,12 @@ Fusion is built to degrade gracefully. If one or two participants fail but at le
 
 ## A worked example
 
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed.
+> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 The model IDs below are illustrative. Fetch `GET /v1/models` for the live catalog and select participants by capability at runtime, because models are added and retired over time.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/api/v1/chat/fusion \
+curl https://nito.dev.zprotocol.org/api/v1/chat/fusion \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

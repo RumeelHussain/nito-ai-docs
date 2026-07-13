@@ -36,12 +36,12 @@ Privacy mode is selected the same way as chat completions: through the model-ID 
 
 ## Worked call
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL once confirmed (owner: Product/Infra).
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed (owner: Product/Infra).
 
 Model IDs below are realistic examples only. Fetch `GET /api/v1/models` for the live catalog.
 
 ```bash
-curl https://YOUR-NITO-BASE-URL/api/v1/chat/fusion \
+curl https://nito.dev.zprotocol.org/api/v1/chat/fusion \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

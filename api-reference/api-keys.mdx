@@ -41,7 +41,7 @@ The response includes the **raw `z_sk_` secret exactly once** — store it immed
 ### Worked call
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api-keys" \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
@@ -53,7 +53,7 @@ curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys" \
 `POST /api/v1/orgs/{org_id}/api-keys/{key_id}/revoke` — immediately invalidates the key. In-flight requests using it will start failing with `401`. Revocation is not reversible; create a new key to rotate.
 
 ```bash
-curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys/$KEY_ID/revoke" \
+curl -X POST "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api-keys/$KEY_ID/revoke" \
   -H "X-CSRF-Token: $CSRF" \
   --cookie "ig_session=$SESSION; ig_csrf=$CSRF"
 ```
@@ -62,7 +62,7 @@ curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys/$KEY_ID/re
 
 API keys are subject to the gateway's [rate limits](/api-reference/errors-and-rate-limits/rate-limits). A `429` response carries a `Retry-After` header when the limiter can compute a retry window.
 
-> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+> **TODO (needs SME):** confirm the canonical production base URL.
 
 ## Related
 

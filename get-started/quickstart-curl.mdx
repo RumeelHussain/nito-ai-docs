@@ -8,7 +8,7 @@ This page shows the raw HTTP call behind every SDK. If you work in a language wi
 ## The minimum call
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -19,7 +19,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://YOUR-NITO-BASE-URL` with the real gateway URL.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ### What each part is
 
@@ -33,7 +33,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 This adds a system message, streaming off, sampling controls, and a token cap:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,7 +54,7 @@ The response is a `chat.completion` object. The text is in `choices[0].message.c
 Add `"stream": true` and read the Server-Sent Events stream. Each line is `data: <json>`, and the stream ends with `data: [DONE]`:
 
 ```bash
-curl -N "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
+curl -N "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -71,7 +71,7 @@ The `-N` flag disables curl's buffering so you see tokens as they arrive. Token 
 Every example above uses the OpenAI-compatible `/v1/...` path. Nito also exposes a first-party `/api/v1/...` path with identical behavior for chat:
 
 ```bash
-curl "https://YOUR-NITO-BASE-URL/api/v1/chat/completions" \
+curl "https://nito.dev.zprotocol.org/api/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'

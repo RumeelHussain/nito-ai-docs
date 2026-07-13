@@ -18,7 +18,7 @@ Document Q&A is a two-step pipeline: turn a file into text, then ask a chat mode
 The response includes `text`, `mime_type`, `file_kind`, `bytes`, and optionally `page_count`, `parsed_pages`, `truncated`, and `warnings`.
 
 ```bash
-curl -sS "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
+curl -sS "https://nito.dev.zprotocol.org/api/v1/attachments/parse" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -F "file=@contract.pdf" \
   -F "trust_tier=tee"
@@ -27,7 +27,7 @@ curl -sS "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
 ```python
 import os, requests
 
-BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm base URL
+BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm base URL
 API_KEY = os.environ["NITO_API_KEY"]
 
 def parse_file(path, trust_tier="confidential"):
