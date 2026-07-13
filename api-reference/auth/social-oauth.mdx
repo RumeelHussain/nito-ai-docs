@@ -1,0 +1,72 @@
+---
+title: Social OAuth (Google & X)
+description: Start and complete Google or X social sign-in, with the query parameters and redirect behavior for each leg.
+---
+
+Sign in (or sign up) with Google or X. Each provider has a **start** leg that redirects the browser to the provider, and a **callback** leg the provider redirects back to. Both legs respond with a `303` redirect (`Location` header) — they are browser navigations, not JSON API calls.
+
+```
+GET /auth/google/start
+GET /auth/google/callback
+GET /auth/x/start
+GET /auth/x/callback
+```
+
+<Note>
+These are browser navigation routes. Open them in a browser (or follow the `303` `Location`); they are not `z_sk_` API-key endpoints and return redirects, not JSON.
+</Note>
+
+## Start leg
+
+`GET /auth/google/start` · `GET /auth/x/start`
+
+Redirects (`303`) to the provider's consent screen.
+
+### Query parameters
+
+| Key | Type | Required | Notes |
+|---|---|---|---|
+| `flow` | string | no | `login` or `signup`. |
+| `accept_terms` | boolean | no | Required on the signup flow. |
+| `accept_privacy` | boolean | no | Required on the signup flow. |
+| `next` | string | no | Relative path to return to after sign-in. |
+| `referral_code` | string | no | Optional referral code (signup). |
+| `referral_invite_id` | string | no | Optional referral invite id (signup). |
+
+### Response
+
+`303` with a `Location` header pointing to the provider's authorization URL. Errors: `400`, `500`, `502`, `503`.
+
+## Callback leg
+
+`GET /auth/google/callback` · `GET /auth/x/callback`
+
+The provider redirects here after consent. The gateway completes the exchange and redirects (`303`) into the app.
+
+### Query parameters
+
+| Key | Type | Required | Notes |
+|---|---|---|---|
+| `code` | string | no | Authorization code from the provider (present on success). |
+| `state` | string | no | Opaque state value echoed back for CSRF protection. |
+| `error` | string | no | Provider error code (present when the user denied or the flow failed). |
+
+### Response
+
+`303` with a `Location` header into the app (signed-in on success, or an error route). Errors: `400`, `500`, `502`, `503`.
+
+### Worked call
+
+```bash
+# Start the flow (follow the redirect in a browser)
+curl -i "https://YOUR-NITO-BASE-URL/auth/google/start?flow=login&next=/dashboard"
+# → 303  Location: https://accounts.google.com/o/oauth2/v2/auth?...
+```
+
+> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+
+{/* source: internal/server/auth_social_handlers.go, auth_social_oauth.go; OpenAPI operations startGoogleOAuth, completeGoogleOAuth, startXOAuth, completeXOAuth */}

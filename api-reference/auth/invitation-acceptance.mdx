@@ -1,0 +1,77 @@
+---
+title: Invitation acceptance
+description: Accept an organization invitation by email or wallet, with the acceptance-page and submit routes for each path.
+---
+
+Accept an organization invitation. Each invitation type has a `GET` route that renders the acceptance page and a `POST` route that submits the acceptance. These are first-party browser routes (session + CSRF), not `z_sk_` API-key endpoints.
+
+```
+GET  /invitations/email/accept
+POST /invitations/email/accept
+GET  /invitations/{invitation_id}/accept
+POST /invitations/{invitation_id}/accept
+POST /invitations/{invitation_id}/accept/wallet
+```
+
+<Note>
+These are browser-surface routes. The submit (`POST`) routes require a browser session (`ig_session`) plus a CSRF token; the `GET` routes render an HTML acceptance page. A `z_sk_` API key does not authorize the submit routes.
+</Note>
+
+## Email invitation
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/invitations/email/accept` | Render the email acceptance page. Query: `token`. |
+| `POST` | `/invitations/email/accept` | Accept the invitation. |
+
+### Submit request
+
+`application/x-www-form-urlencoded`
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `token` | string | yes | The invitation token from the email. |
+
+Responses: `200` (accepted, HTML) or `303` (redirect into the org). Errors: `400`, `401`.
+
+## Wallet invitation
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/invitations/{invitation_id}/accept` | Render the wallet acceptance page. |
+| `POST` | `/invitations/{invitation_id}/accept` | Accept the invitation. |
+| `POST` | `/invitations/{invitation_id}/accept/wallet` | Accept from the wallet form. |
+
+### Path parameter
+
+| Key | Type | Required | Notes |
+|---|---|---|---|
+| `invitation_id` | string | yes | The invitation id. |
+
+### Submit request
+
+`application/x-www-form-urlencoded`
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `verified_challenge_id` | string | yes | The id of a completed wallet challenge that proves control of the wallet. |
+
+Responses: `200` (accepted, HTML) or `303` (redirect into the org). Errors: `400`, `401`.
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/invitations/INVITATION_ID/accept" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
+  --data-urlencode "verified_challenge_id=CHALLENGE_ID"
+```
+
+> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+
+{/* source: internal/server/auth_handlers.go (invitation acceptance); OpenAPI operations acceptEmailInvitation, acceptWalletInvitation, acceptWalletInvitationForm. Note: the {invitation_id}/accept summary reads "Accept a wallet invitation" in the spec — confirm with team before publishing. */}

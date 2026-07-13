@@ -300,6 +300,14 @@
             ]
           },
           {
+            "group": "Auth",
+            "pages": [
+              "api-reference/auth/email-verification",
+              "api-reference/auth/social-oauth",
+              "api-reference/auth/invitation-acceptance"
+            ]
+          },
+          {
             "group": "Overview",
             "pages": [
               "api-reference/index",

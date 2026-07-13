@@ -1,0 +1,83 @@
+---
+title: Email verification
+description: Verify an email signup token and resend the verification message, with the request and response schema for each.
+---
+
+Confirm a newly registered email address, or resend the verification message. These are first-party browser routes: they require a browser CSRF token (and cookie), not an API key.
+
+```
+POST /api/v1/auth/email/verify
+POST /auth/email/resend
+```
+
+<Note>
+These are browser-surface routes (`BrowserCSRF`). The interactive "Try it" runs from a logged-in browser session with a CSRF token; a `z_sk_` API key alone will not authorize them.
+</Note>
+
+## Verify an email token
+
+`POST /api/v1/auth/email/verify`
+
+### Request
+
+`application/json`
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `token` | string | yes | The verification token from the signup email. |
+
+### Response
+
+`200` → `EmailVerifyResponse`
+
+| Field | Type | Notes |
+|---|---|---|
+| `ok` | string | `"true"` on success. |
+| `email` | string | The verified email address. |
+
+Error statuses: `400`, `401`, `403`, `409`, `429`, `500`, `503`.
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/auth/email/verify" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_csrf=$CSRF" \
+  -d '{"token":"VERIFICATION_TOKEN"}'
+```
+
+## Resend the verification message
+
+`POST /auth/email/resend`
+
+### Request
+
+`application/x-www-form-urlencoded`
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `email` | string | yes | The address to resend the verification message to. |
+
+### Response
+
+`200` — the message is queued if the address is eligible. The response does not reveal whether the address exists (enumeration-safe).
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/auth/email/resend" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_csrf=$CSRF" \
+  --data-urlencode "email=user@example.com"
+```
+
+> **TODO (needs SME):** the canonical production base URL — replace `https://YOUR-NITO-BASE-URL` once confirmed (owner: Product/Infra).
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+- [Headers](/api-reference/overview/headers)
+
+{/* source: internal/server/auth_email_handlers.go; OpenAPI operations verifyEmailToken, resendEmailVerification */}
