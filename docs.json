@@ -501,6 +501,9 @@
         "groups": [
           {
             "group": "Nito API",
+            "pages": [
+              "api-playground"
+            ],
             "openapi": "openapi.json"
           }
         ]
