@@ -1,0 +1,62 @@
+---
+title: "Anonymous"
+description: "The lightest privacy tier and the default. Anonymized routing with metadata-only retention, on the broadest set of models."
+---
+
+Anonymous is the first rung of the [privacy ladder](/privacy/tiers) and the one most calls use. It is the stored tier `anon`, which is the default tier for every provider. It is the right choice for low-sensitivity work where you want the widest model selection and the least overhead, and where you do not need a proof that a specific sealed environment ran your call.
+
+## What it is
+
+`anon` is the baseline posture of the gateway. When you name a model that the catalog reports as `privacy_tier: "anon"` and add no suffix, you are calling it in the Anonymous tier. The routing is anonymized: the gateway selects a healthy, eligible, cost-effective backend and serves your request without tying it to a strong privacy boundary. Anonymous is what "ordinary" routing means in practice for a model whose stored tier is `anon`.
+
+Because `anon` is the default tier across providers, it is also the broadest. Most of the catalog is reachable at Anonymous. The attested tiers, by contrast, come from specific providers only, so climbing the ladder always narrows the set of models you can pick from.
+
+## What it guarantees
+
+The guarantee at Anonymous is **metadata-only retention by default**. The gateway keeps operational metadata about the call, not your prompt or the model's reply. Prompts, completions, reasoning, tool payloads, and attachment contents are enumerated in the code as never-persisted, and inference responses are returned with `Cache-Control: no-store`. Where a chat history exists, for example in a browser app, it is stored client-side, not by the gateway.
+
+What Anonymous does **not** carry is any attestation metadata. By design, an `anon` model carries no attestation, no TEE provider, and no encryption subject; the gateway's invariants reject an `anon` entry that claims any of those. So Anonymous gives you a sound default retention posture, but no hardware-backed proof of where or how your call ran. If you need that proof, you climb to [Confidential](/privacy/tiers/confidential). If you need the upstream provider held to no retention at all, you move to [Private](/privacy/tiers/private).
+
+## How to select it
+
+You select Anonymous by naming an `anon`-tier model with no suffix.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL-ID",
+    "messages": [{"role": "user", "content": "Summarize this public article."}]
+  }'
+```
+
+> **TODO (needs SME):** replace `MODEL-ID` with a real `anon`-tier model from `GET /v1/models`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
+
+There is nothing to add to the request body. Anonymous is not requested with a suffix; it is simply what you get when the model's `privacy_tier` is `anon` and you supply no `:confidential` or `:encrypted`. To confirm a model is `anon`, read its catalog entry:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+The entry's `privacy_tier` field tells you the tier you will get with no suffix. If it reads `private`, the same suffix-free call lands you in [Private](/privacy/tiers/private) instead, because the model's own stored tier decides between the two.
+
+## Trade-offs
+
+- **Lightest protection.** Anonymous gives you metadata-only retention but no upstream zero-data-retention requirement and no attestation. It is the floor, not a guarantee about a provider's internals.
+- **Broadest availability.** Because `anon` is the default tier for all providers, Anonymous reaches the most models and tends to route to the most backends, which helps latency and availability.
+- **No proof to check.** If the value of a call depends on being able to verify where it ran, Anonymous cannot give you that. Use `:confidential` for an attestation.
+
+## When to choose it
+
+Reach for Anonymous when the request is low-sensitivity and you want speed, choice, and simplicity: public or non-confidential prompts, prototyping, internal tooling, or anything where metadata-only retention is enough and you do not need a verifiable execution boundary. Match the tier to the sensitivity of the call, and save the stronger rungs for the calls that actually need them.
+
+## Related
+
+- [Privacy tiers in depth](/privacy/tiers)
+- [Private](/privacy/tiers/private)
+- [Confidential](/privacy/tiers/confidential)
+- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+- [Privacy overview](/privacy/overview)
+- [Model ID convention](/models/model-id-convention)

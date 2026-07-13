@@ -1,0 +1,87 @@
+---
+title: "Confidential"
+description: "Sealed, hardware-isolated execution with an attestation you can fetch and verify. Supports streaming."
+---
+
+Confidential is the third rung of the [privacy ladder](/privacy/tiers) and the first one backed by hardware you can check. It is the `confidential` tier, selected with the `:confidential` suffix on the model ID. It keeps the guarantees of the tiers below it and adds the one thing none of them can: your call runs inside a sealed environment, and you can obtain a signed statement that proves it did.
+
+<Note>
+`confidential` is the canonical name for what was previously called the `tee` tier. The old `:tee` suffix and the `tee` `privacy_tier` value still work as deprecated aliases, so existing integrations keep running.
+</Note>
+
+## What a TEE is
+
+Confidential runs inside a **Trusted Execution Environment (TEE)** — a hardware-isolated, sealed compute environment. Code and data inside it are protected from the host machine: the operator running the hardware cannot peer into the computation. Crucially, the environment can produce an **attestation**, a signed statement about what is running inside it, which you can verify. Think of a TEE as a tamper-evident safe that runs your computation: the contents are shielded, and the safe can hand you a sealed receipt proving it was the thing that did the work.
+
+That receipt is what separates Confidential from [Private](/privacy/tiers/private). Private holds the provider to zero-data-retention, but you take that on the provider's word. Confidential gives you an artifact you can independently check. What Confidential provides is attested and verifiable, and the gateway's verification is a baseline rather than full hardware verification (see below).
+
+## What it requires
+
+Confidential is offered by specific providers only, so not every model can run in a TEE. A model supports it when its catalog entry reports `attestation_available: true` (with `privacy_tier: "confidential"`). The TEE providers are **NEAR** and **Phala**; the gateway's invariants require a `confidential`-tier model to name one of them as its TEE provider, and require attestation to be present for the tier. Filter the catalog for attestation support before you rely on it:
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/models \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+Look for `attestation_available: true` on the entry. If it is absent, the model has no TEE backend and appending `:confidential` will be rejected rather than served at a weaker tier.
+
+## How to select it
+
+Append `:confidential` to the model ID. Nothing else in the request body changes.
+
+```bash
+curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
+  -H "Authorization: Bearer $NITO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "MODEL-ID:confidential",
+    "messages": [{"role": "user", "content": "Analyze this sensitive document."}]
+  }'
+```
+
+> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://YOUR-NITO-BASE-URL` with the canonical production base URL (code default is a local address).
+
+`:confidential` is one of only two attested suffixes (the other is `:encrypted`). If the model does not support it, the call fails rather than quietly downgrading to a weaker tier.
+
+## Streaming works at Confidential
+
+A key reason to choose Confidential over [Encrypted](/privacy/tiers/encrypted): **streaming is supported in `:confidential`**. You can attest a call and still receive tokens incrementally over a long-lived connection, which a chat UI needs to show output as it arrives. Encrypted's end-to-end encryption, by contrast, is non-streaming by design. So when you need a verifiable execution boundary together with streaming, Confidential is the rung to use.
+
+## Fetching and verifying the attestation
+
+The attestation is what makes Confidential verifiable. You fetch it from a dedicated endpoint:
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL-ID&nonce=YOUR-NONCE" \
+  -H "Authorization: Bearer $NITO_API_KEY"
+```
+
+> **TODO (needs SME):** replace `MODEL-ID` with a real attestation-capable model, `YOUR-NONCE` with a fresh random nonce, and the base URL with the production value.
+
+<Note>
+`GET /api/v1/attestation` is the canonical attestation endpoint; it returns `object: "attestation"`. The older `GET /api/v1/tee/attestation` (returning `object: "tee.attestation"`) still works as a legacy route.
+</Note>
+
+The gateway resolves the model to a physical attestation-capable backend, asks the provider for its attestation, and runs a **baseline verification** before returning. The baseline checks that the provider evidence is present and parseable, that the proof format and signing material are present, that your nonce matches the one observed from the provider, and that the report-data binding holds. It then returns the result, including the raw `evidence`, so you can perform **full client-side verification yourself**.
+
+This split matters and is load-bearing: the gateway's baseline does **not** verify Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. Those are the client's responsibility, which is exactly why the raw evidence is handed back to you. Treat the gateway result as "baseline-verified" and do the hardware-level verification on your side for maximum assurance. The freshness guarantee is caller-driven: supply a fresh random nonce on each request so the attestation is bound to your call. The full procedure, the response fields, and a reference verifier are covered in [TEE attestation](/privacy/tee-attestation).
+
+## Trade-offs
+
+- **Fewer backends.** The TEE comes from NEAR and Phala only, so Confidential reaches fewer models than Anonymous or Private, which can affect latency and availability.
+- **A proof you must use.** The attestation is only worth as much as the verification you do with it. The gateway gives you a baseline and the raw evidence; full assurance comes from verifying the evidence client-side.
+- **Streaming kept, encryption not yet added.** Confidential is the strongest tier that still streams. If you also need your data encrypted to the sealed environment, climb to [Encrypted](/privacy/tiers/encrypted) and accept its non-streaming constraint.
+
+## When to choose it
+
+Choose Confidential for sensitive calls where you need to verify that a sealed environment ran the work, and where you still want streaming and the normal feature set. It is the sweet spot for high-sensitivity interactive use: attested execution without giving up token-by-token output.
+
+## Related
+
+- [Privacy tiers in depth](/privacy/tiers)
+- [Private](/privacy/tiers/private)
+- [Encrypted](/privacy/tiers/encrypted)
+- [TEE attestation](/privacy/tee-attestation)
+- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+- [Streaming](/features/streaming)

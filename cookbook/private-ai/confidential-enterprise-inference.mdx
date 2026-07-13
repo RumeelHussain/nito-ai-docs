@@ -5,25 +5,25 @@ description: "Build confidential enterprise inference on the attested tier today
 
 Enterprises often ask for three things together: **bring-your-own-key (BYOK)** so the provider never sees a raw model key, an **attested** execution environment, and **audited, governed debug capture** for incident review. This recipe is honest about which of those you can build on Nito today and which you cannot.
 
-**What is buildable today:** attested inference on the `:tee` tier, with attestation you can fetch and verify. **What is not available yet:** BYOK and audited debug capture. Those are marked below with SME TODOs and belong on the deferred list; do not build against them until confirmed.
+**What is buildable today:** attested inference on the `:confidential` tier, with attestation you can fetch and verify. **What is not available yet:** BYOK and audited debug capture. Those are marked below with SME TODOs and belong on the deferred list; do not build against them until confirmed.
 
-## The buildable part: attested (T3 / `:tee`) inference
+## The buildable part: attested (Confidential / `:confidential`) inference
 
-The attested tier is real and shippable. Select it with the `:tee` model-ID suffix on an attestation-capable model (NEAR or Phala in the current catalog). Fetch `GET /v1/models` and pick a model whose card advertises attestation. The example model `grok-4.3` is a placeholder for a non-attested tier and does **not** support `:tee`.
+The attested tier is real and shippable. Select it with the `:confidential` model-ID suffix on an attestation-capable model (NEAR or Phala in the current catalog). Fetch `GET /v1/models` and pick a model whose card advertises attestation. The example model `grok-4.3` is a placeholder for a non-attested tier and does **not** support `:confidential`.
 
 ```bash
 curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "MODEL_ID:tee",
+    "model": "MODEL_ID:confidential",
     "messages": [{"role": "user", "content": "Classify this internal ticket."}]
   }'
 ```
 
 > **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address (owner: Product/Infra). Confirm the model against `GET /v1/models`.
 
-Then prove the tier rather than trust it. Fetch `GET /api/v1/tee/attestation?model=...&nonce=<fresh>` and run the baseline checks (status 200, `object` is `tee.attestation`, `privacy_tier` is `tee`, `attestation_available` true, the nonce echo matches, evidence present, proof metadata present, `verified` true). The gateway does **baseline** verification only; validating the Intel TDX quote, GPU evidence, and certificate chains in `evidence` is your responsibility. The full flow, with a runnable checker, is in [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
+Then prove the tier rather than trust it. Fetch `GET /api/v1/attestation?model=...&nonce=<fresh>` and run the baseline checks (status 200, `object` is `attestation`, `privacy_tier` is `confidential`, `attestation_available` true, the nonce echo matches, evidence present, proof metadata present, `verified` true). The gateway does **baseline** verification only; validating the Intel TDX quote, GPU evidence, and certificate chains in `evidence` is your responsibility. The full flow, with a runnable checker, is in [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
 
 Alongside the attested tier, the gateway's baseline privacy posture applies: metadata-only retention (prompts, completions, reasoning, tool, and attachment payloads are never persisted) and `Cache-Control: no-store` on inference responses.
 

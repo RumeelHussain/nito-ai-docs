@@ -11,45 +11,45 @@ On most AI platforms, privacy is a property of your account or plan: you pick a 
 
 The reason to offer a dial rather than simply maxing out privacy is that the strongest modes have real costs. They route to fewer backends, the very strongest one cannot stream results token by token, and it supports fewer features. Forcing every call through the strongest mode would make routine work slower and more fragile for no benefit. Letting you match protection to the sensitivity of each call is the point: pay the cost of strong privacy only where the request needs it.
 
-## The modes
+## The tiers
 
-You select a mode by the model ID suffix. From lightest to strongest:
+You select a tier by the model ID suffix. From lightest to strongest:
 
-| Mode | How you select it | What it gives you |
+| Tier | How you select it | What it gives you |
 | --- | --- | --- |
-| **Ordinary** | `model` (no suffix) | Standard routing. Metadata-only retention by default, meaning the gateway keeps operational metadata, not your prompt or the reply. |
-| **Private** | `model` served by a private-tier model | Served by a privately configured backend with zero-data-retention enforced upstream. |
-| **TEE** | `model:tee` | Runs inside a Trusted Execution Environment. You can fetch an attestation and verify it. |
-| **End-to-end encrypted TEE** | `model:e2e-tee` | Adds client-side encryption on top of TEE, encrypting your data to the sealed environment itself. Non-streaming, on supporting providers. |
+| **Anonymous** | `model` (no suffix), `anon`-tier model | Standard routing. Metadata-only retention by default, meaning the gateway keeps operational metadata, not your prompt or the reply. |
+| **Private** | `model` (no suffix), `private`-tier model | Served by a privately configured backend with zero-data-retention enforced upstream. |
+| **Confidential** | `model:confidential` | Runs inside a Trusted Execution Environment. You can fetch an attestation and verify it. |
+| **Encrypted** | `model:encrypted` | Adds client-side encryption on top of Confidential, encrypting your data to the sealed environment itself. Non-streaming, on supporting providers. |
 
-Two terms in that table are worth defining up front. **Zero-data-retention (ZDR)** means the upstream provider is told, contractually and technically, not to keep the request after serving it. A **Trusted Execution Environment (TEE)** is a hardware-isolated, sealed compute environment: code and data inside it are protected from the host machine, and the environment can produce an **attestation**, a signed statement about what is running inside, which you can check. Think of a TEE as a tamper-evident safe that runs your computation: not only is the contents shielded, the safe can hand you a sealed receipt proving it was the thing that did the work.
+Two terms are worth defining up front. **Zero-data-retention (ZDR)** means the upstream provider is told, contractually and technically, not to keep the request after serving it. A **Trusted Execution Environment (TEE)** is a hardware-isolated, sealed compute environment: code and data inside it are protected from the host machine, and the environment can produce an **attestation**, a signed statement about what is running inside, which you can check. Think of a TEE as a tamper-evident safe that runs your computation: not only is the contents shielded, the safe can hand you a sealed receipt proving it was the thing that did the work.
 
-## How the modes map to model fields
+## How the tiers map to model fields
 
-Whether a given model supports a mode is reported on its catalog entry, so the practical rule is: read the model entry, then choose the suffix the model supports.
+Whether a given model supports a tier is reported on its catalog entry, so the practical rule is: read the model entry, then choose the suffix the model supports.
 
-- **Ordinary / private** are determined by the model's `privacy_tier` (`anon` or `private`). You do not add a suffix.
-- **TEE** is available when `attestation_available: true` (and `privacy_tier: "tee"`). Select it with `:tee`.
-- **End-to-end encrypted TEE** is available when `e2ee_supported: true`. Select it with `:e2e-tee` and the required encryption headers.
+- **Anonymous / Private** are determined by the model's `privacy_tier` (`anon` or `private`). You do not add a suffix.
+- **Confidential** is available when `attestation_available: true` (and `privacy_tier: "confidential"`). Select it with `:confidential`.
+- **Encrypted** is available when `encrypted_supported: true`. Select it with `:encrypted` and the required encryption headers.
 
-A worked example. Suppose `GET /v1/models` shows a model with `attestation_available: true`, `e2ee_supported: true`, and `privacy_tier: "tee"`. You have three valid ways to call it: name it plain for ordinary routing, append `:tee` to run it in a sealed environment you can attest, or append `:e2e-tee` to additionally encrypt your data to that environment. If you instead pick a model whose entry shows `privacy_tier: "anon"` and append `:tee`, the call is rejected, because that model has no TEE backend to honor the request. A privacy mode never silently downgrades to a weaker one.
+A worked example. Suppose `GET /v1/models` shows a model with `attestation_available: true`, `encrypted_supported: true`, and `privacy_tier: "confidential"`. You have three valid ways to call it: name it plain for standard routing, append `:confidential` to run it in a sealed environment you can attest, or append `:encrypted` to additionally encrypt your data to that environment. If you instead pick a model whose entry shows `privacy_tier: "anon"` and append `:confidential`, the call is rejected, because that model has no TEE backend to honor the request. A privacy mode never silently downgrades to a weaker one.
 
 ## A note on naming
 
-You may see the tiers referred to by marketing labels, for example T1 through T4. Those are labels mapped onto the named modes; they are not concepts the code works in. Under the hood, the gateway operates in terms of the named modes above: the stored tiers `anon`, `private`, and `tee`, plus the `e2e-tee` mode layered on TEE. This page and the API use the named modes. The mapping to any numbered labels is covered in the [Privacy tiers in depth](/privacy/tiers) pages.
+The four tier names — **Anonymous, Private, Confidential, Encrypted** — are the canonical `privacy_tier` values in the catalog and the API. Confidential and Encrypted were previously called `tee` and `e2e-tee`; the old `:tee` / `:e2e-tee` suffixes and `tee` / `e2e-tee` tier values still work as **deprecated aliases**, so existing integrations keep running. New code should use the canonical names. The full mapping is covered in the [Privacy tiers in depth](/privacy/tiers) pages.
 
 ## Trade-offs to know
 
-- **TEE and end-to-end TEE are offered by specific providers only.** Not every model can run in a TEE. Filter the catalog for attestation support before you rely on it.
-- **End-to-end encrypted TEE does not stream**, and does not support some features (reasoning, tools, prompt caching, multi-part messages). Use `:tee` when you need streaming together with attestation.
-- **Stronger modes can route to fewer backends**, which can affect latency and availability. Match the mode to the sensitivity of the call.
+- **Confidential and Encrypted are offered by specific providers only.** Not every model can run in a TEE. Filter the catalog for attestation support before you rely on it.
+- **Encrypted does not stream**, and does not support some features (reasoning, tools, prompt caching, multi-part messages). Use `:confidential` when you need streaming together with attestation.
+- **Stronger tiers can route to fewer backends**, which can affect latency and availability. Match the tier to the sensitivity of the call.
 
 ## Common mistakes
 
-- **Treating privacy as an account setting.** It is per call, chosen by the model ID. Two calls with the same key can use different modes.
-- **Selecting `:e2e-tee` and then trying to stream.** It is non-streaming by design; the call is rejected rather than quietly served without encryption.
-- **Using a suffix other than `:tee` or `:e2e-tee`.** Those are the only valid suffixes. Anything else (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body.
-- **Assuming "private" and "TEE" are the same.** Private means zero-data-retention upstream; TEE means sealed execution with an attestation you can verify. They are different guarantees, and only TEE gives you a proof to check.
+- **Treating privacy as an account setting.** It is per call, chosen by the model ID. Two calls with the same key can use different tiers.
+- **Selecting `:encrypted` and then trying to stream.** It is non-streaming by design; the call is rejected rather than quietly served without encryption.
+- **Using a suffix other than `:confidential` or `:encrypted`.** Those are the canonical suffixes (`:tee` / `:e2e-tee` still work as deprecated aliases). Anything else (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body.
+- **Assuming "Private" and "Confidential" are the same.** Private means zero-data-retention upstream; Confidential means sealed execution with an attestation you can verify. They are different guarantees, and only Confidential gives you a proof to check.
 
 ## Related
 

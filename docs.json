@@ -126,10 +126,10 @@
             "group": "Privacy tiers",
             "pages": [
               "privacy/tiers/index",
-              "privacy/tiers/t1-anonymous",
-              "privacy/tiers/t2-private",
-              "privacy/tiers/t3-private-plus-tee",
-              "privacy/tiers/t4-encrypted-e2e-tee"
+              "privacy/tiers/anonymous",
+              "privacy/tiers/private",
+              "privacy/tiers/confidential",
+              "privacy/tiers/encrypted"
             ]
           },
           {
