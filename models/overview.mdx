@@ -47,7 +47,7 @@ Each entry describes one model you can call. The important fields:
 | `encrypted_supported` | Whether end-to-end encrypted TEE is available. |
 | `free_tier_eligible` | Whether the model can be used without a funded balance. |
 
-The `capabilities` object reports what a model can do, including: `supports_image_inputs`, `supports_image_generation`, `supports_web_search`, `supports_web_fetch`, `supports_x_search`, `supports_code_interpreter`, `supports_reasoning`, `supports_tee_attestation`, and `supports_e2ee`. Read these before sending a feature: a request that uses a capability the model lacks is rejected rather than silently ignored.
+The `capabilities` object reports what a model can do, including: `supports_image_inputs`, `supports_image_generation`, `supports_web_search`, `supports_web_fetch`, `supports_x_search`, `supports_code_interpreter`, `supports_reasoning`, `supports_tee_attestation`, and `supports_encrypted`. Read these before sending a feature: a request that uses a capability the model lacks is rejected rather than silently ignored.
 
 ### Where pricing and context window come from
 
