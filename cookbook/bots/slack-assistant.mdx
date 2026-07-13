@@ -58,17 +58,17 @@ Keep the Nito key in a server-side environment variable alongside your Slack app
 
 ## Streaming or not
 
-Slack posts whole messages, so an assistant typically uses a non-streaming call and posts the reply once complete. You can update a posted message with the growing text if you stream from Nito (`stream=True`), but mind Slack's update rate limits. Because `:e2e-tee` does not stream, pair streaming only with an ordinary or `:tee` model.
+Slack posts whole messages, so an assistant typically uses a non-streaming call and posts the reply once complete. You can update a posted message with the growing text if you stream from Nito (`stream=True`), but mind Slack's update rate limits. Because `:encrypted` does not stream, pair streaming only with an ordinary or `:confidential` model.
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:confidential`:
 
 ```python
-model="grok-4.3:tee"
+model="grok-4.3:confidential"
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Handling errors
 

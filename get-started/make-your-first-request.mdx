@@ -76,7 +76,7 @@ Before reading the fields, it helps to know the path the call takes, because it 
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `model` | string | optional | The model ID. If omitted, a default model is used. Add `:tee` or `:e2e-tee` to raise privacy. |
+| `model` | string | optional | The model ID. If omitted, a default model is used. Add `:confidential` or `:encrypted` to raise privacy. |
 | `messages` | array | required | The conversation. Each item is `{ role, content }`. Roles: `system`, `user`, `assistant`, `tool`, `developer`. |
 | `temperature` | number | optional | Sampling randomness. Higher is more varied. Passed through to the model. |
 | `top_p` | number | optional | Nucleus sampling, an alternative to temperature. |
@@ -126,13 +126,13 @@ Reading it field by field:
 
 ## Add privacy with one change
 
-To run the same request inside a Trusted Execution Environment (a TEE: a hardware-isolated, sealed compute box the host cannot inspect), add the `:tee` suffix to the model, provided that model supports it:
+To run the same request inside a Trusted Execution Environment (a TEE: a hardware-isolated, sealed compute box the host cannot inspect), add the `:confidential` suffix to the model, provided that model supports it:
 
 ```json
-{ "model": "grok-4.3:tee", "messages": [ ... ] }
+{ "model": "grok-4.3:confidential", "messages": [ ... ] }
 ```
 
-Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:tee` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation).
+Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:confidential` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation).
 
 ## Common mistakes
 
@@ -141,7 +141,7 @@ Nothing else in the request changes. The privacy mode lives entirely in the mode
 - **A `tool` message without `tool_call_id`.** Tool-result messages must reference the call they answer.
 - **Assuming multiple choices.** Nito returns a single choice; there is no `n` fan-out on chat completions. To compare several models on one prompt, see [chat fusion](/features/multi-model-routing).
 - **Reading a streamed response as one JSON object.** If you set `stream: true`, the reply is many Server-Sent Events, not one document. See the next page.
-- **Expecting `:tee` to fall back silently.** A privacy mode never downgrades. If the model cannot serve it, the call fails instead.
+- **Expecting `:confidential` to fall back silently.** A privacy mode never downgrades. If the model cannot serve it, the call fails instead.
 
 ## Related
 

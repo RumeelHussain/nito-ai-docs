@@ -1,66 +1,66 @@
 ---
-title: "End-to-end TEE Call"
-description: "Make an :e2e-tee chat call on NEAR or Phala models, a non-streaming request that requires the X-Z-TEE-* encryption headers."
+title: "Encrypted Call"
+description: "Make an :encrypted chat call on NEAR or Phala models, a non-streaming request that requires the X-Z-ENCRYPTED-* encryption headers."
 ---
 
-The `:e2e-tee` mode is the strictest privacy tier on Nito. Where `:tee` gives you an attested route, `:e2e-tee` adds end-to-end encryption between your client and the model inside the trusted execution environment, negotiated through a set of `X-Z-TEE-*` request headers. This recipe covers how to select the mode and the constraints it imposes. The exact encryption handshake is owner-confirmed work, marked below.
+The `:encrypted` mode is the strictest privacy tier on Nito. Where `:confidential` gives you an attested route, `:encrypted` adds end-to-end encryption between your client and the model inside the trusted execution environment, negotiated through a set of `X-Z-ENCRYPTED-*` request headers. This recipe covers how to select the mode and the constraints it imposes. The exact encryption handshake is owner-confirmed work, marked below.
 
-## What `:e2e-tee` requires and forbids
+## What `:encrypted` requires and forbids
 
-Selecting end-to-end TEE is done with the `:e2e-tee` model-ID suffix, and it only works on **NEAR or Phala** models (the attestation-capable providers). It is more constrained than an ordinary or `:tee` call:
+Selecting the Encrypted tier is done with the `:encrypted` model-ID suffix, and it only works on **NEAR or Phala** models (the attestation-capable providers). It is more constrained than an ordinary or `:confidential` call:
 
-- **Non-streaming only.** With the E2EE headers present, streaming is refused (`streaming is not supported with E2E-TEE`). Do not set `stream: true`.
+- **Non-streaming only.** With the E2EE headers present, streaming is refused (`streaming is not supported with Encrypted`). Do not set `stream: true`.
 - **No tools, reasoning, prompt caching, or multi-part messages.** Each of these is rejected when the E2EE headers are present. Send a plain, single-part message request.
 - **NEAR / Phala only.** Other providers reject the mode.
-- **Requires the `X-Z-TEE-*` headers.** The mode is not active on the suffix alone; the encryption headers must be present and well-formed.
+- **Requires the `X-Z-ENCRYPTED-*` headers.** The mode is not active on the suffix alone; the encryption headers must be present and well-formed.
 
 ## The required headers
 
-An `:e2e-tee` request carries this set of headers, parsed by the gateway into its E2EE encryption context:
+An `:encrypted` request carries this set of headers, parsed by the gateway into its E2EE encryption context:
 
-- `X-Z-TEE-E2EE`
-- `X-Z-TEE-Client-Pub-Key`
-- `X-Z-TEE-Model-Pub-Key`
-- `X-Z-TEE-Signing-Algo`
-- `X-Z-TEE-Encryption-Version`
-- `X-Z-TEE-E2EE-Nonce`
-- `X-Z-TEE-E2EE-Timestamp`
+- `X-Z-ENCRYPTED-E2EE`
+- `X-Z-ENCRYPTED-Client-Pub-Key`
+- `X-Z-ENCRYPTED-Model-Pub-Key`
+- `X-Z-ENCRYPTED-Signing-Algo`
+- `X-Z-ENCRYPTED-Encryption-Version`
+- `X-Z-ENCRYPTED-E2EE-Nonce`
+- `X-Z-ENCRYPTED-E2EE-Timestamp`
 
-The model public key you place in `X-Z-TEE-Model-Pub-Key` is the same model public key returned by the attestation endpoint (`signing_key` / `model_public_key` are aliases for it). So a typical flow is: fetch the attestation for the `:e2e-tee` model, take the model public key from it, perform the key exchange, and set these headers on the chat call.
+The model public key you place in `X-Z-ENCRYPTED-Model-Pub-Key` is the same model public key returned by the attestation endpoint (`signing_key` / `model_public_key` are aliases for it). So a typical flow is: fetch the attestation for the `:encrypted` model, take the model public key from it, perform the key exchange, and set these headers on the chat call.
 
-> **TODO (needs SME):** exact E2E-TEE encryption handshake and header value construction.
+> **TODO (needs SME):** exact Encrypted encryption handshake and header value construction.
 
 The precise steps (how the client keypair is generated, how the shared secret is derived from the client and model public keys, how the request body is encrypted, and the exact string encodings for each header value) are not documented here because they must be confirmed against the implementation. Do not infer them; the placeholder request below shows only the header **shape**, not real values.
 
 ## Request shape (placeholder values)
 
-The example model `MODEL_ID:e2e-tee` is a placeholder for a NEAR or Phala model that supports the mode; fetch `GET /v1/models` and pick one whose card advertises `e2e-tee` support.
+The example model `MODEL_ID:encrypted` is a placeholder for a NEAR or Phala model that supports the mode; fetch `GET /v1/models` and pick one whose card advertises `encrypted` support.
 
 ```bash
 curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
-  -H "X-Z-TEE-E2EE: <TODO>" \
-  -H "X-Z-TEE-Client-Pub-Key: <TODO client public key>" \
-  -H "X-Z-TEE-Model-Pub-Key: <TODO model public key from attestation>" \
-  -H "X-Z-TEE-Signing-Algo: <TODO>" \
-  -H "X-Z-TEE-Encryption-Version: <TODO>" \
-  -H "X-Z-TEE-E2EE-Nonce: <TODO fresh nonce>" \
-  -H "X-Z-TEE-E2EE-Timestamp: <TODO>" \
+  -H "X-Z-ENCRYPTED-E2EE: <TODO>" \
+  -H "X-Z-ENCRYPTED-Client-Pub-Key: <TODO client public key>" \
+  -H "X-Z-ENCRYPTED-Model-Pub-Key: <TODO model public key from attestation>" \
+  -H "X-Z-ENCRYPTED-Signing-Algo: <TODO>" \
+  -H "X-Z-ENCRYPTED-Encryption-Version: <TODO>" \
+  -H "X-Z-ENCRYPTED-E2EE-Nonce: <TODO fresh nonce>" \
+  -H "X-Z-ENCRYPTED-E2EE-Timestamp: <TODO>" \
   -d '{
-    "model": "MODEL_ID:e2e-tee",
+    "model": "MODEL_ID:encrypted",
     "messages": [{"role": "user", "content": "Single-part message, no tools, no streaming."}]
   }'
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete `e2e-tee`-capable `MODEL_ID`. The code default is a local address. Confirm the model against `GET /v1/models`.
+> **TODO (needs SME):** the canonical production base URL and a concrete `encrypted`-capable `MODEL_ID`. The code default is a local address. Confirm the model against `GET /v1/models`.
 
 Because the mode is non-streaming, the response is a single `chat.completion` envelope, not an SSE stream.
 
-## When to use `:e2e-tee` vs `:tee`
+## When to use `:encrypted` vs `:confidential`
 
-- Use `:tee` when you want an **attested** route and still need streaming, tools, reasoning, or caching. Verify it with the [attested-call recipe](/cookbook/private-ai/tee-attested-call-verify-nonce).
-- Use `:e2e-tee` when the request and response payloads must be **encrypted end to end** to the enclave and you can accept the non-streaming, no-tools, single-part constraints.
+- Use `:confidential` when you want an **attested** route and still need streaming, tools, reasoning, or caching. Verify it with the [attested-call recipe](/cookbook/private-ai/tee-attested-call-verify-nonce).
+- Use `:encrypted` when the request and response payloads must be **encrypted end to end** to the enclave and you can accept the non-streaming, no-tools, single-part constraints.
 
 Either way, attestation is still how you gain assurance: fetch and verify the attestation for the model before trusting the tier. See [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe).
 

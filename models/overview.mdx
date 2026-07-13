@@ -42,9 +42,9 @@ Each entry describes one model you can call. The important fields:
 | `capabilities` | Feature support flags (see below). |
 | `context_window` | The model's context limit, when known. |
 | `pricing` | Per-token and per-unit cost, when configured. |
-| `privacy_tier` | The model's privacy tier: `anon`, `private`, or `tee`. |
+| `privacy_tier` | The model's privacy tier: `anon`, `private`, or `confidential`. |
 | `tee_provider`, `attestation_available`, `attestation_subject` | TEE details when the model supports attestation. |
-| `e2ee_supported` | Whether end-to-end encrypted TEE is available. |
+| `encrypted_supported` | Whether end-to-end encrypted TEE is available. |
 | `free_tier_eligible` | Whether the model can be used without a funded balance. |
 
 The `capabilities` object reports what a model can do, including: `supports_image_inputs`, `supports_image_generation`, `supports_web_search`, `supports_web_fetch`, `supports_x_search`, `supports_code_interpreter`, `supports_reasoning`, `supports_tee_attestation`, and `supports_e2ee`. Read these before sending a feature: a request that uses a capability the model lacks is rejected rather than silently ignored.
@@ -55,7 +55,7 @@ Two fields deserve a note, because they behave differently from the rest. `prici
 
 ## Privacy is part of the model choice
 
-A model entry's `privacy_tier` and TEE fields tell you which privacy modes that model supports. You select a mode by adding `:tee` or `:e2e-tee` to the model ID at request time (those two are the only valid suffixes). A model that reports `attestation_available: true` can be called with `:tee`; one with `e2ee_supported: true` can be called with `:e2e-tee`. TEE stands for Trusted Execution Environment, a hardware-isolated compute box the host cannot read into; attestation is a signed statement proving your call ran inside one. See [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) and [Model ID convention](/models/model-id-convention).
+A model entry's `privacy_tier` and TEE fields tell you which privacy modes that model supports. You select a mode by adding `:confidential` or `:encrypted` to the model ID at request time (those two are the only valid suffixes). A model that reports `attestation_available: true` can be called with `:confidential`; one with `encrypted_supported: true` can be called with `:encrypted`. TEE stands for Trusted Execution Environment, a hardware-isolated compute box the host cannot read into; attestation is a signed statement proving your call ran inside one. See [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) and [Model ID convention](/models/model-id-convention).
 
 ## Common mistakes
 

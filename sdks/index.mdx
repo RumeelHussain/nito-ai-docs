@@ -59,7 +59,7 @@ When those pages exist, they will be linked from here. Until then, treat the Ope
 
 ## Privacy, briefly
 
-Across every SDK path, privacy is selected by the model ID, not by a separate parameter. Add `:tee` or `:e2e-tee` to the model string to raise the tier; no other code changes. `system_fingerprint` is always `null`, and the error envelope carries the error family in `code` with no `type` field. Streaming, tool calling, prompt caching, and reasoning are supported on the Chat Completions surface. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Across every SDK path, privacy is selected by the model ID, not by a separate parameter. Add `:confidential` or `:encrypted` to the model string to raise the tier; no other code changes. `system_fingerprint` is always `null`, and the error envelope carries the error family in `code` with no `type` field. Streaming, tool calling, prompt caching, and reasoning are supported on the Chat Completions surface. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Related
 

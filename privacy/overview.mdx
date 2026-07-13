@@ -15,22 +15,22 @@ This matters because the strongest modes have real costs (fewer eligible backend
 
 ## The modes you can ask for
 
-Nito exposes a small, fixed set of public privacy modes. Internally these map onto three stored tiers (`anon`, `private`, `tee`), but what you select from is this list:
+Nito exposes a small, fixed set of public privacy modes. Internally these map onto three stored tiers (`anon`, `private`, `confidential`), but what you select from is this list:
 
 | Mode | How you get it | What it means in plain terms |
 | --- | --- | --- |
 | `ordinary` | No suffix, on an ordinary-tier model | Standard routing. By default the gateway keeps metadata only, not your prompt or the reply. |
 | `private` | No suffix, on a private-tier model | Routed to a privately configured backend with zero-data-retention enforced at the provider. |
-| `tee` | `:tee` suffix | Runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box. You can fetch an attestation and verify the call really ran there. |
-| `e2e-tee` | `:e2e-tee` suffix (plus encryption headers) | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. Non-streaming, supported on NEAR and Phala only. |
+| `confidential` | `:confidential` suffix | Runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box. You can fetch an attestation and verify the call really ran there. |
+| `encrypted` | `:encrypted` suffix (plus encryption headers) | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. Non-streaming, supported on NEAR and Phala only. |
 
-Note that you never type `:ordinary`, `:anon`, or `:private`. Those modes are reached by sending the plain model ID; the model's own tier decides whether a suffix-free call is ordinary or private. The **only** valid suffixes are `:tee` and `:e2e-tee`. Anything else is rejected.
+Note that you never type `:ordinary`, `:anon`, or `:private`. Those modes are reached by sending the plain model ID; the model's own tier decides whether a suffix-free call is ordinary or private. The **only** valid suffixes are `:confidential` and `:encrypted`. Anything else is rejected.
 
 ## Metadata-only by default
 
 Even an ordinary call is not a free-for-all. The gateway's default posture is **metadata only**. Prompts, completions, reasoning, tool calls, and uploaded file contents are request-local: they are used to serve your request and are not persisted by the gateway. Telemetry is restricted to a safe allowlist of fields, and inference responses are served with `Cache-Control: no-store`. Where a chat history exists, for example in a browser app, it lives on the client side and is encrypted, not on the gateway.
 
-That default is the floor. The `private`, `tee`, and `e2e-tee` modes build assurance on top of it. The precise contract, including what is and is not retained and how it is enforced upstream, is in [Zero data retention](/privacy/zero-data-retention).
+That default is the floor. The `private`, `confidential`, and `encrypted` modes build assurance on top of it. The precise contract, including what is and is not retained and how it is enforced upstream, is in [Zero data retention](/privacy/zero-data-retention).
 
 ## Verifiable assurance, not "trust us"
 
@@ -42,14 +42,14 @@ This split is the whole reason the assurance is credible. If the gateway claimed
 
 ## A mode never silently downgrades
 
-This is the single most important behavior for a security reviewer to internalize. If you ask for `:tee` and no TEE-capable backend can serve the call, the call **fails**. It does not quietly fall back to an ordinary backend. The same is true for `:e2e-tee`. A privacy guarantee that silently weakens is worse than no guarantee, so Nito refuses rather than downgrades. When you see a successful response to a `:tee` or `:e2e-tee` request, you can be sure it was served at the mode you asked for.
+This is the single most important behavior for a security reviewer to internalize. If you ask for `:confidential` and no TEE-capable backend can serve the call, the call **fails**. It does not quietly fall back to an ordinary backend. The same is true for `:encrypted`. A privacy guarantee that silently weakens is worse than no guarantee, so Nito refuses rather than downgrades. When you see a successful response to a `:confidential` or `:encrypted` request, you can be sure it was served at the mode you asked for.
 
 ## How to think about choosing a mode
 
 - **Ordinary** for routine, low-sensitivity work where metadata-only retention is enough.
 - **Private** when you want zero-data-retention enforced at the provider but do not need hardware proof.
-- **`:tee`** when you want the call to run in a sealed environment and want to verify it did.
-- **`:e2e-tee`** when the data must be encrypted to the sealed environment itself and you can accept non-streaming, NEAR/Phala-only operation.
+- **`:confidential`** when you want the call to run in a sealed environment and want to verify it did.
+- **`:encrypted`** when the data must be encrypted to the sealed environment itself and you can accept non-streaming, NEAR/Phala-only operation.
 
 ## Related
 

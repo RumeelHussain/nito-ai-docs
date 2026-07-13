@@ -28,7 +28,7 @@ Hold onto one idea from that sentence: **the model ID carries two decisions at o
 Here is what actually happens when you make a call, step by step. You only ever touch steps 1 and 2 directly; the rest is the gateway doing its job, but knowing them helps you reason about errors, cost, and latency.
 
 1. **Authentication.** You send your API key as a bearer token in the `Authorization` header. Nito looks it up, resolves it to your organization (the account that owns billing and keys), and rejects the request with `401` if the key is missing, malformed, revoked, or expired. This is also where rate limits are checked: if you are over a limit, you get `429` with a `Retry-After` header telling you how long to wait.
-2. **Model and privacy resolution.** Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode; `grok-4.3:tee` asks for execution inside a Trusted Execution Environment; `grok-4.3:e2e-tee` asks for end-to-end encrypted TEE. Only `:tee` and `:e2e-tee` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
+2. **Model and privacy resolution.** Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode; `grok-4.3:confidential` asks for execution inside a Trusted Execution Environment; `grok-4.3:encrypted` asks for end-to-end encrypted TEE. Only `:confidential` and `:encrypted` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
 3. **Routing.** A single logical model can be served by more than one physical backend (the same model at different providers, or at different privacy tiers). Nito gathers the eligible backends and chooses one, filtering first by hard requirements (your privacy mode, the features you asked for, the inputs you sent) and then ordering what remains by availability and cost. The result is that you name one model and Nito quietly picks a healthy, eligible, cost-effective backend to run it.
 4. **Billing hold.** Before spending real money on a provider call, Nito places a hold against your credit balance, sized to the expected cost of the request. A hold is like the pre-authorization a hotel puts on a card at check-in: it reserves the funds without charging them yet. This guarantees you can pay for the work before it starts.
 5. **Inference.** Nito calls the chosen provider inside the privacy boundary you selected, and returns the result either as one complete response or as a stream of tokens (small incremental pieces) over a long-lived connection.
@@ -61,15 +61,15 @@ On most AI platforms, privacy is a property of your account or your plan: you si
 | --- | --- | --- |
 | `model-id` | Ordinary | Standard routing. By default the gateway keeps metadata only, not your prompt or the model's reply. |
 | `model-id` (a private-tier model) | Private | Served by a privately configured backend with zero-data-retention enforced at the provider, so the upstream is contractually and technically told not to keep the data. |
-| `model-id:tee` | TEE | Runs inside a Trusted Execution Environment: a hardware-isolated, sealed compute box the host cannot peer into. You can fetch an attestation and verify the call really ran there. |
-| `model-id:e2e-tee` | End-to-end encrypted TEE | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. It does not stream and supports fewer features, by design. |
+| `model-id:confidential` | TEE | Runs inside a Trusted Execution Environment: a hardware-isolated, sealed compute box the host cannot peer into. You can fetch an attestation and verify the call really ran there. |
+| `model-id:encrypted` | End-to-end encrypted TEE | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. It does not stream and supports fewer features, by design. |
 
 **Why offer a dial instead of just maxing out privacy?** Because the strongest modes have real trade-offs. End-to-end encrypted TEE cannot stream, so a chat UI built on it cannot show tokens as they arrive. TEE-capable backends are fewer, which can mean higher latency or lower availability. Forcing every request through the strongest mode would make routine calls slower and more fragile for no benefit. Letting you match the protection to the sensitivity of each call is the whole point: pay the cost of strong privacy only where the request actually needs it.
 
-Which modes a given model supports is reported on its catalog entry (look at `privacy_tier`, `attestation_available`, and `e2ee_supported`). TEE and end-to-end TEE come from specific providers only. The full treatment is in [Per-call privacy modes](/privacy/per-call-privacy-modes) and [Privacy tiers in depth](/privacy/tiers).
+Which modes a given model supports is reported on its catalog entry (look at `privacy_tier`, `attestation_available`, and `encrypted_supported`). Confidential and Encrypted come from specific providers only. The full treatment is in [Per-call privacy modes](/privacy/per-call-privacy-modes) and [Privacy tiers in depth](/privacy/tiers).
 
 <Warning>
-  Privacy modes are selected by the model ID suffix, and the only valid suffixes are `:tee` and `:e2e-tee`. Any other suffix (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body. If you want a different privacy mode, you change the model string, nothing else.
+  Privacy modes are selected by the model ID suffix, and the only valid suffixes are `:confidential` and `:encrypted`. Any other suffix (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body. If you want a different privacy mode, you change the model string, nothing else.
 </Warning>
 
 ## What you can do with one request
@@ -94,7 +94,7 @@ Knowing the boundaries prevents wrong assumptions:
 ## Common misunderstandings
 
 - **"I set privacy once for my account."** No. Privacy is per request, via the model ID. Two calls with the same key can use different modes.
-- **"`:tee` will fall back to a normal backend if no TEE is free."** No. A privacy mode never silently downgrades. If it cannot be served as asked, the call fails.
+- **"`:confidential` will fall back to a normal backend if no TEE is free."** No. A privacy mode never silently downgrades. If it cannot be served as asked, the call fails.
 - **"A logical model always runs on the same backend."** No. Routing can pick different backends across calls based on availability and cost. For attested calls, the attestation tells you exactly where it ran.
 
 ## Next

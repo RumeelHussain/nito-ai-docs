@@ -30,7 +30,7 @@ A signed receipt is only useful if it describes **your** computation and not an 
 
 ## What this means on Nito
 
-Nito uses this pair, sealed execution plus a checkable attestation, to back its strongest privacy modes. When you select the `:tee` or `:e2e-tee` mode on a supported model, your call runs inside one of these environments, and you can fetch the attestation and verify it yourself rather than trusting a claim. That is the difference between a privacy promise and a privacy property you can confirm.
+Nito uses this pair, sealed execution plus a checkable attestation, to back its strongest privacy modes. When you select the `:confidential` or `:encrypted` mode on a supported model, your call runs inside one of these environments, and you can fetch the attestation and verify it yourself rather than trusting a claim. That is the difference between a privacy promise and a privacy property you can confirm.
 
 One honest caution, which the rest of this section expands on. Producing an attestation and **fully** verifying its hardware quote are two different jobs. The Nito gateway runs a set of baseline checks (the evidence is well-formed, the signing material is present, your nonce is bound) and returns the raw evidence to you. The deepest hardware checks, validating the manufacturer's quote and certificate chains, are yours to perform on that evidence if your threat model demands them. This is why these docs say a result is **attested** and **verifiable**, never "trustless." The assurance is real, and it is checkable, which is exactly the point.
 

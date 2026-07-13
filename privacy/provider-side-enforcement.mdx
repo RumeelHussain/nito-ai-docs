@@ -36,7 +36,7 @@ Image generation is served by fal. Nito sends `X-Fal-Store-IO: 0` on image reque
 
 ## NEAR and Phala: sealed execution with attestation
 
-NEAR and Phala are the providers behind the `tee` and `e2e-tee` modes, and their enforcement is categorically stronger than a no-store flag. Instead of asking the provider not to keep your data, these run the call inside a Trusted Execution Environment, a hardware-isolated, sealed compute box, and produce an **attestation**: a signed statement about the environment that ran the call.
+NEAR and Phala are the providers behind the `confidential` and `encrypted` modes, and their enforcement is categorically stronger than a no-store flag. Instead of asking the provider not to keep your data, these run the call inside a Trusted Execution Environment, a hardware-isolated, sealed compute box, and produce an **attestation**: a signed statement about the environment that ran the call.
 
 The attestation carries a provider-specific subject so you can confirm which sealed environment served you:
 

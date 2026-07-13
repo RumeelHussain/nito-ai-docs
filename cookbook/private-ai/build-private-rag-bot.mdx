@@ -7,7 +7,7 @@ Retrieval-augmented generation (RAG) has two model calls in its hot path: **embe
 
 ## The two calls, both private
 
-Privacy is chosen by model ID on every call. That includes embeddings: `POST /v1/embeddings` accepts a `model`, and the same tier rules apply. Choosing a private-tier embedding model, or an attestation-capable one with `:tee`, keeps retrieval under the same privacy posture as your chat answering step.
+Privacy is chosen by model ID on every call. That includes embeddings: `POST /v1/embeddings` accepts a `model`, and the same tier rules apply. Choosing a private-tier embedding model, or an attestation-capable one with `:confidential`, keeps retrieval under the same privacy posture as your chat answering step.
 
 Fetch `GET /v1/models?capability=embeddings` (via `GET /api/v1/model-groups?capability=embeddings`) to pick an embedding model, and `GET /v1/models` for a chat model. The example IDs below are placeholders.
 
@@ -21,7 +21,7 @@ Fetch `GET /v1/models?capability=embeddings` (via `GET /api/v1/model-groups?capa
 import os, requests
 
 BASE_URL = "https://YOUR-NITO-BASE-URL"       # TODO: confirm base URL
-EMBED_MODEL = "EMBED_MODEL_ID:tee"             # TODO: attestation-capable or private-tier embedding model
+EMBED_MODEL = "EMBED_MODEL_ID:confidential"             # TODO: attestation-capable or private-tier embedding model
 API_KEY = os.environ["NITO_API_KEY"]
 
 def embed(texts):
@@ -48,7 +48,7 @@ Store each `(chunk, vector)` pair in whatever vector index you already use. The 
 At query time, embed the question with the **same** embedding model, find the nearest chunks in your index, and pass them to a private or attested chat model as context.
 
 ```python
-CHAT_MODEL = "CHAT_MODEL_ID:tee"   # TODO: attestation-capable or private-tier chat model
+CHAT_MODEL = "CHAT_MODEL_ID:confidential"   # TODO: attestation-capable or private-tier chat model
 
 def answer(question, top_chunks):
     context = "\n\n".join(top_chunks)
@@ -73,9 +73,9 @@ print(answer(question, top))
 ## Keeping the pipeline private end to end
 
 - **Same tier on both calls.** If retrieval runs at a private tier but answering runs on an ordinary model, your privacy posture is only as strong as the weaker call. Match the tiers.
-- **Embeddings inherit the same privacy options.** The `:tee` suffix and private-tier selection work the same way on `/v1/embeddings` as on chat, so there is no separate mechanism to learn.
+- **Embeddings inherit the same privacy options.** The `:confidential` suffix and private-tier selection work the same way on `/v1/embeddings` as on chat, so there is no separate mechanism to learn.
 - **Your index is outside the gateway.** The gateway does not store chunks or vectors. Retention, encryption, and access control on the vector store are your responsibility.
-- **Attest if you used `:tee`.** For an attested chat model, you can fetch and verify the attestation separately. See [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
+- **Attest if you used `:confidential`.** For an attested chat model, you can fetch and verify the attestation separately. See [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce).
 
 ## Related
 

@@ -11,7 +11,7 @@ The key is missing, mistyped, revoked, or not sent as `Authorization: Bearer <ke
 
 #### Why am I getting 400 about the model?
 
-The model ID is not in your catalog, or you used an invalid privacy suffix. Only `:tee` and `:e2e-tee` are valid. Pull a valid ID from `GET /v1/models`.
+The model ID is not in your catalog, or you used an invalid privacy suffix. Only `:confidential` and `:encrypted` are valid. Pull a valid ID from `GET /v1/models`.
 
 #### Why am I getting 402?
 
@@ -27,7 +27,7 @@ Yes. The chat request body is capped at 4 MiB. The attachments parser has a sepa
 
 #### Does streaming work with every mode?
 
-No. The `:e2e-tee` mode is non-streaming only. Use `:tee` if you need streaming with attestation. See [Streaming](/features/streaming).
+No. The `:encrypted` mode is non-streaming only. Use `:confidential` if you need streaming with attestation. See [Streaming](/features/streaming).
 
 #### What is not available yet?
 

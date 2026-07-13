@@ -86,10 +86,10 @@ Privacy is chosen by the model ID, so you opt into a stronger tier by adding a s
 
 ```python
 # TEE-backed execution with an attestation you can verify
-model="grok-4.3:tee"
+model="grok-4.3:confidential"
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Use `GET /v1/models` to find models that support attestation. Note that `:e2e-tee` does not stream and needs extra headers, so it is best done by hand rather than through the SDK. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Use `GET /v1/models` to find models that support attestation. Note that `:encrypted` does not stream and needs extra headers, so it is best done by hand rather than through the SDK. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 

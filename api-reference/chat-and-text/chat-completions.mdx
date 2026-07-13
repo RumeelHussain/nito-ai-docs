@@ -21,7 +21,7 @@ The body is decoded as **strict JSON**: unknown fields are rejected with a `400`
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `messages` | array | Yes | Conversation so far. Empty array is rejected (`messages is required`). See [Message format](/api-reference/chat-and-text/message-format). |
-| `model` | string | No | Empty falls back to the gateway default. Append `:tee` or `:e2e-tee` to select a privacy mode. Router mode expects `provider/model` form. |
+| `model` | string | No | Empty falls back to the gateway default. Append `:confidential` or `:encrypted` to select a privacy mode. Router mode expects `provider/model` form. |
 | `temperature` | number | No | Sampling temperature. Nil passthrough. |
 | `top_p` | number | No | Nucleus sampling. Nil passthrough. |
 | `max_tokens` | integer | No | Cap on generated tokens. |

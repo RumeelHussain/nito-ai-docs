@@ -30,7 +30,7 @@ This recipe uses OpenAI **Chat Completions** at `POST /v1/chat/completions`, the
 
 ## Notes
 
-- Privacy is selected by the model ID. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. `:encrypted` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 - For the current settings path and troubleshooting, follow the [Codex editor integration](/sdks/editor-integrations/codex) page.
 
 ## Related

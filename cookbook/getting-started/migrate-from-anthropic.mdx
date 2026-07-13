@@ -82,7 +82,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/models" \
 
 ## Walkthrough
 
-Once the request is in Chat Completions shape, everything else is standard Nito. Streaming uses `stream: true` and emits SSE chunks ending with `data: [DONE]`. Privacy is chosen by a model-ID suffix (`grok-4.3:tee`), not a request field. Only `:tee` and `:e2e-tee` are valid, and `:e2e-tee` does not stream.
+Once the request is in Chat Completions shape, everything else is standard Nito. Streaming uses `stream: true` and emits SSE chunks ending with `data: [DONE]`. Privacy is chosen by a model-ID suffix (`grok-4.3:confidential`), not a request field. Only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
 
 Do not carry Anthropic-specific behaviors over as if they were Nito's. Features that are part of the Anthropic API but not documented for Nito's Chat Completions surface should be treated as unverified rather than assumed to work.
 

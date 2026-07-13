@@ -15,15 +15,15 @@ The gateway verifies attestations at a baseline level (evidence present and well
 
 Attestation freshness is bound through the nonce you send. If you omit it, the binding can be satisfied by an empty value, which is not replay protection. To get anti-replay you must generate a fresh random nonce per request and confirm it is echoed. The gateway does not generate one for you.
 
-## E2E-TEE is non-streaming and feature-limited
+## Encrypted is non-streaming and feature-limited
 
-The `e2e-tee` mode is the strongest privacy mode and, by design, the most constrained:
+The `encrypted` mode is the strongest privacy mode and, by design, the most constrained:
 
 - It does **not** stream. A chat UI built on it cannot show tokens as they arrive.
 - It rejects reasoning, tools, prompt caching, and multi-part messages when the encryption headers are present.
 - It is available on **NEAR and Phala only**.
 
-If you need streaming or those features, you cannot use `e2e-tee` for that call. Choose the privacy mode against the call's real needs, as described in the [Privacy overview](/privacy/overview).
+If you need streaming or those features, you cannot use `encrypted` for that call. Choose the privacy mode against the call's real needs, as described in the [Privacy overview](/privacy/overview).
 
 ## Audio and video are not available
 

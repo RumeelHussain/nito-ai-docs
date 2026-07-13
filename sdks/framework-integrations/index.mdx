@@ -22,10 +22,10 @@ That is the whole contract. Messages, streaming, and tool-call shapes follow the
 Privacy is chosen by the model ID, not by a framework setting. Add a suffix to the model name and change nothing else:
 
 ```text
-grok-4.3:tee      # TEE-backed execution with an attestation you can verify
+grok-4.3:confidential      # TEE-backed execution with an attestation you can verify
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support that tier. Note that `:e2e-tee` does not stream and requires extra headers, so it is a poor fit for most framework integrations; prefer `:tee` when you need attestation with streaming. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note that `:encrypted` does not stream and requires extra headers, so it is a poor fit for most framework integrations; prefer `:confidential` when you need attestation with streaming. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## A note on Anthropic-shaped frameworks
 

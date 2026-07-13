@@ -22,7 +22,7 @@ To read the two pages well, hold this picture of where your data goes:
 
 1. Your request reaches the gateway, authenticated by an API key that is stored only as a hash.
 2. The gateway resolves the model and privacy mode from the model ID, places a billing hold, and routes to a provider inside the privacy boundary you selected.
-3. The provider runs the call. For ordinary and private modes, the provider is constrained by a per-request no-retention setting. For `tee` and `e2e-tee`, the call runs inside a sealed environment that produces an attestation.
+3. The provider runs the call. For ordinary and private modes, the provider is constrained by a per-request no-retention setting. For `confidential` and `encrypted`, the call runs inside a sealed environment that produces an attestation.
 4. The result returns; prompts and completions are request-local and not persisted by the gateway.
 
 Each step has defenses and each step has limits. The two pages walk them in that order.

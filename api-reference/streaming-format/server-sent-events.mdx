@@ -3,7 +3,7 @@ title: Server-Sent Events transport
 description: How Nito streams chat completions over SSE. Response headers, frame format, and the keep-alive heartbeat.
 ---
 
-When you set `stream: true` on a chat completions request (and the call is not E2E-TEE), Nito streams the reply as Server-Sent Events. This page covers the transport: headers, frame format, and heartbeats. The chunk payload shape is in [Delta format](/api-reference/streaming-format/delta-format).
+When you set `stream: true` on a chat completions request (and the call is not Encrypted), Nito streams the reply as Server-Sent Events. This page covers the transport: headers, frame format, and heartbeats. The chunk payload shape is in [Delta format](/api-reference/streaming-format/delta-format).
 
 ## Response headers
 
@@ -49,7 +49,7 @@ data: [DONE]\n\n
 
 ## What is not streamable
 
-Streaming is refused for E2E-TEE chat (`streaming is not supported with E2E-TEE`). Chat fusion is non-streaming by design. See [Chat Fusion API](/api-reference/chat-and-text/chat-fusion).
+Streaming is refused for Encrypted chat (`streaming is not supported with Encrypted`). Chat fusion is non-streaming by design. See [Chat Fusion API](/api-reference/chat-and-text/chat-fusion).
 
 ## Related
 

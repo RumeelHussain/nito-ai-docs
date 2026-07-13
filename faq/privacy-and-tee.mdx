@@ -7,27 +7,27 @@ Questions about the privacy model and how to verify it. Each answer links to the
 
 #### Does every call run in a TEE?
 
-No. TEE execution is the highest tier and is selected per call by adding `:tee` to the model ID (the model must support it). Most calls use lighter modes. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+No. TEE execution is the highest tier and is selected per call by adding `:confidential` to the model ID (the model must support it). Most calls use lighter modes. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 #### How do I make a call private?
 
-Add a suffix to the model ID: `:tee` for TEE-backed execution with attestation, or `:e2e-tee` for end-to-end encrypted TEE. Ordinary and private modes need no suffix. Only `:tee` and `:e2e-tee` are valid.
+Add a suffix to the model ID: `:confidential` for TEE-backed execution with attestation, or `:encrypted` for end-to-end encrypted TEE. Ordinary and private modes need no suffix. Only `:confidential` and `:encrypted` are valid.
 
 #### What are the privacy tiers?
 
-Four modes: ordinary (no suffix), private (a private-tier model), TEE (`:tee`), and end-to-end encrypted TEE (`:e2e-tee`). See [Privacy tiers](/privacy/tiers).
+Four modes: ordinary (no suffix), private (a private-tier model), TEE (`:confidential`), and end-to-end encrypted TEE (`:encrypted`). See [Privacy tiers](/privacy/tiers).
 
 #### Can I verify the privacy claim myself?
 
-Yes, for TEE tiers. Fetch an attestation from `GET /api/v1/tee/attestation` and verify it independently. The gateway runs a baseline verification and returns the raw evidence so you can complete full hardware verification client-side. See [TEE attestation](/privacy/tee-attestation).
+Yes, for TEE tiers. Fetch an attestation from `GET /api/v1/attestation` and verify it independently. The gateway runs a baseline verification and returns the raw evidence so you can complete full hardware verification client-side. See [TEE attestation](/privacy/tee-attestation).
 
 #### What does Nito keep about my prompts?
 
 By default, metadata only. Prompt and completion contents are treated as request-local and are not persisted by the gateway. See [Zero Data Retention](/privacy/zero-data-retention).
 
-#### Does a `:tee` call ever fall back to a non-TEE backend?
+#### Does a `:confidential` call ever fall back to a non-TEE backend?
 
-No. A privacy mode never silently downgrades. If a `:tee` call cannot be served attested, it fails rather than running in a weaker mode. See [Backend selection](/models/backend-selection).
+No. A privacy mode never silently downgrades. If a `:confidential` call cannot be served attested, it fails rather than running in a weaker mode. See [Backend selection](/models/backend-selection).
 
 ## Related
 

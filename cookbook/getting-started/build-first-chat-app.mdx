@@ -84,7 +84,7 @@ The whole app rests on one idea: the API is stateless, so the conversation lives
 
 The `system` message at the top sets behavior once and stays for the whole session. `resp.choices[0].message.content` is the reply text, and `finish_reason` (not printed here) would tell you if the model stopped early because it hit `max_tokens` (`length`) rather than finishing (`stop`).
 
-To send a turn through a stronger privacy mode, change the model to `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the mode.
+To send a turn through a stronger privacy mode, change the model to `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the mode.
 
 ## Watch out for growth
 

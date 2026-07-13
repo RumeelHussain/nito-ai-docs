@@ -6,7 +6,7 @@ description: Fetch a baseline-verified TEE attestation for a model, with the ful
 Fetch a TEE attestation for an attestation-capable model.
 
 ```
-GET /api/v1/tee/attestation
+GET /api/v1/attestation
 ```
 
 The gateway resolves the public model to a physical, attestation-capable model, calls the provider's attestation client, runs **baseline** verification, and returns the result. The gateway does baseline verification only; it does not perform full hardware-quote verification (see the scope note below).
@@ -21,7 +21,7 @@ Only these keys are allow-listed; others are ignored.
 | `nonce` | no | Caller-supplied freshness value. Supply a fresh random nonce for anti-replay. |
 | `signing_address` | no | The signing address you expect the report-data to bind to. |
 | `signing_algo` | no | The signing algorithm you expect. If given, it must match the evidence. |
-| `trust_tier` | no | `""` or `tee`, or `e2e-tee`. Selects the attestation tier. |
+| `trust_tier` | no | `""` or `confidential`, or `encrypted`. Selects the attestation tier. |
 
 Anti-replay is **caller-driven**: you supply a fresh nonce and check that it is echoed. If you omit `nonce`, the report may carry an empty binding, so an omitted nonce does not give you replay protection. See [Verify yourself](/api-reference/attestation/verify-yourself).
 
@@ -29,12 +29,12 @@ Anti-replay is **caller-driven**: you supply a fresh nonce and check that it is 
 
 ```json
 {
-  "object": "tee.attestation",
-  "model": "MODEL:tee",
+  "object": "attestation",
+  "model": "MODEL:confidential",
   "routed_model": "near/...",
   "provider": "near",
   "provider_model_id": "...",
-  "privacy_tier": "tee",
+  "privacy_tier": "confidential",
   "tee_provider": "near",
   "attestation_available": true,
   "attestation_subject": "...",
@@ -51,12 +51,12 @@ Anti-replay is **caller-driven**: you supply a fresh nonce and check that it is 
 
 | Field | Type | Notes |
 |---|---|---|
-| `object` | string | Always `"tee.attestation"`. |
+| `object` | string | Always `"attestation"`. |
 | `model` | string | The public model id you requested. |
 | `routed_model` | string | Optional. The physical model that produced the attestation. |
 | `provider` | string | The serving provider (e.g. `near`, `phala`). |
 | `provider_model_id` | string | The provider's native model id. |
-| `privacy_tier` | string | The stored tier (`tee` for attested models). |
+| `privacy_tier` | string | The stored tier (`confidential` for attested models). |
 | `tee_provider` | string | The TEE provider. |
 | `attestation_available` | boolean | Whether attestation evidence was available. |
 | `attestation_subject` | string | Optional. NEAR uses a domain; Phala uses an appid. |
@@ -79,7 +79,7 @@ The response is served with `Cache-Control: no-store`. Do not cache attestations
 
 ```bash
 NONCE=$(openssl rand -hex 32)
-curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL:tee&nonce=$NONCE" \
+curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 

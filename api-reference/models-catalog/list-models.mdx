@@ -51,11 +51,11 @@ The envelope is an OpenAI-style list:
 | `context_window` | int | Maximum context length in tokens. |
 | `pricing` | object | Unit prices in nanos. See below. |
 | `free_tier_eligible` | bool | Whether the model can be used on the free tier. |
-| `privacy_tier` | string | Stored privacy tier: `anon`, `private`, or `tee`. |
-| `tee_provider` | string | TEE provider when the tier is `tee` (`near` or `phala`). |
+| `privacy_tier` | string | Stored privacy tier: `anon`, `private`, or `confidential`. |
+| `tee_provider` | string | TEE provider when the tier is `confidential` (`near` or `phala`). |
 | `attestation_available` | bool | Whether a TEE attestation can be fetched for this model. |
 | `attestation_subject` | string | Attestation subject (NEAR `domain` / Phala `appid`) when applicable. |
-| `e2ee_supported` | bool | Whether end-to-end TEE encryption is supported. |
+| `encrypted_supported` | bool | Whether end-to-end encryption is supported. |
 
 ### `architecture`
 
@@ -78,7 +78,7 @@ Boolean flags describing what the model supports. The set includes (and is not l
 | `supports_code_interpreter` | Can use the [code interpreter](/api-reference/server-tools/code-interpreter) tool. |
 | `supports_reasoning` | Exposes reasoning output. |
 | `supports_tee_attestation` | Can produce a TEE attestation. |
-| `supports_e2ee` | Supports end-to-end TEE encryption. |
+| `supports_e2ee` | Supports end-to-end encryption. |
 
 ### `pricing`
 
@@ -115,7 +115,7 @@ Per-unit prices are expressed in nanos (billionths of a currency unit). The exac
       "free_tier_eligible": true,
       "privacy_tier": "anon",
       "attestation_available": false,
-      "e2ee_supported": false
+      "encrypted_supported": false
     }
   ]
 }
@@ -127,7 +127,7 @@ Per-unit prices are expressed in nanos (billionths of a currency unit). The exac
 
 - The catalog is runtime-discovered and upserted from provider APIs. There is no hardcoded model list, so the available models depend on the deployment's configured providers.
 - `pricing` and `context_window` are joined from the billing layer at response time; they are not stored on the underlying model card.
-- The `id` you get back is a logical public ID. To request a privacy tier, append `:tee` or `:e2e-tee` to it. See [Model groups](/api-reference/models-catalog/model-groups) and [Models](/models/model-groups).
+- The `id` you get back is a logical public ID. To request a privacy tier, append `:confidential` or `:encrypted` to it. See [Model groups](/api-reference/models-catalog/model-groups) and [Models](/models/model-groups).
 
 ## Not implemented
 

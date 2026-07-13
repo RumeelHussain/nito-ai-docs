@@ -108,7 +108,7 @@ Streaming changes how errors arrive, and this trips people up. Once the stream h
 - **Forgetting `[DONE]`.** Treat the literal `data: [DONE]` as the end signal; do not JSON-parse it.
 - **Expecting usage by default.** Add `stream_options.include_usage: true` to get the usage chunk; without it there is no usage in the stream.
 - **Ignoring mid-stream errors.** A `200` status does not guarantee success. Check each chunk for `error`.
-- **Streaming with `:e2e-tee`.** End-to-end encrypted TEE calls do not stream, by design. Use `:tee` if you want streaming together with attestation.
+- **Streaming with `:encrypted`.** End-to-end encrypted TEE calls do not stream, by design. Use `:confidential` if you want streaming together with attestation.
 
 ## Related
 

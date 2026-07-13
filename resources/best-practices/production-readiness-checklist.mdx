@@ -31,11 +31,11 @@ If you use `stream: true`, parse the stream correctly. Naive parsing is a common
 - **`[DONE]` is handled.** The stream terminates with a literal `data: [DONE]\n\n`; your parser stops on it rather than trying to JSON-decode it.
 - **Mid-stream error chunks are handled.** An error can arrive as a chunk with a top-level `error` object and a choice whose `finish_reason` is `error`. Detect and surface it instead of silently ending. See [Error events](/api-reference/streaming-format/error-events).
 - **Heartbeats are tolerated.** Keep-alive comment lines (`: keep-alive`) arrive periodically and must be ignored by the parser, not treated as data.
-- **`:e2e-tee` is never streamed.** That mode does not support streaming; your code does not request it. See [Streaming](/features/streaming).
+- **`:encrypted` is never streamed.** That mode does not support streaming; your code does not request it. See [Streaming](/features/streaming).
 
 ## Privacy
 
-- **The right tier is chosen per call.** Each request uses the privacy mode its sensitivity warrants, selected by the model-ID suffix (`:tee`, `:e2e-tee`, or none), not a blanket maximum that slows every call. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- **The right tier is chosen per call.** Each request uses the privacy mode its sensitivity warrants, selected by the model-ID suffix (`:confidential`, `:encrypted`, or none), not a blanket maximum that slows every call. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 - **No path downgrades privacy.** No retry or fallback ever relaxes a requested privacy mode; the gateway refuses to downgrade and your code must not work around that.
 
 ## Observability

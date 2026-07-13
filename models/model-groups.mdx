@@ -12,7 +12,7 @@ If that sounds abstract, here is the everyday version. Think of a model group li
 A group gathers several physical models that share one canonical identity. A physical model is a specific model on a specific provider, identified internally as `provider/providerModelID`. A canonical identity is the single public name they all answer to. Grouping them gives you three properties:
 
 - **You select by the logical model ID, not by a specific backend.** The logical ID is the public name you put in your request.
-- **One logical ID can fan out into per-privacy-mode options.** A group can expose ordinary, private, `:tee`, and `:e2e-tee` variants, depending on which backends in the group actually support which modes. A backend only shows up under a mode it can genuinely serve.
+- **One logical ID can fan out into per-privacy-mode options.** A group can expose ordinary, private, `:confidential`, and `:encrypted` variants, depending on which backends in the group actually support which modes. A backend only shows up under a mode it can genuinely serve.
 - **If one backend is unavailable, another in the group can serve the call.** Health is not your problem to track.
 
 The grouping is computed per surface, so the chat catalog, the embeddings catalog, and the image catalog each group independently.
@@ -32,13 +32,13 @@ The `capability` query parameter selects the surface: `chat` (the default), `emb
 
 People often expect an "alias" to be a manual mapping someone maintains, like a spreadsheet that says "this nickname means that model." Grouping is what aliasing is in practice, and it is automatic. Many provider-scoped rows that share a canonical model ID are presented as one option, keyed by the logical ID for each supported privacy mode. You do not register or manage aliases yourself. You benefit from them by naming the logical model and letting the group resolve to a concrete backend.
 
-A worked example makes the collapse concrete. Suppose a popular chat model is available from two providers, and one of those providers also offers it inside a TEE. That is three physical rows. The group collapses them into a small set of logical options: an ordinary-mode option that either provider can serve, and a `:tee` option that only the attestation-capable provider can serve. You see clean choices; Nito keeps the messy provider list behind them.
+A worked example makes the collapse concrete. Suppose a popular chat model is available from two providers, and one of those providers also offers it inside a TEE. That is three physical rows. The group collapses them into a small set of logical options: an ordinary-mode option that either provider can serve, and a `:confidential` option that only the attestation-capable provider can serve. You see clean choices; Nito keeps the messy provider list behind them.
 
 ## Fallbacks, and the one place they stop
 
 When you call a logical model, Nito gathers the candidate backends in the group and chooses one. If the preferred backend is unavailable, the next eligible candidate is used. There is also a second kind of fallback, the provider-default fallback: if the catalog has no exact match for a bare logical ID, Nito can route to a provider's configured default model.
 
-The provider-default fallback applies to the ordinary, anon, and private modes only. It does not apply to the TEE modes (`:tee` and `:e2e-tee`). The reason follows directly from what attestation means. An attestation is a signed statement that your call ran inside a specific sealed environment. If Nito quietly substituted a default backend for a `:tee` request, any attestation you later fetched would describe a different environment than the one you asked for, which defeats the purpose. So for TEE modes there is no silent substitute: either an attestation-capable backend in the group can serve the call, or the call fails.
+The provider-default fallback applies to the ordinary, anon, and private modes only. It does not apply to the TEE modes (`:confidential` and `:encrypted`). The reason follows directly from what attestation means. An attestation is a signed statement that your call ran inside a specific sealed environment. If Nito quietly substituted a default backend for a `:confidential` request, any attestation you later fetched would describe a different environment than the one you asked for, which defeats the purpose. So for TEE modes there is no silent substitute: either an attestation-capable backend in the group can serve the call, or the call fails.
 
 The exact ordering Nito uses to choose among the eligible candidates is described in [Backend selection](/models/backend-selection).
 
@@ -48,7 +48,7 @@ Model groups are what let you write `model: "<logical-id>"` once and stop worryi
 
 ## Common mistakes
 
-- **Expecting TEE to fall back to a non-TEE backend.** It will not. A `:tee` call that cannot be served attested fails rather than quietly downgrading. The provider-default fallback is excluded from TEE modes for precisely this reason.
+- **Expecting TEE to fall back to a non-TEE backend.** It will not. A `:confidential` call that cannot be served attested fails rather than quietly downgrading. The provider-default fallback is excluded from TEE modes for precisely this reason.
 - **Treating a logical ID as a single fixed backend.** It can resolve to different backends across calls based on availability and cost. For attested calls, the attestation tells you which backend actually ran.
 - **Calling the wrong capability.** A chat-shaped request against an embeddings group will not behave. Use `?capability=embeddings` or `?capability=images` to see the groups for those surfaces.
 

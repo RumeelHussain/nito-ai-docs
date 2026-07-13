@@ -74,7 +74,7 @@ Yes. The Anthropic SDK's primary call is `messages.create`, which targets `/v1/m
 
 ## Privacy
 
-As everywhere on Nito, privacy rides on the model ID. Add `:tee` or `:e2e-tee` to the model string to raise the tier, with no other code change. Only those two suffixes are valid. `:e2e-tee` is non-streaming and needs extra headers. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+As everywhere on Nito, privacy rides on the model ID. Add `:confidential` or `:encrypted` to the model string to raise the tier, with no other code change. Only those two suffixes are valid. `:encrypted` is non-streaming and needs extra headers. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 

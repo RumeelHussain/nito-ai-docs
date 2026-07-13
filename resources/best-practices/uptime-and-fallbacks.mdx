@@ -12,7 +12,7 @@ Two behaviors matter most, and understanding them keeps you from re-implementing
 - **Failover within a logical model group.** A single logical model can be served by more than one physical backend, the same model at different providers or tiers. When you name a model, Nito gathers the eligible backends, filters by your hard requirements, and orders the rest by availability and cost. If a healthy eligible backend exists, routing picks it. So transient trouble at one backend does not necessarily reach you; the gateway routes around it within the group.
 - **A server-side circuit breaker.** Nito runs a provider circuit breaker (enabled by default) that trips after a threshold of failures (3) and holds a cooldown (30s) before probing that provider again. This stops the gateway from hammering a backend that is clearly down and helps it shift load to healthier ones.
 
-There is one deliberate non-behavior worth stressing: **privacy modes never silently downgrade.** A `:tee` or `:e2e-tee` request that cannot be served as asked fails rather than falling back to a weaker backend. That is a guarantee, not a bug. Your fallback logic must respect it: never "retry without TEE" as a recovery step, because doing so would defeat the privacy choice the caller made.
+There is one deliberate non-behavior worth stressing: **privacy modes never silently downgrade.** A `:confidential` or `:encrypted` request that cannot be served as asked fails rather than falling back to a weaker backend. That is a guarantee, not a bug. Your fallback logic must respect it: never "retry without TEE" as a recovery step, because doing so would defeat the privacy choice the caller made.
 
 ## What you should add: app-level fallback
 

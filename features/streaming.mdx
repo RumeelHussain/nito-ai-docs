@@ -15,7 +15,7 @@ Reach for streaming when:
 Skip streaming when:
 
 - You only need the final text and are going to wait for it anyway (a backend job, a batch transform). A non-streaming call is simpler to handle.
-- You need a privacy mode that does not support it. The end-to-end encrypted TEE mode (`:e2e-tee`) **does not stream**; those calls are non-streaming only. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- You need a privacy mode that does not support it. The Encrypted mode (`:encrypted`) **does not stream**; those calls are non-streaming only. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Turning it on
 
@@ -57,7 +57,7 @@ This is the one place streaming error handling differs from normal request handl
 
 ## A note on privacy and streaming
 
-Streaming is available in ordinary, private, and `:tee` modes. It is the strongest mode, `:e2e-tee`, that cannot stream, because the response is encrypted to the sealed environment as a whole. If a streaming UX is essential, choose a privacy mode that supports it.
+Streaming is available in ordinary, private, and `:confidential` modes. It is the strongest mode, `:encrypted`, that cannot stream, because the response is encrypted to the sealed environment as a whole. If a streaming UX is essential, choose a privacy mode that supports it.
 
 The full SSE wire format, every field on a chunk, and exact framing are documented in the [streaming format reference](/api-reference/streaming-format). This page is the overview; that page is the contract.
 

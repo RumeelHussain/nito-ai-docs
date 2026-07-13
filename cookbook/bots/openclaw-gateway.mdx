@@ -60,11 +60,11 @@ Keep the real `z_sk_` key inside the OpenClaw configuration on your server. Your
 
 ## Streaming or not
 
-OpenClaw forwards standard Chat Completions, so streaming works if both your bot and the gateway pass `stream=True` through. Because `:e2e-tee` does not stream, only combine streaming with an ordinary or `:tee` model.
+OpenClaw forwards standard Chat Completions, so streaming works if both your bot and the gateway pass `stream=True` through. Because `:encrypted` does not stream, only combine streaming with an ordinary or `:confidential` model.
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID passed upstream. To run a request in a TEE with a verifiable attestation, use `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID passed upstream. To run a request in a TEE with a verifiable attestation, use `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Handling errors
 

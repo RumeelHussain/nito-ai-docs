@@ -25,7 +25,7 @@ curl "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
 
 - **`Authorization: Bearer $NITO_API_KEY`** authenticates the request. API keys start with `z_sk_`. This header is required on every call.
 - **`Content-Type: application/json`** tells the gateway the body is JSON. The body is decoded strictly: unknown fields are rejected, so a typo in a field name returns a 400.
-- **`model`** selects the model and, via an optional `:tee` / `:e2e-tee` suffix, the privacy mode.
+- **`model`** selects the model and, via an optional `:confidential` / `:encrypted` suffix, the privacy mode.
 - **`messages`** is the conversation, an array of `{ role, content }` objects.
 
 ## A fuller call

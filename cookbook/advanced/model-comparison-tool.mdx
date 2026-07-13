@@ -92,7 +92,7 @@ for m in fusion["models"]:
     print(m["model"], m["latency_ms"], "ms", m.get("finish_reason"))
 ```
 
-A few honest constraints. Fusion is **non-streaming and batched only**: you get one complete response, not a token stream. It takes **2 to 3 distinct models**. The response object is `"fusion.completion"` and includes the `judge` used, the merged `synthesis`, per-model results in `models[]` (each with `output`, `tokens`, `latency_ms`, `finish_reason`), and synthesis token counts. Only hosted web tools are allowed; caller-defined function tools are rejected. Privacy is chosen per model via the ID suffix, but you cannot mix TEE and non-TEE models in one call, and `:e2e-tee` is rejected for fusion.
+A few honest constraints. Fusion is **non-streaming and batched only**: you get one complete response, not a token stream. It takes **2 to 3 distinct models**. The response object is `"fusion.completion"` and includes the `judge` used, the merged `synthesis`, per-model results in `models[]` (each with `output`, `tokens`, `latency_ms`, `finish_reason`), and synthesis token counts. Only hosted web tools are allowed; caller-defined function tools are rejected. Privacy is chosen per model via the ID suffix, but you cannot mix TEE and non-TEE models in one call, and `:encrypted` is rejected for fusion.
 
 Use your own loop (Steps 1 to 3) when you want raw side-by-side answers and streaming; use fusion when you want the gateway to fan out and merge for you in one call.
 

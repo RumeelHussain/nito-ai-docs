@@ -16,7 +16,7 @@ These are the things the system actually does, which a compliance reviewer can v
 - **Metadata-only default retention.** Prompts, completions, reasoning, tool calls, and uploaded file contents are request-local and not persisted by the gateway. See the [Privacy overview](/privacy/overview).
 - **Provider-side no-retention enforcement.** Per-request settings constrain each provider hop. See [Provider-side enforcement](/privacy/provider-side-enforcement).
 - **Hashed credential storage.** Tokens are stored only as HMAC-SHA256 hashes, never in raw form.
-- **Attested execution on the top tiers.** `tee` and `e2e-tee` modes run in sealed environments that produce verifiable attestations.
+- **Attested execution on the top tiers.** `confidential` and `encrypted` modes run in sealed environments that produce verifiable attestations.
 - **Standard web-security controls.** Security headers, CSRF protection, and attachment-URL restrictions are in place.
 
 These are engineering facts, not compliance assertions. They describe behavior, not certification.

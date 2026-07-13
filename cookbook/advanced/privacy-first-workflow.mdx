@@ -1,9 +1,9 @@
 ---
 title: "Build a privacy-first workflow"
-description: "Pick the privacy tier per step, ordinary for low-sensitivity work and :tee for sensitive work, and verify attestation on the critical step."
+description: "Pick the privacy tier per step, ordinary for low-sensitivity work and :confidential for sensitive work, and verify attestation on the critical step."
 ---
 
-**Goal.** A multi-step workflow that chooses its privacy tier per step: cheap ordinary mode for low-sensitivity work, `:tee` for sensitive work, and an attestation check on the one step that actually handles the confidential material.
+**Goal.** A multi-step workflow that chooses its privacy tier per step: cheap ordinary mode for low-sensitivity work, `:confidential` for sensitive work, and an attestation check on the one step that actually handles the confidential material.
 
 **Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and at least one attestation-capable model (check `privacy_tier` and `attestation_available` in `GET /v1/models`). Read [Per-call privacy modes](/privacy/per-call-privacy-modes) first; this recipe assumes you know that the model ID suffix selects privacy.
 
@@ -14,10 +14,10 @@ The idea this recipe rests on: privacy is a property of **each request**, chosen
 Imagine a document triage flow with three steps:
 
 1. **Classify** the incoming document type. Low sensitivity, so run it in ordinary mode.
-2. **Extract** the confidential fields. High sensitivity, so run it in `:tee` and verify the attestation before trusting the result.
+2. **Extract** the confidential fields. High sensitivity, so run it in `:confidential` and verify the attestation before trusting the result.
 3. **Draft** a public-facing summary from non-sensitive fields. Low sensitivity, ordinary mode again.
 
-Matching the tier to the step is the whole point. Forcing every step through the strongest mode would make routine steps slower and more fragile for no benefit, since strong modes have real trade-offs (fewer backends, no streaming for `:e2e-tee`).
+Matching the tier to the step is the whole point. Forcing every step through the strongest mode would make routine steps slower and more fragile for no benefit, since strong modes have real trade-offs (fewer backends, no streaming for `:encrypted`).
 
 ## Step 1 and 3: Ordinary mode
 
@@ -47,33 +47,33 @@ doc_type = chat("grok-4.3", "Classify this document type: ...")   # ordinary mod
 
 `grok-4.3` is a stand-in; fetch real IDs from `GET /v1/models`.
 
-## Step 2: TEE mode, verified before use
+## Step 2: Confidential mode, verified before use
 
-For the sensitive step, add the `:tee` suffix so the call runs inside a Trusted Execution Environment. Because a privacy mode never silently downgrades, if TEE cannot be served the call fails rather than quietly running in ordinary mode. That refusal is a feature: you never accidentally process confidential data in a weaker tier.
+For the sensitive step, add the `:confidential` suffix so the call runs inside a Trusted Execution Environment. Because a privacy mode never silently downgrades, if TEE cannot be served the call fails rather than quietly running in ordinary mode. That refusal is a feature: you never accidentally process confidential data in a weaker tier.
 
-For the critical step you should not just ask for `:tee`, you should confirm it. Fetch an attestation with a fresh nonce and run the baseline checks before you send or trust the sensitive payload.
+For the critical step you should not just ask for `:confidential`, you should confirm it. Fetch an attestation with a fresh nonce and run the baseline checks before you send or trust the sensitive payload.
 
 ```python
 def verify_attestation(model_with_tee):
     nonce = secrets.token_hex(32)                     # fresh, never reused
     query = urllib.parse.urlencode({"model": model_with_tee, "nonce": nonce})
     req = urllib.request.Request(
-        f"{BASE_URL}/api/v1/tee/attestation?{query}",
+        f"{BASE_URL}/api/v1/attestation?{query}",
         headers={"Authorization": f"Bearer {API_KEY}"},
     )
     with urllib.request.urlopen(req) as resp:
         body = json.load(resp)
     assert resp.status == 200
-    assert body.get("object") == "tee.attestation"
-    assert body.get("privacy_tier") == "tee"
+    assert body.get("object") == "attestation"
+    assert body.get("privacy_tier") == "confidential"
     assert body.get("attestation_available") is True
     assert body.get("nonce") == nonce, "nonce echo mismatch, not bound to us"
     assert body.get("evidence"), "evidence missing"
     assert body.get("verified") is True, "baseline verification failed"
     return body
 
-att = verify_attestation("grok-4.3:tee")   # only proceed if this returns
-fields = chat("grok-4.3:tee", "Extract the confidential fields: ...")
+att = verify_attestation("grok-4.3:confidential")   # only proceed if this returns
+fields = chat("grok-4.3:confidential", "Extract the confidential fields: ...")
 ```
 
 These are **baseline** checks. They confirm the report is well-formed and bound to your nonce; they do **not** perform full hardware-quote verification. Validating the Intel TDX quote, GPU evidence, and certificate chains inside `evidence` is your responsibility on top of this. The full runnable version is the [verify-it-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe). Use the terms **attested** and **verifiable**, never "trustless."
@@ -82,7 +82,7 @@ These are **baseline** checks. They confirm the report is well-formed and bound 
 
 The workflow now spends strong-privacy budget on exactly one step, verifies that step before trusting it, and runs the cheap steps cheaply. That is the privacy dial working as designed: protection matched to the sensitivity of each request, all under one key.
 
-If you need the very strongest tier for a step, `:e2e-tee` adds client-side encryption on top of TEE, but it does not stream and rejects tools, reasoning, prompt caching, and multi-part messages, so reserve it for a step that can live with those limits.
+If you need the very strongest tier for a step, `:encrypted` adds client-side encryption on top of TEE, but it does not stream and rejects tools, reasoning, prompt caching, and multi-part messages, so reserve it for a step that can live with those limits.
 
 ## Related
 

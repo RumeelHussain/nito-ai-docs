@@ -20,8 +20,8 @@ The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatib
 - **`system_fingerprint` is always `null`.** It is serialized for compatibility but never populated. Do not branch on it.
 - **There is always exactly one choice.** Nito does not return `n > 1` alternatives. Read `choices[0]`.
 - **The error envelope has no `type` field.** Errors are `{"error": {"message", "code", "param"}}`. The error family lives in `code`, not in a `type` field as some OpenAI tooling expects.
-- **The model ID carries privacy.** Append `:tee` or `:e2e-tee` to raise the tier. There is no separate privacy parameter, and only those two suffixes are valid. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
-- **`:e2e-tee` does not stream.** End-to-end TEE mode is non-streaming and needs extra headers, so it is best driven by hand rather than through the SDK. Use `:tee` if you need streaming with attestation.
+- **The model ID carries privacy.** Append `:confidential` or `:encrypted` to raise the tier. There is no separate privacy parameter, and only those two suffixes are valid. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- **`:encrypted` does not stream.** Encrypted mode is non-streaming and needs extra headers, so it is best driven by hand rather than through the SDK. Use `:confidential` if you need streaming with attestation.
 - **Strict JSON decoding.** Unknown fields are rejected with a `400` rather than silently ignored, so a field pasted from another provider's API will surface an error immediately.
 - **Rate-limit headers.** On a `429`, Nito sends `Retry-After`. It does not emit `X-RateLimit-*` headers. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
 - **Model names.** OpenAI names are not Nito IDs. See [model mapping](/sdks/openai-drop-in/model-mapping).
@@ -48,7 +48,7 @@ Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported.
 | Capability | Status on Nito |
 | --- | --- |
 | Chat Completions | Supported |
-| Streaming | Supported (not with `:e2e-tee`) |
+| Streaming | Supported (not with `:encrypted`) |
 | Tool calling (function tools) | Supported (you execute them) |
 | Prompt caching | Supported (passthrough) |
 | Reasoning | Supported |

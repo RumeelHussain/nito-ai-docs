@@ -13,13 +13,13 @@ Every request begins with authentication. You send your API key as a bearer toke
 
 ## Hop 2: Model and privacy-mode resolution
 
-This is where the privacy mode is decided, and it is decided **once**. The gateway parses the `model` string. The base part selects the model; an optional `:tee` or `:e2e-tee` suffix selects a stronger mode. A model sent with no suffix resolves to ordinary or private according to that model's stored tier. Any suffix other than `:tee` or `:e2e-tee` is rejected here, before routing.
+This is where the privacy mode is decided, and it is decided **once**. The gateway parses the `model` string. The base part selects the model; an optional `:confidential` or `:encrypted` suffix selects a stronger mode. A model sent with no suffix resolves to ordinary or private according to that model's stored tier. Any suffix other than `:confidential` or `:encrypted` is rejected here, before routing.
 
-The output of this hop is a fixed privacy mode for the rest of the request's life. Nothing downstream can promote or demote it. If you asked for `:e2e-tee`, this is also where the gateway checks that the `X-Z-TEE-*` encryption headers are present and that the request is non-streaming; if those constraints are not met, the request is rejected at this stage rather than served in a weaker form.
+The output of this hop is a fixed privacy mode for the rest of the request's life. Nothing downstream can promote or demote it. If you asked for `:encrypted`, this is also where the gateway checks that the `X-Z-ENCRYPTED-*` encryption headers are present and that the request is non-streaming; if those constraints are not met, the request is rejected at this stage rather than served in a weaker form.
 
 ## Hop 3: Routing under the privacy filter
 
-A single logical model can be served by more than one physical backend (the same model at different providers or at different privacy tiers). The router gathers the eligible backends and chooses one, but it filters **first by hard requirements**, and the privacy mode is a hard requirement. A `:tee` request is filtered down to TEE-capable backends only; a `private`-tier request sets `RequireZeroDataRetention`, which in turn drives provider-side ZDR.
+A single logical model can be served by more than one physical backend (the same model at different providers or at different privacy tiers). The router gathers the eligible backends and chooses one, but it filters **first by hard requirements**, and the privacy mode is a hard requirement. A `:confidential` request is filtered down to TEE-capable backends only; a `private`-tier request sets `RequireZeroDataRetention`, which in turn drives provider-side ZDR.
 
 The load-bearing property here is the refusal to downgrade. If the privacy filter leaves zero eligible backends, the call **fails**. It does not fall back to a backend that cannot honor the mode. Only after the privacy filter is satisfied does the router order what remains by availability and cost. So routing optimizes for cost and health, but never at the expense of the privacy mode.
 
@@ -39,7 +39,7 @@ The point of the table is that the boundary is enforced **at the provider**, by 
 
 ## Where attestation fits
 
-For `:tee` and `:e2e-tee` calls, the sealed environment produces a signed attestation. You retrieve it through `GET /api/v1/tee/attestation`, supplying at minimum the `model` and ideally a fresh random `nonce`. The gateway runs **baseline** verification on the evidence before returning it:
+For `:confidential` and `:encrypted` calls, the sealed environment produces a signed attestation. You retrieve it through `GET /api/v1/attestation`, supplying at minimum the `model` and ideally a fresh random `nonce`. The gateway runs **baseline** verification on the evidence before returning it:
 
 1. Provider evidence is present and parses as a JSON object.
 2. A provider-declared `verified:false` marks the attestation unverified.

@@ -23,7 +23,7 @@ A gateway. Nito sits in front of many models from several providers, and you cho
 No. Nito is OpenAI-compatible: point the OpenAI SDK (or plain HTTP) at Nito's base URL and use a Nito model ID. See [Integrations](/faq/integrations).
 
 **Does every call run in a TEE?**
-No, and that is deliberate. TEE execution is the highest tier, selected per call by adding `:tee` to the model ID. Most calls use lighter modes. See [Privacy and TEE](/faq/privacy-and-tee).
+No, and that is deliberate. TEE execution is the highest tier, selected per call by adding `:confidential` to the model ID. Most calls use lighter modes. See [Privacy and TEE](/faq/privacy-and-tee).
 
 **What does Nito keep about my prompts?**
 By default, metadata only. Prompt and completion contents are treated as request-local and are not persisted by the gateway. See [Zero Data Retention](/privacy/zero-data-retention).

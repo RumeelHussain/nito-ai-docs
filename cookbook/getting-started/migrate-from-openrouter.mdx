@@ -70,7 +70,7 @@ Select IDs at runtime, because the catalog is discovered from providers and chan
 
 Both gateways speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the `chat.completion` response shape carry over unchanged. The three edits are the base URL (ending in `/v1`), the `z_sk_` key, and the model ID.
 
-Privacy on Nito is chosen per call by a model-ID suffix (`grok-4.3:tee`); only `:tee` and `:e2e-tee` are valid, and `:e2e-tee` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy on Nito is chosen per call by a model-ID suffix (`grok-4.3:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Do not import OpenRouter-specific behavior
 

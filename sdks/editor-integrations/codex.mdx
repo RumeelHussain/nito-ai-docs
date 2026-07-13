@@ -32,7 +32,7 @@ curl https://YOUR-NITO-BASE-URL/v1/models \
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID, so no separate Codex setting is required. Append `:tee` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. `:e2e-tee` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID, so no separate Codex setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 

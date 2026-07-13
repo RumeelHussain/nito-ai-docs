@@ -65,7 +65,7 @@ console.log(resp.choices[0].message.content);
 - **System prompts.** Anthropic takes a top-level `system` string; the Chat Completions shape uses a message with `role: "system"`. Move the system text into the messages array as shown above.
 - **Roles.** Nito accepts `system`, `user`, `assistant`, `tool`, and `developer` roles on the inference layer.
 - **Model names.** Anthropic model names are not Nito IDs. Use a Nito catalog ID from `GET /v1/models`.
-- **Privacy.** As everywhere on Nito, add `:tee` or `:e2e-tee` to the model ID to raise the privacy tier.
+- **Privacy.** As everywhere on Nito, add `:confidential` or `:encrypted` to the model ID to raise the privacy tier.
 
 ## Common mistakes
 
@@ -77,7 +77,7 @@ console.log(resp.choices[0].message.content);
 
 - Rate limits: per-key and per-org; 429 carries `Retry-After`. See [Rate limits](/resources/rate-limits).
 - Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
-- Privacy-mode applicability: ordinary, private, and `:tee`. `:e2e-tee` is non-streaming and needs extra headers.
+- Privacy-mode applicability: ordinary, private, and `:confidential`. `:encrypted` is non-streaming and needs extra headers.
 
 ## Related
 

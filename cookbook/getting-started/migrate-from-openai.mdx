@@ -78,13 +78,13 @@ Select IDs at runtime from this list rather than pasting a name into your source
 
 Nito implements the OpenAI Chat Completions protocol, so `messages`, `temperature`, `top_p`, `max_tokens`, `tools`, `tool_choice`, streaming, and the `chat.completion` response shape all carry over unchanged. The SDK appends `/chat/completions` to your base URL, which is why the base URL must end in `/v1`.
 
-To select a privacy mode, add a suffix to the model ID (`grok-4.3:tee`). No request-body field controls privacy; it is purely the model string. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To select a privacy mode, add a suffix to the model ID (`grok-4.3:confidential`). No request-body field controls privacy; it is purely the model string. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What does not carry over
 
 - **This recipe uses Chat Completions.** Chat Completions is the primary, fully supported surface. Nito now also serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`; if your code calls `client.responses.create(...)`, you can either target that endpoint or port the call to `client.chat.completions.create(...)`.
 - **OpenAI model names.** `gpt-4o` and friends are not catalog IDs. Always substitute a Nito ID.
-- **End-to-end TEE and streaming together.** `:e2e-tee` does not stream. Use `:tee` if you need streaming with attestation.
+- **Encrypted and streaming together.** `:encrypted` does not stream. Use `:confidential` if you need streaming with attestation.
 
 Do not assume OpenAI-specific behaviors that are not part of the Chat Completions contract. If a feature is not documented for Nito, treat it as unverified rather than importing OpenAI's semantics.
 

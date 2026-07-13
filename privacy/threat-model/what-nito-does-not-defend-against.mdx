@@ -9,11 +9,11 @@ If you read one idea from this page, read this one: **the gateway gives you fast
 
 ## The gateway does not perform full hardware-quote verification
 
-When you use `tee` or `e2e-tee`, the gateway verifies the attestation at a **baseline** level: it confirms the evidence is present and well-formed, that the proof format and signing material are there, that your nonce is echoed, and that the `report_data == signing_address + nonce` binding holds. What it deliberately does **not** do is verify the underlying hardware quote. The gateway does not validate Intel TDX quotes, NVIDIA GPU evidence, certificate chains, certificate revocation lists (CRLs), or TCB (trusted computing base) policies.
+When you use `confidential` or `encrypted`, the gateway verifies the attestation at a **baseline** level: it confirms the evidence is present and well-formed, that the proof format and signing material are there, that your nonce is echoed, and that the `report_data == signing_address + nonce` binding holds. What it deliberately does **not** do is verify the underlying hardware quote. The gateway does not validate Intel TDX quotes, NVIDIA GPU evidence, certificate chains, certificate revocation lists (CRLs), or TCB (trusted computing base) policies.
 
 That full hardware-quote verification is the **client's responsibility**. The gateway returns the raw evidence, signing address, model public key, proof format, and echoed nonce precisely so you can run those checks yourself, and there is a reference verifier to model the process.
 
-**What this means for you:** if your threat model requires hardware-rooted assurance, you must run the client-side verification. A successful `:tee` response means the call was baseline-verified and the raw evidence is available, not that the gateway has fully vouched for the silicon. This is why these docs say **attested** and **verifiable**, never "trustless" or "fully verified."
+**What this means for you:** if your threat model requires hardware-rooted assurance, you must run the client-side verification. A successful `:confidential` response means the call was baseline-verified and the raw evidence is available, not that the gateway has fully vouched for the silicon. This is why these docs say **attested** and **verifiable**, never "trustless" or "fully verified."
 
 ## Anti-replay depends on the caller supplying a nonce
 
@@ -31,7 +31,7 @@ The gateway does not scan your chat prompts for unsafe content, and it does not 
 
 For ordinary and private modes, your call runs on the provider's normal infrastructure. Nito constrains it with a per-request no-retention setting (`Store: false`, a ZDR policy, or `X-Fal-Store-IO: 0`), but that is an instruction to the provider, not a sealed environment. The call is **not** isolated from the provider beyond the provider honoring that retention setting. There is no attestation, no hardware isolation, and no proof for a non-TEE call.
 
-**What this means for you:** if you need the provider to be unable to see the data, rather than instructed not to keep it, you must use `tee` or `e2e-tee` on a supporting model. Private mode is a strong retention posture, not a sealing guarantee. The distinction is the whole reason the privacy dial exists.
+**What this means for you:** if you need the provider to be unable to see the data, rather than instructed not to keep it, you must use `confidential` or `encrypted` on a supporting model. Private mode is a strong retention posture, not a sealing guarantee. The distinction is the whole reason the privacy dial exists.
 
 ## Summary
 
@@ -40,7 +40,7 @@ For ordinary and private modes, your call runs on the provider's normal infrastr
 | Attestation verification | Baseline only; no TDX/GPU/cert-chain/CRL/TCB checks | Run the client-side hardware verification |
 | Anti-replay | Only as strong as the nonce you send | Supply a fresh random nonce; confirm the echo |
 | Content safety | Only outbound web-search query redaction | Add moderation / injection defense yourself |
-| Non-TEE isolation | Retention setting only, no sealing | Use `:tee` / `:e2e-tee` for hardware isolation |
+| Non-TEE isolation | Retention setting only, no sealing | Use `:confidential` / `:encrypted` for hardware isolation |
 
 ## Related
 

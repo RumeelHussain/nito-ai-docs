@@ -25,7 +25,7 @@ One nuance is worth knowing because it is the exception to the ZDR rule. When a 
 
 ### NEAR
 
-One of the two TEE-capable providers. NEAR can run a call inside a TEE and return an attestation. It uses domain-based attestation, meaning the attestation subject is a domain, and it supports end-to-end encryption with ed25519 client and model keys (ed25519 is a public-key signature scheme; in plain terms, your client and the sealed model each hold a key pair so data can be encrypted directly to the environment). NEAR-served models can carry `privacy_tier: "tee"` and, for chat, `e2ee_supported: true`. For NEAR the attestation subject is optional.
+One of the two TEE-capable providers. NEAR can run a call inside a TEE and return an attestation. It uses domain-based attestation, meaning the attestation subject is a domain, and it supports end-to-end encryption with ed25519 client and model keys (ed25519 is a public-key signature scheme; in plain terms, your client and the sealed model each hold a key pair so data can be encrypted directly to the environment). NEAR-served models can carry `privacy_tier: "confidential"` and, for chat, `encrypted_supported: true`. For NEAR the attestation subject is optional.
 
 ### Phala
 
@@ -51,15 +51,15 @@ The reason to care who serves a call is that different providers give you differ
 
 - For routine, low-sensitivity calls, ordinary routing is fine; any eligible provider may serve it.
 - If you want the upstream to keep nothing but do not need a proof, a private-tier model (often routed through OpenRouter ZDR endpoints) is enough.
-- If you need a verifiable privacy guarantee, you want a TEE-capable provider (NEAR or Phala) and a `:tee` or `:e2e-tee` call. Here the assurance is not a promise but an attestation: the provider that served the call is named in the attestation response, so you can confirm after the fact where a sensitive request actually ran.
+- If you need a verifiable privacy guarantee, you want a TEE-capable provider (NEAR or Phala) and a `:confidential` or `:encrypted` call. Here the assurance is not a promise but an attestation: the provider that served the call is named in the attestation response, so you can confirm after the fact where a sensitive request actually ran.
 
 This is why the language across these docs is "attested" and "verifiable" rather than absolute claims: TEE gives you evidence to check, not a request to take on faith.
 
 ## Common mistakes
 
 - **Assuming you pick the provider directly.** You pick a model and a privacy mode; Nito picks the provider. To influence which backend runs, see [Backend selection](/models/backend-selection).
-- **Expecting ZDR on an OpenRouter call that uses OpenRouter web tools.** That specific combination relaxes the ZDR flag by necessity. Use a TEE mode if you need a guarantee on a tool-using call.
-- **Looking for TEE on xAI or the image provider.** TEE and end-to-end TEE come from NEAR and Phala only.
+- **Expecting ZDR on an OpenRouter call that uses OpenRouter web tools.** That specific combination relaxes the ZDR flag by necessity. Use a Confidential mode if you need a guarantee on a tool-using call.
+- **Looking for TEE on xAI or the image provider.** Confidential and Encrypted come from NEAR and Phala only.
 - **Treating "storage disabled" and "TEE" as the same protection.** Storage disabled (xAI, fal) tells the provider not to keep the request; TEE seals execution and gives you an attestation. The second is a stronger, checkable guarantee.
 
 ## Related

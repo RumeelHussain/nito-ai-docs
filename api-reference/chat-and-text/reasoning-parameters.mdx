@@ -70,9 +70,9 @@ Each entry:
 
 In a stream, `reasoning_details` arrives on deltas that carry a non-empty summary, in the same `[{type, summary, id, format, index}]` shape. See [Delta format](/api-reference/streaming-format/delta-format).
 
-## E2E-TEE constraint
+## Encrypted constraint
 
-When the E2E-TEE encryption headers (`X-Z-TEE-*`) are present, **reasoning is rejected** along with streaming, tools, prompt caching, and multi-part messages. E2E-TEE chat is non-streaming and plain only.
+When the Encrypted encryption headers (`X-Z-ENCRYPTED-*`) are present, **reasoning is rejected** along with streaming, tools, prompt caching, and multi-part messages. Encrypted chat is non-streaming and plain only.
 
 ## Related
 

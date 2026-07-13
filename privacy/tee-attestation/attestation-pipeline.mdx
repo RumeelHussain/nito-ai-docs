@@ -1,14 +1,14 @@
 ---
 title: "The Attestation Pipeline"
-description: "The end-to-end flow of GET /api/v1/tee/attestation, from query keys to every field in the response, with the baseline scope stated plainly."
+description: "The end-to-end flow of GET /api/v1/attestation, from query keys to every field in the response, with the baseline scope stated plainly."
 ---
 
-This page traces exactly what happens when you call `GET /api/v1/tee/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [freshness binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
+This page traces exactly what happens when you call `GET /api/v1/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [freshness binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
 
 ## The endpoint
 
 ```text
-GET /api/v1/tee/attestation
+GET /api/v1/attestation
 ```
 
 The endpoint takes an allow-listed set of query keys. Only these keys are read; the allow-list is explicit.
@@ -19,7 +19,7 @@ The endpoint takes an allow-listed set of query keys. Only these keys are read; 
 | `nonce` | No | A fresh random value you generate. Binds the report to this request. Omitting it permits an empty binding. |
 | `signing_address` | No | The signing address you expect the report-data binding to commit to. |
 | `signing_algo` | No | The signing algorithm you expect. If given, it must match what the evidence declares. |
-| `trust_tier` | No | Selects the tier: `""` or `tee`, or `e2e-tee`. |
+| `trust_tier` | No | Selects the tier: `""` or `confidential`, or `encrypted`. |
 
 Although the nonce is optional to the endpoint, supplying a fresh random nonce on every call is what gives you replay protection. Anti-replay is caller-driven and there is no server-side nonce store, so an omitted nonce is permitted but produces an empty-binding report. See [freshness binding](/privacy/tee-attestation/freshness-binding).
 
@@ -37,7 +37,7 @@ A successful call returns a JSON object. Every field below is part of the docume
 
 | Field | Notes |
 | --- | --- |
-| `object` | Always the string `"tee.attestation"`. |
+| `object` | Always the string `"attestation"`. |
 | `model` | The public model you asked to attest. |
 | `routed_model` | Optional. The physical model the request resolved to, when it differs from `model`. |
 | `provider` | The provider that produced the evidence. |

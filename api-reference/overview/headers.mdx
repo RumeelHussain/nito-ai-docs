@@ -16,7 +16,7 @@ This page lists the HTTP headers the Nito gateway reads on requests and sets on 
 | `X-CSRF-Token` | Browser-session double-submit token; not used for `z_sk_` API-key calls. |
 | `X-Z-Anonymous-ID` | Anonymous/free-tier identity for unauthenticated browser flows. |
 | `X-Forwarded-For` / `X-Forwarded-Proto` | Honored only from trusted proxies. |
-| `X-Z-TEE-*` | End-to-end TEE encryption envelope headers, parsed for E2E-TEE chat. |
+| `X-Z-ENCRYPTED-*` | end-to-end encryption envelope headers, parsed for Encrypted chat. |
 
 `Idempotency-Key` must be a UUID specifically; any other format is rejected. It controls billing dedup, which is a different concern from the trace `X-Request-ID`.
 

@@ -29,7 +29,7 @@ Three things define the product:
 
 ## The model ID carries two decisions
 
-Here is the single idea the rest of the docs hang on: **the model ID you send carries two decisions at once, which model and how private.** The base part of the ID selects the model. An optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode. `grok-4.3:tee` asks for execution inside a TEE. `grok-4.3:e2e-tee` asks for end-to-end encrypted TEE, the strongest mode. Only `:tee` and `:e2e-tee` are valid suffixes, and there is no separate privacy field in the request body. If you want a different privacy mode, you change the model string and nothing else.
+Here is the single idea the rest of the docs hang on: **the model ID you send carries two decisions at once, which model and how private.** The base part of the ID selects the model. An optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode. `grok-4.3:confidential` asks for execution inside a TEE. `grok-4.3:encrypted` asks for end-to-end encrypted TEE, the strongest mode. Only `:confidential` and `:encrypted` are valid suffixes, and there is no separate privacy field in the request body. If you want a different privacy mode, you change the model string and nothing else.
 
 ## Principles
 

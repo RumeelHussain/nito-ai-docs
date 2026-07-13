@@ -13,7 +13,7 @@ Generate a fresh 32-byte nonce, fetch the attestation with it, and verify the re
 
 ```bash
 NONCE=$(openssl rand -hex 32)
-curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL:tee&nonce=$NONCE" \
+curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
@@ -23,7 +23,7 @@ curl "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL:tee&nonce=$N
 
 After you receive the response, confirm:
 
-- **Status 200** and the envelope `object` is `"tee.attestation"`.
+- **Status 200** and the envelope `object` is `"attestation"`.
 - **TEE metadata present**: `tee_provider` and `attestation_available: true`.
 - **Nonce echo**: the `nonce` in the response equals the `NONCE` you sent. A mismatched or absent nonce means the report is not bound to your request.
 - **Evidence present**: the `evidence` object is non-empty.

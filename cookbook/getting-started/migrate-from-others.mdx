@@ -85,7 +85,7 @@ The swap works the same for each, but the model-name step differs:
 
 ## Walkthrough
 
-All of these speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the response shape carry over. Privacy on Nito is a model-ID suffix (`grok-4.3:tee`); only `:tee` and `:e2e-tee` are valid, and `:e2e-tee` does not stream.
+All of these speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the response shape carry over. Privacy on Nito is a model-ID suffix (`grok-4.3:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
 
 Do not carry any provider-specific behavior over as if it were Nito's. Custom request fields, routing preferences, search parameters, or response extensions that are specific to your old provider are not part of Nito's contract. If a capability is not documented for Nito, treat it as unverified. Nito's supported surface is Chat Completions, embeddings, image generation, and the models catalog, all reachable under `/v1`.
 

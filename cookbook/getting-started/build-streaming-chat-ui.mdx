@@ -17,7 +17,7 @@ Stream a chat reply token by token instead of waiting for the whole response, so
 
 Set `stream: true` and the response becomes a stream of Server-Sent Events. Each event is a line `data: <json>\n\n` carrying a `chat.completion.chunk`. The incremental text is in `choices[0].delta.content`. The gateway sends `: keep-alive` heartbeat comments roughly every 15 seconds to hold the connection open, and the stream ends with a literal `data: [DONE]` line.
 
-One constraint: the `:e2e-tee` privacy mode does not stream. Use ordinary mode or `:tee` when you need streaming.
+One constraint: the `:encrypted` privacy mode does not stream. Use ordinary mode or `:confidential` when you need streaming.
 
 ## Step 1: See the raw stream with curl
 

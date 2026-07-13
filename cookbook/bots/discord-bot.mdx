@@ -59,17 +59,17 @@ Keep the Nito key in a server-side environment variable. A Discord bot runs on y
 
 ## Streaming or not
 
-Discord posts whole messages, so a bot normally uses a non-streaming call and sends the reply once it is complete. If you want a "typing" effect, you can stream from Nito (`stream=True`) and edit the message as chunks arrive, respecting Discord's edit rate limits. Note that `:e2e-tee` does not stream, so combine streaming only with an ordinary or `:tee` model.
+Discord posts whole messages, so a bot normally uses a non-streaming call and sends the reply once it is complete. If you want a "typing" effect, you can stream from Nito (`stream=True`) and edit the message as chunks arrive, respecting Discord's edit rate limits. Note that `:encrypted` does not stream, so combine streaming only with an ordinary or `:confidential` model.
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:tee`:
+Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:confidential`:
 
 ```python
-model="grok-4.3:tee"
+model="grok-4.3:confidential"
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Handling errors
 

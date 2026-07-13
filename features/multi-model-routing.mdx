@@ -52,9 +52,9 @@ Two constraints are worth stating loudly because they cause rejections:
 Just like ordinary chat, privacy rides on the **model suffix** of each entry in `models[]`. But fusion adds two rules:
 
 - **You cannot mix TEE and non-TEE models** in the same fusion request. Either all participants are attested-tier or none are; a mixed set is rejected.
-- **`:e2e-tee` is rejected for fusion.** End-to-end encrypted TEE is non-streaming and deliberately feature-limited, and it is not available as a fusion participant.
+- **`:encrypted` is rejected for fusion.** End-to-end encrypted TEE is non-streaming and deliberately feature-limited, and it is not available as a fusion participant.
 
-The `:tee` suffix is allowed, in which case the response can carry attestations (see below).
+The `:confidential` suffix is allowed, in which case the response can carry attestations (see below).
 
 ## The response
 

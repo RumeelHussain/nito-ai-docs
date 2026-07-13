@@ -13,7 +13,7 @@ Document Q&A is a two-step pipeline: turn a file into text, then ask a chat mode
 - **Images are rejected.** The parser tells you to send images directly to an image-capable model instead.
 - **Size cap:** 10 MiB per upload (a `413` on oversize).
 - **PDF caps:** at most **80 pages**, **300k output characters**, and a **10 second** parse timeout. Output is truncated past those limits (`truncated: true` in the response).
-- **Fields:** `file` (required), optional `trust_tier` (`anon`, `private`, or `tee`; `e2e-tee` is not supported here), and optional `parse_mode` (`""`, `server`, or `auto`).
+- **Fields:** `file` (required), optional `trust_tier` (`anon`, `private`, or `confidential`; `encrypted` is not supported here), and optional `parse_mode` (`""`, `server`, or `auto`).
 
 The response includes `text`, `mime_type`, `file_kind`, `bytes`, and optionally `page_count`, `parsed_pages`, `truncated`, and `warnings`.
 
@@ -30,7 +30,7 @@ import os, requests
 BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm base URL
 API_KEY = os.environ["NITO_API_KEY"]
 
-def parse_file(path, trust_tier="tee"):
+def parse_file(path, trust_tier="confidential"):
     with open(path, "rb") as f:
         resp = requests.post(
             f"{BASE_URL}/api/v1/attachments/parse",
@@ -50,10 +50,10 @@ def parse_file(path, trust_tier="tee"):
 
 ## Step 2: Answer questions over the text
 
-Feed the extracted text to a private or attested chat model as context. Privacy is selected by model ID, so use a private-tier model or append `:tee` to an attestation-capable one. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and for `:tee` note the model must support attestation.
+Feed the extracted text to a private or attested chat model as context. Privacy is selected by model ID, so use a private-tier model or append `:confidential` to an attestation-capable one. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and for `:confidential` note the model must support attestation.
 
 ```python
-CHAT_MODEL = "MODEL_ID:tee"   # TODO: attestation-capable model, or a private-tier model
+CHAT_MODEL = "MODEL_ID:confidential"   # TODO: attestation-capable model, or a private-tier model
 
 def ask_document(doc_text, question):
     messages = [
@@ -73,7 +73,7 @@ text = parse_file("contract.pdf")
 print(ask_document(text, "What is the termination notice period?"))
 ```
 
-> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:tee` example. Confirm against `GET /v1/models`.
+> **TODO (needs SME):** a concrete attestation-capable `MODEL_ID` for the `:confidential` example. Confirm against `GET /v1/models`.
 
 ## Handling large documents
 

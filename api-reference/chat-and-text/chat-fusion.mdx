@@ -32,7 +32,7 @@ There is **no `/v1` alias** for fusion. The handler is `apiChatFusionHandler`. E
 Privacy mode is selected the same way as chat completions: through the model-ID suffix on each entry in `models`. Two constraints are specific to fusion:
 
 - You **cannot mix TEE and non-TEE** models in a single fusion request.
-- The `:e2e-tee` suffix is **rejected** for fusion.
+- The `:encrypted` suffix is **rejected** for fusion.
 
 ## Worked call
 

@@ -21,7 +21,7 @@ The metadata-only default would mean little if the provider kept everything once
 
 ## Sealed, attested execution for the top tiers
 
-For `tee` and `e2e-tee` modes on NEAR and Phala, the call runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box the host cannot peer into, and the provider returns an **attestation**: a signed statement about the environment that ran the call. You can fetch that attestation and verify it. The gateway performs baseline verification (evidence present and well-formed, proof format and signing material present, your nonce echoed, and the `report_data == signing_address + nonce` binding holds), and hands you the raw evidence to verify the hardware quote yourself.
+For `confidential` and `encrypted` modes on NEAR and Phala, the call runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box the host cannot peer into, and the provider returns an **attestation**: a signed statement about the environment that ran the call. You can fetch that attestation and verify it. The gateway performs baseline verification (evidence present and well-formed, proof format and signing material present, your nonce echoed, and the `report_data == signing_address + nonce` binding holds), and hands you the raw evidence to verify the hardware quote yourself.
 
 **What this defends against:** having to take the provider's word that your call ran where it claimed. The result is **attested** and **verifiable**. (The boundary, that the gateway's verification is baseline and not full hardware-quote verification, is on the [companion page](/privacy/threat-model/what-nito-does-not-defend-against) and is essential to read.)
 

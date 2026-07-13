@@ -13,13 +13,13 @@ That leaves a robust, provider-agnostic pattern that works today: instruct the m
 
 ## Step 1: Ask for JSON in the prompt
 
-Give the model an explicit schema in words, tell it to return only JSON, and show the exact shape. Being strict in the prompt reduces (but does not eliminate) malformed output. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and use a private-tier model or an attestation-capable model with `:tee` to keep the extraction private.
+Give the model an explicit schema in words, tell it to return only JSON, and show the exact shape. Being strict in the prompt reduces (but does not eliminate) malformed output. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and use a private-tier model or an attestation-capable model with `:confidential` to keep the extraction private.
 
 ```python
 import os, json, requests
 
 BASE_URL = "https://YOUR-NITO-BASE-URL"   # TODO: confirm base URL
-MODEL = "MODEL_ID:tee"                     # TODO: attestation-capable model, or a private-tier model
+MODEL = "MODEL_ID:confidential"                     # TODO: attestation-capable model, or a private-tier model
 API_KEY = os.environ["NITO_API_KEY"]
 
 SCHEMA_HINT = """Return ONLY a JSON object, no prose, no code fences, matching:
@@ -92,7 +92,7 @@ A model asked for JSON will usually comply, but "usually" is not "always": it ma
 
 ## Keeping it private
 
-Extraction often runs over sensitive text (resumes, contracts, support tickets). Select a private-tier model or append `:tee` to an attestation-capable model so the extraction call inherits the same privacy posture as the rest of your app. The gateway is metadata-only by default and does not persist your prompts or the model's output.
+Extraction often runs over sensitive text (resumes, contracts, support tickets). Select a private-tier model or append `:confidential` to an attestation-capable model so the extraction call inherits the same privacy posture as the rest of your app. The gateway is metadata-only by default and does not persist your prompts or the model's output.
 
 ## Related
 

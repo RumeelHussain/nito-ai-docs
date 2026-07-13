@@ -54,13 +54,13 @@ The example `grok-4.3` used elsewhere in these docs is illustrative only. Pick a
 A Nito public model ID is a canonical model name with an optional privacy suffix:
 
 ```text
-<canonical-model-id>[:tee | :e2e-tee]
+<canonical-model-id>[:confidential | :encrypted]
 ```
 
 - The base is the canonical model ID from the catalog.
-- The optional suffix selects a stronger privacy mode. Only `:tee` and `:e2e-tee` are valid; any other suffix is rejected. Legacy-looking suffixes such as `:standard`, `:zdr`, `:anon`, or `:private` are not accepted on the public ID.
+- The optional suffix selects a stronger privacy mode. Only `:confidential` and `:encrypted` are valid; any other suffix is rejected. Legacy-looking suffixes such as `:standard`, `:zdr`, `:anon`, or `:private` are not accepted on the public ID.
 
-So `grok-4.3` and `grok-4.3:tee` are the same model at two privacy tiers. The privacy decision rides entirely on this suffix; there is no separate tier parameter. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+So `grok-4.3` and `grok-4.3:confidential` are the same model at two privacy tiers. The privacy decision rides entirely on this suffix; there is no separate tier parameter. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Mapping OpenAI names to Nito IDs
 
@@ -73,7 +73,7 @@ There is no mapping table inside the gateway that translates an OpenAI name to a
 1. List the OpenAI model names your code uses today.
 2. Call `GET /v1/models` against Nito and note the IDs that match each capability.
 3. Replace each hard-coded OpenAI name with the chosen Nito ID, or better, select from the catalog at runtime.
-4. If a call needs stronger privacy, append `:tee` or `:e2e-tee` and confirm the model supports that tier.
+4. If a call needs stronger privacy, append `:confidential` or `:encrypted` and confirm the model supports that tier.
 
 ## Related
 

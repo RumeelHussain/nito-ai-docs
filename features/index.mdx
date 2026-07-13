@@ -12,7 +12,7 @@ This is a map, not a tutorial. Each capability below links to its own deep page.
 These are live on the gateway and documented in depth.
 
 - [**Chat completions**](/features/chat-completions) the primary text surface. Send messages, name a model, get a reply. OpenAI-compatible shape, served at both `/v1/chat/completions` and `/api/v1/chat/completions`.
-- [**Streaming**](/features/streaming) get the reply as Server-Sent Events token by token, by setting `stream: true`. Not available in end-to-end encrypted TEE mode.
+- [**Streaming**](/features/streaming) get the reply as Server-Sent Events token by token, by setting `stream: true`. Not available in Encrypted mode.
 - [**Tool calling**](/features/tool-calling) declare function tools the model can ask to call. Your code runs them and returns the result; the gateway routes the conversation but does not execute your functions.
 - [**Server-side tools**](/features/server-side-tools) tools Nito runs for you mid-generation: web search, web fetch, the file parser, and (xAI only) a code interpreter. You do not wire these up yourself.
 - [**Reasoning**](/features/reasoning) ask a capable model to think first, with controls over effort and summary. Output arrives as `reasoning_details` plus a `reasoning_tokens` usage count.

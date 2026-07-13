@@ -1,6 +1,6 @@
 ---
 title: "TEE-attested Call and Verify Nonce"
-description: "Make a :tee chat call, then fetch and verify its attestation with a fresh nonce, running the baseline checks the gateway supports."
+description: "Make a :confidential chat call, then fetch and verify its attestation with a fresh nonce, running the baseline checks the gateway supports."
 ---
 
 This is the flagship private-AI flow: make an attested chat call, then **prove** the tier instead of trusting it. You do that by fetching the attestation with a fresh nonce and running a set of independent checks on what comes back. It combines the [drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade) with the [verify-it-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe).
@@ -9,14 +9,14 @@ One thing up front, because it governs everything below. These checks confirm a 
 
 ## Step 1: Make the attested chat call
 
-Select the attested tier with the `:tee` model-ID suffix. The suffix only works on attestation-capable models (NEAR or Phala in the current catalog); fetch `GET /v1/models` and pick one whose card advertises attestation.
+Select the attested tier with the `:confidential` model-ID suffix. The suffix only works on attestation-capable models (NEAR or Phala in the current catalog); fetch `GET /v1/models` and pick one whose card advertises attestation.
 
 ```bash
 curl -sS "https://YOUR-NITO-BASE-URL/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "MODEL_ID:tee",
+    "model": "MODEL_ID:confidential",
     "messages": [{"role": "user", "content": "Summarize this in one line."}]
   }'
 ```
@@ -33,11 +33,11 @@ NONCE=$(openssl rand -hex 32)
 
 ## Step 3: Fetch the attestation
 
-Fetch `GET /api/v1/tee/attestation` for the same model, passing your nonce.
+Fetch `GET /api/v1/attestation` for the same model, passing your nonce.
 
 ```curl
 curl -sS \
-  "https://YOUR-NITO-BASE-URL/api/v1/tee/attestation?model=MODEL_ID:tee&nonce=$NONCE" \
+  "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL_ID:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
@@ -46,8 +46,8 @@ curl -sS \
 Do not trust the `verified` flag alone. Re-check what you can against the response. Each item is something you assert in your own code.
 
 1. **HTTP status is 200.**
-2. **`object` equals `"tee.attestation"`.**
-3. **`model` is set, `privacy_tier` is `"tee"`, and `attestation_available` is true.**
+2. **`object` equals `"attestation"`.**
+3. **`model` is set, `privacy_tier` is `"confidential"`, and `attestation_available` is true.**
 4. **The echoed `nonce` equals the nonce you sent.** If not, stop; the report is not bound to your request.
 5. **`evidence` is present** (a non-empty JSON object).
 6. **Proof metadata is present:** `proof_format`, `signing_algo`, and `signing_key` are all populated. (`signing_key` and `model_public_key` are aliases for the same model public key.)
@@ -59,7 +59,7 @@ Here is a compact Python sketch that fetches and checks, using only the standard
 import os, secrets, json, urllib.parse, urllib.request
 
 BASE_URL = "https://YOUR-NITO-BASE-URL"  # TODO: confirm canonical base URL
-MODEL = "MODEL_ID:tee"                   # TODO: confirm an attestation-capable model
+MODEL = "MODEL_ID:confidential"                   # TODO: confirm an attestation-capable model
 API_KEY = os.environ["NITO_API_KEY"]
 
 # Fresh nonce: 32 random bytes, hex-encoded.
@@ -67,7 +67,7 @@ nonce = secrets.token_hex(32)
 
 query = urllib.parse.urlencode({"model": MODEL, "nonce": nonce})
 req = urllib.request.Request(
-    f"{BASE_URL}/api/v1/tee/attestation?{query}",
+    f"{BASE_URL}/api/v1/attestation?{query}",
     headers={"Authorization": f"Bearer {API_KEY}"},
 )
 with urllib.request.urlopen(req) as resp:
@@ -75,9 +75,9 @@ with urllib.request.urlopen(req) as resp:
     body = json.load(resp)
 
 assert status == 200, f"expected 200, got {status}"
-assert body.get("object") == "tee.attestation", "wrong object type"
+assert body.get("object") == "attestation", "wrong object type"
 assert body.get("model"), "model missing"
-assert body.get("privacy_tier") == "tee", "not a TEE tier"
+assert body.get("privacy_tier") == "confidential", "not a Confidential tier"
 assert body.get("attestation_available") is True, "attestation not available"
 assert body.get("nonce") == nonce, "nonce echo does not match what we sent"
 assert body.get("evidence"), "evidence missing"
@@ -105,5 +105,5 @@ Steps 1 through 4 give you a baseline-verified result. For full assurance you mu
 
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
-- [End-to-end TEE call](/cookbook/private-ai/end-to-end-tee-call)
+- [Encrypted call](/cookbook/private-ai/end-to-end-tee-call)
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)

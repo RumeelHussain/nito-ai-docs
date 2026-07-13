@@ -25,7 +25,7 @@ Only `messages` is required. Everything else is optional and passed through when
 | Field | Type | Notes |
 | --- | --- | --- |
 | `messages` | array | **Required.** The conversation so far. Empty array is rejected. |
-| `model` | string | Optional; falls back to a default. Add a `:tee` or `:e2e-tee` suffix to select a privacy mode. |
+| `model` | string | Optional; falls back to a default. Add a `:confidential` or `:encrypted` suffix to select a privacy mode. |
 | `temperature` | number | Sampling temperature, passed through. |
 | `top_p` | number | Nucleus sampling, passed through. |
 | `max_tokens` | integer | Cap on generated tokens. |
@@ -106,7 +106,7 @@ const resp = await client.chat.completions.create({
 console.log(resp.choices[0].message.content);
 ```
 
-To make the same call inside an attested environment, change one thing: `"model": "grok-4.3:tee"`. The privacy mode rides on the model string and nothing else. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To make the same call inside an attested environment, change one thing: `"model": "grok-4.3:confidential"`. The privacy mode rides on the model string and nothing else. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## The response
 

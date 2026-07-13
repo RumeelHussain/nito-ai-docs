@@ -97,7 +97,7 @@ Three fields carry everything you need. `choices[0].message.content` is the assi
 
 The Python example uses the OpenAI SDK unchanged, because Nito speaks the same protocol. The only Nito-specific details are the key (a `z_sk_` value) and the base URL, which must end in `/v1` so the SDK can append `/chat/completions` itself. The curl example hits that path directly.
 
-To send a request through a stronger privacy mode, add a suffix to the model ID, for example `grok-4.3:tee`. Only `:tee` and `:e2e-tee` are valid, and the model must support the mode. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To send a request through a stronger privacy mode, add a suffix to the model ID, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid, and the model must support the mode. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 

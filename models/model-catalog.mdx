@@ -43,7 +43,7 @@ Note that pricing and context window are not on the entry by default; pricing ap
 By default the endpoint returns only chat models. To see other kinds, pass a `type` filter such as `embedding` or `image`. Additional query parameters narrow the list further; the full set is in the [models endpoint reference](/api-reference/models-catalog/list-models). In practice you filter on:
 
 - **`type`** to separate chat, embedding, and image models. Without it, embedding and image models are hidden.
-- **privacy** to find models that support `:tee`, by reading `privacy_tier: "tee"` or `attestation_available: true`.
+- **privacy** to find models that support `:confidential`, by reading `privacy_tier: "confidential"` or `attestation_available: true`.
 - **capabilities** such as `supports_image_inputs` or `supports_reasoning`, to match a model to a feature you need.
 
 ## Using the catalog in code

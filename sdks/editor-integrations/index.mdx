@@ -21,10 +21,10 @@ That is the whole idea. The editor sends standard Chat Completions requests, and
 
 Privacy is chosen by the model ID, not by a separate setting. Add a suffix to the model name to opt into a stronger tier:
 
-- `grok-4.3:tee` runs in a TEE with an attestation you can verify.
-- `grok-4.3:e2e-tee` adds end-to-end encryption, but does not stream and needs extra headers, so it is rarely usable from an editor's chat box.
+- `grok-4.3:confidential` runs in a TEE with an attestation you can verify.
+- `grok-4.3:encrypted` adds end-to-end encryption, but does not stream and needs extra headers, so it is rarely usable from an editor's chat box.
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What works and what does not
 

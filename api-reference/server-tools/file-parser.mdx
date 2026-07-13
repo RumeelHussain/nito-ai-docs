@@ -24,7 +24,7 @@ curl "https://YOUR-NITO-BASE-URL/api/v1/attachments/parse" \
 | Field | Values | Notes |
 |---|---|---|
 | `file` | file upload | Required. The document to parse. |
-| `trust_tier` | `anon`, `private`, `tee` | Privacy tier for the parse. `e2e-tee` is not supported here. |
+| `trust_tier` | `anon`, `private`, `confidential` | Privacy tier for the parse. `encrypted` is not supported here. |
 | `parse_mode` | `""`, `server`, `auto` | Empty string is the default. |
 
 ### Accepted file kinds
@@ -78,7 +78,7 @@ Same upload and parser, but a different response shape and an extra field.
 | Field | Values | Notes |
 |---|---|---|
 | `file` | file upload | Required. |
-| `trust_tier` | `anon`, `private`, `tee` | As above. |
+| `trust_tier` | `anon`, `private`, `confidential` | As above. |
 | `parse_mode` | `""`, `server`, `auto` | As above. |
 | `response_format` | `json` (default), `text` | Output format. |
 
@@ -96,7 +96,7 @@ A parse is billed as `z-protocol/document-parse`, one unit per request, in addit
 
 ## Notes
 
-- `e2e-tee` is not a valid `trust_tier` for parsing.
+- `encrypted` is not a valid `trust_tier` for parsing.
 - Chat can also parse documents inline (PDF/docx/pptx/xlsx/xls/text) via `file` content parts; this endpoint is the standalone equivalent.
 
 ## Related

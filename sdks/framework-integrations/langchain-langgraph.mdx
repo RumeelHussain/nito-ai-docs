@@ -41,10 +41,10 @@ The same `llm` object is what you bind tools to and pass into a LangGraph node, 
 Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID and change nothing else:
 
 ```python
-model="grok-4.3:tee"
+model="grok-4.3:confidential"
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes. Note `:e2e-tee` does not stream, so avoid it for streaming chains. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes. Note `:encrypted` does not stream, so avoid it for streaming chains. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## If you reach for the Anthropic chat model
 

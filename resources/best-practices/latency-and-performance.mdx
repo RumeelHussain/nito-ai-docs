@@ -20,7 +20,7 @@ curl https://YOUR-NITO-BASE-URL/v1/chat/completions \
 
 > **TODO (needs SME):** replace `MODEL_ID` with a confirmed streaming-capable model ID from `GET /v1/models`.
 
-Streaming has one important exception. The `:e2e-tee` end-to-end encrypted mode does not stream at all: those requests are non-streaming only, by design. If you build a UI on top of `:e2e-tee`, you cannot show tokens as they arrive, so plan the experience around a single returned response. See [Per-call privacy modes](/privacy/per-call-privacy-modes) for the full constraint list.
+Streaming has one important exception. The `:encrypted` end-to-end encrypted mode does not stream at all: those requests are non-streaming only, by design. If you build a UI on top of `:encrypted`, you cannot show tokens as they arrive, so plan the experience around a single returned response. See [Per-call privacy modes](/privacy/per-call-privacy-modes) for the full constraint list.
 
 ## Reuse work with prompt caching
 
@@ -40,14 +40,14 @@ Nito caps the request body at 4 MiB (the `apiMaxRequestBytes` default). Oversize
 
 Stronger privacy modes have real latency costs, and choosing them everywhere would make routine calls slower for no benefit. Two things to keep in mind:
 
-- **TEE-capable backends are fewer.** The `:tee` and `:e2e-tee` modes route only to specific providers, which can mean higher latency or lower availability than ordinary routing.
-- **`:e2e-tee` does not stream.** As noted above, this removes the perceived-speed win entirely, so those calls feel slower even when total time is comparable.
+- **TEE-capable backends are fewer.** The `:confidential` and `:encrypted` modes route only to specific providers, which can mean higher latency or lower availability than ordinary routing.
+- **`:encrypted` does not stream.** As noted above, this removes the perceived-speed win entirely, so those calls feel slower even when total time is comparable.
 
 The right move is to match the privacy mode to the sensitivity of each call, paying the latency cost only where the request needs it. That per-call dial is the whole point of the design.
 
 ## A quick mental checklist
 
-- Streaming on for anything a human watches (except `:e2e-tee`).
+- Streaming on for anything a human watches (except `:encrypted`).
 - Prompt caching on for repeated prefixes; confirm with `cache_read_input_tokens`.
 - Smallest adequate model, selected from the live catalog.
 - Request bodies well under 4 MiB.

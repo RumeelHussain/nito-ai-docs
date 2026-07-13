@@ -59,23 +59,23 @@ Because privacy is chosen by the model ID, you opt into a stronger tier by addin
 
 ```python
 # TEE-backed execution with an attestation you can verify
-model="grok-4.3:tee"
+model="grok-4.3:confidential"
 ```
 
-Only `:tee` and `:e2e-tee` are valid suffixes, and a model must support that tier. Use `GET /v1/models` to find models that support attestation. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and a model must support that tier. Use `GET /v1/models` to find models that support attestation. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 
 - **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with a Nito model ID from `GET /v1/models`. Model mapping is covered in [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping).
 - **Forgetting `/v1` on the base URL.** The OpenAI SDK appends paths like `/chat/completions`, so the base URL must end in `/v1`.
 - **Assuming the Responses API is unavailable.** Nito now serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`. Chat Completions remains the primary, fully supported surface and is what this page uses.
-- **Streaming with end-to-end TEE.** The `:e2e-tee` mode does not stream. Use `:tee` if you need streaming with attestation.
+- **Streaming with Encrypted.** The `:encrypted` mode does not stream. Use `:confidential` if you need streaming with attestation.
 
 ## Notes
 
 - Rate limits: standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/resources/rate-limits).
 - Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
-- Privacy-mode applicability: ordinary, private, and `:tee` work with the OpenAI SDK. `:e2e-tee` requires extra headers and is best done via curl or the native SDK.
+- Privacy-mode applicability: ordinary, private, and `:confidential` work with the OpenAI SDK. `:encrypted` requires extra headers and is best done via curl or the native SDK.
 
 ## Related
 
