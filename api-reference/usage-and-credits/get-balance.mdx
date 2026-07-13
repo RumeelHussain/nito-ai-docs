@@ -1,0 +1,41 @@
+---
+title: "Get balance"
+description: "Read an organization's available credit balance."
+---
+
+Return the org's available credit balance. Inference is paid from this balance; when it reaches zero, chargeable requests fail with `402` until you [add credits](/api-reference/funding-and-billing).
+
+```
+GET /api/v1/orgs/{org_id}/billing/balance
+```
+
+<Note>
+First-party browser route: requires a browser **session** (`ig_session`). Not a `z_sk_` API-key endpoint.
+</Note>
+
+## Response
+
+```json
+{ "available_nanos": "42500000000" }
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `available_nanos` | string | Available balance in **nanos** (1 credit unit = 1,000,000,000 nanos). Returned as a string to preserve precision. |
+
+## Worked call
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/billing/balance" \
+  -H "X-Org-ID: $ORG_ID" \
+  --cookie "ig_session=$SESSION"
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [Get usage](/api-reference/usage-and-credits/get-usage)
+- [Funding and billing](/api-reference/funding-and-billing)
+
+{/* source: OpenAPI operation getOrgBillingBalance */}

@@ -1,0 +1,36 @@
+---
+title: "Failed-request billing"
+description: "What is and isn't billed when a request errors."
+---
+
+Not every request that returns an error is free, and not every one is charged. This page explains what Nito bills when a call fails, so your cost accounting matches reality.
+
+## The rule of thumb
+
+You are billed for **work the provider actually performed**, not for the HTTP status code alone.
+
+| Situation | Billed? |
+|---|---|
+| Request rejected **before** inference — validation error (`400`), auth failure (`401`/`403`), unknown route (`404`) | ❌ No |
+| **Rate limited** (`429`) or **service unavailable** (`503`) before the model ran | ❌ No |
+| **Insufficient credits** (`402`) — the request never runs | ❌ No |
+| Model **started generating** then the stream failed partway | ⚠️ Partial — you are billed for tokens actually produced |
+| Successful response (`200`) | ✅ Yes |
+
+## Why partial billing happens on streams
+
+A streaming completion emits tokens as they are produced. If the connection drops or the provider stream fails after some tokens were generated, those tokens represent real work and are counted in `usage`. Always read the `usage` block on the final chunk (or the error payload where present) rather than assuming a failed request cost nothing.
+
+## Checking what you were charged
+
+Every successful response includes a `usage` object (prompt, completion, reasoning, and cached token counts). Reconcile against your [balance](/api-reference/usage-and-credits/get-balance) and [usage overview](/api-reference/usage-and-credits/get-usage) rather than inferring cost from status codes.
+
+> **TODO (needs SME):** confirm the exact partial-billing behavior for provider-stream failures and any per-provider differences (owner: Backend/Billing).
+
+## Related
+
+- [Get balance](/api-reference/usage-and-credits/get-balance)
+- [Get usage](/api-reference/usage-and-credits/get-usage)
+- [Error format](/api-reference/overview/error-format)
+
+{/* source: DOCS_SOURCE_OF_TRUTH — billing/usage accounting */}

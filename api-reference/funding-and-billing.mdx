@@ -1,0 +1,65 @@
+---
+title: "Funding and billing"
+description: "Add credits, manage billing via Stripe Checkout and the billing portal, and configure auto top-up."
+---
+
+Nito inference is paid from an org's credit balance. This surface funds the org (Stripe Checkout or x402), manages billing details (Stripe portal), and configures automatic top-ups.
+
+```
+GET  /api/v1/billing/checkout/products
+POST /api/v1/billing/checkout/sessions
+POST /api/v1/billing/portal/sessions
+POST /api/v1/billing/x402/top-up
+GET  /api/v1/orgs/{org_id}/billing/balance
+GET  /api/v1/orgs/{org_id}/billing/auto-top-up
+PUT  /api/v1/orgs/{org_id}/billing/auto-top-up
+```
+
+<Note>
+First-party browser routes: session + CSRF required. Not `z_sk_` API-key endpoints. Amounts are expressed in **nanos** (1 credit unit = 1,000,000,000 nanos).
+</Note>
+
+## Balance
+
+`GET /api/v1/orgs/{org_id}/billing/balance` → `{ "available_nanos": "…" }`. See [Get balance](/api-reference/usage-and-credits/get-balance) for details.
+
+## Stripe Checkout (add credits)
+
+- `GET /billing/checkout/products` → the purchasable products (`publishable_key`, `products`).
+- `POST /billing/checkout/sessions` → create a Checkout session (`product_id`, optional `org_id`/`price_id`); returns a Stripe URL to redirect the buyer to.
+
+## Billing portal
+
+`POST /billing/portal/sessions` (`org_id`) → returns a Stripe Billing Portal `url` where a customer manages payment methods and invoices.
+
+## x402 top-up
+
+`POST /billing/x402/top-up` (`amount_nanos`, optional `currency_code`) — pay-per-call top-up via the x402 payment flow. Declares an `Idempotency-Key` to make retries safe.
+
+## Auto top-up
+
+Keep the balance above a threshold automatically.
+
+- `GET /orgs/{org_id}/billing/auto-top-up` → current policy (`enabled`, `threshold_nanos`, `amount_nanos`, `currency_code`).
+- `PUT /orgs/{org_id}/billing/auto-top-up` → set the policy (`enabled`, `threshold_nanos`, `amount_nanos`, `payment_method_id`).
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/billing/portal/sessions" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
+  -d '{"org_id":"'"$ORG_ID"'"}'
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [Get balance](/api-reference/usage-and-credits/get-balance)
+- [Get usage](/api-reference/usage-and-credits/get-usage)
+- [Failed-request billing](/api-reference/usage-and-credits/failed-request-billing)
+- [Orgs and members](/api-reference/orgs-and-members)
+
+{/* source: OpenAPI operations under /api/v1/billing/* and /api/v1/orgs/{org_id}/billing/* */}

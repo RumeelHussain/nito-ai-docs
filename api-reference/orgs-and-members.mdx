@@ -1,0 +1,65 @@
+---
+title: "Orgs and members"
+description: "Create organizations, invite and manage members, and set roles."
+---
+
+Organizations own your API keys, billing, and usage. This surface creates orgs, invites members, and manages their roles.
+
+```
+GET  /api/v1/orgs
+POST /api/v1/orgs
+GET  /api/v1/orgs/{org_id}/members
+POST /api/v1/orgs/{org_id}/invitations
+POST /api/v1/orgs/{org_id}/invitations/{invitation_id}/resend
+POST /api/v1/orgs/{org_id}/invitations/{invitation_id}/revoke
+POST /api/v1/orgs/{org_id}/members/{member_id}/role
+POST /api/v1/orgs/{org_id}/members/{member_id}/disable
+```
+
+<Note>
+First-party browser routes: reads need a browser **session** (`ig_session`); writes require a **CSRF token** (`X-CSRF-Token`). Org-scoped routes also take an `X-Org-ID` header. Not `z_sk_` API-key endpoints.
+</Note>
+
+## Organizations
+
+- `GET /api/v1/orgs` → `{ orgs: [ { id, name, … } ] }` — the orgs you belong to.
+- `POST /api/v1/orgs` → create an org (`name`). *(No delete endpoint is currently exposed.)*
+
+## Members
+
+`GET /api/v1/orgs/{org_id}/members` → `{ members: [ … ], invitations: [ … ] }` — current members plus any pending invitations.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/members/{member_id}/role` | Change a member's role (`role`). |
+| `POST` | `/members/{member_id}/disable` | Remove a member's access. |
+
+## Invitations
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/invitations` | Invite a member (`role`, `target_identity_kind`, `target_value`). |
+| `POST` | `/invitations/{invitation_id}/resend` | Resend a pending invitation. |
+| `POST` | `/invitations/{invitation_id}/revoke` | Cancel a pending invitation. |
+
+Invitees complete the flow via the [invitation acceptance](/api-reference/auth/invitation-acceptance) pages.
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/invitations" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $CSRF" -H "X-Org-ID: $ORG_ID" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
+  -d '{"role":"member","target_identity_kind":"email","target_value":"teammate@example.com"}'
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [API keys](/api-reference/api-keys)
+- [Funding and billing](/api-reference/funding-and-billing)
+- [Invitation acceptance](/api-reference/auth/invitation-acceptance)
+
+{/* source: OpenAPI operations under /api/v1/orgs/* */}

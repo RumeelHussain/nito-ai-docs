@@ -308,6 +308,23 @@
             ]
           },
           {
+            "group": "Account & billing",
+            "pages": [
+              "api-reference/api-keys",
+              "api-reference/account-security",
+              "api-reference/orgs-and-members",
+              "api-reference/funding-and-billing"
+            ]
+          },
+          {
+            "group": "Usage & credits",
+            "pages": [
+              "api-reference/usage-and-credits/get-balance",
+              "api-reference/usage-and-credits/get-usage",
+              "api-reference/usage-and-credits/failed-request-billing"
+            ]
+          },
+          {
             "group": "Overview",
             "pages": [
               "api-reference/index",

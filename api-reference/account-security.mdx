@@ -1,0 +1,84 @@
+---
+title: "Account security"
+description: "Manage your account profile, linked identities, MFA, password, and active sessions."
+---
+
+The account-security surface manages the human account behind the org: profile, linked sign-in identities, multi-factor auth, password, and active browser sessions.
+
+```
+GET  /api/v1/account/profile
+POST /api/v1/account/profile
+GET  /api/v1/account/security
+POST /api/v1/account/security/identities/email
+POST /api/v1/account/security/identities/wallet
+POST /api/v1/account/security/identities/{identity_id}/disable
+POST /api/v1/account/security/mfa/totp/setup
+POST /api/v1/account/security/mfa/totp/confirm
+POST /api/v1/account/security/mfa/totp/disable
+POST /api/v1/account/security/password
+POST /api/v1/account/security/oauth-tokens/{token_id}/revoke
+POST /api/v1/account/security/sessions/{session_id}/revoke
+```
+
+<Note>
+These are first-party browser routes: reads need a browser **session** (`ig_session`); writes additionally require a **CSRF token** (`X-CSRF-Token`). They are not `z_sk_` API-key endpoints.
+</Note>
+
+## Profile
+
+- `GET /api/v1/account/profile` → `{ displayName, email }`
+- `POST /api/v1/account/profile` → update `display_name`
+
+## Security overview
+
+`GET /api/v1/account/security` returns the account's security state:
+
+```json
+{ "identities": [ … ], "oauthTokens": [ … ], "apiKeyOrgs": [ … ], "canChangePassword": true }
+```
+
+## Linked identities
+
+Add or remove the ways you can sign in.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/identities/email` | Link an email identity (`email`) — sends a verification. |
+| `POST` | `/identities/wallet` | Link a wallet identity (`verified_challenge_id`). |
+| `POST` | `/identities/{identity_id}/disable` | Disable a linked identity. |
+
+## Multi-factor auth (TOTP)
+
+A three-step lifecycle:
+
+1. `POST /mfa/totp/setup` — returns a TOTP secret to load into an authenticator app.
+2. `POST /mfa/totp/confirm` — submit a `code` from the app to enable MFA.
+3. `POST /mfa/totp/disable` — submit a `code` to turn MFA off.
+
+## Password
+
+`POST /api/v1/account/security/password` — requires `current_password`, `new_password`, `confirm_password` (and `totp_code` if MFA is on). A wrong current password returns `400`.
+
+## Revoking tokens & sessions
+
+- `POST /oauth-tokens/{token_id}/revoke` — revoke a connected OAuth token.
+- `POST /sessions/{session_id}/revoke` — sign out a specific browser session.
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/account/profile" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
+  -d '{"display_name":"Ada Lovelace"}'
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+- [Orgs and members](/api-reference/orgs-and-members)
+
+{/* source: OpenAPI operations under /api/v1/account/* */}

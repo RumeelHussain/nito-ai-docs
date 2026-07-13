@@ -1,0 +1,74 @@
+---
+title: "API keys"
+description: "List, create, and revoke organization API keys, with request and response schemas and worked calls."
+---
+
+Organization API keys are the `z_sk_...` bearer tokens your integrations use to call the inference API. They are scoped to an organization and managed from the org's dashboard surface.
+
+```
+GET  /api/v1/orgs/{org_id}/api-keys
+POST /api/v1/orgs/{org_id}/api-keys
+POST /api/v1/orgs/{org_id}/api-keys/{key_id}/revoke
+```
+
+<Note>
+These are first-party browser routes: they require a signed-in browser **session** (`ig_session`) plus a **CSRF token** (`X-CSRF-Token`). They are **not** callable with a `z_sk_` API key — you manage keys from the console, then use the resulting key for inference.
+</Note>
+
+## List keys
+
+`GET /api/v1/orgs/{org_id}/api-keys` — returns the org's keys. The secret value is shown **only** at creation time; the list returns metadata (id, name, spend cap, timestamps), never the raw secret.
+
+```json
+{ "keys": [ { "id": "…", "name": "production", "spend_cap_nanos": "…", "created_at": "…" } ] }
+```
+
+## Create a key
+
+`POST /api/v1/orgs/{org_id}/api-keys`
+
+### Request
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | yes | Human-readable label. |
+| `spend_cap_nanos` | string | no | Optional spend ceiling for the key, in nanos. |
+| `spend_cap_period` | string | no | The window the cap applies over. |
+| `expires_in` | — | no | Optional expiry. |
+
+The response includes the **raw `z_sk_` secret exactly once** — store it immediately; it cannot be retrieved later.
+
+### Worked call
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF" \
+  -d '{"name":"production","spend_cap_nanos":"100000000000"}'
+```
+
+## Revoke a key
+
+`POST /api/v1/orgs/{org_id}/api-keys/{key_id}/revoke` — immediately invalidates the key. In-flight requests using it will start failing with `401`. Revocation is not reversible; create a new key to rotate.
+
+```bash
+curl -X POST "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api-keys/$KEY_ID/revoke" \
+  -H "X-CSRF-Token: $CSRF" \
+  --cookie "ig_session=$SESSION; ig_csrf=$CSRF"
+```
+
+## Rate limits
+
+API keys are subject to the gateway's [rate limits](/api-reference/errors-and-rate-limits/rate-limits). A `429` response carries a `Retry-After` header when the limiter can compute a retry window.
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [Authentication](/api-reference/overview/authentication)
+- [Orgs and members](/api-reference/orgs-and-members)
+- [Funding and billing](/api-reference/funding-and-billing)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+
+{/* source: OpenAPI operations listOrgApiKeys, createOrgApiKey, revokeOrgApiKey */}

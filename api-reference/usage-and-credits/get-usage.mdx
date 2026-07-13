@@ -1,0 +1,49 @@
+---
+title: "Get usage"
+description: "Read an organization's API usage overview."
+---
+
+Return a rolling overview of the org's API usage and spend, for dashboards and monitoring.
+
+```
+GET /api/v1/orgs/{org_id}/api/overview
+```
+
+<Note>
+First-party browser route: requires a browser **session** (`ig_session`) and the `X-Org-ID` header. Not a `z_sk_` API-key endpoint.
+</Note>
+
+## Response
+
+```json
+{
+  "billing_configured": true,
+  "customer_spend_visible": true,
+  "generated_at": "…",
+  "window_start": "…"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `billing_configured` | boolean | Whether billing is set up for the org. |
+| `customer_spend_visible` | boolean | Whether customer-level spend is visible. |
+| `generated_at` | string | When the overview was computed. |
+| `window_start` | string | Start of the reporting window. |
+
+## Worked call
+
+```bash
+curl "https://YOUR-NITO-BASE-URL/api/v1/orgs/$ORG_ID/api/overview" \
+  -H "X-Org-ID: $ORG_ID" \
+  --cookie "ig_session=$SESSION"
+```
+
+> **TODO (needs SME):** confirm the canonical production base URL; `https://YOUR-NITO-BASE-URL` is a placeholder.
+
+## Related
+
+- [Get balance](/api-reference/usage-and-credits/get-balance)
+- [Failed-request billing](/api-reference/usage-and-credits/failed-request-billing)
+
+{/* source: OpenAPI operation getOrgApiOverview */}
