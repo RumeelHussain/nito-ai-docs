@@ -5,10 +5,6 @@ description: "Sealed, hardware-isolated execution with an attestation you can fe
 
 Confidential is the third rung of the [privacy ladder](/privacy/tiers) and the first one backed by hardware you can check. It is the `confidential` tier, selected with the `:confidential` suffix on the model ID. It keeps the guarantees of the tiers below it and adds the one thing none of them can: your call runs inside a sealed environment, and you can obtain a signed statement that proves it did.
 
-<Note>
-`confidential` is the canonical name for what was previously called the `tee` tier. The old `:tee` suffix and the `tee` `privacy_tier` value still work as deprecated aliases, so existing integrations keep running.
-</Note>
-
 ## What a TEE is
 
 Confidential runs inside a **Trusted Execution Environment (TEE)** — a hardware-isolated, sealed compute environment. Code and data inside it are protected from the host machine: the operator running the hardware cannot peer into the computation. Crucially, the environment can produce an **attestation**, a signed statement about what is running inside it, which you can verify. Think of a TEE as a tamper-evident safe that runs your computation: the contents are shielded, and the safe can hand you a sealed receipt proving it was the thing that did the work.
@@ -58,10 +54,6 @@ curl "https://YOUR-NITO-BASE-URL/api/v1/attestation?model=MODEL-ID&nonce=YOUR-NO
 ```
 
 > **TODO (needs SME):** replace `MODEL-ID` with a real attestation-capable model, `YOUR-NONCE` with a fresh random nonce, and the base URL with the production value.
-
-<Note>
-`GET /api/v1/attestation` is the canonical attestation endpoint; it returns `object: "attestation"`. The older `GET /api/v1/tee/attestation` (returning `object: "tee.attestation"`) still works as a legacy route.
-</Note>
 
 The gateway resolves the model to a physical attestation-capable backend, asks the provider for its attestation, and runs a **baseline verification** before returning. The baseline checks that the provider evidence is present and parseable, that the proof format and signing material are present, that your nonce matches the one observed from the provider, and that the report-data binding holds. It then returns the result, including the raw `evidence`, so you can perform **full client-side verification yourself**.
 

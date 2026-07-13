@@ -36,7 +36,7 @@ A worked example. Suppose `GET /v1/models` shows a model with `attestation_avail
 
 ## A note on naming
 
-The four tier names — **Anonymous, Private, Confidential, Encrypted** — are the canonical `privacy_tier` values in the catalog and the API. Confidential and Encrypted were previously called `tee` and `e2e-tee`; the old `:tee` / `:e2e-tee` suffixes and `tee` / `e2e-tee` tier values still work as **deprecated aliases**, so existing integrations keep running. New code should use the canonical names. The full mapping is covered in the [Privacy tiers in depth](/privacy/tiers) pages.
+The four tier names — **Anonymous, Private, Confidential, Encrypted** — are the canonical `privacy_tier` values in the catalog and the API. The full treatment is in the [Privacy tiers in depth](/privacy/tiers) pages.
 
 ## Trade-offs to know
 
@@ -48,7 +48,7 @@ The four tier names — **Anonymous, Private, Confidential, Encrypted** — are 
 
 - **Treating privacy as an account setting.** It is per call, chosen by the model ID. Two calls with the same key can use different tiers.
 - **Selecting `:encrypted` and then trying to stream.** It is non-streaming by design; the call is rejected rather than quietly served without encryption.
-- **Using a suffix other than `:confidential` or `:encrypted`.** Those are the canonical suffixes (`:tee` / `:e2e-tee` still work as deprecated aliases). Anything else (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body.
+- **Using a suffix other than `:confidential` or `:encrypted`.** Those are the only valid suffixes. Anything else (`:standard`, `:zdr`, `:private`, and so on) is rejected. There is no separate `tier` field in the request body.
 - **Assuming "Private" and "Confidential" are the same.** Private means zero-data-retention upstream; Confidential means sealed execution with an attestation you can verify. They are different guarantees, and only Confidential gives you a proof to check.
 
 ## Related

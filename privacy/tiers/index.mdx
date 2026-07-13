@@ -28,10 +28,6 @@ The four tiers — Anonymous, Private, Confidential, Encrypted — are the canon
 
 `:confidential` and `:encrypted` are the canonical suffixes. There is no separate `tier` field in the request body; you change the privacy of a call by changing the model string, nothing else.
 
-<Note>
-Confidential and Encrypted were previously called `tee` and `e2e-tee`. The old `:tee` / `:e2e-tee` suffixes and `tee` / `e2e-tee` `privacy_tier` values still work as deprecated aliases, so existing integrations keep running.
-</Note>
-
 ## Support is per model, so read the catalog entry
 
 No model supports every tier. Which rungs of the ladder a given model offers is reported on its catalog entry from `GET /v1/models`, and the practical rule is always the same: read the model entry, then choose the tier the model supports.
