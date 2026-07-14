@@ -36,7 +36,7 @@ const { text } = await generateText({
 console.log(text);
 ```
 
-For streaming, use `streamText` with the same `nito(...)` model. Streaming, tool calling, and structured outputs are all supported (subject to the model supporting them). Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
+For streaming, use `streamText` with the same `nito(...)` model. Streaming and tool calling are supported (subject to the model supporting them). Structured outputs via `response_format` are **not** exposed by the gateway, so `generateObject`/`streamObject` in JSON-schema mode will fail — see the [OpenAI compatibility notes](/sdks/openai-drop-in/compatibility-notes). Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
 
 <Note>
 If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("x-ai/grok-4.5")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
