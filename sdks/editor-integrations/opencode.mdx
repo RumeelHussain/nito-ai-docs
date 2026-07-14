@@ -1,0 +1,71 @@
+---
+title: "OpenCode"
+description: "Route OpenCode through Nito by defining a custom OpenAI-compatible provider in opencode.json with a Nito base URL, key, and catalog model ID."
+---
+
+OpenCode is a terminal coding agent that supports custom providers through the AI SDK. Because Nito exposes an OpenAI-compatible API, you can route OpenCode through Nito by defining an OpenAI-compatible provider. You are not selecting a named "Nito" provider — you are configuring OpenCode's generic OpenAI-compatible provider and pointing it at Nito.
+
+## Configuration
+
+OpenCode reads config from `opencode.json` in your project root, or `~/.config/opencode/opencode.json` for a global setup. Define Nito as a provider and list the models you want:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "nito": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Nito",
+      "options": {
+        "baseURL": "https://nito.dev.zprotocol.org/v1",
+        "apiKey": "{env:NITO_API_KEY}"
+      },
+      "models": {
+        "x-ai/grok-4.5": { "name": "Grok 4.5" }
+      }
+    }
+  }
+}
+```
+
+- **`npm`** must be `@ai-sdk/openai-compatible` — the OpenAI **Chat Completions** wire format (`/v1/chat/completions`).
+- **`options.baseURL`** must end in `/v1` (the SDK appends `/chat/completions`). Ending it in `/v1/chat/completions` is the most common mistake.
+- **`options.apiKey`** supports `{env:VAR}` references — export `NITO_API_KEY="z_sk_..."` rather than hardcoding the key. (You can also omit it and use `opencode auth login`.)
+- **The `models` keys are the allowlist** — only listed IDs are selectable, and each key is sent to the API unchanged, so it must exactly match a Nito catalog ID (`x-ai/grok-4.5`, vendor prefix included).
+
+```bash
+export NITO_API_KEY="z_sk_your_key_here"
+opencode
+```
+
+<Note>
+OpenCode may not pick up provider or config changes until you restart it.
+</Note>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
+
+## Finding a model ID
+
+Add more entries under `models` for more Nito IDs. Fetch the live list:
+
+```bash
+curl https://nito.dev.zprotocol.org/v1/models \
+  -H "Authorization: Bearer z_sk_your_key_here"
+```
+
+## Choosing a privacy tier
+
+Privacy is selected by the model ID, so no separate OpenCode setting is required. Add a `:confidential` model for a TEE-backed run with a verifiable attestation, for example a `models` key of `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier (for instance `x-ai/grok-4.5` has no confidential variant). `:encrypted` does not stream and needs extra headers, so it is generally not usable from a coding agent's request loop. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Common mistakes
+
+- **`baseURL` ending in `/v1/chat/completions`.** Use `/v1`; the SDK appends the operation path.
+- **Model key that isn't a real catalog ID.** Keys are sent verbatim — use an ID from `GET /v1/models`.
+- **Forgetting to export `NITO_API_KEY`** when using a `{env:...}` reference.
+- **Not restarting** after editing `opencode.json`.
+
+## Related
+
+- [Editor and tool integrations](/sdks/editor-integrations)
+- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Jan.ai](/sdks/editor-integrations/jan-ai)

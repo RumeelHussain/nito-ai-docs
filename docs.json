@@ -218,7 +218,9 @@
               "sdks/editor-integrations/codex",
               "sdks/editor-integrations/openclaw",
               "sdks/editor-integrations/zed",
-              "sdks/editor-integrations/continue-dev"
+              "sdks/editor-integrations/continue-dev",
+              "sdks/editor-integrations/jan-ai",
+              "sdks/editor-integrations/opencode"
             ]
           },
           {
