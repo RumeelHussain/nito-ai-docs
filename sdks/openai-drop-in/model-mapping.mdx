@@ -47,7 +47,7 @@ for (const m of models.data) {
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL (owner: Product/Infra).
 
-The example `grok-4.3` used elsewhere in these docs is illustrative only. Pick an ID from the live `GET /v1/models` response.
+The example `x-ai/grok-4.5` used elsewhere in these docs is illustrative only. Pick an ID from the live `GET /v1/models` response.
 
 ## How a Nito model ID is built
 
@@ -57,10 +57,10 @@ A Nito public model ID is a canonical model name with an optional privacy suffix
 <canonical-model-id>[:confidential | :encrypted]
 ```
 
-- The base is the canonical model ID from the catalog.
-- The optional suffix selects a stronger privacy mode. Only `:confidential` and `:encrypted` are valid; any other suffix is rejected. Legacy-looking suffixes such as `:standard`, `:zdr`, `:anon`, or `:private` are not accepted on the public ID.
+- The base is the canonical model ID from the catalog, e.g. `x-ai/grok-4.5` or `openai/gpt-oss-120b`.
+- A `:confidential` or `:encrypted` suffix selects a stronger privacy mode. Only those two suffixes are valid; any other (`:standard`, `:zdr`, `:anon`, `:private`, …) is rejected.
 
-So `grok-4.3` and `grok-4.3:confidential` are the same model at two privacy tiers. The privacy decision rides entirely on this suffix; there is no separate tier parameter. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy variants are **published as their own catalog entries**, only for the models that support them — not every model has one. For example, `x-ai/grok-4.5` has no confidential variant, while `openai/gpt-oss-120b:confidential` and `openai/gpt-oss-120b:encrypted` are listed as distinct IDs. So the reliable way to select a private tier is to call `GET /v1/models` and pick an ID that already ends in `:confidential` or `:encrypted`, rather than appending a suffix to an arbitrary model. The privacy decision rides entirely on the model ID; there is no separate tier parameter. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Mapping OpenAI names to Nito IDs
 

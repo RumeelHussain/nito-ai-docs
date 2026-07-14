@@ -29,7 +29,7 @@ const nito = createOpenAICompatible({
 });
 
 const { text } = await generateText({
-  model: nito("grok-4.3"),                       // a Nito catalog ID, fetch from GET /v1/models
+  model: nito("x-ai/grok-4.5"),                       // a Nito catalog ID, fetch from GET /v1/models
   prompt: "Say hello in one short sentence.",
 });
 
@@ -39,7 +39,7 @@ console.log(text);
 For streaming, use `streamText` with the same `nito(...)` model. Streaming, tool calling, and structured outputs are all supported (subject to the model supporting them). Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
 
 <Note>
-If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("grok-4.3")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
+If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("x-ai/grok-4.5")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
@@ -49,7 +49,7 @@ If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the m
 Pass a Nito catalog ID to the provider factory, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
 ```typescript
-model: nito("grok-4.3:confidential"),
+model: nito("openai/gpt-oss-120b:confidential"),
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

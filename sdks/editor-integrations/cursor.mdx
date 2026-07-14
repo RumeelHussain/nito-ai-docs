@@ -11,7 +11,7 @@ Cursor is configured through its UI, not a config file. In **Settings → Models
 
 1. Under **API Keys**, open the **OpenAI** section and paste your Nito key (`z_sk_...`).
 2. Enable **Override OpenAI Base URL** and set it to `https://nito.dev.zprotocol.org/v1` (must end in `/v1`).
-3. Under **Models**, add a custom model whose name is a Nito catalog ID such as `grok-4.3` (not an OpenAI name like `gpt-4o`), then select it.
+3. Under **Models**, add a custom model whose name is a Nito catalog ID such as `x-ai/grok-4.5` (not an OpenAI name like `gpt-4o`), then select it.
 
 <Warning>
 Two limits to know before relying on this:
@@ -34,7 +34,7 @@ Enter one of the returned IDs as the Cursor model name. If Cursor lets you add a
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID, so you do not need a separate Cursor setting. To run a request in a TEE with a verifiable attestation, append `:confidential` to the model name, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Note that `:encrypted` does not stream and needs extra headers, so it is generally not usable from Cursor's chat box. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID, so you do not need a separate Cursor setting. To run a request in a TEE with a verifiable attestation, append `:confidential` to the model name, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Note that `:encrypted` does not stream and needs extra headers, so it is generally not usable from Cursor's chat box. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What to expect
 

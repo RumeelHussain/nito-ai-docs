@@ -21,7 +21,7 @@ LiteLLM forwards the request in OpenAI Chat Completions shape, which is exactly 
 from litellm import completion
 
 resp = completion(
-    model="openai/grok-4.3",                       # OpenAI-compatible route; grok-4.3 is a Nito catalog ID
+    model="openai/x-ai/grok-4.5",                       # OpenAI-compatible route; x-ai/grok-4.5 is a Nito catalog ID
     api_key="z_sk_your_key_here",                  # your Nito API key
     api_base="https://nito.dev.zprotocol.org/v1",  # note: api_base (not base_url)
     messages=[{"role": "user", "content": "Say hello in one short sentence."}],
@@ -30,15 +30,15 @@ resp = completion(
 print(resp.choices[0].message.content)
 ```
 
-The `openai/` prefix tells LiteLLM to use its OpenAI-compatible client; the part after it, `grok-4.3`, is the Nito catalog ID sent to the gateway. Note the parameter is **`api_base`**, not `base_url`.
+The `openai/` prefix tells LiteLLM to use its OpenAI-compatible client; the part after it, `x-ai/grok-4.5`, is the Nito catalog ID sent to the gateway. Note the parameter is **`api_base`**, not `base_url`.
 
 **Proxy** — the same three values on a `model_list` entry in `config.yaml`:
 
 ```yaml
 model_list:
-  - model_name: grok-4.3
+  - model_name: x-ai/grok-4.5
     litellm_params:
-      model: openai/grok-4.3
+      model: openai/x-ai/grok-4.5
       api_base: https://nito.dev.zprotocol.org/v1
       api_key: z_sk_your_key_here
 ```
@@ -49,13 +49,14 @@ Run `litellm --config config.yaml`, then call the proxy with the bare `model_nam
 
 ## Choosing a model and privacy
 
-Use a Nito catalog ID after the `openai/` route prefix, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+Use a Nito catalog ID after the `openai/` route prefix, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models` and pick one that supports the tier — private variants are listed as their own IDs ending in `:confidential` / `:encrypted`:
 
 ```python
-model="openai/grok-4.3:confidential"
+# openai/ = LiteLLM route prefix; openai/gpt-oss-120b:confidential = the Nito catalog ID
+model="openai/openai/gpt-oss-120b:confidential"
 ```
 
-Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier (e.g. `x-ai/grok-4.5` has no confidential variant). Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Do not use the Anthropic route
 

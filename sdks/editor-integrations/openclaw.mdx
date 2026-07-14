@@ -18,7 +18,7 @@ OpenClaw is configured in `~/.openclaw/openclaw.json` (JSON5, so comments are al
         apiKey: "${NITO_API_KEY}",                     // ${ENV} refs are expanded
         api: "openai-completions",                     // Chat Completions wire format
         models: [
-          { id: "grok-4.3", name: "Grok 4.3" },        // id is the Nito catalog ID
+          { id: "x-ai/grok-4.5", name: "Grok 4.5" },        // id is the Nito catalog ID
         ],
       },
     },
@@ -26,7 +26,7 @@ OpenClaw is configured in `~/.openclaw/openclaw.json` (JSON5, so comments are al
   agents: {
     defaults: {
       model: {
-        primary: "nito/grok-4.3",   // provider/id — required, or the model is not selectable
+        primary: "nito/x-ai/grok-4.5",   // provider/id — required, or the model is not selectable
       },
     },
   },
@@ -52,7 +52,7 @@ If OpenClaw lets you register a custom model name, add the Nito ID so it appears
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID, so no separate OpenClaw setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from an interactive editor. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID, so no separate OpenClaw setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from an interactive editor. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What to expect
 

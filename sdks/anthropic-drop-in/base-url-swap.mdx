@@ -33,7 +33,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",   # a Nito catalog ID from GET /v1/models
+    model="x-ai/grok-4.5",   # a Nito catalog ID from GET /v1/models
     messages=[
         {"role": "system", "content": "You are a concise assistant."},
         {"role": "user", "content": "Say hello in one short sentence."},
@@ -52,7 +52,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",
+  model: "x-ai/grok-4.5",
   messages: [
     { role: "system", content: "You are a concise assistant." },
     { role: "user", content: "Say hello in one short sentence." },
@@ -66,7 +66,7 @@ console.log(resp.choices[0].message.content);
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
 
-The example model `grok-4.3` is illustrative. Fetch `GET /v1/models` for the live catalog and pick by capability; Anthropic model names are not Nito IDs.
+The example model `x-ai/grok-4.5` is illustrative. Fetch `GET /v1/models` for the live catalog and pick by capability; Anthropic model names are not Nito IDs.
 
 ## Can I keep the Anthropic SDK?
 

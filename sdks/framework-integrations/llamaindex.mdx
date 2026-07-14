@@ -22,7 +22,7 @@ Set it as your LLM and the rest of the pipeline is unchanged.
 from llama_index.llms.openai_like import OpenAILike
 
 llm = OpenAILike(
-    model="grok-4.3",                              # a Nito catalog ID, fetch from GET /v1/models
+    model="x-ai/grok-4.5",                              # a Nito catalog ID, fetch from GET /v1/models
     api_key="z_sk_your_key_here",                  # your Nito API key
     api_base="https://nito.dev.zprotocol.org/v1",  # note: api_base (not base_url)
     is_chat_model=True,                            # else it routes to the legacy /completions path
@@ -34,7 +34,7 @@ print(llm.complete("Say hello in one short sentence."))
 ```
 
 <Warning>
-Use **`OpenAILike`**, not the plain `OpenAI` class. Plain `OpenAI` resolves the model name against its built-in list and raises `ValueError: Unknown model` for a custom ID like `grok-4.3`. `OpenAILike` accepts any model ID via the explicit `context_window`/`is_chat_model` attributes.
+Use **`OpenAILike`**, not the plain `OpenAI` class. Plain `OpenAI` resolves the model name against its built-in list and raises `ValueError: Unknown model` for a custom ID like `x-ai/grok-4.5`. `OpenAILike` accepts any model ID via the explicit `context_window`/`is_chat_model` attributes.
 </Warning>
 
 For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
@@ -46,7 +46,7 @@ For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against
 Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
 ```python
-model="grok-4.3:confidential"
+model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

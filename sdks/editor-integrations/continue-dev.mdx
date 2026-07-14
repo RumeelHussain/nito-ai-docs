@@ -11,9 +11,9 @@ Add a model entry to `~/.continue/config.yaml` (the current format; `config.json
 
 ```yaml
 models:
-  - name: Grok 4.3
+  - name: Grok 4.5
     provider: openai
-    model: grok-4.3                             # a Nito catalog ID, fetch from GET /v1/models
+    model: x-ai/grok-4.5                             # a Nito catalog ID, fetch from GET /v1/models
     apiBase: https://nito.dev.zprotocol.org/v1  # must end in /v1
     apiKey: z_sk_your_key_here                  # your Nito key
     roles:
@@ -40,7 +40,7 @@ Add the Nito ID as the model name so it appears in Continue's model dropdown. Yo
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID, so no separate Continue setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. You can register two entries, one plain and one with the `:confidential` suffix, to switch tiers from the model picker. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from Continue. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID, so no separate Continue setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. You can register two entries, one plain and one with the `:confidential` suffix, to switch tiers from the model picker. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from Continue. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What to expect
 

@@ -11,14 +11,14 @@ Claude Code reads its endpoint and credentials from environment variables:
 
 - **`ANTHROPIC_BASE_URL`:** `https://nito.dev.zprotocol.org` — the **host root, without `/v1`**. Claude Code appends `/v1/messages` itself.
 - **`ANTHROPIC_AUTH_TOKEN`:** your Nito key (`z_sk_...`), sent as `Authorization: Bearer`. (Use `ANTHROPIC_AUTH_TOKEN`, not `ANTHROPIC_API_KEY`, since Nito issues bearer keys.)
-- **`ANTHROPIC_MODEL`:** a Nito catalog ID such as `grok-4.3` — not a Claude name like `claude-3-5-sonnet`.
+- **`ANTHROPIC_MODEL`:** a Nito catalog ID such as `x-ai/grok-4.5` — not a Claude name like `claude-3-5-sonnet`.
 
 ### Option A — environment variables
 
 ```bash
 export ANTHROPIC_BASE_URL="https://nito.dev.zprotocol.org"
 export ANTHROPIC_AUTH_TOKEN="z_sk_your_key_here"
-export ANTHROPIC_MODEL="grok-4.3"
+export ANTHROPIC_MODEL="x-ai/grok-4.5"
 claude
 ```
 
@@ -29,7 +29,7 @@ claude
   "env": {
     "ANTHROPIC_BASE_URL": "https://nito.dev.zprotocol.org",
     "ANTHROPIC_AUTH_TOKEN": "z_sk_your_key_here",
-    "ANTHROPIC_MODEL": "grok-4.3"
+    "ANTHROPIC_MODEL": "x-ai/grok-4.5"
   }
 }
 ```
@@ -49,7 +49,7 @@ Use one of the returned IDs as `ANTHROPIC_MODEL`.
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation (`grok-4.3:confidential`). Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier; `:encrypted` is non-streaming and generally not usable from an interactive CLI. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation (`openai/gpt-oss-120b:confidential`). Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier; `:encrypted` is non-streaming and generally not usable from an interactive CLI. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Notes and caveats
 

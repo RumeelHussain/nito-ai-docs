@@ -11,7 +11,7 @@ Every editor on these pages follows the same three-value setup. Wherever the edi
 
 - **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append routes like `/chat/completions` themselves.
 - **API key:** a Nito key that starts with `z_sk_`.
-- **Model ID:** a Nito catalog ID, such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`. Fetch the live list with `GET /v1/models`.
+- **Model ID:** a Nito catalog ID, such as `x-ai/grok-4.5`. Do not use an OpenAI name like `gpt-4o`. Fetch the live list with `GET /v1/models`.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
@@ -21,8 +21,8 @@ That is the whole idea. The editor sends standard Chat Completions requests, and
 
 Privacy is chosen by the model ID, not by a separate setting. Add a suffix to the model name to opt into a stronger tier:
 
-- `grok-4.3:confidential` runs in a TEE with an attestation you can verify.
-- `grok-4.3:encrypted` adds end-to-end encryption, but does not stream and needs extra headers, so it is rarely usable from an editor's chat box.
+- `openai/gpt-oss-120b:confidential` runs in a TEE with an attestation you can verify.
+- `openai/gpt-oss-120b:encrypted` adds end-to-end encryption, but does not stream and needs extra headers, so it is rarely usable from an editor's chat box.
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 

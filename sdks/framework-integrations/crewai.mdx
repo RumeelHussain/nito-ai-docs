@@ -21,7 +21,7 @@ Assign that LLM to your agents and the rest of the crew is unchanged.
 from crewai import LLM, Agent
 
 llm = LLM(
-    model="openai/grok-4.3",                       # note the openai/ prefix (see below)
+    model="openai/x-ai/grok-4.5",                       # note the openai/ prefix (see below)
     api_key="z_sk_your_key_here",                  # your Nito API key
     base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
 )
@@ -35,7 +35,7 @@ researcher = Agent(
 ```
 
 <Warning>
-Prefix the model with **`openai/`** (`openai/grok-4.3`). CrewAI routes through LiteLLM; the `openai/` prefix forces LiteLLM's OpenAI handler to use your custom `base_url` and pass the model string through, instead of trying to resolve `grok-4.3` against its built-in provider map.
+Prefix the model with **`openai/`** (`openai/x-ai/grok-4.5`). CrewAI routes through LiteLLM; the `openai/` prefix forces LiteLLM's OpenAI handler to use your custom `base_url` and pass the model string through, instead of trying to resolve `x-ai/grok-4.5` against its built-in provider map.
 </Warning>
 
 Alternatively, configure it with environment variables:
@@ -44,20 +44,21 @@ Alternatively, configure it with environment variables:
 import os
 os.environ["OPENAI_API_KEY"]    = "z_sk_your_key_here"
 os.environ["OPENAI_API_BASE"]   = "https://nito.dev.zprotocol.org/v1"
-os.environ["OPENAI_MODEL_NAME"] = "grok-4.3"
+os.environ["OPENAI_MODEL_NAME"] = "x-ai/grok-4.5"
 ```
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Choosing a model and privacy
 
-Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
+Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models` and pick one that supports the tier — private variants are listed as their own IDs ending in `:confidential` / `:encrypted`:
 
 ```python
-model="openai/grok-4.3:confidential"
+# openai/ = LiteLLM route prefix; openai/gpt-oss-120b:confidential = the Nito catalog ID
+model="openai/openai/gpt-oss-120b:confidential"
 ```
 
-Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier (e.g. `x-ai/grok-4.5` has no confidential variant). Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Anthropic-shaped configuration
 

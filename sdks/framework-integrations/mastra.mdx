@@ -26,14 +26,14 @@ export const nitoAgent = new Agent({
   instructions: "Answer concisely.",
   model: {
     url: "https://nito.dev.zprotocol.org/v1",   // base URL, WITH /v1 (not the /chat/completions path)
-    id: "nito/grok-4.3",                         // provider/model form; use a Nito catalog ID
+    id: "nito/x-ai/grok-4.5",                         // provider/model form; use a Nito catalog ID
     apiKey: process.env.NITO_API_KEY,            // your Nito key, "z_sk_..."
   },
 });
 ```
 
 <Warning>
-Use the **object** form above. The bare string `model: "openai/grok-4.3"` routes to the built-in OpenAI provider (hits `api.openai.com` with `OPENAI_API_KEY`) — it will **not** use your custom base URL.
+Use the **object** form above. The bare string `model: "openai/x-ai/grok-4.5"` routes to the built-in OpenAI provider (hits `api.openai.com` with `OPENAI_API_KEY`) — it will **not** use your custom base URL.
 </Warning>
 
 Alternatively, pass an AI SDK v5 provider instance (`npm i ai @ai-sdk/openai`) and use `.chat()` since Nito serves Chat Completions:
@@ -41,7 +41,7 @@ Alternatively, pass an AI SDK v5 provider instance (`npm i ai @ai-sdk/openai`) a
 ```typescript
 import { createOpenAI } from "@ai-sdk/openai";
 const nito = createOpenAI({ baseURL: "https://nito.dev.zprotocol.org/v1", apiKey: process.env.NITO_API_KEY });
-// model: nito.chat("grok-4.3")
+// model: nito.chat("x-ai/grok-4.5")
 ```
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
@@ -51,7 +51,7 @@ const nito = createOpenAI({ baseURL: "https://nito.dev.zprotocol.org/v1", apiKey
 Use a Nito catalog ID for `id`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
 ```typescript
-id: "nito/grok-4.3:confidential",
+id: "nito/openai/gpt-oss-120b:confidential",
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream, so prefer `:confidential` for streamed agent responses. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

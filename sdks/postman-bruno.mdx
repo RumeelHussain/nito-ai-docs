@@ -32,7 +32,7 @@ GET https://nito.dev.zprotocol.org/v1/models
 Authorization: Bearer z_sk_your_key_here
 ```
 
-The response lists the model IDs you can pass as `model`. The example `grok-4.3` below is illustrative; pick a real ID from this response, because the catalog changes over time.
+The response lists the model IDs you can pass as `model`. The example `x-ai/grok-4.5` below is illustrative; pick a real ID from this response, because the catalog changes over time.
 
 ## Sample chat completion request
 
@@ -46,7 +46,7 @@ Body:
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [
     { "role": "system", "content": "You are concise." },
     { "role": "user", "content": "Say hello in one short sentence." }
@@ -61,7 +61,7 @@ A successful response is a standard `chat.completion` object. The assistant's te
 Privacy rides on the model ID. To run inside an attested environment, change one field:
 
 ```json
-{ "model": "grok-4.3:confidential" }
+{ "model": "openai/gpt-oss-120b:confidential" }
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note that `:encrypted` is non-streaming and needs extra headers, so it is not well suited to a simple Postman or Bruno request. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

@@ -11,7 +11,7 @@ Every integration on the following pages is the same move, expressed in that fra
 
 1. **Base URL.** Point the framework's OpenAI client at the Nito base plus `/v1`, for example `https://nito.dev.zprotocol.org/v1`. The client appends paths like `/chat/completions` itself, so the base must end in `/v1`.
 2. **API key.** Use a Nito key (it starts with `z_sk_`) wherever the framework expects an OpenAI API key.
-3. **Model ID.** Use a Nito catalog ID, not an OpenAI name like `gpt-4o`. Fetch the current catalog from `GET /v1/models` and pick an ID such as `grok-4.3`.
+3. **Model ID.** Use a Nito catalog ID, not an OpenAI name like `gpt-4o`. Fetch the current catalog from `GET /v1/models` and pick an ID such as `x-ai/grok-4.5`.
 
 That is the whole contract. Messages, streaming, and tool-call shapes follow the OpenAI Chat Completions format the framework already targets.
 
@@ -22,7 +22,7 @@ That is the whole contract. Messages, streaming, and tool-call shapes follow the
 Privacy is chosen by the model ID, not by a framework setting. Add a suffix to the model name and change nothing else:
 
 ```text
-grok-4.3:confidential      # TEE-backed execution with an attestation you can verify
+openai/gpt-oss-120b:confidential      # TEE-backed execution with an attestation you can verify
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note that `:encrypted` does not stream and requires extra headers, so it is a poor fit for most framework integrations; prefer `:confidential` when you need attestation with streaming. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

@@ -22,7 +22,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",                          # a Nito catalog ID, not an OpenAI name
+    model="x-ai/grok-4.5",                          # a Nito catalog ID, not an OpenAI name
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -40,7 +40,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",                         // a Nito catalog ID
+  model: "x-ai/grok-4.5",                         // a Nito catalog ID
   messages: [
     { role: "user", content: "Say hello in one short sentence." },
   ],
@@ -53,7 +53,7 @@ console.log(resp.choices[0].message.content);
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-The example model `grok-4.3` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
+The example model `x-ai/grok-4.5` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
 ## Why the base URL must end in `/v1`
 
@@ -86,7 +86,7 @@ Privacy is chosen by the model ID, so you opt into a stronger tier by adding a s
 
 ```python
 # TEE-backed execution with an attestation you can verify
-model="grok-4.3:confidential"
+model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Use `GET /v1/models` to find models that support attestation. Note that `:encrypted` does not stream and needs extra headers, so it is best done by hand rather than through the SDK. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

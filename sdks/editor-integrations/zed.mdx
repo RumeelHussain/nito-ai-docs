@@ -16,7 +16,7 @@ Zed has a first-class `openai_compatible` provider. Add it to `settings.json` un
       "nito": {
         "api_url": "https://nito.dev.zprotocol.org/v1",
         "available_models": [
-          { "name": "grok-4.3", "display_name": "Grok 4.3", "max_tokens": 128000 }
+          { "name": "x-ai/grok-4.5", "display_name": "Grok 4.5", "max_tokens": 128000 }
         ]
       }
     }
@@ -43,7 +43,7 @@ Register the Nito ID as a model name in Zed's provider configuration so it appea
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID, so no separate Zed setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from Zed's assistant. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID, so no separate Zed setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from Zed's assistant. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What to expect
 

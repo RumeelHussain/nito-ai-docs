@@ -21,7 +21,7 @@ LangGraph nodes that call a model receive this configured model object, so there
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
+    model="x-ai/grok-4.5",                          # a Nito catalog ID, fetch from GET /v1/models
     api_key="z_sk_your_key_here",              # your Nito API key
     base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
 )
@@ -48,7 +48,7 @@ For a non-OpenAI base URL, LangChain leaves streaming token-usage off by default
 Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID and change nothing else:
 
 ```python
-model="grok-4.3:confidential"
+model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes. Note `:encrypted` does not stream, so avoid it for streaming chains. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
