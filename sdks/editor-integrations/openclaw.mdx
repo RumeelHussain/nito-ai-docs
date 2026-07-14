@@ -5,17 +5,39 @@ description: "Connect OpenClaw to Nito by configuring a custom OpenAI-compatible
 
 If OpenClaw supports a custom OpenAI-compatible provider, you can route it through Nito. Nito exposes an OpenAI-compatible API, so OpenClaw sends standard Chat Completions requests and Nito serves them. You are not selecting a named "Nito" provider. You are using OpenClaw's generic OpenAI-compatible endpoint setting and pointing it at Nito.
 
-## Values to enter
+## Configuration
 
-Wherever OpenClaw accepts OpenAI-compatible connection details, supply:
+OpenClaw is configured in `~/.openclaw/openclaw.json` (JSON5, so comments are allowed). Register Nito as a provider, then allowlist one of its models as the default the agent may use:
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+```json5
+{
+  models: {
+    providers: {
+      nito: {
+        baseUrl: "https://nito.dev.zprotocol.org/v1",  // must end in /v1
+        apiKey: "${NITO_API_KEY}",                     // ${ENV} refs are expanded
+        api: "openai-completions",                     // Chat Completions wire format
+        models: [
+          { id: "grok-4.3", name: "Grok 4.3" },        // id is the Nito catalog ID
+        ],
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: {
+        primary: "nito/grok-4.3",   // provider/id — required, or the model is not selectable
+      },
+    },
+  },
+}
+```
+
+- **`baseUrl`** must end in `/v1`.
+- **`apiKey`** accepts `${ENV}` references — export `NITO_API_KEY="z_sk_..."` rather than hardcoding the key.
+- **You must allowlist the model** under `agents.defaults.model.primary` (as `provider/id`). Registering the provider alone is not enough — OpenClaw will not offer a model it hasn't been told to use.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
-
-> **TODO (needs SME):** verify the exact current settings path/config for OpenClaw against its official docs, including whether it supports a custom OpenAI-compatible endpoint at all.
 
 ## Finding a model ID
 

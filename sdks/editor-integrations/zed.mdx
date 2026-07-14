@@ -5,17 +5,30 @@ description: "Use Nito in Zed by configuring a custom OpenAI-compatible provider
 
 Zed's assistant supports custom OpenAI-compatible providers. Because Nito exposes an OpenAI-compatible API, you can route Zed's assistant through Nito by filling in that custom-endpoint configuration. You are not selecting a named "Nito" provider. You are using Zed's OpenAI-compatible provider option and pointing it at Nito.
 
-## Values to enter
+## Configuration
 
-Wherever Zed accepts OpenAI-compatible provider details, supply:
+Zed has a first-class `openai_compatible` provider. Add it to `settings.json` under `language_models`, listing the Nito models you want (Zed does not auto-discover them):
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+```json
+{
+  "language_models": {
+    "openai_compatible": {
+      "nito": {
+        "api_url": "https://nito.dev.zprotocol.org/v1",
+        "available_models": [
+          { "name": "grok-4.3", "display_name": "Grok 4.3", "max_tokens": 128000 }
+        ]
+      }
+    }
+  }
+}
+```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
+- **`api_url`** must end in `/v1`.
+- **The API key goes in the UI, not the file** — add it under Agent Settings → LLM Providers (Zed stores it in the keychain). Do not put `z_sk_...` in `settings.json`.
+- Each entry in `available_models` needs a `name` (the Nito catalog ID). Add more entries for more models.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Zed against its official docs, including the configuration key names for a custom OpenAI-compatible provider.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Finding a model ID
 

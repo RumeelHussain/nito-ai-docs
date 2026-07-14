@@ -1,47 +1,69 @@
 ---
 title: "Claude Code"
-description: "Route Claude Code through Nito using the OpenAI-compatible path. Nito also now serves an Anthropic Messages-compatible endpoint."
+description: "Route Claude Code through Nito's Anthropic Messages-compatible endpoint using ANTHROPIC_BASE_URL and a Nito key."
 ---
 
-Claude Code is an Anthropic-oriented CLI that talks to a Claude model by default. This guide routes it through Nito's **OpenAI-compatible** surface for the widest support. Nito now also serves an Anthropic Messages-compatible endpoint (`POST /v1/messages`); this page targets the OpenAI-compatible path. Use a configuration that points Claude Code at an OpenAI-compatible endpoint.
+Claude Code is an Anthropic client — it talks to the **Anthropic Messages API**, not an OpenAI-compatible one. Because Nito now serves an **Anthropic Messages-compatible** endpoint (`POST /v1/messages`), you can point Claude Code at Nito by overriding its Anthropic base URL and key. There is no OpenAI-style configuration for Claude Code.
 
-## Values to enter
+## Values to set
 
-Wherever Claude Code accepts an OpenAI-compatible base URL and key, supply:
+Claude Code reads its endpoint and credentials from environment variables:
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an Anthropic name like `claude-3-5-sonnet` or an OpenAI name like `gpt-4o`.
+- **`ANTHROPIC_BASE_URL`:** `https://nito.dev.zprotocol.org` — the **host root, without `/v1`**. Claude Code appends `/v1/messages` itself.
+- **`ANTHROPIC_AUTH_TOKEN`:** your Nito key (`z_sk_...`), sent as `Authorization: Bearer`. (Use `ANTHROPIC_AUTH_TOKEN`, not `ANTHROPIC_API_KEY`, since Nito issues bearer keys.)
+- **`ANTHROPIC_MODEL`:** a Nito catalog ID such as `grok-4.3` — not a Claude name like `claude-3-5-sonnet`.
+
+### Option A — environment variables
+
+```bash
+export ANTHROPIC_BASE_URL="https://nito.dev.zprotocol.org"
+export ANTHROPIC_AUTH_TOKEN="z_sk_your_key_here"
+export ANTHROPIC_MODEL="grok-4.3"
+claude
+```
+
+### Option B — `~/.claude/settings.json`
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://nito.dev.zprotocol.org",
+    "ANTHROPIC_AUTH_TOKEN": "z_sk_your_key_here",
+    "ANTHROPIC_MODEL": "grok-4.3"
+  }
+}
+```
+
+Use a project-level `.claude/settings.json` to scope it to one repo.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-> **TODO (needs SME):** verify the exact current settings path/config for Claude Code against its official docs, including whether the running version supports an OpenAI-compatible endpoint at all.
-
-## This guide uses the OpenAI-compatible path
-
-This page targets OpenAI Chat Completions at `POST /v1/chat/completions` for the widest support. Nito now also serves an Anthropic Messages-compatible endpoint (`/v1/messages`) and its token-counting endpoint (`/v1/messages/count_tokens`). Confirm in the official Claude Code docs whether your version supports an OpenAI-compatible provider before relying on this route.
-
 ## Finding a model ID
-
-Fetch the catalog and use one of the returned IDs as the model name:
 
 ```bash
 curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
+Use one of the returned IDs as `ANTHROPIC_MODEL`.
+
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from an interactive CLI. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation (`grok-4.3:confidential`). Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier; `:encrypted` is non-streaming and generally not usable from an interactive CLI. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+
+## Notes and caveats
+
+- Nito's Anthropic-compatible surface covers `POST /v1/messages` and `POST /v1/messages/count_tokens`. Features that depend on Anthropic-native infrastructure (e.g. some MCP tooling) may be disabled when pointed at a non-`api.anthropic.com` host.
+- `ANTHROPIC_BASE_URL` is the **host root** (no `/v1`); this differs from the OpenAI-compatible integrations, which use `.../v1`.
 
 ## Common mistakes
 
-- **Assuming only the Anthropic Messages path works.** This guide targets the OpenAI-compatible path; use it for the widest support.
-- **Leaving a Claude or GPT model name in.** Replace it with a Nito catalog ID from `GET /v1/models`.
-- **Dropping `/v1` from the base URL.** The route will not be reached without it.
+- **Using an OpenAI-style base URL.** Claude Code is not an OpenAI client; set `ANTHROPIC_BASE_URL` (host root), not an OpenAI `/v1` URL.
+- **Leaving a Claude model name in.** Replace `claude-*` with a Nito catalog ID from `GET /v1/models`.
+- **Adding `/v1` to `ANTHROPIC_BASE_URL`.** The client appends `/v1/messages` itself.
 
 ## Related
 
 - [Editor and tool integrations](/sdks/editor-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
+- [Anthropic drop-in](/sdks/anthropic-drop-in/base-url-swap)
 - [Codex](/sdks/editor-integrations/codex)

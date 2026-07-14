@@ -5,21 +5,33 @@ description: "Point Codex at Nito through the OpenAI-compatible Chat Completions
 
 Codex is an OpenAI-oriented coding tool. Since Nito exposes an OpenAI-compatible API, you can route Codex through Nito by overriding its base URL, key, and model. You are not selecting a named "Nito" provider. You are using Codex's OpenAI-compatible configuration and pointing it at Nito.
 
-## Values to enter
+## Configuration
 
-Wherever Codex accepts an OpenAI-compatible base URL and key, supply:
+Codex is configured in `~/.codex/config.toml`. Define Nito as a custom provider and select it at the top level:
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+```toml
+model = "grok-4.3"          # a Nito catalog ID, fetch from GET /v1/models
+model_provider = "nito"
+
+[model_providers.nito]
+name = "Nito"
+base_url = "https://nito.dev.zprotocol.org/v1"   # must end in /v1
+env_key = "NITO_API_KEY"    # names the env var Codex reads the key from
+wire_api = "chat"           # Chat Completions; use "responses" for the Responses API
+```
+
+The key is read from the environment variable named by `env_key`, so export it before launching Codex:
+
+```bash
+export NITO_API_KEY="z_sk_your_key_here"
+codex
+```
+
+<Note>
+`wire_api` picks the protocol. Nito serves **both** OpenAI Chat Completions (`/v1/chat/completions`) and a Responses-compatible endpoint (`/v1/responses`), so either `wire_api = "chat"` or `wire_api = "responses"` works. Recent Codex builds default to `"responses"`; set `"chat"` explicitly for the widest compatibility.
+</Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
-
-> **TODO (needs SME):** verify the exact current settings path/config for Codex against its official docs, including whether the running version targets Chat Completions or the Responses API.
-
-## Use Chat Completions, not Responses
-
-The protocol matters. This guide targets OpenAI **Chat Completions** at `POST /v1/chat/completions` for the widest support. Nito now also serves an OpenAI Responses-compatible endpoint (`/v1/responses`), but this page targets Chat Completions, so confirm that your Codex version can target it before relying on this route.
 
 ## Finding a model ID
 

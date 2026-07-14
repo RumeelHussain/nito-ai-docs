@@ -5,17 +5,21 @@ description: "Connect Cursor to Nito by setting a custom OpenAI-compatible base 
 
 Cursor lets you configure a custom OpenAI-compatible API instead of its built-in models. Because Nito exposes an OpenAI-compatible API, you can route Cursor's chat and inline edits through Nito by filling in that custom-endpoint setting. You are not selecting a named "Nito" provider. You are using Cursor's OpenAI-compatible override and pointing it at Nito.
 
-## Values to enter
+## Configuration
 
-Wherever Cursor asks for OpenAI-compatible connection details, supply these three values:
+Cursor is configured through its UI, not a config file. In **Settings → Models**:
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
+1. Under **API Keys**, open the **OpenAI** section and paste your Nito key (`z_sk_...`).
+2. Enable **Override OpenAI Base URL** and set it to `https://nito.dev.zprotocol.org/v1` (must end in `/v1`).
+3. Under **Models**, add a custom model whose name is a Nito catalog ID such as `grok-4.3` (not an OpenAI name like `gpt-4o`), then select it.
+
+<Warning>
+Two limits to know before relying on this:
+- **The base-URL override only affects chat/edit models.** Cursor's Tab autocomplete stays on its built-in models and cannot be redirected to Nito.
+- **The "Override OpenAI Base URL" toggle is not covered by Cursor's official BYOK docs** (which document bringing your own *key* only). The flow above is community-verified and can change between Cursor releases.
+</Warning>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
-
-> **TODO (needs SME):** verify the exact current settings path/config for Cursor against its official docs.
 
 ## Finding a model ID
 

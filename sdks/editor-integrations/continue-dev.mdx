@@ -5,17 +5,27 @@ description: "Add Nito to Continue.dev as a custom OpenAI-compatible model with 
 
 Continue.dev lets you add models from custom OpenAI-compatible providers. Because Nito exposes an OpenAI-compatible API, you can add a Nito model to Continue by configuring it as an OpenAI-compatible endpoint. You are not selecting a named "Nito" provider. You are using Continue's OpenAI-compatible model configuration and pointing it at Nito.
 
-## Values to enter
+## Configuration
 
-Wherever Continue.dev defines an OpenAI-compatible model, supply:
+Add a model entry to `~/.continue/config.yaml` (the current format; `config.json` is deprecated). Use the built-in `openai` provider with an `apiBase` override:
 
-- **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
-- **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+```yaml
+models:
+  - name: Grok 4.3
+    provider: openai
+    model: grok-4.3                             # a Nito catalog ID, fetch from GET /v1/models
+    apiBase: https://nito.dev.zprotocol.org/v1  # must end in /v1
+    apiKey: z_sk_your_key_here                  # your Nito key
+    roles:
+      - chat
+      - edit
+```
+
+- **`apiBase`** must end in `/v1` (the client appends `/chat/completions`).
+- **`apiKey`** is sent as a Bearer token.
+- If your gateway needs it, `useResponsesApi: false` forces the `/chat/completions` route.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
-
-> **TODO (needs SME):** verify the exact current settings path/config for Continue.dev against its official docs, including the configuration key names for an OpenAI-compatible model entry.
 
 ## Finding a model ID
 
