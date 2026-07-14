@@ -296,12 +296,6 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Accounts",
-            "pages": [
-              "api-reference/accounts/core-balance-by-address"
-            ]
-          },
-          {
             "group": "Auth",
             "pages": [
               "api-reference/auth/email-verification",
@@ -504,9 +498,179 @@
           {
             "group": "Nito API",
             "pages": [
-              "api-playground"
-            ],
-            "openapi": "openapi.json"
+              "api-playground",
+              {
+                "group": "Chat & Text",
+                "pages": [
+                  "api-reference/endpoints/chat-text/createchatcompletion",
+                  "api-reference/endpoints/chat-text/createanthropicmessage",
+                  "api-reference/endpoints/chat-text/createopenairesponse",
+                  "api-reference/endpoints/chat-text/createopenaichatcompletion",
+                  "api-reference/endpoints/chat-text/createopenairesponsecompact",
+                  "api-reference/endpoints/chat-text/countanthropicmessagetokens"
+                ]
+              },
+              {
+                "group": "Embeddings",
+                "pages": [
+                  "api-reference/endpoints/embeddings/createopenaiembedding",
+                  "api-reference/endpoints/embeddings/createembedding"
+                ]
+              },
+              {
+                "group": "Images",
+                "pages": [
+                  "api-reference/endpoints/images/createopenaiimagegeneration",
+                  "api-reference/endpoints/images/createimagegeneration"
+                ]
+              },
+              {
+                "group": "Models",
+                "pages": [
+                  "api-reference/endpoints/models/listopenaimodels",
+                  "api-reference/endpoints/models/listmodels",
+                  "api-reference/endpoints/models/listmodelgroups"
+                ]
+              },
+              {
+                "group": "Attestation",
+                "pages": [
+                  "api-reference/endpoints/attestation/getattestation",
+                  "api-reference/endpoints/attestation/getlegacyteeattestation"
+                ]
+              },
+              {
+                "group": "MCP",
+                "pages": [
+                  "api-reference/endpoints/mcp/handlemcpdelete",
+                  "api-reference/endpoints/mcp/handlemcpget",
+                  "api-reference/endpoints/mcp/handlemcppost"
+                ]
+              },
+              {
+                "group": "Authentication",
+                "pages": [
+                  "api-reference/endpoints/authentication/acceptwalletinvitationform",
+                  "api-reference/endpoints/authentication/completegooglesocialauth",
+                  "api-reference/endpoints/authentication/completexsocialauth",
+                  "api-reference/endpoints/authentication/completeemailmfa",
+                  "api-reference/endpoints/authentication/completesocialmfa",
+                  "api-reference/endpoints/authentication/loginwallet",
+                  "api-reference/endpoints/authentication/signupwallet",
+                  "api-reference/endpoints/authentication/loginemail",
+                  "api-reference/endpoints/authentication/createwalletchallenge",
+                  "api-reference/endpoints/authentication/getcsrftoken",
+                  "api-reference/endpoints/authentication/getanonymousfreetierstatus",
+                  "api-reference/endpoints/authentication/getstoragekey",
+                  "api-reference/endpoints/authentication/getsession",
+                  "api-reference/endpoints/authentication/listsocialauthproviders",
+                  "api-reference/endpoints/authentication/requestpasswordreset",
+                  "api-reference/endpoints/authentication/resendemailverification",
+                  "api-reference/endpoints/authentication/resetpassword",
+                  "api-reference/endpoints/authentication/startgooglesocialauth",
+                  "api-reference/endpoints/authentication/startxsocialauth",
+                  "api-reference/endpoints/authentication/signupemail",
+                  "api-reference/endpoints/authentication/verifywalletchallenge",
+                  "api-reference/endpoints/authentication/verifyemail"
+                ]
+              },
+              {
+                "group": "Account & Security",
+                "pages": [
+                  "api-reference/endpoints/account-security/acceptwalletinvitation",
+                  "api-reference/endpoints/account-security/acceptemailinvitation",
+                  "api-reference/endpoints/account-security/begintotpsetup",
+                  "api-reference/endpoints/account-security/changeaccountpassword",
+                  "api-reference/endpoints/account-security/logout",
+                  "api-reference/endpoints/account-security/confirmtotpsetup",
+                  "api-reference/endpoints/account-security/disabletotp",
+                  "api-reference/endpoints/account-security/disableidentity",
+                  "api-reference/endpoints/account-security/getaccountprofile",
+                  "api-reference/endpoints/account-security/getaccountsecurity",
+                  "api-reference/endpoints/account-security/linkwalletidentity",
+                  "api-reference/endpoints/account-security/linkemailidentity",
+                  "api-reference/endpoints/account-security/showemailinvitationaccept",
+                  "api-reference/endpoints/account-security/showwalletinvitationaccept",
+                  "api-reference/endpoints/account-security/revokeaccountsession",
+                  "api-reference/endpoints/account-security/revokeaccountoauthtoken",
+                  "api-reference/endpoints/account-security/updateaccountprofile"
+                ]
+              },
+              {
+                "group": "Organizations",
+                "pages": [
+                  "api-reference/endpoints/organizations/createorg",
+                  "api-reference/endpoints/organizations/createorginvitation",
+                  "api-reference/endpoints/organizations/createorgapikey",
+                  "api-reference/endpoints/organizations/disableorgmember",
+                  "api-reference/endpoints/organizations/getorgapioverview",
+                  "api-reference/endpoints/organizations/getorgfreetierstatus",
+                  "api-reference/endpoints/organizations/listorgs",
+                  "api-reference/endpoints/organizations/listorgapikeys",
+                  "api-reference/endpoints/organizations/listorgmembers",
+                  "api-reference/endpoints/organizations/resendorginvitation",
+                  "api-reference/endpoints/organizations/revokeorginvitation",
+                  "api-reference/endpoints/organizations/revokeorgapikey",
+                  "api-reference/endpoints/organizations/updateorgmemberrole"
+                ]
+              },
+              {
+                "group": "Billing",
+                "pages": [
+                  "api-reference/endpoints/billing/createbillingportalsession",
+                  "api-reference/endpoints/billing/createbillingcheckoutsession",
+                  "api-reference/endpoints/billing/createreferralinvite",
+                  "api-reference/endpoints/billing/getorgbillingautotopup",
+                  "api-reference/endpoints/billing/getorgbillingbalance",
+                  "api-reference/endpoints/billing/getreferraloverview",
+                  "api-reference/endpoints/billing/listbillingcheckoutproducts",
+                  "api-reference/endpoints/billing/updateorgbillingautotopup"
+                ]
+              },
+              {
+                "group": "OAuth",
+                "pages": [
+                  "api-reference/endpoints/oauth/approveoauthauthorization",
+                  "api-reference/endpoints/oauth/createoauthdeviceauthorization",
+                  "api-reference/endpoints/oauth/createoauthtoken",
+                  "api-reference/endpoints/oauth/denyoauthauthorization",
+                  "api-reference/endpoints/oauth/getmcpprotectedresourcemetadata",
+                  "api-reference/endpoints/oauth/getoauthauthorizationservermetadata",
+                  "api-reference/endpoints/oauth/getoauthprotectedresourcemetadata",
+                  "api-reference/endpoints/oauth/getopenidconfiguration",
+                  "api-reference/endpoints/oauth/getauthstatus",
+                  "api-reference/endpoints/oauth/authorizeoauth",
+                  "api-reference/endpoints/oauth/revokeoauthtoken"
+                ]
+              },
+              {
+                "group": "Storage & Sync",
+                "pages": [
+                  "api-reference/endpoints/storage-sync/abortsharelink",
+                  "api-reference/endpoints/storage-sync/completesharelink",
+                  "api-reference/endpoints/storage-sync/createbackupdownloadpresign",
+                  "api-reference/endpoints/storage-sync/createbackupuploadpresign",
+                  "api-reference/endpoints/storage-sync/createsharelink",
+                  "api-reference/endpoints/storage-sync/createsyncdownloadpresign",
+                  "api-reference/endpoints/storage-sync/createsyncuploadpresign",
+                  "api-reference/endpoints/storage-sync/parseattachment",
+                  "api-reference/endpoints/storage-sync/getbackupcatalog",
+                  "api-reference/endpoints/storage-sync/getbackupmanifest",
+                  "api-reference/endpoints/storage-sync/getsyncmanifest",
+                  "api-reference/endpoints/storage-sync/listnotifications",
+                  "api-reference/endpoints/storage-sync/opensharelink",
+                  "api-reference/endpoints/storage-sync/updatenotificationreadstate"
+                ]
+              },
+              {
+                "group": "System",
+                "pages": [
+                  "api-reference/endpoints/system/getopenapijson",
+                  "api-reference/endpoints/system/getopenapiyaml",
+                  "api-reference/endpoints/system/gethealth"
+                ]
+              }
+            ]
           }
         ]
       }
