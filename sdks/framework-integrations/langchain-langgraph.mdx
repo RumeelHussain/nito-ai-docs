@@ -30,11 +30,18 @@ result = llm.invoke("Say hello in one short sentence.")
 print(result.content)
 ```
 
-The same `llm` object is what you bind tools to and pass into a LangGraph node, so the redirect carries through to graphs unchanged.
+The same `llm` object is what you bind tools to (`llm.bind_tools([...])`) and pass into a LangGraph node, so the redirect carries through to graphs unchanged:
 
-> **TODO (needs SME):** verify the exact current configuration for LangChain and LangGraph against its official docs
+```python
+from langgraph.prebuilt import create_react_agent
+agent = create_react_agent(model=llm, tools=[...])
+```
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL
+<Note>
+For a non-OpenAI base URL, LangChain leaves streaming token-usage off by default. If you want usage on streamed responses, pass `stream_usage=True` to `ChatOpenAI(...)`.
+</Note>
+
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
 ## Choosing a model and privacy
 

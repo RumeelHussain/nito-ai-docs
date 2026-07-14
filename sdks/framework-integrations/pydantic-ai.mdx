@@ -18,11 +18,12 @@ Hand that model to your agent and the rest of the program is unchanged.
 ## Representative configuration
 
 ```python
+# pip install pydantic-ai
 from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-model = OpenAIModel(
+model = OpenAIChatModel(
     "grok-4.3",                                    # a Nito catalog ID, fetch from GET /v1/models
     provider=OpenAIProvider(
         api_key="z_sk_your_key_here",              # your Nito API key
@@ -35,7 +36,9 @@ result = agent.run_sync("Say hello in one short sentence.")
 print(result.output)
 ```
 
-> **TODO (needs SME):** verify the exact current configuration for Pydantic AI against its official docs
+<Note>
+Use **`OpenAIChatModel`** (Chat Completions), not `OpenAIResponsesModel`, for a third-party compatible endpoint. The older name `OpenAIModel` is now a deprecated alias of `OpenAIChatModel`.
+</Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 

@@ -3,40 +3,44 @@ title: "Vercel AI SDK"
 description: "Use Nito in the Vercel AI SDK via its OpenAI-compatible provider, pointed at Nito's base URL with a Nito key and model ID."
 ---
 
-The Vercel AI SDK reaches Nito through its OpenAI-compatible provider. There is no Nito-specific provider package. Because Nito exposes an OpenAI-compatible API, you create an OpenAI provider instance configured for Nito and use it the same way you would use any other model in `generateText`, `streamText`, and tool calls.
+The Vercel AI SDK reaches Nito through its OpenAI-compatible provider. There is no Nito-specific provider package. Use the dedicated **`@ai-sdk/openai-compatible`** provider (`createOpenAICompatible`) — the official docs recommend it over `@ai-sdk/openai` for third-party endpoints, because the standard OpenAI provider defaults to the Responses API, which a Chat-Completions endpoint may not implement.
 
 ## The principle
 
-Configure the SDK's OpenAI-compatible provider with three values:
+Configure the OpenAI-compatible provider with three values:
 
 - the Nito base URL ending in `/v1`,
 - a Nito API key (it starts with `z_sk_`),
 - a Nito catalog model ID from `GET /v1/models`.
 
-Everything downstream of the provider, your messages, streaming, and tool definitions, follows the OpenAI Chat Completions shape the SDK already produces.
+Everything downstream of the provider — your messages, streaming, and tool definitions — follows the OpenAI Chat Completions shape the SDK already produces.
 
 ## Representative configuration
 
 ```typescript
-import { createOpenAI } from "@ai-sdk/openai";
+// npm i ai @ai-sdk/openai-compatible
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 
-const nito = createOpenAI({
-  apiKey: "z_sk_your_key_here",              // your Nito API key
+const nito = createOpenAICompatible({
+  name: "nito",
+  apiKey: process.env.NITO_API_KEY,              // your Nito key, "z_sk_..."
   baseURL: "https://nito.dev.zprotocol.org/v1",  // Nito's OpenAI-compatible base URL
 });
 
 const { text } = await generateText({
-  model: nito("grok-4.3"),                   // a Nito catalog ID, fetch from GET /v1/models
+  model: nito("grok-4.3"),                       // a Nito catalog ID, fetch from GET /v1/models
   prompt: "Say hello in one short sentence.",
 });
 
 console.log(text);
 ```
 
-For streaming, use `streamText` with the same `nito(...)` model. Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
+For streaming, use `streamText` with the same `nito(...)` model. Streaming, tool calling, and structured outputs are all supported (subject to the model supporting them). Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
 
-> **TODO (needs SME):** verify the exact current configuration for the Vercel AI SDK against its official docs
+<Note>
+If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("grok-4.3")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
+</Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 

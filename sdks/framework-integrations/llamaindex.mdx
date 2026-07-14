@@ -18,21 +18,26 @@ Set it as your LLM and the rest of the pipeline is unchanged.
 ## Representative configuration
 
 ```python
+# pip install llama-index-llms-openai-like
 from llama_index.llms.openai_like import OpenAILike
 
 llm = OpenAILike(
-    model="grok-4.3",                          # a Nito catalog ID, fetch from GET /v1/models
-    api_key="z_sk_your_key_here",              # your Nito API key
-    api_base="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
-    is_chat_model=True,
+    model="grok-4.3",                              # a Nito catalog ID, fetch from GET /v1/models
+    api_key="z_sk_your_key_here",                  # your Nito API key
+    api_base="https://nito.dev.zprotocol.org/v1",  # note: api_base (not base_url)
+    is_chat_model=True,                            # else it routes to the legacy /completions path
+    is_function_calling_model=True,                # only if the model supports tools
+    context_window=128000,                         # default is only 3900 — set the model's real window
 )
 
 print(llm.complete("Say hello in one short sentence."))
 ```
 
-For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
+<Warning>
+Use **`OpenAILike`**, not the plain `OpenAI` class. Plain `OpenAI` resolves the model name against its built-in list and raises `ValueError: Unknown model` for a custom ID like `grok-4.3`. `OpenAILike` accepts any model ID via the explicit `context_window`/`is_chat_model` attributes.
+</Warning>
 
-> **TODO (needs SME):** verify the exact current configuration for LlamaIndex (LLM and embeddings) against its official docs
+For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
