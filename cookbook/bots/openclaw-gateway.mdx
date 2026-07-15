@@ -15,7 +15,7 @@ Wherever OpenClaw configures an upstream OpenAI-compatible provider, supply thes
 
 - **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, because OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not use an OpenAI name like `gpt-4o`.
+- **Model:** a Nito catalog ID such as `x-ai/grok-4.5`. Do not use an OpenAI name like `gpt-4o`.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
@@ -25,7 +25,7 @@ upstream:
   provider: openai-compatible
   base_url: https://nito.dev.zprotocol.org/v1
   api_key: z_sk_your_key_here
-  model: grok-4.3
+  model: x-ai/grok-4.5
 ```
 
 ## Finding a model ID
@@ -50,7 +50,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",
+    model="x-ai/grok-4.5",
     messages=[{"role": "user", "content": "Summarize this thread."}],
 )
 print(resp.choices[0].message.content)
@@ -64,7 +64,7 @@ OpenClaw forwards standard Chat Completions, so streaming works if both your bot
 
 ## Choosing a privacy tier
 
-Privacy is selected by the model ID passed upstream. To run a request in a TEE with a verifiable attestation, use `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy is selected by the model ID passed upstream. To run a request in a TEE with a verifiable attestation, use `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Handling errors
 

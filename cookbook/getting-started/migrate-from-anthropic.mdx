@@ -11,7 +11,7 @@ Move an application built on the Anthropic Messages API onto Nito. This recipe r
 
 - Code that currently calls the Anthropic Messages API (`POST /v1/messages`) or uses the Anthropic SDK.
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 
 ## The key difference
 
@@ -32,7 +32,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",  # a Nito catalog ID from GET /v1/models
+    model="x-ai/grok-4.5",  # a Nito catalog ID from GET /v1/models
     messages=[
         {"role": "system", "content": "You are a concise assistant."},
         {"role": "user", "content": "Say hello in one short sentence."},
@@ -48,7 +48,7 @@ curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       { "role": "system", "content": "You are a concise assistant." },
       { "role": "user", "content": "Say hello in one short sentence." }
@@ -82,7 +82,7 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 
 ## Walkthrough
 
-Once the request is in Chat Completions shape, everything else is standard Nito. Streaming uses `stream: true` and emits SSE chunks ending with `data: [DONE]`. Privacy is chosen by a model-ID suffix (`grok-4.3:confidential`), not a request field. Only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
+Once the request is in Chat Completions shape, everything else is standard Nito. Streaming uses `stream: true` and emits SSE chunks ending with `data: [DONE]`. Privacy is chosen by a model-ID suffix (`openai/gpt-oss-120b:confidential`), not a request field. Only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
 
 Do not carry Anthropic-specific behaviors over as if they were Nito's. Features that are part of the Anthropic API but not documented for Nito's Chat Completions surface should be treated as unverified rather than assumed to work.
 

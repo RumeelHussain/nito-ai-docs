@@ -21,7 +21,7 @@ nito = OpenAI(
 
 def answer(user_text: str) -> str:
     resp = nito.chat.completions.create(
-        model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+        model="x-ai/grok-4.5",                      # a Nito catalog ID, not an OpenAI name
         messages=[
             {"role": "system", "content": "You are a helpful Slack assistant."},
             {"role": "user", "content": user_text},
@@ -65,7 +65,7 @@ Slack posts whole messages, so an assistant typically uses a non-streaming call 
 Privacy is selected by the model ID. To run a request in a TEE with a verifiable attestation, append `:confidential`:
 
 ```python
-model="grok-4.3:confidential"
+model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Use `GET /v1/models` to find attestation-capable models. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

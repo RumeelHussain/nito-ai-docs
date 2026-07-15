@@ -20,14 +20,14 @@ Not every model supports every tier. The `:confidential` suffix only works on at
 
 ## The one-line change
 
-Here is a typical existing call. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` to get a real model ID for your account.
+Here is a typical existing call. The example model `x-ai/grok-4.5` is a placeholder; fetch `GET /v1/models` to get a real model ID for your account.
 
 ```bash
 curl -sS "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [{"role": "user", "content": "Summarize this contract clause."}]
   }'
 ```
@@ -58,7 +58,7 @@ Everything else stays the same: the same `/v1/chat/completions` path, the same `
 
 ## Rollout tip
 
-Because the only thing that changes is the model string, you can gate the upgrade behind config. Read the model ID from an environment variable and flip it per environment (for example, `grok-4.3` in dev and `MODEL_ID:confidential` in production), so the privacy upgrade ships without touching request-building code.
+Because the only thing that changes is the model string, you can gate the upgrade behind config. Read the model ID from an environment variable and flip it per environment (for example, `x-ai/grok-4.5` in dev and `MODEL_ID:confidential` in production), so the privacy upgrade ships without touching request-building code.
 
 ## Related
 

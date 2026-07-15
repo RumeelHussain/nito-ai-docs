@@ -31,7 +31,7 @@ curl "$NITO_BASE_URL/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-Each entry includes an `id` you pass back in a request, a `type` (chat, embedding, image), and a `privacy_tier`. Pick a chat model. The rest of this recipe uses `grok-4.3` as an example; substitute a real ID from your catalog.
+Each entry includes an `id` you pass back in a request, a `type` (chat, embedding, image), and a `privacy_tier`. Pick a chat model. The rest of this recipe uses `x-ai/grok-4.5` as an example; substitute a real ID from your catalog.
 
 ## Step 3: Send a chat request
 
@@ -42,7 +42,7 @@ curl "$NITO_BASE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       { "role": "user", "content": "Say hello in one short sentence." }
     ]
@@ -59,7 +59,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",  # a Nito catalog ID from GET /v1/models
+    model="x-ai/grok-4.5",  # a Nito catalog ID from GET /v1/models
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -79,7 +79,7 @@ A successful call returns a standard `chat.completion` object:
   "id": "...",
   "object": "chat.completion",
   "created": 1751299200,
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "choices": [
     {
       "index": 0,
@@ -97,7 +97,7 @@ Three fields carry everything you need. `choices[0].message.content` is the assi
 
 The Python example uses the OpenAI SDK unchanged, because Nito speaks the same protocol. The only Nito-specific details are the key (a `z_sk_` value) and the base URL, which must end in `/v1` so the SDK can append `/chat/completions` itself. The curl example hits that path directly.
 
-To send a request through a stronger privacy mode, add a suffix to the model ID, for example `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid, and the model must support the mode. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To send a request through a stronger privacy mode, add a suffix to the model ID, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid, and the model must support the mode. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Common mistakes
 

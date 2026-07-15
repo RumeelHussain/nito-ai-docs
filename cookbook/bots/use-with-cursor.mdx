@@ -13,7 +13,7 @@ Wherever Cursor asks for OpenAI-compatible connection details, supply:
 
 - **Base URL:** `https://nito.dev.zprotocol.org/v1`. The path must end in `/v1`, since OpenAI-style clients append `/chat/completions` themselves.
 - **API key:** your Nito key, which starts with `z_sk_`.
-- **Model:** a Nito catalog ID such as `grok-4.3`. Do not enter an OpenAI name like `gpt-4o`.
+- **Model:** a Nito catalog ID such as `x-ai/grok-4.5`. Do not enter an OpenAI name like `gpt-4o`.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
@@ -26,7 +26,7 @@ curl https://nito.dev.zprotocol.org/v1/models \
 
 ## Notes
 
-- Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `grok-4.3:confidential`. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+- Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 - Nito serves OpenAI Chat Completions at `POST /v1/chat/completions`, which is what this recipe uses. Nito now also serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`; where Cursor works best with Chat Completions, leave any "use Responses API" option off.
 - For the current settings path, model picker behavior, and troubleshooting, follow the [Cursor editor integration](/sdks/editor-integrations/cursor) page.
 

@@ -11,7 +11,7 @@ Move an application built on OpenRouter onto Nito. Because both expose an OpenAI
 
 - Code that calls OpenRouter's OpenAI-compatible endpoint (the OpenAI SDK, or direct `POST /chat/completions`).
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 
 ## Step 1: Repoint the client
 
@@ -26,7 +26,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",                          # was e.g. openai/gpt-4o
+    model="x-ai/grok-4.5",                          # was e.g. openai/gpt-4o
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -44,7 +44,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",                         // was e.g. openai/gpt-4o
+  model: "x-ai/grok-4.5",                         // was e.g. openai/gpt-4o
   messages: [{ role: "user", content: "Say hello in one short sentence." }],
 });
 
@@ -70,7 +70,7 @@ Select IDs at runtime, because the catalog is discovered from providers and chan
 
 Both gateways speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the `chat.completion` response shape carry over unchanged. The three edits are the base URL (ending in `/v1`), the `z_sk_` key, and the model ID.
 
-Privacy on Nito is chosen per call by a model-ID suffix (`grok-4.3:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+Privacy on Nito is chosen per call by a model-ID suffix (`openai/gpt-oss-120b:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## Do not import OpenRouter-specific behavior
 

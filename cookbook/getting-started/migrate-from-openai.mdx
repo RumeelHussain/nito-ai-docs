@@ -11,7 +11,7 @@ Move existing OpenAI SDK code onto Nito without rewriting your application. When
 
 - Code that already uses the OpenAI SDK (Python or TypeScript) or hits `POST /v1/chat/completions` directly.
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 
 ## The three changes
 
@@ -34,7 +34,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",                          # was e.g. gpt-4o
+    model="x-ai/grok-4.5",                          # was e.g. gpt-4o
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -52,7 +52,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",                         // was e.g. gpt-4o
+  model: "x-ai/grok-4.5",                         // was e.g. gpt-4o
   messages: [{ role: "user", content: "Say hello in one short sentence." }],
 });
 
@@ -78,7 +78,7 @@ Select IDs at runtime from this list rather than pasting a name into your source
 
 Nito implements the OpenAI Chat Completions protocol, so `messages`, `temperature`, `top_p`, `max_tokens`, `tools`, `tool_choice`, streaming, and the `chat.completion` response shape all carry over unchanged. The SDK appends `/chat/completions` to your base URL, which is why the base URL must end in `/v1`.
 
-To select a privacy mode, add a suffix to the model ID (`grok-4.3:confidential`). No request-body field controls privacy; it is purely the model string. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To select a privacy mode, add a suffix to the model ID (`openai/gpt-oss-120b:confidential`). No request-body field controls privacy; it is purely the model string. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## What does not carry over
 

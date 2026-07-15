@@ -40,12 +40,12 @@ def chat(model, prompt):
     with urllib.request.urlopen(req) as resp:
         return json.load(resp)["choices"][0]["message"]["content"]
 
-doc_type = chat("grok-4.3", "Classify this document type: ...")   # ordinary mode
+doc_type = chat("x-ai/grok-4.5", "Classify this document type: ...")   # ordinary mode
 ```
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` once confirmed.
 
-`grok-4.3` is a stand-in; fetch real IDs from `GET /v1/models`.
+`x-ai/grok-4.5` is a stand-in; fetch real IDs from `GET /v1/models`.
 
 ## Step 2: Confidential mode, verified before use
 
@@ -72,8 +72,8 @@ def verify_attestation(model_with_tee):
     assert body.get("verified") is True, "baseline verification failed"
     return body
 
-att = verify_attestation("grok-4.3:confidential")   # only proceed if this returns
-fields = chat("grok-4.3:confidential", "Extract the confidential fields: ...")
+att = verify_attestation("openai/gpt-oss-120b:confidential")   # only proceed if this returns
+fields = chat("openai/gpt-oss-120b:confidential", "Extract the confidential fields: ...")
 ```
 
 These are **baseline** checks. They confirm the report is well-formed and bound to your nonce; they do **not** perform full hardware-quote verification. Validating the Intel TDX quote, GPU evidence, and certificate chains inside `evidence` is your responsibility on top of this. The full runnable version is the [verify-it-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe). Use the terms **attested** and **verifiable**, never "trustless."

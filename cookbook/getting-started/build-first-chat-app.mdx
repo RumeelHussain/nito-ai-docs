@@ -11,7 +11,7 @@ Build a small but complete chat app that keeps a conversation going across turns
 
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
 - Python 3 with the `openai` package installed (`pip install openai`), or curl for the single-turn version.
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 
 ## Step 1: A single call with curl
 
@@ -22,7 +22,7 @@ curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       { "role": "system", "content": "You are a helpful, concise assistant." },
       { "role": "user", "content": "What is a gateway, in one sentence?" }
@@ -60,7 +60,7 @@ while True:
     messages.append({"role": "user", "content": user_input})
 
     resp = client.chat.completions.create(
-        model="grok-4.3",  # a Nito catalog ID from GET /v1/models
+        model="x-ai/grok-4.5",  # a Nito catalog ID from GET /v1/models
         messages=messages,
     )
 
@@ -84,7 +84,7 @@ The whole app rests on one idea: the API is stateless, so the conversation lives
 
 The `system` message at the top sets behavior once and stays for the whole session. `resp.choices[0].message.content` is the reply text, and `finish_reason` (not printed here) would tell you if the model stopped early because it hit `max_tokens` (`length`) rather than finishing (`stop`).
 
-To send a turn through a stronger privacy mode, change the model to `grok-4.3:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the mode.
+To send a turn through a stronger privacy mode, change the model to `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the mode.
 
 ## Watch out for growth
 

@@ -10,7 +10,7 @@ Stream a chat reply token by token instead of waiting for the whole response, so
 ## Prerequisites
 
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 - curl for the raw view, and Python or a browser for the rendered version.
 
 ## How streaming works on Nito
@@ -26,7 +26,7 @@ curl -N "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "stream": true,
     "messages": [
       { "role": "user", "content": "Count to five, one number per line." }
@@ -50,7 +50,7 @@ client = OpenAI(
 )
 
 stream = client.chat.completions.create(
-    model="grok-4.3",
+    model="x-ai/grok-4.5",
     stream=True,
     messages=[{"role": "user", "content": "Count to five, one number per line."}],
 )
@@ -74,7 +74,7 @@ async function streamChat(prompt, onToken) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "grok-4.3",
+      model: "x-ai/grok-4.5",
       stream: true,
       messages: [{ role: "user", content: prompt }],
     }),
