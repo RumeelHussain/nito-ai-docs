@@ -11,14 +11,14 @@ Claude Code reads its endpoint and credentials from environment variables:
 
 - **`ANTHROPIC_BASE_URL`:** `https://nito.dev.zprotocol.org` — the **host root, without `/v1`**. Claude Code appends `/v1/messages` itself.
 - **`ANTHROPIC_AUTH_TOKEN`:** your Nito key (`z_sk_...`), sent as `Authorization: Bearer`. (Use `ANTHROPIC_AUTH_TOKEN`, not `ANTHROPIC_API_KEY`, since Nito issues bearer keys.)
-- **`ANTHROPIC_MODEL`:** a Nito catalog ID such as `x-ai/grok-4.5` — not a Claude name like `claude-3-5-sonnet`.
+- **`ANTHROPIC_MODEL`:** a Nito catalog ID the Anthropic Messages facade serves, such as `anthropic/claude-sonnet-5`. Use the catalog ID, not a raw Anthropic name like `claude-3-5-sonnet`. Not every catalog model is reachable through this facade — `x-ai/grok-4.5`, for example, is rejected; Claude- and GPT-family catalog IDs work.
 
 ### Option A — environment variables
 
 ```bash
 export ANTHROPIC_BASE_URL="https://nito.dev.zprotocol.org"
 export ANTHROPIC_AUTH_TOKEN="z_sk_your_key_here"
-export ANTHROPIC_MODEL="x-ai/grok-4.5"
+export ANTHROPIC_MODEL="anthropic/claude-sonnet-5"
 claude
 ```
 
@@ -29,7 +29,7 @@ claude
   "env": {
     "ANTHROPIC_BASE_URL": "https://nito.dev.zprotocol.org",
     "ANTHROPIC_AUTH_TOKEN": "z_sk_your_key_here",
-    "ANTHROPIC_MODEL": "x-ai/grok-4.5"
+    "ANTHROPIC_MODEL": "anthropic/claude-sonnet-5"
   }
 }
 ```
@@ -59,7 +59,8 @@ Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run
 ## Common mistakes
 
 - **Using an OpenAI-style base URL.** Claude Code is not an OpenAI client; set `ANTHROPIC_BASE_URL` (host root), not an OpenAI `/v1` URL.
-- **Leaving a Claude model name in.** Replace `claude-*` with a Nito catalog ID from `GET /v1/models`.
+- **Using a raw Anthropic model name.** Replace `claude-3-5-sonnet` with a Nito catalog ID like `anthropic/claude-sonnet-5` from `GET /v1/models`.
+- **Picking a model the facade doesn't serve.** `x-ai/grok-4.5` is rejected on `/v1/messages`; use a Claude- or GPT-family catalog ID.
 - **Adding `/v1` to `ANTHROPIC_BASE_URL`.** The client appends `/v1/messages` itself.
 
 ## Related
