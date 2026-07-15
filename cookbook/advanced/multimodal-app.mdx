@@ -3,7 +3,15 @@ title: "Build an image and document app"
 description: "Combine image input, document parsing, and image generation into one app. Audio and video are not supported today."
 ---
 
-**Goal.** A small app that does the three multimodal things Nito actually supports: read an image in a chat request, parse a document into a prompt, and generate an image from text. One workflow, three real capabilities.
+**Goal.** A small app that combines three multimodal steps: read an image in a chat request, parse a document into a prompt, and generate an image from text.
+
+<Warning>
+Two of the three steps below don't work with an API key right now (verified live):
+- **Image generation (Step 3)** — the image backend isn't serving: `POST /v1/images/generations` returns `400 "model is not available"` even with a prompt-only request. Raised with the team.
+- **Document parsing (Step 2)** — `POST /api/v1/attachments/parse` is **browser-only by design** (confirmed with the team): it returns `403 "browser session required"` for `z_sk_` keys, so it can't be called with an API key.
+
+**Image input (Step 1) does work** — just pass the image as **inline base64 / a data URL**, not an arbitrary URL. The gateway only accepts images from approved hosts, so a random `image_url` returns `400 "host is not allowed"`.
+</Warning>
 
 **Prerequisites.** An organization key in `NITO_API_KEY`, your base URL, and a chat model that declares image support (`supportsImageInputs` in `GET /v1/models`).
 
@@ -38,21 +46,26 @@ def post(path, body):
     with urllib.request.urlopen(req) as resp:
         return json.load(resp)
 
+import base64
+with open("photo.png", "rb") as f:                 # a local image file
+    b64 = base64.b64encode(f.read()).decode()
+
 vision = post("/v1/chat/completions", {
-    "model": "grok-4.3",   # must declare image support; check GET /v1/models
+    "model": "x-ai/grok-4.5",   # must declare image support; check GET /v1/models
     "messages": [{
         "role": "user",
         "content": [
             {"type": "text", "text": "What is in this image?"},
+            # pass the image inline as a data URL — an arbitrary URL is rejected ("host is not allowed")
             {"type": "image_url",
-             "image_url": {"url": "https://example.com/photo.png"}},
+             "image_url": {"url": f"data:image/png;base64,{b64}"}},
         ],
     }],
 })
 print(vision["choices"][0]["message"]["content"])
 ```
 
-`grok-4.3` is a stand-in; fetch a real image-capable ID from `GET /v1/models`. Limits: up to 10 images per request, 5 MiB per image, 2048px on the long edge.
+`x-ai/grok-4.5` is a stand-in; fetch a real image-capable ID from `GET /v1/models`. Limits: up to 10 images per request, 5 MiB per image, 2048px on the long edge.
 
 ## Step 2: Parse a document into a prompt
 
@@ -82,7 +95,7 @@ def parse_document(file_path):
 
 parsed = parse_document("contract.pdf")
 answer = post("/v1/chat/completions", {
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [{"role": "user",
                   "content": f"Summarize this document:\n\n{parsed['text']}"}],
 })

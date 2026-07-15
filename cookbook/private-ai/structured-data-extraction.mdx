@@ -13,7 +13,7 @@ That leaves a robust, provider-agnostic pattern that works today: instruct the m
 
 ## Step 1: Ask for JSON in the prompt
 
-Give the model an explicit schema in words, tell it to return only JSON, and show the exact shape. Being strict in the prompt reduces (but does not eliminate) malformed output. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and use a private-tier model or an attestation-capable model with `:confidential` to keep the extraction private.
+Give the model an explicit schema in words, tell it to return only JSON, and show the exact shape. Being strict in the prompt reduces (but does not eliminate) malformed output. The example model `x-ai/grok-4.5` is a placeholder; fetch `GET /v1/models` for a real ID, and use a private-tier model or an attestation-capable model with `:confidential` to keep the extraction private.
 
 ```python
 import os, json, requests
@@ -96,7 +96,6 @@ Extraction often runs over sensitive text (resumes, contracts, support tickets).
 
 ## Related
 
-- [Build document Q&A](/cookbook/private-ai/build-document-qa)
-- [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
+- [Build a private chat app](/cookbook/private-ai/build-private-chat-app)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)

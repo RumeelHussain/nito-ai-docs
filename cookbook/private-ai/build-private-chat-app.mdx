@@ -12,7 +12,7 @@ Privacy on Nito is selected by the **model ID**, so the design decision that mat
 - choose a model stored at the `private` tier (routed with zero-data-retention on the upstream), or
 - append `:confidential` to an attestation-capable model to get an attested route.
 
-Fetch `GET /v1/models` and pick a model whose card advertises the tier you need. The `:confidential` suffix only works on attestation-capable models (NEAR or Phala in the current catalog); it is rejected on models that do not support it. The example model `grok-4.3` below is a placeholder for a non-attested tier; replace it with a real ID from the catalog.
+Fetch `GET /v1/models` and pick a model whose card advertises the tier you need. The `:confidential` suffix only works on attestation-capable models (NEAR or Phala in the current catalog); it is rejected on models that do not support it. The example model `x-ai/grok-4.5` below is a placeholder for a non-attested tier; replace it with a real ID from the catalog.
 
 ## The chat loop
 
@@ -64,6 +64,5 @@ If you chose a `:confidential` model, you can prove the tier rather than trust i
 ## Related
 
 - [Drop-in privacy upgrade](/cookbook/private-ai/drop-in-privacy-upgrade)
-- [Build a private RAG bot](/cookbook/private-ai/build-private-rag-bot)
 - [TEE-attested call and verify nonce](/cookbook/private-ai/tee-attested-call-verify-nonce)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)

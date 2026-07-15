@@ -257,8 +257,6 @@
             "pages": [
               "cookbook/private-ai/drop-in-privacy-upgrade",
               "cookbook/private-ai/build-private-chat-app",
-              "cookbook/private-ai/build-private-rag-bot",
-              "cookbook/private-ai/build-document-qa",
               "cookbook/private-ai/structured-data-extraction",
               "cookbook/private-ai/tee-attested-call-verify-nonce",
               "cookbook/private-ai/encrypted-call",
@@ -286,8 +284,7 @@
               "cookbook/advanced/cost-monitoring-dashboard",
               "cookbook/advanced/fallback-router",
               "cookbook/advanced/observability-pipeline",
-              "cookbook/advanced/privacy-first-workflow",
-              "cookbook/advanced/multimodal-app"
+              "cookbook/advanced/privacy-first-workflow"
             ]
           }
         ]

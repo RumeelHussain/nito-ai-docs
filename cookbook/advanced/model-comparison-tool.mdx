@@ -1,6 +1,6 @@
 ---
 title: "Build a model comparison tool"
-description: "List the catalog, send one prompt to several models, and compare the answers side by side. Plus the gateway-native fusion endpoint."
+description: "List the catalog, send one prompt to several models, and compare the answers side by side."
 ---
 
 **Goal.** A small script that discovers the available chat models, sends the same prompt to a handful of them, and lays the answers out side by side so you can judge quality, tone, and latency for your own task.
@@ -24,14 +24,14 @@ Each entry has an `id` (what you pass back in a request), a `type` (`chat`, `emb
 
 ## Step 2: Send one prompt to several models
 
-The example below uses `grok-4.3` as a stand-in; substitute IDs you pulled from `GET /v1/models`.
+The example below uses `x-ai/grok-4.5` as a stand-in; substitute IDs you pulled from `GET /v1/models`.
 
 ```python
 import os, json, time, urllib.request
 
 BASE_URL = "https://nito.dev.zprotocol.org"   # TODO: confirm canonical base URL
 API_KEY = os.environ["NITO_API_KEY"]
-MODELS = ["grok-4.3"]  # add more IDs fetched from GET /v1/models
+MODELS = ["x-ai/grok-4.5"]  # add more IDs fetched from GET /v1/models
 
 PROMPT = "Explain what a Trusted Execution Environment is, in two sentences."
 
@@ -69,32 +69,6 @@ Every response carries an `X-Request-ID` header, so you can capture it alongside
 ## Step 3: Compare on the axes that matter
 
 Print the three things that separate models on a real task: the text quality (your judgment), the token count (a proxy for cost and verbosity), and the latency you measured. Run the loop a few times, because latency varies with routing and load.
-
-## The gateway-native way: fusion
-
-If your goal is not just to compare but to merge, Nito has a built-in endpoint for that: `POST /api/v1/chat/fusion`. It asks 2 to 3 distinct models the same prompt concurrently, then runs one synthesis (judge) pass that merges the answers into a single result.
-
-```python
-body = json.dumps({
-    "models": ["grok-4.3", "another-model-id"],   # 2 to 3 distinct IDs
-    "messages": [{"role": "user", "content": PROMPT}],
-}).encode()
-req = urllib.request.Request(
-    f"{BASE_URL}/api/v1/chat/fusion", data=body,
-    headers={"Authorization": f"Bearer {API_KEY}",
-             "Content-Type": "application/json"},
-)
-with urllib.request.urlopen(req) as resp:
-    fusion = json.load(resp)
-
-print("synthesis:\n", fusion["synthesis"])
-for m in fusion["models"]:
-    print(m["model"], m["latency_ms"], "ms", m.get("finish_reason"))
-```
-
-A few honest constraints. Fusion is **non-streaming and batched only**: you get one complete response, not a token stream. It takes **2 to 3 distinct models**. The response object is `"fusion.completion"` and includes the `judge` used, the merged `synthesis`, per-model results in `models[]` (each with `output`, `tokens`, `latency_ms`, `finish_reason`), and synthesis token counts. Only hosted web tools are allowed; caller-defined function tools are rejected. Privacy is chosen per model via the ID suffix, but you cannot mix TEE and non-TEE models in one call, and `:encrypted` is rejected for fusion.
-
-Use your own loop (Steps 1 to 3) when you want raw side-by-side answers and streaming; use fusion when you want the gateway to fan out and merge for you in one call.
 
 ## Related
 

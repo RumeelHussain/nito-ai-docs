@@ -5,6 +5,10 @@ description: "Build retrieval-augmented generation on Nito with private-tier emb
 
 Retrieval-augmented generation (RAG) has two model calls in its hot path: **embeddings** to find relevant context, and **chat** to answer using that context. On Nito, both surfaces take the same privacy selection, so you can keep the whole pipeline at a private or attested tier. This recipe wires up a minimal private RAG bot.
 
+<Warning>
+**Not runnable end-to-end on the current devnet.** RAG needs an embedding model, but Nito's catalog is chat-only right now — `POST /v1/embeddings` returns `400 "model provider is not configured"`. Use this page as a reference for the pipeline shape; the retrieval step won't run until an embedding model is added to the catalog.
+</Warning>
+
 ## The two calls, both private
 
 Privacy is chosen by model ID on every call. That includes embeddings: `POST /v1/embeddings` accepts a `model`, and the same tier rules apply. Choosing a private-tier embedding model, or an attestation-capable one with `:confidential`, keeps retrieval under the same privacy posture as your chat answering step.

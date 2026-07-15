@@ -5,6 +5,10 @@ description: "Extract text from PDF, DOCX, PPTX, XLSX, and text files with the N
 
 Document Q&A is a two-step pipeline: turn a file into text, then ask a chat model about that text. Nito ships a server-side **file parser** for the first step, so you do not have to run your own PDF and Office extractors. This recipe parses a document and answers questions about it at a private or attested tier.
 
+<Warning>
+**The file-parser step is browser-only by design — not available to API keys.** `POST /api/v1/attachments/parse` is a first-party endpoint (confirmed with the team): it requires a logged-in browser session and returns `403 "browser session required"` for `z_sk_` keys. So Step 1 can't run with an API key. The chat answering step (Step 2) works as shown — bring your own extracted text (from any PDF/Office extractor) and pass it in.
+</Warning>
+
 ## Step 1: Parse the file to text
 
 `POST /api/v1/attachments/parse` takes a **multipart** upload and returns extracted text. It is not JSON-bodied; you send a file part.
@@ -50,7 +54,7 @@ def parse_file(path, trust_tier="confidential"):
 
 ## Step 2: Answer questions over the text
 
-Feed the extracted text to a private or attested chat model as context. Privacy is selected by model ID, so use a private-tier model or append `:confidential` to an attestation-capable one. The example model `grok-4.3` is a placeholder; fetch `GET /v1/models` for a real ID, and for `:confidential` note the model must support attestation.
+Feed the extracted text to a private or attested chat model as context. Privacy is selected by model ID, so use a private-tier model or append `:confidential` to an attestation-capable one. The example model `x-ai/grok-4.5` is a placeholder; fetch `GET /v1/models` for a real ID, and for `:confidential` note the model must support attestation.
 
 ```python
 CHAT_MODEL = "MODEL_ID:confidential"   # TODO: attestation-capable model, or a private-tier model

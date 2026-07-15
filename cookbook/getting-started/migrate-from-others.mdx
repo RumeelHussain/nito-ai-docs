@@ -11,7 +11,7 @@ Move an application off another OpenAI-compatible provider (Together, Fireworks,
 
 - Code that calls an OpenAI-compatible endpoint on your current provider (the OpenAI SDK, or direct `POST /chat/completions`).
 - A Nito API key starting with `z_sk_`. See [Authentication](/get-started/authentication).
-- A chat model ID from `GET /v1/models`. This recipe uses `grok-4.3` as an example.
+- A chat model ID from `GET /v1/models`. This recipe uses `x-ai/grok-4.5` as an example.
 
 ## The pattern
 
@@ -34,7 +34,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",                          # a Nito catalog ID from GET /v1/models
+    model="x-ai/grok-4.5",                          # a Nito catalog ID from GET /v1/models
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -52,7 +52,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",                         // a Nito catalog ID
+  model: "x-ai/grok-4.5",                         // a Nito catalog ID
   messages: [{ role: "user", content: "Say hello in one short sentence." }],
 });
 
@@ -85,9 +85,9 @@ The swap works the same for each, but the model-name step differs:
 
 ## Walkthrough
 
-All of these speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the response shape carry over. Privacy on Nito is a model-ID suffix (`grok-4.3:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
+All of these speak the OpenAI Chat Completions protocol, so `messages`, sampling parameters, `tools`, streaming, and the response shape carry over. Privacy on Nito is a model-ID suffix (`openai/gpt-oss-120b:confidential`); only `:confidential` and `:encrypted` are valid, and `:encrypted` does not stream.
 
-Do not carry any provider-specific behavior over as if it were Nito's. Custom request fields, routing preferences, search parameters, or response extensions that are specific to your old provider are not part of Nito's contract. If a capability is not documented for Nito, treat it as unverified. Nito's supported surface is Chat Completions, embeddings, image generation, and the models catalog, all reachable under `/v1`.
+Do not carry any provider-specific behavior over as if it were Nito's. Custom request fields, routing preferences, search parameters, or response extensions that are specific to your old provider are not part of Nito's contract. If a capability is not documented for Nito, treat it as unverified. Nito's supported surface is Chat Completions and the models catalog under `/v1`.
 
 ## Next steps
 
