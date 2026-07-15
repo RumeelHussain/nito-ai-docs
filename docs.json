@@ -417,7 +417,6 @@
             "pages": [
               "resources/index",
               "resources/pricing",
-              "resources/rate-limits",
               "resources/errors-reference"
             ]
           },

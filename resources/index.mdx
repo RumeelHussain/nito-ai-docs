@@ -10,12 +10,13 @@ If you are new to Nito, read [How Nito Works](/get-started/how-nito-works) first
 ## What is here
 
 - [**Pricing**](/resources/pricing) how Nito meters and bills inference. Nito bills in credits tracked in nanos (billionths of a unit) for precision, with separate per-token rates for input and output plus rates for cache, reasoning, and server-side tools. The master per-model price table and the credit-to-currency value are not asserted in these docs; they are configured live and surfaced on each model entry. Read this page to learn where to pull the authoritative numbers from.
-- [**Rate limits**](/resources/rate-limits) the canonical rate-limit reference. Limits come from a policy table, per-key values are global group defaults rather than per-key stored numbers, and the only signal on a `429` is the `Retry-After` header. Selected `inference_generate` defaults and the fail-open versus fail-closed behavior are documented here.
 - [**Errors reference**](/resources/errors-reference) the full error catalog in one place: the response envelope, every error kind the gateway emits, and the HTTP status each one maps to. This is the consolidated version of the per-topic error pages in the API reference.
+
+Looking for **rate limits**? They live in the API reference: [Rate limits](/api-reference/errors-and-rate-limits/rate-limits) — the single canonical reference for the policy table, `inference_generate` defaults, the `Retry-After`-only `429` signal, and fail-open versus fail-closed behavior.
 
 ## How these pages relate to the rest of the docs
 
-The [API Reference](/api-reference) has focused pages for each of these topics scoped to a single endpoint group. The Resources tab is the consolidated view: one pricing model, one rate-limit policy, one error catalog, spanning the whole gateway. Where a concrete number is deployment-configurable or lives in a system these docs do not read from, it is marked as a TODO for the owning team rather than guessed. Treat any unmarked number as verifiable against the gateway and any TODO as not yet published.
+The [API Reference](/api-reference) has focused pages for each of these topics scoped to a single endpoint group. The Resources tab is the consolidated view: one pricing model and one error catalog, spanning the whole gateway. Rate limits are documented once, in the [API reference](/api-reference/errors-and-rate-limits/rate-limits). Where a concrete number is deployment-configurable or lives in a system these docs do not read from, it is marked as a TODO for the owning team rather than guessed. Treat any unmarked number as verifiable against the gateway and any TODO as not yet published.
 
 ## A note on numbers
 

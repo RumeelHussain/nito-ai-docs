@@ -1,20 +1,22 @@
 ---
 title: Rate limits
-description: Nito rate limits are policy-table defaults across scopes, signalled only with Retry-After on 429.
+description: The canonical Nito rate-limit reference. Policy-table defaults across scopes, signalled only with Retry-After on 429.
 ---
 
-Nito enforces rate limits from a policy table. The limiter has scopes such as org, API key, and session; the values below are global group defaults applied to a scope, not values stored per individual key.
+Nito enforces rate limits from a **policy table** of limiter groups, each with per-scope limits. The defaults below are a useful reference; values are **deployment-configurable**, so a given production environment may differ.
 
-When you exceed a limit, the gateway returns `429` with a `Retry-After` header. There are **no `X-RateLimit-*` headers**.
+<Note>
+On a `429`, Nito sends **only** a `Retry-After` header (seconds to wait). There are **no `X-RateLimit-*` headers** — no `limit`, `remaining`, or `reset`. Read the wait time from `Retry-After` and back off; don't build client logic around a remaining-quota or reset header, because none is sent.
+</Note>
 
-## Selected defaults
+## Default limits
 
-These are the published defaults for the listed limiter groups. Values are deployment-configurable, so a given environment may differ.
+### `inference_generate`
 
-### `inference_generate` (chat, fusion, image, embeddings generation)
+Chat, fusion, image, and embeddings generation.
 
 | Scope | Limit |
-|---|---|
+|:------|------------------:|
 | org | 600 / min |
 | api_key | 120 / min |
 | session | 120 / min |
@@ -24,36 +26,73 @@ These are the published defaults for the listed limiter groups. Values are deplo
 ### Other groups
 
 | Group | Scope | Limit |
-|---|---|---|
+|:------|:------|------------:|
 | `inference_count` | api_key | 300 / min |
 | `model_list` | api_key | 600 / min |
 
-> **TODO (needs SME):** the exact published limits per deployment, if they differ from these defaults (owner: Backend/Infra).
+> **TODO (needs SME):** the exact published production limits per deployment, if they differ from these defaults (owner: Backend/Infra).
 
-## Per-key vs global
+<Accordion title="How scopes and per-key limits work">
+The policy table defines limits per **scope** — global, ip, org, `api_key`, `oauth_token`, session, user, `oauth_client`, the `mcp_*` groups, subject, and command.
 
-Per-key limit values are global group defaults, not stored per key. Two keys in the same group share the same default rate; the table does not hold a custom number for each key.
+**Per-key values are global group defaults, not stored per individual key.** Two API keys in the same group share the same default rate; the table holds one default per scope, not a custom number per key. Changing the rate for a specific workload is a deployment-level policy change, not a per-key setting.
+</Accordion>
 
-## In-flight (concurrency) limits
+## Concurrency (in-flight) limits
 
-`inference_generate` also bounds concurrent in-flight requests: 25 per org and 10 per API key. Exceeding the concurrency bound is rate-limited the same way (`429` + `Retry-After`), independent of the per-minute rate.
+`inference_generate` also bounds **concurrent in-flight requests**, independent of the per-minute rate:
+
+| Scope | In-flight limit |
+|:------|------------------:|
+| org | 25 concurrent |
+| api_key | 10 concurrent |
+
+Exceeding the concurrency bound is rate-limited the same way (`429` + `Retry-After`) even when you are under the per-minute limit. If you fan out many long-running generations at once, this is the bound you will hit first.
 
 ## What you get on a 429
 
 - HTTP status `429`.
-- `Retry-After` header with the seconds to wait.
-- The error envelope with `code` either `rate_limited` or `insufficient_quota`. See [Status mapping](/api-reference/errors-and-rate-limits/status-mapping).
+- A `Retry-After` header with the seconds to wait.
+- The [error envelope](/api-reference/errors-and-rate-limits/error-envelope) with `code` either `rate_limited` (transient — retry after the wait) or `insufficient_quota` (a spend or usage cap — may need a quota change).
 
-No `X-RateLimit-Limit`, `X-RateLimit-Remaining`, or `X-RateLimit-Reset` headers are emitted, so do not depend on them.
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+Content-Type: application/json; charset=utf-8
 
-## Fail-open vs fail-closed
+{"error":{"message":"rate limited","code":"rate_limited"}}
+```
 
-If the limiter's own infrastructure errors, most groups fail open (the request proceeds). A fail-closed set, including `inference_generate`, `inference_count`, auth, OAuth, MCP, and org-admin groups, rejects requests when the limiter cannot be consulted.
+First-party browser routes return the same `429` and `Retry-After`, but with a flat body (`{"code":"rate_limited","error":"rate limited"}`) rather than the nested `error` envelope.
+
+<Accordion title="Fail-open vs fail-closed groups">
+If the limiter's own infrastructure errors (it cannot be consulted), most groups **fail open** — the request proceeds rather than being rejected on an infrastructure fault.
+
+A **fail-closed** set rejects requests when the limiter cannot be consulted, because letting them through unbounded is riskier than a brief outage:
+
+- `auth_interactive`
+- `inference_generate`
+- `inference_count`
+- `mcp_*`
+- `oauth`
+- `org_admin`
+- `spa_api_account_org`
+
+Everything outside this set fails open.
+</Accordion>
+
+## Handling limits in your client
+
+- Treat `429` as retryable, but only after the `Retry-After` interval. See [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior).
+- Do not poll for a remaining-quota header — it does not exist.
+- Bound your own concurrency to stay under the in-flight limits (25 per org, 10 per key on `inference_generate`).
+- Distinguish `rate_limited` (retry after wait) from `insufficient_quota` (spend/usage cap) even though both return `429`.
 
 ## Related
 
 - [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
 - [Backoff](/api-reference/errors-and-rate-limits/backoff)
 - [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
+- [Error codes](/api-reference/errors-and-rate-limits/error-codes)
 
-{/* source: DOCS_SOURCE_OF_TRUTH.md §8 (internal/ratelimit: policy-table defaults, inference_generate org 600 / api_key 120 / session 120 / in-flight org 25 / api_key 10; inference_count api_key 300; model_list api_key 600; Retry-After only; fail-open/closed set) */}
+{/* source: DOCS_SOURCE_OF_TRUTH.md §8 (internal/ratelimit: policy-table defaults, inference_generate org 600 / api_key 120 / session 120 / in-flight org 25 / api_key 10; inference_count api_key 300; model_list api_key 600; Retry-After only; fail-open/closed set). Consolidated single source — the former resources/rate-limits.mdx was merged here. */}

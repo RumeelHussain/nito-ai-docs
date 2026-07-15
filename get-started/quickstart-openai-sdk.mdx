@@ -73,7 +73,7 @@ Only `:confidential` and `:encrypted` are valid suffixes, and a model must suppo
 
 ## Notes
 
-- Rate limits: standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/resources/rate-limits).
+- Rate limits: standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
 - Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
 - Privacy-mode applicability: ordinary, private, and `:confidential` work with the OpenAI SDK. `:encrypted` requires extra headers and is best done via curl or the native SDK.
 
