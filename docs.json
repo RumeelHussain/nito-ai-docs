@@ -48,6 +48,7 @@
             "pages": [
               "models/index",
               "models/overview",
+              "models/all-models",
               "models/model-catalog",
               "models/model-id-convention",
               "models/privacy-tiers-at-a-glance",
