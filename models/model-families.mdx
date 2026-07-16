@@ -3,11 +3,11 @@ title: "Model families"
 description: "The kinds of models Nito serves, what each is for, and which modalities are available today."
 ---
 
-Models on Nito fall into a few families grouped by what they do. A family is just a category of model with a shared job: generating text, turning text into vectors, reading an image, making an image. This page describes the families that are available so you can match a task to the right kind of model, and it is deliberate about which families are not served yet. Where a kind of model in the broader roadmap is not available, this page says so plainly rather than implying it exists, so you do not build against something that will return an error.
+Models on Nito fall into a few families grouped by what they do. A family is just a category of model with a shared job: generating text, reading an image, making an image. This page describes the families that are available so you can match a task to the right kind of model.
 
-A term used throughout: a **modality** is a kind of data, such as text, images, audio, or video. A model's input modalities are what it accepts; its output modalities are what it produces. The families below are best understood as combinations of those.
+A term used throughout: a **modality** is a kind of data, such as text or images. A model's input modalities are what it accepts; its output modalities are what it produces. The families below are best understood as combinations of those.
 
-Use the anchors to jump to a family: [Text](#text), [Reasoning](#reasoning), [Embedding](#embedding), [Vision (image input)](#vision-image-input), [Image generation](#image-generation), [Audio and video](#audio-and-video).
+Use the anchors to jump to a family: [Text](#text), [Reasoning](#reasoning), [Vision (image input)](#vision-image-input), [Image generation](#image-generation).
 
 ## Text
 
@@ -19,14 +19,6 @@ Reasoning is not a separate family of model so much as a capability some text mo
 
 On Nito you request this with the `reasoning` parameter (`enabled`, `effort` of `low`/`medium`/`high`, `summary`, `max_tokens`). The reasoning is returned as `reasoning_details`, and the tokens spent reasoning are counted separately in `usage` as `reasoning_tokens`, so you can see what the thinking cost. Reasoning is a per-model capability: check `supports_reasoning` on the model entry before relying on it. See [Reasoning](/features/reasoning).
 
-## Embedding
-
-Embedding models turn text into an **embedding**: a vector, meaning a list of numbers, that captures the meaning of the text so that similar texts sit close together numerically. They are the backbone of search, clustering, and retrieval-augmented generation (feeding relevant snippets into a prompt). They do not generate text; sending an embedding model a chat will not get you a chat reply.
-
-You call them through the [embeddings endpoint](/api-reference/embeddings/create-embeddings), passing one or more input strings, and get back one vector per input. Embeddings inherit the same privacy options as chat. The default embedding model is a Qwen embedding model, and the exact length of the returned vector is determined by the provider at call time rather than fixed in the gateway.
-
-> **TODO (needs SME):** the per-model embedding output dimensions. The gateway does not encode a fixed dimension per model; the vector length is returned by the provider at runtime.
-
 ## Vision (image input)
 
 Vision-capable text models accept images as part of a chat message, alongside text, for tasks like describing a photo or reading a chart. Vision here means image input, not image output: the model reads the picture and replies in text. You attach an image as a content part (a data URL, an https URL, or base64 with a media type). Support is per model: check `supports_image_inputs`. Accepted image formats for direct upload are PNG, JPEG, and WebP. See [Image input](/features/multimodal/image-input).
@@ -37,16 +29,12 @@ Nito also parses documents (PDF, DOCX, PPTX, XLSX, XLS, and text) server-side so
 
 Image-generation models run the other direction from vision: text in, image out. On Nito this is served through the [image generations endpoint](/api-reference/multimodal/image-generation), backed by an image provider. You send a prompt and options like size and count, and receive image URLs or base64 data. The default image model is a Z-Image generation model. Note that the chat surface and the image-generation surface are separate endpoints; a vision-capable chat model that reads images does not generate them.
 
-## Audio and video
-
-> **Not available at this time.** The gateway does not currently serve audio input (transcription), video input, audio generation (speech), or video generation. There are no endpoints for these modalities at this commit. They are tracked for a possible future pass; this page will be updated if and when they ship. Until then, do not build against them.
-
-One detail can mislead you here, so it is worth being explicit. The model catalog includes a `type` field that can in principle carry the values `audio` or `video`. The presence of those values in the schema does not mean such models are served. At this commit no audio or video models are in the catalog and no audio or video endpoints exist, so a request for either will not succeed.
+<Note>
+**Audio and video are not served on Nito today** — no transcription, speech, or video in/out, and no endpoints for them. Plan around text, vision input, and image generation.
+</Note>
 
 ## Common mistakes
 
-- **Expecting audio or video.** Those modalities are not served yet, schema values notwithstanding. Plan around text, embeddings, vision input, and image generation.
-- **Using an embedding model for chat, or a chat model for embeddings.** Embedding models return vectors, not text, and chat models do not return embeddings. Check `type` first.
 - **Confusing vision input with image generation.** Reading an image and creating one are different families on different endpoints.
 - **Assuming every text model can see images or reason.** Image input and reasoning are per-model capabilities; read `supports_image_inputs` and `supports_reasoning` on the entry.
 
@@ -54,5 +42,4 @@ One detail can mislead you here, so it is worth being explicit. The model catalo
 
 - [Choosing the right model](/models/choosing-a-model)
 - [Chat completions](/features/chat-completions)
-- [Embeddings](/features/embeddings)
 - [Image generation](/api-reference/multimodal/image-generation)

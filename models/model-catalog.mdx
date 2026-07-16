@@ -19,20 +19,23 @@ The response is a list of model entries:
   "object": "list",
   "data": [
     {
-      "id": "grok-4.3",
+      "id": "x-ai/grok-4.5",
       "object": "model",
       "type": "chat",
-      "owned_by": "...",
-      "display_name": "...",
+      "owned_by": "x-ai",
+      "source": "frontier",
+      "display_name": "xAI: Grok 4.5",
+      "architecture": { "input_modalities": ["text", "image"], "output_modalities": ["text"] },
       "capabilities": { "supports_reasoning": true, "supports_web_search": true, "supports_tee_attestation": false },
-      "privacy_tier": "anon",
+      "context_window": 500000,
+      "privacy_tier": "private",
       "free_tier_eligible": false
     }
   ]
 }
 ```
 
-The `id` is what you pass back in the `model` field of a request. `type` separates chat, embedding, and image models. `capabilities` and `privacy_tier` tell you what a model can do and which privacy modes it supports. The first-party path `GET /api/v1/models` returns the same shape.
+The `id` is what you pass back in the `model` field of a request. `type` separates chat and image models; `source` marks a model as `open_source`, `frontier`, or `unknown`; `architecture` lists the input and output modalities; and `capabilities` and `privacy_tier` tell you what a model can do and which privacy modes it supports. Confidential and encrypted models additionally carry `attestation_provider`, `attestation_available`, `attestation_subject`, and `encrypted_supported`. The first-party path `GET /api/v1/models` returns the same shape.
 
 Note that pricing and context window are not on the entry by default; pricing appears as a separate `pricing` object only when it is configured for that model. See [Pricing](/models/pricing).
 
@@ -40,9 +43,9 @@ Note that pricing and context window are not on the entry by default; pricing ap
 
 ## Filtering
 
-By default the endpoint returns only chat models. To see other kinds, pass a `type` filter such as `embedding` or `image`. Additional query parameters narrow the list further; the full set is in the [models endpoint reference](/api-reference/models-catalog/list-models). In practice you filter on:
+By default the endpoint returns only chat models. Pass a `type` filter such as `image` to see another kind, or `type=all` to list every kind the catalog carries. Additional query parameters narrow the list further; the full set is in the [models endpoint reference](/api-reference/models-catalog/list-models). In practice you filter on:
 
-- **`type`** to separate chat, embedding, and image models. Without it, embedding and image models are hidden.
+- **`type`** to select a model kind (`chat`, `image`, or `all`). Without it, only chat models are returned.
 - **privacy** to find models that support `:confidential`, by reading `privacy_tier: "confidential"` or `attestation_available: true`.
 - **capabilities** such as `supports_image_inputs` or `supports_reasoning`, to match a model to a feature you need.
 
@@ -66,7 +69,7 @@ Query `GET /v1/models` directly for the list of available models.
 
 ## Common mistakes
 
-- **Expecting embedding or image models in the default list.** The endpoint returns chat models unless you pass a `type` filter.
+- **Expecting image models in the default list.** The endpoint returns chat models unless you pass a `type` filter (or `type=all`).
 - **Caching the catalog forever.** The list changes as models are added and retired; refresh it periodically.
 - **Inferring privacy support from the model name.** Read `privacy_tier` and `attestation_available` from the entry instead.
 - **Assuming a model name from another provider exists here.** Always confirm against `GET /v1/models`.

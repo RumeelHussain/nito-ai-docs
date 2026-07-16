@@ -9,7 +9,7 @@ On Nito, a single API key reaches every model in the catalog. You do not hold ac
 
 Reaching AI models the normal way means signing up with each vendor, holding a separate key per vendor, learning each vendor's slightly different request shape, and paying several bills. Switching from one model to another for cost or quality often means rewriting code. Nito removes that friction by sitting in front of the providers as a single entry point, called a gateway. A gateway takes one kind of request, decides which backend should serve it, applies your rules, handles payment, and hands back one consistent response shape.
 
-The practical consequence for you is simple: you integrate once and reach many models. The model you name is a logical model, meaning a stable public name that Nito maps to whichever physical backend can actually run it. You name `grok-4.3`; Nito finds a healthy, eligible, cost-effective backend that serves it. That indirection is what lets one key reach the whole catalog.
+The practical consequence for you is simple: you integrate once and reach many models. The model you name is a logical model, meaning a stable public name that Nito maps to whichever physical backend can actually run it. You name `x-ai/grok-4.5`; Nito finds a healthy, eligible, cost-effective backend that serves it. That indirection is what lets one key reach the whole catalog.
 
 ## One key, the whole catalog
 
@@ -24,7 +24,7 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-This returns a list of model entries. By default it returns chat models; pass a `type` filter to see other kinds (for example embedding or image models). The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
+This returns a list of model entries. By default it returns chat models; pass a `type` filter (for example `image`, or `type=all`) to see the other kinds the catalog carries. The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
@@ -35,15 +35,15 @@ Each entry describes one model you can call. The important fields:
 | Field | What it tells you |
 | --- | --- |
 | `id` | The model ID you pass back in a request. |
-| `type` | `chat`, `embedding`, or `image`. |
+| `type` | The model's kind: `chat` or `image`. |
 | `display_name`, `description` | Human-friendly name and summary. |
 | `owned_by` | The model's vendor. |
 | `architecture.input_modalities` / `output_modalities` | What the model accepts and produces (for example text, image input). A modality is a kind of data, such as text or images. |
 | `capabilities` | Feature support flags (see below). |
 | `context_window` | The model's context limit, when known. |
 | `pricing` | Per-token and per-unit cost, when configured. |
-| `privacy_tier` | The model's privacy tier: `anon`, `private`, or `confidential`. |
-| `tee_provider`, `attestation_available`, `attestation_subject` | TEE details when the model supports attestation. |
+| `privacy_tier` | The model's privacy tier: `anon`, `private`, `confidential`, or `encrypted`. |
+| `attestation_provider`, `attestation_available`, `attestation_subject` | TEE details when the model supports attestation. |
 | `encrypted_supported` | Whether end-to-end encrypted TEE is available. |
 | `free_tier_eligible` | Whether the model can be used without a funded balance. |
 

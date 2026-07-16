@@ -3,13 +3,13 @@ title: "Choosing the right model"
 description: "A practical guide from use case to model and privacy mode on Nito."
 ---
 
-With many models behind one key, the useful question is not "what exists" but "what should I use for this." This page is a decision guide. It maps common situations to a kind of model and a privacy mode, so you can choose quickly and refine later. Throughout, treat the live catalog as the final word: always confirm exact model IDs against `GET /v1/models`, because the catalog is discovered from providers and changes over time rather than being a fixed list.
+With many models behind one key, the useful question is not "what exists" but "what should I use for this." This page is a decision guide. It maps common situations to a kind of model and a privacy mode, so you can choose quickly and refine later. Throughout, treat the live catalog as the final word: always confirm exact model IDs against `GET /v1/models`.
 
 The single most useful habit is to separate two decisions that feel like one. What the model does and how protected the call is are independent choices. Mixing them is the most common reason people end up over-paying for privacy they did not need, or under-protecting a call that mattered.
 
 ## Start from two questions
 
-1. **What task is this?** Generation, embeddings for search, or image creation. This picks the kind of model.
+1. **What task is this?** Generation or image creation. This picks the kind of model.
 2. **How sensitive is this call?** This sets the privacy mode, independent of the model.
 
 Answer those two and you have most of the decision. The rest is refinement.
@@ -18,7 +18,6 @@ Answer those two and you have most of the decision. The rest is refinement.
 
 - **Conversational or generative text.** Use a chat model. Favor a capable general model for quality, or a smaller one for speed and cost. See [Text](/models/model-families#text).
 - **Step-by-step problem solving.** Use a reasoning-capable chat model and enable `reasoning`. Use `effort: "high"` for genuinely hard problems and a lower effort for routine ones, since higher effort spends more tokens and time. See [Reasoning](/features/reasoning).
-- **Search, retrieval, or RAG.** RAG means retrieval-augmented generation: you look up relevant text first, then ask a model to answer using it. Use an embedding model to index and query, and a chat model to answer. See [Embeddings](/features/embeddings).
 - **Understanding images or documents.** Use a vision-capable chat model for images, and the file parser for PDFs and office documents. See [Image input](/features/multimodal/image-input).
 - **Creating images.** Use the image-generation endpoint. See [Image generation](/api-reference/multimodal/image-generation).
 - **Current information.** Use a chat model with web search enabled, so the model can pull in facts newer than its training. See [Web search](/features/server-side-tools/web-search).
@@ -32,29 +31,27 @@ A privacy mode describes how protected your prompt and the reply are while the m
 | Low-sensitivity, internal | Ordinary mode (`model`) | Lowest overhead; metadata-only retention by default. |
 | Sensitive, needs no provider retention | Private-tier model | Zero-data-retention enforced upstream. |
 | Highly sensitive, needs proof | `model:confidential` | Sealed execution inside a hardware-isolated environment, with an attestation you can verify. |
-| Maximum assurance | `model:encrypted` | Client-side encryption to the sealed environment, on top of TEE. Non-streaming. |
+| Maximum assurance | `model:encrypted` | Client-side encryption to the sealed environment, on top of `:confidential`. Non-streaming. |
 
-The privacy decision is orthogonal to the model decision: pick the model for the task, then pick the mode for the sensitivity. The only constraint is that the TEE modes require a model that actually supports them, and a `:confidential` or `:encrypted` request that cannot be served as asked fails rather than quietly downgrading to a weaker mode. That refusal is a feature, not a glitch: it means you never silently lose the protection you asked for.
+The privacy decision is orthogonal to the model decision: pick the model for the task, then pick the mode for the sensitivity. The only constraint is that `:confidential` and `:encrypted` require a model that actually supports them, and a request that cannot be served as asked fails rather than quietly downgrading to a weaker mode. That refusal is a feature, not a glitch: it means you never silently lose the protection you asked for.
 
 ## Why a dial instead of always-maximum privacy
 
-It is tempting to put every call in the strongest mode and stop thinking about it. The reason not to is that the strongest modes carry real trade-offs. End-to-end encrypted TEE (`:encrypted`) does not stream, so a chat interface built on it cannot show tokens as they arrive. TEE-capable backends are fewer, which can mean higher latency or lower availability. Forcing routine, low-sensitivity calls through the strongest mode makes them slower and more fragile for no benefit. Matching the protection to the sensitivity of each call is the whole point of a per-call dial: you pay the cost of strong privacy only where the request needs it.
+It is tempting to put every call in the strongest mode and stop thinking about it. The reason not to is that the strongest modes carry real trade-offs. The `:encrypted` mode does not stream, so a chat interface built on it cannot show tokens as they arrive. Attestation-capable backends are fewer, which can mean higher latency or lower availability. Forcing routine, low-sensitivity calls through the strongest mode makes them slower and more fragile for no benefit. Matching the protection to the sensitivity of each call is the whole point of a per-call dial: you pay the cost of strong privacy only where the request needs it.
 
 ## Worked examples
 
 - **A customer support bot that must not retain user data.** Use a capable chat model in private mode. Step up to `:confidential` if you need to prove the privacy property to your own customers, since attestation gives you something verifiable to show them.
-- **A RAG system over confidential documents.** Index with an embedding model and answer with a chat model, both at a private or Confidential tier, so neither the vectors nor the prompts are retained upstream. Note that the privacy decision applies to both halves; protecting only the chat call while indexing in ordinary mode leaves the embeddings exposed.
 - **A coding helper for internal use.** A reasoning-capable chat model in ordinary mode is usually enough. Raise to private if the code itself is sensitive.
 - **A research assistant that needs fresh facts.** A chat model with web search enabled. Be aware that some provider web-tool combinations relax zero-data-retention; if that matters for your use, prefer a Confidential tier.
 
 ## Cost and latency
 
-Cost and latency vary by model and by privacy mode. Cheaper models and ordinary mode are faster and cheaper; TEE modes can route to fewer backends and add overhead. When cost matters, compare candidates with the [pricing reference](/models/pricing) and lean on Nito's [backend selection](/models/backend-selection), which prefers the cheapest eligible backend among those that satisfy your privacy mode and feature requirements. Remember the ordering from that page: privacy and capability are filtered first, so cost only chooses among backends that already qualify.
+Cost and latency vary by model and by privacy mode. Cheaper models and ordinary mode are faster and cheaper; `:confidential` and `:encrypted` can route to fewer backends and add overhead. When cost matters, compare candidates with the [pricing reference](/models/pricing) and lean on Nito's [backend selection](/models/backend-selection), which prefers the cheapest eligible backend among those that satisfy your privacy mode and feature requirements. Remember the ordering from that page: privacy and capability are filtered first, so cost only chooses among backends that already qualify.
 
 ## Common mistakes
 
 - **Choosing privacy by model instead of by call.** A model can serve multiple modes; choose the mode per request, not once for the whole project.
-- **Using a large chat model for an embedding task.** Embeddings need an embedding model. A chat model will not produce the vectors a search index expects.
 - **Forgetting that `:encrypted` cannot stream.** If you need both streaming and attestation, use `:confidential` instead.
 - **Hard-coding a model ID.** Confirm IDs against `GET /v1/models`, since models are added and retired over time.
 

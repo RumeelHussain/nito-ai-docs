@@ -1,6 +1,6 @@
 ---
 title: "Backend selection"
-description: "How Nito chooses which backend serves a request, and how latency, cost, and privacy shape that choice."
+description: "How Nito chooses which backend serves a request, and how cost, privacy, and availability shape that choice."
 ---
 
 When you name a logical model, more than one backend may be able to serve it. A backend here means one specific model on one specific provider. Nito has to pick exactly one of them for each call, and it does so with a defined order of preference rather than at random. This page explains that order, because understanding it lets you reason about why a call went where it did, predict how cost and privacy interact, and avoid being surprised when the "same" model lands on a different provider tomorrow.
@@ -17,7 +17,7 @@ Before a backend is even eligible, it has to be compatible with your specific re
 
 Your privacy choice is part of this same filtering stage, and it is a hard filter, not a gentle preference:
 
-- A **`:confidential` call** only considers TEE-capable backends with attestation. It will not fall back to a non-TEE backend.
+- A **`:confidential` call** only considers attestation-capable backends (those that run in a sealed environment). It will not fall back to an ordinary backend.
 - A **`:encrypted` call** only considers backends that support end-to-end encryption.
 - On a **private route**, Nito sets a zero-data-retention requirement, which constrains which backends and provider settings are allowed.
 
@@ -41,11 +41,11 @@ Read top to bottom, the list tells a story: never route to something that is dow
 
 Suppose you send a request for a popular chat model with `:confidential`, and you attach an image. Walk it through both stages:
 
-1. **Filter by privacy.** Every non-TEE backend in the group is dropped immediately. Only attestation-capable backends remain.
+1. **Filter by privacy.** Every ordinary (non-attested) backend in the group is dropped immediately. Only attestation-capable backends remain.
 2. **Filter by capability.** Of those, any that cannot accept image inputs is dropped.
 3. **Order the rest.** Unavailable backends fall to the bottom. Among the available ones, Nito prefers a price-known, cheaper backend, then higher provider priority, then name.
 
-If only one TEE backend can take an image, that one is chosen regardless of price, because filtering happened before ordering. If two qualify, the cheaper available one wins.
+If only one attestation-capable backend can take an image, that one is chosen regardless of price, because filtering happened before ordering. If two qualify, the cheaper available one wins.
 
 ## Influencing the choice
 
@@ -55,9 +55,7 @@ You shape backend selection mostly through the model ID:
 - **Set the privacy mode** with `:confidential` / `:encrypted` to constrain the candidates to attested backends.
 - **Use a free-tier-eligible model** to stay on the free-tier route.
 
-Beyond the model ID and privacy suffix, this page does not claim a mechanism for pinning one exact physical backend.
-
-> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (for example a provider-scoped `provider/model` ID) from the public API, beyond the model ID and privacy mode. The routing logic chooses among candidates; confirm the intended public contract for explicit pinning.
+You influence backend selection through the model ID and privacy mode; there is no public way to pin one specific physical backend — Nito always selects among the eligible candidates.
 
 ## Why a call went where it did
 
@@ -65,7 +63,7 @@ For attested calls, the attestation response names the provider and physical mod
 
 ## Common mistakes
 
-- **Expecting cost preference to override privacy.** Privacy filters first; cost only orders the survivors. A cheaper non-TEE backend can never win a `:confidential` request.
+- **Expecting cost preference to override privacy.** Privacy filters first; cost only orders the survivors. A cheaper ordinary backend can never win a `:confidential` request.
 - **Assuming the same logical ID always hits the same backend.** It can change with availability and price between calls.
 - **Requesting a feature the cheapest backend lacks.** Because the candidate set is filtered by capability first, a single feature requirement can change which backend is chosen.
 

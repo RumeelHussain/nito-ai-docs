@@ -11,7 +11,7 @@ Nito bills in credits, tracked internally in nanos (billionths of a unit) for pr
 
 ## Where to read per-model cost
 
-Pricing and context window are not on the model card by default. When pricing is configured for a model, its `GET /v1/models` entry carries a separate `pricing` object, joined from the billing system at response time. Its fields are expressed in nanos and cover input and output token rates, cache read and write rates, the reasoning output rate, web search and fetch rates, an image output rate, and the model's context limit. Read pricing from the entry so your estimates track the live configuration.
+Pricing and context window are not on the model card by default. When pricing is configured for a model, its `GET /v1/models` entry carries a separate `pricing` object, joined from the billing system at response time. Its per-token rates are expressed in nanos and cover input and output tokens, cache read and write, the reasoning output rate, web search and fetch, and an image output rate, plus `context_limit_tokens` for the model's context limit. The object also carries `currency_code` (defaults to `USD`), `unit` (`nanos`), and a price `version`; and each per-token rate is mirrored as a `*_million_token_nanos` field (the rate per million tokens) for convenience. Read pricing from the entry so your estimates track the live configuration.
 
 ```bash
 curl "https://nito.dev.zprotocol.org/v1/models" \
@@ -19,13 +19,11 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 # each entry includes a "pricing" object in nanos when configured
 ```
 
-> **TODO (needs SME):** the master per-model price table (input and output cost per model) and the human-facing credit unit (what one credit is worth in currency). These numbers live in the billing system and provider catalogs and are not asserted in these docs.
+> **TODO (needs SME):** confirm — there is no static price table to publish here; rates are configured live and read from each model's `pricing` object. All amounts are in `nanos` (billionths of the currency in `currency_code`, default `USD`), so divide by `1e9` for the value in dollars.
 
 ## Server-side tool pricing
 
-Server-side tools such as web search and web fetch are billed in addition to the model tokens. Their per-use rates are part of the same pricing configuration. See [Tool pricing](/api-reference/server-tools/tool-pricing) for the reference.
-
-> **TODO (needs SME):** server-side tool unit prices. Owner: Finance.
+Server-side tools such as web search and web fetch are billed in addition to the model tokens. Their per-use rates (`web_search_request_nanos`, `web_search_result_nanos`, `web_fetch_request_nanos`) are part of the same `pricing` object, read live. See [Tool pricing](/api-reference/server-tools/tool-pricing) for the reference.
 
 ## Estimating a call
 

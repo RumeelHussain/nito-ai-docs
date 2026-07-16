@@ -25,13 +25,13 @@ A privacy mode is just how protected your prompt and the reply are while the mod
 Examples:
 
 ```text
-grok-4.3              # ordinary mode
-grok-4.3:confidential          # TEE-backed execution with attestation (if the model supports it)
-grok-4.3:encrypted      # end-to-end encrypted TEE (if the model supports it)
+x-ai/grok-4.5                     # ordinary mode (no suffix)
+openai/gpt-oss-120b:confidential  # TEE-backed execution with a verifiable attestation
+openai/gpt-oss-120b:encrypted     # end-to-end encrypted TEE
 ```
 
 <Warning>
-  `:confidential` and `:encrypted` are the only accepted suffixes. Any other suffix (for example `:standard`, `:zdr`, `:anon`, `:private`, `:e2ee`) is rejected with a `400`. There is no separate `tier` field in the request body. Privacy is chosen here, in the model ID, and nowhere else.
+  `:confidential` and `:encrypted` are the privacy suffixes to use. Other suffixes such as `:standard`, `:zdr`, `:anon`, `:private`, or `:e2ee` are rejected with a `400`. There is no separate `tier` field in the request body. Privacy is chosen here, in the model ID, and nowhere else.
 </Warning>
 
 ## Why privacy lives in the ID
@@ -57,17 +57,15 @@ Under the hood, Nito keeps two different kinds of identifier apart. You almost a
 
 An analogy: the logical ID is like a phone number you dial, and the physical ID is like the specific cell tower and line that actually carries the call. You dial the number; the network picks the path. The physical ID becomes interesting only when you want to understand or reason about which backend served a call. For attested (`:confidential`) calls, the attestation response names the physical model that ran, so you can confirm where the work happened. See [Backend selection](/models/backend-selection) for how that path is chosen.
 
-Whether the public API supports pinning a specific physical backend directly is not something this page asserts.
-
-> **TODO (needs SME):** whether there is a supported way to pin a specific physical backend (a provider-scoped `provider/model` ID) from the public API, beyond the model ID plus privacy suffix. Confirm the intended public contract.
+The public API takes logical IDs; there is no supported way to pin a specific physical backend directly — Nito selects it for you during routing.
 
 ## Selecting a model with no ID
 
-If you omit `model` entirely, Nito uses a default model for that surface (chat, embeddings, or image generation). This is convenient for a quick test, but naming a model explicitly is recommended for anything you ship, so that your behavior does not silently change if the default changes.
+If you omit `model` entirely, Nito uses a default model for that surface (chat or image generation). This is convenient for a quick test, but naming a model explicitly is recommended for anything you ship, so that your behavior does not silently change if the default changes.
 
 ## Common mistakes
 
-- **Inventing a suffix.** Only `:confidential` and `:encrypted` work. Everything else, including plausible-looking names like `:private` or `:zdr`, is a `400`.
+- **Inventing a suffix.** Only `:confidential` and `:encrypted` work; plausible-looking names like `:private` or `:zdr` return a `400`.
 - **Adding `:confidential` to a model that lacks attestation.** Check `attestation_available` on the model entry first. The call fails rather than downgrading.
 - **Expecting a suffix to add a privacy field elsewhere.** There is no `tier` field in the body. The suffix is the whole mechanism.
 - **Passing a physical `provider/model` ID when a logical one is expected.** Use the logical IDs from `GET /v1/models` for normal calls.

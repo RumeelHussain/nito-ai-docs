@@ -15,7 +15,7 @@ A group gathers several physical models that share one canonical identity. A phy
 - **One logical ID can fan out into per-privacy-mode options.** A group can expose ordinary, private, `:confidential`, and `:encrypted` variants, depending on which backends in the group actually support which modes. A backend only shows up under a mode it can genuinely serve.
 - **If one backend is unavailable, another in the group can serve the call.** Health is not your problem to track.
 
-The grouping is computed per surface, so the chat catalog, the embeddings catalog, and the image catalog each group independently.
+The grouping is computed per surface, so the chat catalog and the image catalog each group independently.
 
 ## Listing groups
 
@@ -24,7 +24,9 @@ curl "https://nito.dev.zprotocol.org/api/v1/model-groups?capability=chat" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-The `capability` query parameter selects the surface: `chat` (the default), `embeddings`, or `images`. The response is a set of groups, each with a label and a list of options, where each option corresponds to a logical ID for a supported privacy mode. An optional org context can scope the result.
+The `capability` query parameter selects the surface: `chat` (the default) or `images`. The response is a set of groups, each with a label and a list of options, where each option corresponds to a logical ID for a supported privacy mode. An optional org context can scope the result.
+
+This endpoint is a convenience for **building a model picker** — a labeled, grouped list for a dropdown or settings screen. It is not how routing happens: you never call it to route a request. Routing is automatic and per-request — you name a logical ID in your `model` field and Nito selects the backend (see [Backend selection](/models/backend-selection)).
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
@@ -38,7 +40,7 @@ A worked example makes the collapse concrete. Suppose a popular chat model is av
 
 When you call a logical model, Nito gathers the candidate backends in the group and chooses one. If the preferred backend is unavailable, the next eligible candidate is used. There is also a second kind of fallback, the provider-default fallback: if the catalog has no exact match for a bare logical ID, Nito can route to a provider's configured default model.
 
-The provider-default fallback applies to the ordinary, anon, and private modes only. It does not apply to the TEE modes (`:confidential` and `:encrypted`). The reason follows directly from what attestation means. An attestation is a signed statement that your call ran inside a specific sealed environment. If Nito quietly substituted a default backend for a `:confidential` request, any attestation you later fetched would describe a different environment than the one you asked for, which defeats the purpose. So for TEE modes there is no silent substitute: either an attestation-capable backend in the group can serve the call, or the call fails.
+The provider-default fallback applies to the ordinary, anon, and private modes only. It does not apply to `:confidential` and `:encrypted`. The reason follows directly from what attestation means. An attestation is a signed statement that your call ran inside a specific sealed environment. If Nito quietly substituted a default backend for a `:confidential` request, any attestation you later fetched would describe a different environment than the one you asked for, which defeats the purpose. So for `:confidential` and `:encrypted` there is no silent substitute: either an attestation-capable backend in the group can serve the call, or the call fails.
 
 The exact ordering Nito uses to choose among the eligible candidates is described in [Backend selection](/models/backend-selection).
 
@@ -48,9 +50,9 @@ Model groups are what let you write `model: "<logical-id>"` once and stop worryi
 
 ## Common mistakes
 
-- **Expecting TEE to fall back to a non-TEE backend.** It will not. A `:confidential` call that cannot be served attested fails rather than quietly downgrading. The provider-default fallback is excluded from TEE modes for precisely this reason.
+- **Expecting a `:confidential` call to fall back to an ordinary backend.** It will not. A `:confidential` call that can't be served in a sealed (attested) environment **fails** rather than quietly downgrading — the provider-default fallback is deliberately excluded from `:confidential` and `:encrypted`, so an attestation always describes the environment you actually asked for.
 - **Treating a logical ID as a single fixed backend.** It can resolve to different backends across calls based on availability and cost. For attested calls, the attestation tells you which backend actually ran.
-- **Calling the wrong capability.** A chat-shaped request against an embeddings group will not behave. Use `?capability=embeddings` or `?capability=images` to see the groups for those surfaces.
+- **Listing the wrong surface.** The `model-groups` endpoint is per capability; pass `?capability=images` to see image groups rather than the `chat` default.
 
 ## Related
 

@@ -21,7 +21,7 @@ Serves xAI models (the Grok family) and xAI-hosted server tools. xAI requests ar
 
 A broad model aggregator that fronts many vendors' models. Nito imports only zero-data-retention endpoints from OpenRouter, and never imports non-ZDR models in the first place, so an OpenRouter-served model is a ZDR model by construction. For models whose owner is a major lab (Anthropic, Google, OpenAI), the stored tier is treated as anonymized (`anon`); other models routed through ZDR endpoints are treated as `private`.
 
-One nuance is worth knowing because it is the exception to the ZDR rule. When a request uses OpenRouter's own server-side web tools, the ZDR flag is not applied to that specific call, because those tools require a data flow the ZDR policy would block. In other words, asking OpenRouter to run web tools and asking it to retain nothing are in tension, and the tool call wins for that request. Embeddings and image requests through OpenRouter, by contrast, always force ZDR.
+One nuance is worth knowing because it is the exception to the ZDR rule. When a request uses OpenRouter's own server-side web tools, the ZDR flag is not applied to that specific call, because those tools require a data flow the ZDR policy would block. In other words, asking OpenRouter to run web tools and asking it to retain nothing are in tension, and the tool call wins for that request. Image requests through OpenRouter, by contrast, always force ZDR.
 
 ### NEAR
 
@@ -33,16 +33,16 @@ The second TEE-capable provider. Phala uses appid-based attestation, meaning the
 
 ### Image provider (fal)
 
-Serves text-to-image generation only. Image requests are forwarded with storage disabled at the provider (the gateway sets `X-Fal-Store-IO: 0`). This provider backs the [image generations endpoint](/api-reference/multimodal/image-generation); the default image model is a Z-Image model. fal does not serve chat, embeddings, or TEE modes.
+Serves text-to-image generation only. Image requests are forwarded with storage disabled at the provider (the gateway sets `X-Fal-Store-IO: 0`). This provider backs the [image generations endpoint](/api-reference/multimodal/image-generation); the default image model is a Z-Image model. fal serves image generation only — not chat, and not the `:confidential`/`:encrypted` modes.
 
 ## Privacy enforcement at a glance
 
 | Provider | Serves | Privacy enforcement |
 | --- | --- | --- |
 | xAI | Grok chat, xAI tools | Storage disabled at provider (`Store: false`) |
-| OpenRouter | Aggregated chat, embeddings, images | ZDR-only import and ZDR data policy (relaxed when OpenRouter server web tools are used; embeddings and images always force ZDR) |
-| NEAR | TEE-capable chat, embeddings | Domain-based attestation, ed25519 end-to-end encryption; subject optional |
-| Phala | TEE-capable chat, embeddings | Appid-based attestation, end-to-end encryption; subject required |
+| OpenRouter | Aggregated chat, images | ZDR-only import and ZDR data policy (relaxed when OpenRouter server web tools are used; image requests always force ZDR) |
+| NEAR | TEE-capable chat | Domain-based attestation, ed25519 end-to-end encryption; subject optional |
+| Phala | TEE-capable chat | Appid-based attestation, end-to-end encryption; subject required |
 | Image provider (fal) | Image generation | Storage disabled at provider (`X-Fal-Store-IO: 0`); image only |
 
 ## Why this matters for sensitive calls
