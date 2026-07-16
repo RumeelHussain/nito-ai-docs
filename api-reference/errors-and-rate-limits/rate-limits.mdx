@@ -1,59 +1,116 @@
 ---
 title: Rate limits
-description: The canonical Nito rate-limit reference. Policy-table defaults across scopes, signalled only with Retry-After on 429.
+description: The canonical Nito rate-limit reference — policy-table defaults per scope, how 429s are signalled, and how quota differs from rate limiting.
 ---
 
-Nito enforces rate limits from a **policy table** of limiter groups, each with per-scope limits. The defaults below are a useful reference; values are **deployment-configurable**, so a given production environment may differ.
+Nito enforces rate limits from a **policy table** of limiter groups, each with limits per **scope** (global, IP, org, API key, OAuth token, session, and more). The defaults below are the current published values; they are **deployment-configurable**, so a given environment may differ.
 
 <Note>
-On a `429`, Nito sends **only** a `Retry-After` header (seconds to wait). There are **no `X-RateLimit-*` headers** — no `limit`, `remaining`, or `reset`. Read the wait time from `Retry-After` and back off; don't build client logic around a remaining-quota or reset header, because none is sent.
+Nito emits **no `X-RateLimit-*` headers** (no `limit`, `remaining`, or `reset`). The only signal is a `Retry-After` header, and even that is **not always present** (see [Signalling](#what-a-429-looks-like)). Pace your clients with your own accounting and backoff rather than reading a remaining-quota header — none is sent.
 </Note>
 
 ## Default limits
 
-### `inference_generate`
+### Inference (API)
 
-Chat, fusion, image, and embeddings generation.
+These are the groups a developer using an API key will hit.
 
-| Scope | Limit |
-|:------|------------------:|
-| org | 600 / min |
-| api_key | 120 / min |
-| session | 120 / min |
-| org (in-flight) | 25 concurrent |
-| api_key (in-flight) | 10 concurrent |
+**`inference_generate`** — chat, fusion, image, and embeddings generation.
 
-### Other groups
+| Scope | Requests | In-flight |
+|:------|--------------:|--------------:|
+| global | 6000 / min | — |
+| ip | 120 / min | — |
+| org | 600 / min | 25 |
+| api_key | 120 / min | 10 |
+| oauth_token | 120 / min | 10 |
+| session | 120 / min | 10 |
+| mcp_token | — | 10 |
+| user | — | 10 |
 
-| Group | Scope | Limit |
-|:------|:------|------------:|
-| `inference_count` | api_key | 300 / min |
-| `model_list` | api_key | 600 / min |
+**`inference_count`** — token-count and similar metadata calls.
 
-> **TODO (needs SME):** the exact published production limits per deployment, if they differ from these defaults (owner: Backend/Infra).
+| Scope | Requests |
+|:------|--------------:|
+| global | 12000 / min |
+| ip | 300 / min |
+| org | 1200 / min |
+| api_key | 300 / min |
+| oauth_token | 300 / min |
+| session | 300 / min |
+
+**`model_list`** — `GET /v1/models` and the catalog.
+
+| Scope | Requests |
+|:------|--------------:|
+| global | 12000 / min |
+| ip | 300 / min |
+| org | 1200 / min |
+| api_key | 600 / min |
+| oauth_token | 600 / min |
+| session | 600 / min |
+
+### MCP
+
+| Group | Scope | Requests | In-flight |
+|:------|:------|--------------:|--------------:|
+| `mcp_transport` | global | 6000 / min | — |
+| | ip | 120 / min | — |
+| | mcp_token, user | 120 / min | — |
+| | mcp_client, org, mcp_resource | 600 / min | — |
+| `mcp_tool_metadata` | mcp_token, user | 120 / min | — |
+| | mcp_client, org, mcp_resource, command | 600 / min | — |
+| `mcp_tool_inference` | mcp_token, user | 120 / min | — |
+| | mcp_client, org, mcp_resource | 600 / min | — |
+| | org | — | 25 |
+| | mcp_token, user | — | 10 |
+
+<Accordion title="Browser, auth, and UI groups">
+These govern first-party web-app and auth traffic, not API-key calls.
+
+| Group | Scope | Requests | In-flight |
+|:------|:------|--------------:|--------------:|
+| `ui_chat` | global | 3000 / min | — |
+| | ip | 120 / min | — |
+| | session | 60 / min | 3 |
+| | user | 120 / min | 10 |
+| | org | 600 / min | 25 |
+| `oauth` | ip | 60 / min | — |
+| | session, user, oauth_token, subject | 120 / min | — |
+| | oauth_client | 600 / min | — |
+| `auth_interactive` | ip | 30 / min | — |
+| | session, user | 120 / min | — |
+| | subject | **10 / 15 min** | — |
+| `spa_api_public` | ip, session, user | 600 / min | — |
+| `spa_api_account_org` | ip, session | 120 / min | — |
+| | user | 300 / min | — |
+| | org | 600 / min | — |
+| | subject | **10 / 15 min** | — |
+
+Note some windows are **15 minutes**, not per-minute.
+</Accordion>
 
 <Accordion title="How scopes and per-key limits work">
-The policy table defines limits per **scope** — global, ip, org, `api_key`, `oauth_token`, session, user, `oauth_client`, the `mcp_*` groups, subject, and command.
+A limit applies per **scope** — global, ip, org, `api_key`, `oauth_token`, session, user, the `mcp_*` scopes, subject, and command. A request must pass **every** scope that applies to it; the tightest one wins.
 
-**Per-key values are global group defaults, not stored per individual key.** Two API keys in the same group share the same default rate; the table holds one default per scope, not a custom number per key. Changing the rate for a specific workload is a deployment-level policy change, not a per-key setting.
+**Per-key values are global group defaults, not stored per individual key.** Two API keys in the same group share the same default rate; the policy table holds one default per scope, not a custom number per key. Changing the rate for a specific workload is a deployment-level policy change.
 </Accordion>
+
+> **TODO (needs SME):** confirm these match the deployed production policy if it overrides the defaults (owner: Backend/Infra).
 
 ## Concurrency (in-flight) limits
 
-`inference_generate` also bounds **concurrent in-flight requests**, independent of the per-minute rate:
+`inference_generate` also bounds **concurrent in-flight requests**, independent of the per-minute rate: **25 per org** and **10** per api_key / oauth_token / session / mcp_token / user. Exceeding the concurrency bound is rejected with a `429` even when you are under the per-minute rate. If you fan out many long-running generations at once, this is the bound you'll hit first.
 
-| Scope | In-flight limit |
-|:------|------------------:|
-| org | 25 concurrent |
-| api_key | 10 concurrent |
+## What a 429 looks like
 
-Exceeding the concurrency bound is rate-limited the same way (`429` + `Retry-After`) even when you are under the per-minute limit. If you fan out many long-running generations at once, this is the bound you will hit first.
+Signalling depends on **why** you were limited:
 
-## What you get on a 429
+- **Request-rate `429`** (per-minute limit) — includes a `Retry-After` header with the seconds to wait, when the limiter can compute a wait duration.
+- **In-flight concurrency `429`** — **may not include `Retry-After`** (there is no fixed window to wait out; retry after a request frees up).
+- **Quota `429`** (`insufficient_quota`) — **may not include `Retry-After`** (see [Quota is not a rate limit](#quota-is-not-a-rate-limit)).
 
-- HTTP status `429`.
-- A `Retry-After` header with the seconds to wait.
-- The [error envelope](/api-reference/errors-and-rate-limits/error-envelope) with `code` either `rate_limited` (transient — retry after the wait) or `insufficient_quota` (a spend or usage cap — may need a quota change).
+There are **no `X-RateLimit-*` headers** in any case.
 
 ```http
 HTTP/1.1 429 Too Many Requests
@@ -63,30 +120,60 @@ Content-Type: application/json; charset=utf-8
 {"error":{"message":"rate limited","code":"rate_limited"}}
 ```
 
-First-party browser routes return the same `429` and `Retry-After`, but with a flat body (`{"code":"rate_limited","error":"rate limited"}`) rather than the nested `error` envelope.
+### Error shapes by surface
 
-<Accordion title="Fail-open vs fail-closed groups">
-If the limiter's own infrastructure errors (it cannot be consulted), most groups **fail open** — the request proceeds rather than being rejected on an infrastructure fault.
+The body shape depends on which surface you called:
 
-A **fail-closed** set rejects requests when the limiter cannot be consulted, because letting them through unbounded is riskier than a brief outage:
+| Surface | Shape |
+|:--------|:------|
+| Public API (JSON) | OpenAI-style envelope: `{"error":{"code":"rate_limited","message":"…"}}` |
+| Browser JSON routes | Flat: `{"error":"…","code":"rate_limited"}` |
+| OAuth routes | OAuth-style: `{"error":"rate_limited"}` |
+| MCP transport | May be **plain text** |
+| MCP tools | Surfaced as a **tool error** |
+
+## Quota is not a rate limit
+
+`insufficient_quota` is a **billing/quota** decision, not a Redis rate-limit decision — a different system with a different meaning, even though both return `429`.
+
+- **Free-tier prompt quotas** are counted per **UTC calendar day**, currently defaulting to **10 text prompts/day** and **15 image prompts/day**. Exhausting them returns `429` with `code: "insufficient_quota"`.
+- **Paid entitlement failures** (e.g. no balance) can return **`402 payment_required`** rather than `429`.
+
+So distinguish the two: `rate_limited` is transient (retry after the wait); `insufficient_quota` / `402` is a spend or usage cap that needs a top-up or a new day, not a retry.
+
+## Fail-open versus fail-closed
+
+If the limiter's own backend (Redis) errors, behavior depends on the group:
+
+<Accordion title="Fail-closed groups (reject when the limiter is unavailable)">
+These groups **fail closed** — if the limiter can't be consulted, the request is rejected rather than let through unbounded:
 
 - `auth_interactive`
 - `inference_generate`
 - `inference_count`
-- `mcp_*`
+- `mcp_transport`
+- `mcp_tool_inference`
+- `mcp_tool_metadata`
 - `oauth`
 - `org_admin`
 - `spa_api_account_org`
 
-Everything outside this set fails open.
+All other groups (including **`model_list`**) **fail open** — the request proceeds on a limiter-backend fault.
 </Accordion>
+
+A Redis ping failure triggers reconnecting behavior; fail-closed groups keep rejecting while the limiter is unavailable.
+
+## Configuration
+
+- Runtime policy overrides are loaded from the **`RATE_LIMIT_POLICIES_FILE`** environment variable (a path to a policy file). **Inline JSON policy config is intentionally unsupported.**
+- A bad policy or config is **fatal at startup** — the gateway will not boot with an invalid policy.
 
 ## Handling limits in your client
 
-- Treat `429` as retryable, but only after the `Retry-After` interval. See [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior).
+- Treat `rate_limited` `429`s as retryable, honoring `Retry-After` when present; otherwise back off ([Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)).
 - Do not poll for a remaining-quota header — it does not exist.
 - Bound your own concurrency to stay under the in-flight limits (25 per org, 10 per key on `inference_generate`).
-- Distinguish `rate_limited` (retry after wait) from `insufficient_quota` (spend/usage cap) even though both return `429`.
+- Treat `insufficient_quota` and `402` as **not** retryable in a tight loop — they need a top-up or a new UTC day, not immediate retry.
 
 ## Related
 
@@ -95,4 +182,4 @@ Everything outside this set fails open.
 - [Status mapping](/api-reference/errors-and-rate-limits/status-mapping)
 - [Error codes](/api-reference/errors-and-rate-limits/error-codes)
 
-{/* source: DOCS_SOURCE_OF_TRUTH.md §8 (internal/ratelimit: policy-table defaults, inference_generate org 600 / api_key 120 / session 120 / in-flight org 25 / api_key 10; inference_count api_key 300; model_list api_key 600; Retry-After only; fail-open/closed set). Consolidated single source — the former resources/rate-limits.mdx was merged here. */}
+{/* source: inference-gateway main — internal/ratelimit/policy.go (DefaultPolicyTable), internal/server/rate_limit.go (fail-closed set, Retry-After only when wait computable, per-surface error shapes), internal/billing/free_tier_usage.go (UTC-day free-tier quotas 10 text / 15 image; insufficient_quota is billing, not rate limiting; 402 payment_required). Config via RATE_LIMIT_POLICIES_FILE; inline JSON unsupported; bad config fatal at startup. Verified against the DevOps spec, 2026-07. */}
