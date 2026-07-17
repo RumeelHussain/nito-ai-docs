@@ -1,106 +1,68 @@
 ---
 title: "File Parser"
-description: "Extract text from uploaded documents through a REST endpoint, separate from the chat tools, with the same parser available inline in chat."
+description: "Extract text from uploaded documents. From the API you reach the parser inline in a chat request; the standalone parse endpoint is a browser-session surface."
 ---
 
-The file parser extracts plain text from an uploaded document so you can feed it into a prompt. It is grouped with the server-side tools because the gateway does the work for you, but it is different in one important way.
+The file parser extracts plain text from a document so a model can read it. The gateway does the work server-side: it detects the file kind, pulls out the text, and folds it into the model's context.
 
-**The file parser is a REST endpoint, not a chat tool.** You do not enable it with a request field or a `tools` entry. You upload a file to a dedicated endpoint and get text back. The same parser also runs **inline** when you attach a file to a chat message, so you have two ways to reach it.
+There are two ways to reach it, and which one applies to you depends on how you authenticate:
 
-## The parse endpoint
+- **Inline in a chat request** the path you use from the API. Attach a file to a chat message and the gateway parses it and injects the text before the model runs. This works with your API key.
+- **The standalone parse endpoint** (`POST /api/v1/attachments/parse`) a **browser-session** surface used by the console UI. It is **not callable with an API key** and returns `403` if you try. From the API, use the inline path below.
 
-```text
-POST /api/v1/attachments/parse
-Content-Type: multipart/form-data
-```
+## Parsing inline in a chat request
 
-The request is multipart form data with these fields.
-
-| Field | Values | Notes |
-| --- | --- | --- |
-| `file` | the upload | required |
-| `trust_tier` | `anon`, `private`, `confidential` | `encrypted` is not supported here |
-| `parse_mode` | `""`, `server`, `auto` | empty string is the default mode |
-
-### Accepted file kinds
-
-The parser accepts text and common office documents: **text, pdf, docx, pptx, xlsx, xls**.
-
-**Images are rejected.** If you need the model to read an image, send it directly to an image-capable model as image input rather than parsing it here.
-
-### Size limit
-
-The upload size cap defaults to **10 MiB**. A file larger than the cap is rejected with **`413`**.
-
-## Response
-
-A successful parse returns a JSON body:
-
-| Field | Notes |
-| --- | --- |
-| `text` | the extracted text |
-| `mime_type` | detected MIME type |
-| `file_kind` | normalized kind (for example `pdf`, `docx`) |
-| `bytes` | size of the input |
-| `page_count?` | present for paginated formats |
-| `parsed_pages?` | how many pages were actually parsed |
-| `truncated?` | true if output hit a cap |
-| `warnings[]` | non-fatal notes about the parse |
-
-### Caps
-
-The parser bounds its work to keep responses predictable:
-
-- **300,000** output characters maximum (output is truncated beyond this; `truncated` is set).
-- **80** PDF pages maximum.
-- **10 seconds** PDF parsing timeout.
-
-## Worked example
+Send the file as a content part alongside your text. The gateway runs the parser on it and continues the completion with the extracted text in context, so there is no separate call and no second round trip.
 
 ```bash
-curl https://nito.dev.zprotocol.org/api/v1/attachments/parse \
+curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
-  -F "file=@/path/to/report.pdf" \
-  -F "trust_tier=private" \
-  -F "parse_mode=auto"
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-oss-120b",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "Summarize this document." },
+          { "type": "file", "file": { "filename": "report.pdf", "file_data": "data:application/pdf;base64,JVBERi0xLjcK..." } }
+        ]
+      }
+    ]
+  }'
 ```
 
 > **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL once confirmed.
 
-A typical response:
+A few rules the gateway enforces:
 
-```json
-{
-  "text": "...extracted document text...",
-  "mime_type": "application/pdf",
-  "file_kind": "pdf",
-  "bytes": 84213,
-  "page_count": 12,
-  "parsed_pages": 12,
-  "truncated": false,
-  "warnings": []
-}
-```
+- Supply the file **inline as `file_data`** (a base64 data URL) or **by `file_url`** for the gateway to fetch. A **`file_id` reference is not supported** and is rejected with `<field>.file_id is not supported`.
+- The model must support file attachments. On a model that does not, the request is rejected with `model does not support file attachments`.
+- Images are not parsed here. Send an image to an image-capable model as [image input](/features/multimodal/image-input) instead.
 
-## The text-parser variant
+## What the parser accepts
 
-A second endpoint uses the same upload and parser but returns a different shape:
+The parser handles text and common office documents: **text, pdf, docx, pptx, xlsx, xls**. Anything else returns `file type is not supported for server-side parsing`, and an image returns `image files should be sent directly to an image-capable model`.
 
-```text
-POST /api/v1/augment/text-parser
-```
+## Limits
 
-It returns `{ text, tokens }` (an approximate token count alongside the text) and additionally supports a `response_format` field set to `json` (default) or `text`. Reach for this when you want a token estimate or a plain-text response instead of the richer `/attachments/parse` envelope.
+The parser bounds its work so responses stay predictable:
 
-## Parsing inline in chat
-
-You do not have to call the endpoint at all. When you send a file as a content part in a chat message, the gateway runs **the same parser** server-side and folds the extracted text into the prompt. The supported document kinds match the endpoint: text, pdf, docx, pptx, xlsx, xls. Note that in chat, a `file_id` reference is not supported; supply the file by URL or inline data. See [How Nito works](/get-started/how-nito-works) for the chat request surface.
+- **50 MiB** default upload cap. A file over the cap is rejected with **`413`**.
+- **2,000** PDF pages maximum.
+- **10 seconds** PDF parsing timeout.
+- Extracted text is bounded by a **50 MiB** safety limit; output that hits a cap is truncated and flagged.
 
 ## Billing
 
-A parse is billed as **`z-protocol/document-parse`**, metered as **1 unit** per call, separate from any model token usage.
+A parse is billed as **`z-protocol/document-parse`**, metered as **1 unit** per parse, separate from any model token usage.
+
+## The standalone parse endpoint (browser session only)
+
+The console UI parses uploads through `POST /api/v1/attachments/parse` (multipart form data). This endpoint requires a **browser session** and is **not** part of the API-key surface: calling it with a bearer token returns `403`. It returns a JSON envelope with the extracted `text`, the detected `mime_type` and `file_kind`, input `bytes`, and — for paginated formats — `page_count`, `parsed_pages`, a `truncated` flag, and any `warnings`. If you are building against the API, use the inline-chat path above instead; it runs the same parser.
 
 ## Related
 
 - [Server-side tools](/features/server-side-tools) for the family overview.
-- [How Nito works](/get-started/how-nito-works) for sending files inline in a chat request.
+- [PDF and document input](/features/multimodal/pdf-input) for the multimodal view of sending files inline.
+- [How Nito works](/get-started/how-nito-works) for the chat request surface.

@@ -73,9 +73,9 @@ The second way is to parse the document first, on its own, and then do whatever 
 POST /api/v1/attachments/parse
 ```
 
-You send the file as a multipart form. The endpoint returns the extracted text plus metadata about what was parsed (the MIME type, the detected file kind, the byte count, page counts for paged formats, and any truncation warnings). This is the right path when you want the text as a reusable artifact rather than a one-shot inline parse, or when the same document feeds several later prompts.
+You send the file as a multipart form and it returns the extracted text plus metadata (the MIME type, the detected file kind, the byte count, page counts for paged formats, and any truncation warnings). **This endpoint requires a browser session and is not callable with an API key — it returns `403`; the console UI uses it.** From the API, use the inline `file` part above; it runs the same parser.
 
-The parser endpoint has its own dedicated feature page with the complete request and response shape, the trust-tier option, and parse modes. See [File parser](/api-reference/server-tools/file-parser) for the full treatment; this page only points at it.
+The parser endpoint has its own dedicated page with the complete behavior. See [File parser](/features/server-side-tools/file-parser) for the full treatment; this page only points at it.
 
 ## PDF parsing caps
 
@@ -83,18 +83,16 @@ PDF parsing is bounded so a single document cannot consume unlimited time or out
 
 | Cap | Value |
 |---|---|
-| Maximum pages parsed | 80 |
+| Maximum pages parsed | 2,000 |
 | Parse timeout | 10 seconds |
-| Maximum output characters | 300,000 |
+| Extracted-text safety limit | 50 MiB |
 
-A document past these limits is parsed up to the cap and the result is marked as truncated rather than silently returning partial text with no signal. If you are working with large PDFs, expect truncation past 80 pages or 300,000 characters and design for it.
-
-> **TODO (needs SME):** confirm whether the 80-page, 10-second, and 300,000-character caps apply identically to the inline `file` content-part path and the `/api/v1/attachments/parse` endpoint, or whether they differ between the two. Owner: Backend.
+A document past these limits is parsed up to the cap and the result is marked as truncated rather than silently returning partial text with no signal. If you are working with very large PDFs, expect truncation past 2,000 pages and design for it. Both paths use the same server-side parser, so these caps apply whether you parse inline or through the endpoint.
 
 ## Which path should you use
 
 - Use the **inline `file` part** when you want one request to both supply the document and get the model's answer. It is the simplest path for "here is a document, answer a question about it."
-- Use the **parser endpoint** when you want the extracted text as a standalone result: to cache it, to feed it into multiple prompts, to inspect it before sending it to a model, or to combine it with other text yourself.
+- Use the **parser endpoint** (browser/console session only, not API-key callable) when the console needs the extracted text as a standalone result. From the API, parse inline and reuse the model's output yourself.
 
 Both use the same server-side parser, so the supported kinds and the parsing behavior are the same. They differ only in whether the model call is bundled in.
 
@@ -111,4 +109,4 @@ Both use the same server-side parser, so the supported kinds and the parsing beh
 - [Image input](/features/multimodal/image-input)
 - [How Nito works](/get-started/how-nito-works)
 
-{/* source: internal/server/api_chat.go (apiChatContentPartToInference, file/input_file -> file_url/file_data/filename, file_id rejected), internal/server/api_attachments_parse.go (apiAttachmentParseHandler, 80 PDF pages, 10s timeout, 300k output runes), internal/inference/contracts.go (ContentPartKind file) */}
+{/* source: internal/server/api_chat.go (apiChatContentPartToInference, file/input_file -> file_url/file_data/filename, file_id rejected), internal/server/api_attachments_parse.go (apiAttachmentParseHandler, browser-session only, 2000 PDF pages, 10s timeout, 50 MiB extracted-text limit), internal/inference/contracts.go (ContentPartKind file) */}

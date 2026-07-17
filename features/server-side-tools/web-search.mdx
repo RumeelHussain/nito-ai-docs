@@ -11,7 +11,7 @@ The simplest form is a boolean on the top-level `web_search` field:
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "What are the headline features of the latest release?" }],
   "web_search": true
 }
@@ -81,7 +81,7 @@ So `mode: on` leans toward searching, `mode: off` disables it, and `mode: auto` 
 
 ## Provider routing
 
-Web search requires a model whose provider can serve it. Today that means an **OpenRouter, xAI, NEAR, or Phala** model. If you enable web search on a model outside that set, the request is rejected rather than silently dropped.
+Web search requires a model whose provider can serve it — today an **OpenRouter, xAI, NEAR, or Phala** model. Enabling it on a model outside that set is rejected with `web_search requires an OpenRouter, xAI, NEAR, or Phala model`, not silently dropped. You can confirm per model with the web-search capability in `GET /v1/models`.
 
 ## What the pipeline is
 
@@ -96,7 +96,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       { "role": "user", "content": "What are the top local news stories today?" }
     ],
@@ -120,7 +120,7 @@ The response is an ordinary chat completion with two additions:
 {
   "id": "...",
   "object": "chat.completion",
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "choices": [ { "index": 0, "message": { "role": "assistant", "content": "..." }, "finish_reason": "stop" } ],
   "web_search": { "...": "search metadata and sources" },
   "usage": {

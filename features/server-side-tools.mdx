@@ -40,7 +40,7 @@ The first shape is a dedicated top-level field on the chat request. Web search a
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "What changed in the latest release?" }],
   "web_search": true
 }
@@ -50,7 +50,7 @@ The second shape is a hosted entry in the `tools` array, using a `type` instead 
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "Plot the last quarter's data." }],
   "tools": [{ "type": "code_interpreter" }]
 }
@@ -70,10 +70,6 @@ Server-side tools are billed in addition to the model's own token usage. The spe
 ## Provider routing
 
 Server-side tools are not available on every model, because they depend on what the underlying provider supports. The eligible providers differ per tool (web search is the broadest; code interpreter and x\_search are xAI-only). If you enable a tool on a model whose provider cannot serve it, the request is rejected rather than silently ignored. Each sub-page lists its own provider requirements.
-
-## A note on the datetime tool
-
-> **Not available yet.** A "datetime" server tool has been discussed but is **not implemented** today. There is no tool type or handler for it in the gateway. Do not rely on it. It is tracked on the deferred/roadmap list, and this page will be updated if it ships.
 
 ## Related
 

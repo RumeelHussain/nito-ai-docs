@@ -1,11 +1,11 @@
 ---
 title: List models
-description: List the chat, embedding, and image models available on Nito, with their capabilities, context window, and pricing.
+description: List the chat and image models available on Nito, with their capabilities, context window, and pricing.
 ---
 
 `GET /v1/models` (OpenAI-compat) and `GET /api/v1/models` (first-party) return the catalog of models the gateway can route to. The catalog is discovered from provider APIs at runtime, not a static list, so the exact set varies by deployment.
 
-By default the list returns `chat` models. Pass `type` to filter for `embedding` or `image`.
+By default the list returns `chat` models. Pass `type` to filter for `image`.
 
 ## Request
 
@@ -20,7 +20,7 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 
 | Parameter | Notes |
 |---|---|
-| `type` | Filter by model type: `chat` (default), `embedding`, or `image`. |
+| `type` | Filter by model type: `chat` (default) or `image`. |
 
 ## Response
 
@@ -39,13 +39,13 @@ The envelope is an OpenAI-style list:
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | Logical public model ID. Use this value as `model` in chat/embeddings/images requests. |
+| `id` | string | Logical public model ID. Use this value as `model` in chat/images requests. |
 | `object` | string | Always `"model"`. |
 | `created` | int | Unix seconds. |
 | `owned_by` | string | Owning provider or model owner. |
 | `display_name` | string | Human-readable name for UI. |
 | `description` | string | Short description. |
-| `type` | string | `chat`, `embedding`, or `image`. |
+| `type` | string | `chat` or `image`. |
 | `architecture` | object | `{ input_modalities, output_modalities }`. See below. |
 | `capabilities` | object | Per-feature support flags. See below. |
 | `context_window` | int | Maximum context length in tokens. |

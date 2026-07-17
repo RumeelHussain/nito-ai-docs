@@ -16,7 +16,7 @@ Chat lives at two paths that share the exact same handler:
 
 Pick whichever fits your stack. An OpenAI SDK pointed at the `/v1` base will work unchanged; a first-party client can use `/api/v1`. There is no behavioral difference between them.
 
-The body is decoded as **strict JSON**: unknown fields are rejected with a `400`, not silently ignored. This is deliberate. If you misspell `max_tokens` or paste a field from another provider's API, you find out immediately instead of having it quietly dropped. Send only the fields documented below.
+The body is decoded as **strict JSON**: unknown fields are rejected with a `400`, not silently ignored. This is deliberate. If you misspell `max_tokens` or paste a field from another provider's API, you find out immediately instead of having it quietly dropped. In particular, several common OpenAI fields are **not** accepted and return a `400` (`unsupported field "..."`): `stop`, `seed`, `n`, `frequency_penalty`, `presence_penalty`, `logit_bias`, `logprobs`, and `response_format`. Send only the fields documented below.
 
 ## The request
 
@@ -33,6 +33,7 @@ Only `messages` is required. Everything else is optional and passed through when
 | `stream` | boolean | Stream the reply as Server-Sent Events. See [Streaming](/features/streaming). |
 | `stream_options.include_usage` | boolean | Add a trailing usage chunk to the stream. |
 | `reasoning` | object | Ask a capable model to think first. See [Reasoning](/features/reasoning). |
+| `reasoning_effort` | string | Flat OpenAI-style effort (`low`, `medium`, `high`); an alternative to the `reasoning` object. |
 | `prompt_cache_key` | string | Reuse a cached prompt prefix (model must support it). |
 | `cache_control` | object | Provider cache hints, passed through. |
 | `web_search` | bool or object | Let the model search the web mid-generation. |
@@ -53,14 +54,14 @@ Each message has a `role` and `content`. The accepted roles are `system`, `user`
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
-`grok-4.3` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
+`x-ai/grok-4.5` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
 ```bash
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       {"role": "system", "content": "You are concise."},
       {"role": "user", "content": "Explain a gateway in one sentence."}
@@ -77,7 +78,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",
+    model="x-ai/grok-4.5",
     messages=[
         {"role": "system", "content": "You are concise."},
         {"role": "user", "content": "Explain a gateway in one sentence."},
@@ -96,7 +97,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",
+  model: "x-ai/grok-4.5",
   messages: [
     { role: "system", content: "You are concise." },
     { role: "user", content: "Explain a gateway in one sentence." },
@@ -106,7 +107,7 @@ const resp = await client.chat.completions.create({
 console.log(resp.choices[0].message.content);
 ```
 
-To make the same call inside an attested environment, change one thing: `"model": "grok-4.3:confidential"`. The privacy mode rides on the model string and nothing else. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+To run the same kind of call inside an attested environment, use a model that offers a confidential variant, for example `"model": "openai/gpt-oss-120b:confidential"`. The privacy mode rides on the model string and nothing else. Not every model has a confidential variant (for instance `x-ai/grok-4.5` does not), so fetch `GET /v1/models` and filter for attestation support. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
 ## The response
 
@@ -117,7 +118,7 @@ A successful non-streaming call returns an object with `object` set to `chat.com
   "id": "...",
   "object": "chat.completion",
   "created": 1751299200,
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "choices": [
     {
       "index": 0,
@@ -151,7 +152,6 @@ Validation and decoding problems return `400` with an error envelope of the shap
 Chat completions is the right default for almost everything text. Reach elsewhere when:
 
 - You want several models to answer and a judge to merge them: that is [chat fusion](/api-reference/chat-and-text/chat-fusion), a separate non-streaming endpoint.
-- You need vectors for search or retrieval: use [embeddings](/features/embeddings).
 - You want text-to-image: use [image generation](/api-reference/multimodal/image-generation).
 
 ## Related

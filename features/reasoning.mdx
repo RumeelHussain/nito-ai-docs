@@ -13,7 +13,7 @@ Add a `reasoning` object to your chat request:
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [
     {"role": "user", "content": "A bat and a ball cost $1.10. The bat costs $1.00 more than the ball. How much is the ball?"}
   ],
@@ -39,14 +39,14 @@ Reasoning can also be requested through a feature suffix on the model ID, the sa
 
 ## A full call
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog and confirm `supports_reasoning`.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `x-ai/grok-4.5` is an example; fetch `GET /v1/models` for the live catalog and confirm `supports_reasoning`.
 
 ```bash
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       {"role": "user", "content": "Prove that the square root of 2 is irrational."}
     ],
@@ -71,7 +71,7 @@ When reasoning runs, the response carries two extra signals.
         "role": "assistant",
         "content": "Assume sqrt(2) = a/b in lowest terms ...",
         "reasoning_details": [
-          { "type": "reasoning", "summary": "Set up a proof by contradiction.", "id": "rd_1", "format": "text", "index": 0 }
+          { "type": "reasoning.summary", "summary": "Set up a proof by contradiction.", "id": "reasoning-0", "format": "text", "index": 0 }
         ]
       },
       "finish_reason": "stop"

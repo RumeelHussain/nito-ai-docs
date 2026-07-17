@@ -15,7 +15,7 @@ Idempotency is controlled by one request header:
 
 Because the gateway generates a key when you do not send one, every request already has an idempotency key internally. Sending your own is what makes a **retry** recognizable as the same logical request, since you control the value and can resend it.
 
-The header is honored across the main surfaces: chat, embeddings, image generation, attachments, and billing. Wherever a request places a billing hold, the key rides along.
+The header is honored across the main surfaces: chat, image generation, attachments, and billing. Wherever a request places a billing hold, the key rides along.
 
 ## What the key actually does: billing dedup
 
@@ -54,7 +54,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: 3f9a1c2e-7b04-4d6a-9e21-6c8b5a0f1d23" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       {"role": "user", "content": "Summarize the request lifecycle in one sentence."}
     ]

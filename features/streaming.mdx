@@ -21,14 +21,14 @@ Skip streaming when:
 
 Set `stream: true` on a chat-completions request. Nito responds with a stream of Server-Sent Events (SSE) instead of a single JSON body.
 
-> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `grok-4.3` is an example; fetch `GET /v1/models` for the live catalog.
+> **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `x-ai/grok-4.5` is an example; fetch `GET /v1/models` for the live catalog.
 
 ```bash
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "stream": true,
     "messages": [
       {"role": "user", "content": "Write a haiku about gateways."}

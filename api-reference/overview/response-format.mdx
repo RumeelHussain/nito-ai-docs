@@ -12,8 +12,7 @@ Nito returns JSON responses with `Content-Type: application/json; charset=utf-8`
 | `chat.completion` | Chat completions (non-streaming) |
 | `chat.completion.chunk` | Streaming chat completion chunks |
 | `fusion.completion` | `/chat/fusion` multi-model synthesis |
-| `list` | Embeddings and other collection responses |
-| `embedding` | Each entry inside an embeddings `data[]` |
+| `list` | Model lists and other collection responses |
 | `attestation` | TEE attestation endpoint |
 
 Read the `object` field to discriminate the shape. The full field-by-field schemas live on each endpoint's reference page; this page only fixes the common conventions.
@@ -22,7 +21,7 @@ A non-streaming chat response, for example, carries `id`, `object: "chat.complet
 
 ## Caching
 
-Inference responses set `Cache-Control: no-store`. The gateway does not cache generated output, and you should not cache it on the client either. This applies to chat, fusion, embeddings, and the other inference surfaces.
+Inference responses set `Cache-Control: no-store`. The gateway does not cache generated output, and you should not cache it on the client either. This applies to chat, fusion, and the other inference surfaces.
 
 ## Streaming
 

@@ -20,7 +20,7 @@ curl "https://nito.dev.zprotocol.org/api/v1/model-groups?capability=chat" \
 
 | Parameter | Notes |
 |---|---|
-| `capability` | Which capability to group by: `chat`, `embeddings`, or `images`. |
+| `capability` | Which capability to group by: `chat` or `images`. |
 
 ## Response
 
@@ -51,7 +51,7 @@ curl "https://nito.dev.zprotocol.org/api/v1/model-groups?capability=chat" \
 - Rows that share a canonical model ID are collapsed into one group. Within a group, each option corresponds to a public mode the family can be served under.
 - A logical public ID is the canonical ID, optionally suffixed with a privacy mode: `<model>`, `<model>:confidential`, or `<model>:encrypted`. No other suffix is valid.
 
-So a group is the "pick one of these" unit, and an option is the concrete `model` value you send to the chat, embeddings, or images endpoint.
+So a group is the "pick one of these" unit, and an option is the concrete `model` value you send to the chat or images endpoint.
 
 ## Backend route selection
 

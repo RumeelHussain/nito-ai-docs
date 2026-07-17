@@ -101,12 +101,10 @@
             ]
           },
           {
-            "group": "Embeddings and efficiency",
+            "group": "Efficiency",
             "pages": [
-              "features/embeddings",
               "features/prompt-caching",
-              "features/idempotency",
-              "features/multi-model-routing"
+              "features/idempotency"
             ]
           }
         ]
@@ -344,15 +342,6 @@
             ]
           },
           {
-            "group": "Embeddings",
-            "pages": [
-              "api-reference/embeddings/create-embeddings",
-              "api-reference/embeddings/embedding-models",
-              "api-reference/embeddings/vector-dimensions",
-              "api-reference/embeddings/input-limits"
-            ]
-          },
-          {
             "group": "Multimodal",
             "pages": [
               "api-reference/multimodal/image-input",
@@ -505,13 +494,6 @@
                   "api-reference/endpoints/chat-text/createopenaichatcompletion",
                   "api-reference/endpoints/chat-text/createopenairesponsecompact",
                   "api-reference/endpoints/chat-text/countanthropicmessagetokens"
-                ]
-              },
-              {
-                "group": "Embeddings",
-                "pages": [
-                  "api-reference/endpoints/embeddings/createopenaiembedding",
-                  "api-reference/endpoints/embeddings/createembedding"
                 ]
               },
               {

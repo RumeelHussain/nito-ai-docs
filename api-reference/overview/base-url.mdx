@@ -16,7 +16,7 @@ https://nito.dev.zprotocol.org/api/v1/...    # first-party
 
 | Prefix | Purpose |
 |---|---|
-| `/v1/...` | OpenAI-compatible surface. Use it to point existing OpenAI-style clients at Nito by swapping the base URL. Covers chat completions, embeddings, image generations, and models. |
+| `/v1/...` | OpenAI-compatible surface. Use it to point existing OpenAI-style clients at Nito by swapping the base URL. Covers chat completions, image generations, and models. |
 | `/api/v1/...` | First-party surface. Covers everything in `/v1` plus Nito-only endpoints such as `/chat/fusion`, `/attachments/parse`, `/model-groups`, `/tee/attestation`, orgs, billing, and account routes. |
 
 Where an endpoint exists under both prefixes, both paths share the same handler and behave identically. Endpoints that are Nito-only (for example `/api/v1/chat/fusion`) have no `/v1` alias.

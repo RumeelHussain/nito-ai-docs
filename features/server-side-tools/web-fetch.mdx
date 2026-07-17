@@ -13,7 +13,7 @@ Enable web fetch with the top-level `web_fetch` field, or as a hosted tool entry
 
 ```json
 {
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "messages": [
     { "role": "user", "content": "Summarize https://example.com/changelog for me." }
   ],
@@ -35,7 +35,7 @@ The gateway's web pipeline triggers fetch mode when **explicit URLs are present 
 
 ## Provider routing
 
-Web fetch requires a model whose provider can serve it. Today that means an **OpenRouter, NEAR, or Phala** model. (Note this set differs from web search, which also includes xAI.) Enabling web fetch on a model outside that set is rejected rather than silently ignored.
+Web fetch requires a model whose provider can serve it — today an **OpenRouter, NEAR, or Phala** model. This set excludes xAI, which serves web search but not web fetch. Enabling it on a model outside that set is rejected with `web_fetch requires an OpenRouter, NEAR, or Phala model`, not silently ignored.
 
 ## Web fetch vs. web search
 
@@ -59,7 +59,7 @@ Fetch activity shows up in `usage.server_tool_use` as `web_fetch_requests`, so y
 ## Common mistakes
 
 - **Expecting a fetch with no URL in the prompt.** Fetch mode triggers on explicit URLs. If there is no link in the message, there is nothing to fetch; use [web search](/features/server-side-tools/web-search) for query-driven retrieval instead.
-- **Enabling it on the wrong provider.** Web fetch needs an OpenRouter, NEAR, or Phala model. xAI serves web search but is not in the fetch set. The request is rejected rather than silently ignored.
+- **Enabling it on the wrong provider.** Web fetch needs an OpenRouter, NEAR, or Phala model. xAI serves web search but not web fetch, so a grok model rejects it with `web_fetch requires an OpenRouter, NEAR, or Phala model`. The request is rejected rather than silently ignored.
 - **Setting the feature twice in conflicting places.** Use either the top-level `web_fetch` field or the `tools` entry, not both, or the request returns `request body contains duplicate feature fields`.
 - **Assuming fetch can reach private or internal pages.** It retrieves public web content; do not rely on it for authenticated or intranet URLs.
 
