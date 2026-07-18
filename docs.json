@@ -25,8 +25,7 @@
             "pages": [
               "get-started/quickstart-60-seconds",
               "get-started/quickstart-openai-sdk",
-              "get-started/quickstart-anthropic-sdk",
-              "get-started/quickstart-curl"
+              "get-started/quickstart-anthropic-sdk"
             ]
           },
           {
@@ -47,7 +46,6 @@
             "group": "Models",
             "pages": [
               "models/index",
-              "models/overview",
               "models/all-models",
               "models/model-catalog",
               "models/model-id-convention",
@@ -149,11 +147,7 @@
             "pages": [
               "privacy/data-visibility",
               "privacy/data-retention/index",
-              "privacy/data-retention/metadata-only-default",
-              "privacy/data-retention/idempotency-replay",
-              "privacy/data-retention/governed-debug-capture",
-              "privacy/data-retention/tenant-saved-chat",
-              "privacy/data-retention/three-distinct-keys"
+              "privacy/data-retention/metadata-only-default"
             ]
           },
           {
@@ -694,5 +688,15 @@
       ]
     },
     "openapi": "nito.openapi.json"
-  }
+  },
+  "redirects": [
+    {
+      "source": "/models/overview",
+      "destination": "/models"
+    },
+    {
+      "source": "/get-started/quickstart-curl",
+      "destination": "/get-started/quickstart-60-seconds"
+    }
+  ]
 }

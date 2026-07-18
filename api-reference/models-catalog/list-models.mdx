@@ -82,46 +82,76 @@ Boolean flags describing what the model supports. The set includes (and is not l
 
 ### `pricing`
 
-Per-unit prices are expressed in nanos (billionths of a currency unit). The exact fields and units are deployment-driven.
+Per-unit prices are expressed in **nanos** (billionths of a currency unit). Divide any nanos value by `1e9` for the price in the currency; a `*_million_token_nanos` value ÷ `1e9` is the price per 1M tokens (e.g. `1500000000` → `$1.50`).
 
-> **TODO (needs SME):** the full `pricing` field set and unit definitions per model type (owner: Finance/Backend).
+| Field | Notes |
+|---|---|
+| `currency_code` | Currency for all amounts, e.g. `USD`. |
+| `unit` | Always `nanos`. |
+| `input_token_nanos` / `output_token_nanos` | Per-token input / output rate. |
+| `cache_read_input_token_nanos` / `cache_write_input_token_nanos` | Cached-input read / write rates. |
+| `reasoning_output_token_nanos` | Per-token rate for reasoning output. |
+| `image_output_nanos` | Per-image output rate (image models). |
+| `web_search_request_nanos` / `web_search_result_nanos` / `web_fetch_request_nanos` | Server-tool per-use rates. |
+| `input_million_token_nanos`, `output_million_token_nanos`, `cache_read_million_token_nanos`, `cache_write_million_token_nanos`, `reasoning_million_token_nanos` | Each token rate mirrored per 1M tokens, for convenience. |
+| `context_limit_tokens` | The model's context limit. |
+| `version` | Opaque price-version identifier. |
 
 ## Worked response
+
+A real anonymous-tier row (abbreviated description):
 
 ```json
 {
   "object": "list",
   "data": [
     {
-      "id": "grok-4.3",
+      "id": "google/gemini-3.5-flash",
       "object": "model",
-      "created": 1751299200,
-      "owned_by": "xai",
-      "display_name": "Grok 4.3",
-      "description": "General-purpose chat model.",
+      "created": 1779193800,
+      "owned_by": "google",
+      "display_name": "Google: Gemini 3.5 Flash",
+      "description": "Google's high-efficiency multimodal model...",
       "type": "chat",
+      "source": "frontier",
       "architecture": {
         "input_modalities": ["text", "image"],
-        "output_modalities": ["text"]
+        "output_modalities": ["text"],
+        "modality": "text+image->text"
       },
       "capabilities": {
         "supports_image_inputs": true,
         "supports_web_search": true,
-        "supports_code_interpreter": true,
-        "supports_reasoning": true
+        "supports_web_fetch": true,
+        "supports_reasoning": true,
+        "supports_code_interpreter": false,
+        "supports_attestable": false,
+        "supports_encrypted": false
       },
-      "context_window": 256000,
-      "pricing": { "...": "..." },
-      "free_tier_eligible": true,
-      "privacy_tier": "anon",
-      "attestation_available": false,
-      "encrypted_supported": false
+      "context_window": 1048576,
+      "pricing": {
+        "currency_code": "USD",
+        "unit": "nanos",
+        "input_token_nanos": 1500,
+        "output_token_nanos": 9000,
+        "cache_read_input_token_nanos": 150,
+        "cache_write_input_token_nanos": 84,
+        "reasoning_output_token_nanos": 9000,
+        "web_search_request_nanos": 5000000,
+        "web_search_result_nanos": 1000000,
+        "web_fetch_request_nanos": 1000000,
+        "input_million_token_nanos": 1500000000,
+        "output_million_token_nanos": 9000000000,
+        "context_limit_tokens": 1048576,
+        "version": "import-c3aaa9cfb6cf5374"
+      },
+      "privacy_tier": "anon"
     }
   ]
 }
 ```
 
-> **TODO (needs SME):** the values above are illustrative. Confirm a real catalog row, its `context_window`, and `pricing` shape (owner: Backend).
+Confidential and Encrypted models additionally carry `attestation_available`, `attestation_provider`, `attestation_subject`, and `encrypted_supported`, and their `id` ends in `:confidential` or `:encrypted`.
 
 ## Notes
 

@@ -16,7 +16,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="grok-4.3",                      # a Nito catalog ID, not an OpenAI name
+    model="x-ai/grok-4.5",                      # a Nito catalog ID, not an OpenAI name
     messages=[
         {"role": "user", "content": "Say hello in one short sentence."},
     ],
@@ -34,7 +34,7 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",                         // a Nito catalog ID
+  model: "x-ai/grok-4.5",                         // a Nito catalog ID
   messages: [
     { role: "user", content: "Say hello in one short sentence." },
   ],
@@ -59,7 +59,7 @@ Because privacy is chosen by the model ID, you opt into a stronger tier by addin
 
 ```python
 # TEE-backed execution with an attestation you can verify
-model="grok-4.3:confidential"
+model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and a model must support that tier. Use `GET /v1/models` to find models that support attestation. See [Per-call privacy modes](/privacy/per-call-privacy-modes).

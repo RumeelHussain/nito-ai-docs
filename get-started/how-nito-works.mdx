@@ -17,18 +17,25 @@ So the value is two-sided. Practically, you integrate once and reach many models
 
 ## The one-sentence version
 
-You send a familiar chat or embeddings request to Nito; the model ID you put in the request selects both the model and how private the call is; Nito routes, bills, and runs it; and for the highest tiers it gives you an attestation (a signed statement about the sealed environment that ran your call) that you can verify independently.
+You send a familiar chat request to Nito; the model ID you put in the request selects both the model and how private the call is; Nito routes, bills, and runs it; and for the highest tiers it gives you an attestation (a signed statement about the sealed environment that ran your call) that you can verify independently.
 
 Hold onto one idea from that sentence: **the model ID carries two decisions at once**, which model and how private. That is the hinge the whole product turns on, and we come back to it below.
 
 ## The request lifecycle
 
-> **Diagram placeholder (request lifecycle).** Show: client request to the gateway; authentication and rate-limit check; model and privacy-mode resolution from the model ID; billing hold placed; provider call inside the selected privacy boundary; response (streamed or whole) returned; hold captured on success or released on failure.
+```mermaid
+flowchart LR
+    A[Client request] --> B{Auth &<br/>rate-limit}
+    B -->|401 / 429| R([Rejected])
+    B -->|ok| C[Resolve model<br/>+ privacy] --> D[Route backend] --> E[Billing hold] --> F[Inference] --> G[Response] --> H{Completed?}
+    H -->|success| I([Capture hold])
+    H -->|failure| J([Release hold])
+```
 
 Here is what actually happens when you make a call, step by step. You only ever touch steps 1 and 2 directly; the rest is the gateway doing its job, but knowing them helps you reason about errors, cost, and latency.
 
 1. **Authentication.** You send your API key as a bearer token in the `Authorization` header. Nito looks it up, resolves it to your organization (the account that owns billing and keys), and rejects the request with `401` if the key is missing, malformed, revoked, or expired. This is also where rate limits are checked: if you are over a limit, you get `429` with a `Retry-After` header telling you how long to wait.
-2. **Model and privacy resolution.** Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode; `grok-4.3:confidential` asks for execution inside a Trusted Execution Environment; `grok-4.3:encrypted` asks for end-to-end encrypted TEE. Only `:confidential` and `:encrypted` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
+2. **Model and privacy resolution.** Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. `x-ai/grok-4.5` is ordinary mode; on a TEE-capable model, a suffix asks for a stronger mode, so `openai/gpt-oss-120b:confidential` asks for execution inside a Trusted Execution Environment and `openai/gpt-oss-120b:encrypted` asks for end-to-end encrypted TEE. Only `:confidential` and `:encrypted` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
 3. **Routing.** A single logical model can be served by more than one physical backend (the same model at different providers, or at different privacy tiers). Nito gathers the eligible backends and chooses one, filtering first by hard requirements (your privacy mode, the features you asked for, the inputs you sent) and then ordering what remains by availability and cost. The result is that you name one model and Nito quietly picks a healthy, eligible, cost-effective backend to run it.
 4. **Billing hold.** Before spending real money on a provider call, Nito places a hold against your credit balance, sized to the expected cost of the request. A hold is like the pre-authorization a hotel puts on a card at check-in: it reserves the funds without charging them yet. This guarantees you can pay for the work before it starts.
 5. **Inference.** Nito calls the chosen provider inside the privacy boundary you selected, and returns the result either as one complete response or as a stream of tokens (small incremental pieces) over a long-lived connection.
@@ -47,7 +54,7 @@ curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-Each entry includes the model `id` you pass back in a request, its `type` (chat, embedding, image), its `capabilities` (which features it supports), and its `privacy_tier`. One detail matters for how you write code: **the catalog is discovered from providers and kept current, not hard-coded.** Models are added and retired over time. So treat `GET /v1/models` as the live source of truth and select models by capability at runtime, rather than pasting a model name into your source and hoping it still exists next quarter.
+Each entry includes the model `id` you pass back in a request, its `type` (chat, image), its `capabilities` (which features it supports), and its `privacy_tier`. One detail matters for how you write code: **the catalog is discovered from providers and kept current, not hard-coded.** Models are added and retired over time. So treat `GET /v1/models` as the live source of truth and select models by capability at runtime, rather than pasting a model name into your source and hoping it still exists next quarter.
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
@@ -99,6 +106,6 @@ Knowing the boundaries prevents wrong assumptions:
 
 ## Next
 
-- Make a real call: [**60-second quickstart**](/get-started/quickstart-60-seconds).
+- Make a real call: [**Quickstart**](/get-started/quickstart-60-seconds).
 - Understand keys first: [**Authentication**](/get-started/authentication).
 - Go deep on the privacy dial: [**Privacy overview**](/privacy/overview).

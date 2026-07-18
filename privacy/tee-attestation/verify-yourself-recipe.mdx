@@ -16,17 +16,17 @@ NONCE=$(openssl rand -hex 32)
 echo "$NONCE"
 ```
 
-Never reuse a nonce. A fresh value per call is what makes gates 4 and 5 of the baseline meaningful (see [freshness and binding](/privacy/tee-attestation/freshness-binding)).
+Never reuse a nonce. A fresh value per call is what makes gates 4 and 5 of the baseline meaningful (see [the report-data binding](/privacy/tee-attestation/freshness-binding)).
 
 ## Step 2: Fetch the attestation
 
 ```bash
 curl -sS \
-  "https://nito.dev.zprotocol.org/api/v1/attestation?model=MODEL_ID:confidential&nonce=$NONCE" \
+  "https://nito.dev.zprotocol.org/api/v1/attestation?model=openai/gpt-oss-120b:confidential&nonce=$NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** the canonical production base URL and a concrete attestation-capable `MODEL_ID`. The code default is a local address; replace `https://nito.dev.zprotocol.org` and `MODEL_ID` once confirmed.
+> **TODO (needs SME):** `https://nito.dev.zprotocol.org` is the devnet URL; confirm the canonical production base URL before public launch. Fetch `GET /v1/models` for a current attestation-capable model.
 
 ## Step 3: Run the independent checks
 
@@ -49,8 +49,8 @@ import json
 import urllib.parse
 import urllib.request
 
-BASE_URL = "https://nito.dev.zprotocol.org"  # TODO: confirm canonical base URL
-MODEL = "MODEL_ID:confidential"                   # TODO: confirm an attestation-capable model
+BASE_URL = "https://nito.dev.zprotocol.org"  # devnet URL; confirm prod URL before launch
+MODEL = "openai/gpt-oss-120b:confidential"        # a confidential model; use GET /v1/models to pick another
 API_KEY = os.environ["NITO_API_KEY"]
 
 # Step 1: fresh nonce, 32 random bytes, hex-encoded.
@@ -98,14 +98,14 @@ Steps 1 through 3 give you a baseline-verified result. To get full assurance you
 
 ## Reference verifier
 
-Nito ships a reference verifier you can read and run: **`tools/tee-attestation-smoke`**. It generates a 32-byte nonce, calls the endpoint, and runs the same kind of independent checks described above: status 200, the envelope shape, TEE metadata, the nonce echo, evidence present, proof metadata, and the baseline `verified` flag. Use it as a worked example of the baseline checks, and as the starting point for layering your own hardware verification on top.
+Nito ships a reference verifier you can read and run: **`tools/attestation-smoke`**. It generates a 32-byte nonce, calls the endpoint, and runs the same kind of independent checks described above: status 200, the envelope shape, TEE metadata, the nonce echo, evidence present, proof metadata, and the baseline `verified` flag. Use it as a worked example of the baseline checks, and as the starting point for layering your own hardware verification on top.
 
-> **TODO (needs SME):** the exact invocation and any build step for the reference verifier (for example a `make` target), confirmed against the current repo (owner: Security).
+Run it with `make attestation-smoke` (or directly, `go run ./tools/attestation-smoke`); pass flags through the `ATTESTATION_SMOKE_ARGS` variable.
 
 ## Related
 
 - [TEE attestation overview](/privacy/tee-attestation)
 - [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
-- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+- [The report-data binding](/privacy/tee-attestation/freshness-binding)
 - [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)

@@ -24,7 +24,7 @@ Nito exposes a small, fixed set of public privacy modes. Internally these map on
 | `confidential` | `:confidential` suffix | Runs inside a Trusted Execution Environment, a hardware-isolated, sealed compute box. You can fetch an attestation and verify the call really ran there. |
 | `encrypted` | `:encrypted` suffix (plus encryption headers) | Adds client-side encryption on top of TEE, so the data is encrypted to the sealed environment itself. The strongest mode. Non-streaming, supported on NEAR and Phala only. |
 
-Note that you never type `:ordinary`, `:anon`, or `:private`. Those modes are reached by sending the plain model ID; the model's own tier decides whether a suffix-free call is ordinary or private. The **only** valid suffixes are `:confidential` and `:encrypted`. Anything else is rejected.
+Note that you never type `:ordinary`, `:anon`, or `:private`. Those modes are reached by sending the plain model ID; the model's own tier decides whether a suffix-free call is ordinary or private. The suffixes to use are `:confidential` and `:encrypted`.
 
 ## Metadata-only by default
 
@@ -32,7 +32,7 @@ Even an ordinary call is not a free-for-all. The gateway's default posture is **
 
 That default is the floor. The `private`, `confidential`, and `encrypted` modes build assurance on top of it. The precise contract, including what is and is not retained and how it is enforced upstream, is in [Zero data retention](/privacy/zero-data-retention).
 
-## Verifiable assurance, not "trust us"
+## Attested, not asserted
 
 The reason the TEE modes are different is that they replace a promise with something you can check. When a call runs inside a TEE, the provider produces an **attestation**: a signed statement about the sealed environment that ran the call. You can fetch that attestation and verify it independently. The result is **attested** and **verifiable**. We use those words deliberately, because the assurance rests on a proof you can check, not on an absence of trust.
 

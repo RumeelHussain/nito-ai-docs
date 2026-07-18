@@ -9,20 +9,18 @@ If you read only one thing, read the table. Everything else explains a cell in i
 
 ## The three columns
 
-| Data | What Nito (the gateway) sees | What the upstream provider sees | Never stored by the gateway |
-| --- | --- | --- | --- |
-| Your prompt / messages | Sees it in transit to route and serve the call; does not persist it | Serves the call, so it may see the prompt, subject to provider-side enforcement (`Store: false`, ZDR, or TEE) | Prompt bodies are request-local, not persisted |
-| The model's completion | Sees it in transit to return it to you; does not persist it | Produces it | Completion bodies are request-local, not persisted |
-| Reasoning / chain-of-thought | In transit only | Produces it | Not persisted |
-| Tool calls and tool arguments | In transit only | Sees what it needs to drive the tool | Not persisted |
-| Uploaded file contents | Parsed inline to serve the request, then discarded | Receives the parsed text as part of the prompt | File contents not persisted |
-| Operational metadata | Kept (the metadata-only default) | N/A | This is the one category that **is** kept |
-| Telemetry / traces | Kept, but restricted to a safe allowlist | N/A | Anything outside the allowlist is not captured |
-| Browser chat history | Not on the gateway; client-side only | Not seen | Lives in the browser, encrypted |
+| Data | What Nito Sees | What the provider sees | Stored by Nito? |
+| :--- | :--- | :--- | :---: |
+| Prompt / messages | In transit, to route and serve | Reads it to answer, under your mode's enforcement | No — request-local |
+| Model completion | In transit, to return it to you | Produces it | No — request-local |
+| Reasoning / chain-of-thought | In transit only | Produces it | No |
+| Tool calls and arguments | In transit only | Sees what it needs to run the tool | No |
+| Uploaded file contents | Parsed inline, then discarded | Receives the parsed text | No |
+| Operational metadata | Kept — the metadata-only default | — | **Yes** — metadata only |
+| Telemetry / traces | Kept — restricted to a safe allowlist | — | **Yes** — allowlisted |
+| Browser chat history | Not on the gateway | Not seen | No — client-side, encrypted |
 
-The shape to take away: the **left** column is deliberately thin (metadata and allowlisted telemetry only), the **middle** column is where your prompt actually gets read in order to be answered, and the **right** column is the long list of things the gateway treats as request-local and throws away.
-
-## What Nito (the gateway) sees
+## What Nito Sees
 
 Nito has to see your request to do its job. It reads your API key to authenticate you, reads the `model` field to resolve the model and privacy mode, routes the call, places a billing hold, and forwards the request to the chosen provider. While the request is in flight, the prompt, completion, reasoning, tool calls, and any parsed file contents pass through the gateway. That is unavoidable: a gateway that could not see a request could not route it.
 
@@ -54,7 +52,7 @@ These are request-local. They live only for as long as it takes to serve the req
 
 ## Browser chat history is a special case
 
-If you use a browser chat app built on Nito, you have a chat history, and it is reasonable to ask where it lives. It lives **on the client**. Chat history is stored client-side in encrypted IndexedDB, using a per-user key. The gateway does not hold a server-side copy of your conversations. The key derivation and what this means for retention are covered in [Tenant and saved-chat retention](/privacy/data-retention/tenant-saved-chat) and [Three secret roles](/privacy/data-retention/three-distinct-keys).
+If you use a browser chat app built on Nito, you have a chat history, and it is reasonable to ask where it lives. It lives **on the client**. Chat history is stored client-side in encrypted IndexedDB, using a per-user key. The gateway does not hold a server-side copy of your conversations.
 
 The practical consequence: clearing your browser storage clears the history, because there is no server-side conversation store to fall back to by default.
 

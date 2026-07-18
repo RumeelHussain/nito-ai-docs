@@ -3,7 +3,7 @@ title: "The Seven-Gate Baseline"
 description: "The exact pass-or-fail checks the Nito gateway runs over attestation evidence, enumerated, with the hardware-verification scope limit stated plainly."
 ---
 
-When the gateway fetches attestation evidence, it runs a fixed sequence of checks called the **baseline**, implemented in `verifyTEEAttestationBaseline`. The result is the `verified` flag in the [response](/privacy/tee-attestation/attestation-pipeline). This page enumerates the seven gates exactly, and then states, as plainly as possible, what the baseline is and is not.
+When the gateway fetches attestation evidence, it runs a fixed sequence of checks called the **baseline**, implemented in `verifyAttestationBaseline`. The result is the `verified` flag in the [response](/privacy/tee-attestation/attestation-pipeline). This page enumerates the seven gates exactly, and then states, as plainly as possible, what the baseline is and is not.
 
 The baseline is a **pass-or-fail contract**. Every gate that applies must pass for `verified` to be true. There is no partial credit and no scoring; a single failed gate means the evidence did not pass the baseline.
 
@@ -15,9 +15,9 @@ The baseline is a **pass-or-fail contract**. Every gate that applies must pass f
 
 **Gate 3: Proof metadata present.** The proof format, the signing algorithm, and the model public key must all be present in the evidence. Additionally, if you supplied a `signing_algo` query parameter, it must match the algorithm the evidence declares. A caller-supplied algorithm that disagrees with the evidence fails this gate.
 
-**Gate 4: Nonce match.** The nonce you supplied as the caller must match the nonce observed in the provider's evidence. This is the freshness check at the top level. (If you supplied no nonce, see the note on caller-driven anti-replay below and on the [freshness page](/privacy/tee-attestation/freshness-binding).)
+**Gate 4: Nonce match.** The nonce you supplied as the caller must match the nonce observed in the provider's evidence. This is the freshness check at the top level. (If you supplied no nonce, see the note on caller-driven anti-replay below and on [the report-data binding page](/privacy/tee-attestation/freshness-binding).)
 
-**Gate 5: Gateway report-data binding.** The gateway recomputes the report-data binding and checks that `report_data == signing_address + nonce`. It also checks that the observed signing address matches the requested address. This is the gate that ties the report to a specific signing identity and a specific nonce. The mechanics are detailed on the [freshness and binding page](/privacy/tee-attestation/freshness-binding).
+**Gate 5: Gateway report-data binding.** The gateway recomputes the report-data binding and checks that `report_data == signing_address + nonce`. It also checks that the observed signing address matches the requested address. This is the gate that ties the report to a specific signing identity and a specific nonce. The mechanics are detailed on [the report-data binding page](/privacy/tee-attestation/freshness-binding).
 
 **Gate 6: Nested model-attestation binding.** Beyond the gateway-level binding, the evidence carries a nested model attestation. The gateway checks the binding within it: the model ID, the algorithm, the model signing identity, the model public key, and the nonce. This is where the binding to the model itself (not just the gateway report) is validated. The address-only invariant that governs this gate is covered in [address-only model binding](/privacy/tee-attestation/address-only-model-binding).
 
@@ -39,14 +39,14 @@ These are exactly the checks that establish full hardware trust, and they are de
 
 So the precise meaning of `verified: true` is: **the evidence passed the gateway's baseline contract.** Read it as "baseline-verified," and layer the hardware verification on top yourself.
 
-## Anti-replay is caller-driven
+## Send a fresh nonce every time
 
-Gate 4 and gate 5 both depend on the nonce. Because there is no server-side nonce store, the freshness those gates provide is only as strong as the nonce you send. Supply a fresh random nonce on every request and the gates enforce that the evidence was produced for this request. Omit the nonce and an empty-binding report is permitted, which means you get no replay protection. This is why every recipe in this section starts by generating a fresh nonce. See [freshness and binding](/privacy/tee-attestation/freshness-binding) for the full treatment.
+Gate 4 and gate 5 both depend on the nonce. Because there is no server-side nonce store, the freshness those gates provide is only as strong as the nonce you send. Supply a fresh random nonce on every request and the gates enforce that the evidence was produced for this request. Omit the nonce and an empty-binding report is permitted, which means you get no replay protection. This is why every recipe in this section starts by generating a fresh nonce. See [the report-data binding](/privacy/tee-attestation/freshness-binding) for the full treatment.
 
 ## Related
 
 - [TEE attestation overview](/privacy/tee-attestation)
 - [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
-- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+- [The report-data binding](/privacy/tee-attestation/freshness-binding)
 - [Address-only model binding](/privacy/tee-attestation/address-only-model-binding)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)

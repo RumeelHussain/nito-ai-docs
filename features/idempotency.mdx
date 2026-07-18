@@ -1,72 +1,44 @@
 ---
-title: "Idempotency"
-description: "Send an Idempotency-Key so a retried request is not double-charged. The key flows into the billing authorization as a dedup key."
+title: "Safe retries"
+description: "How to retry a request safely on Nito: failed calls are not billed, and how to guarantee exactly-once at your layer."
 ---
 
-Networks fail in the worst possible way: your request reaches the gateway, runs, and then the connection drops before you see the response. You do not know whether it worked, so you retry. Idempotency exists to make that retry safe from a billing standpoint. You attach a key to the request, and that key flows into Nito's billing authorization so a retried request is not charged twice. This page is precise about what the key does, and equally precise about what it does not do, so you do not build on a guarantee that is not there.
+Networks fail in the worst possible way: your request reaches the gateway, runs, and then the connection drops before you see the response. You do not know whether it worked, so you retry. This page explains how to retry safely on Nito.
 
-## The header
+## Failed requests are not billed
 
-Idempotency is controlled by one request header:
+Nito places a billing hold before each call and captures it only when the call succeeds and produces usage. If a request fails before producing usage — a timeout, a dropped connection, a `5xx` — the hold is released and you are not charged. So retrying a failed request never costs you for the failed attempt. See [How Nito Works](/get-started/how-nito-works) for the hold-and-settle lifecycle.
 
-| Header | Required | Notes |
-| --- | --- | --- |
-| `Idempotency-Key` | No | Must be a **UUID**. A non-UUID value is rejected with `400` and the message `Idempotency-Key must be a UUID`. If you omit the header, the gateway generates a key for you. |
+## Retrying safely
 
-Because the gateway generates a key when you do not send one, every request already has an idempotency key internally. Sending your own is what makes a **retry** recognizable as the same logical request, since you control the value and can resend it.
+1. **Retry the failures that are actually retryable** — timeouts, dropped connections, `429`, `503` — with backoff. A failed attempt is not billed, so you only pay for the attempt that completes.
+2. **Be careful with a call that may have succeeded.** If a request completed on the server but the response was lost in transit, a blind retry will run and bill again. When you cannot tell, check state before retrying.
+3. **Guarantee exactly-once at your layer.** For an operation that must not run twice, track completion on your side — for example, a client-generated operation ID you record once the call succeeds and check before retrying.
 
-The header is honored across the main surfaces: chat, image generation, attachments, and billing. Wherever a request places a billing hold, the key rides along.
+## Example: retry with backoff
 
-## What the key actually does: billing dedup
+```python
+import time, httpx
 
-Be precise here, because the word "idempotency" promises a lot more than this implementation delivers.
-
-The `Idempotency-Key` is scoped to **billing deduplication**. It flows into the billing authorization as that authorization's idempotency key. The effect is that a retried request carrying the same key is recognized by the billing layer and is not authorized (and therefore not charged) a second time. That is the guarantee: **no double-charge on a retry that reuses the key.**
-
-What it is **not**: there is no observed server-side response-replay cache in the server layer. The gateway does not store the first response and return it verbatim for a later request with the same key. So a retry is protected from double-billing, but it is not guaranteed to return the byte-identical body of the original call. Do not assume a replay window.
-
-> **TODO (needs SME):** confirm there is no idempotency response-replay or retention window anywhere below the server layer (for example in SQL migrations). The scanned Go shows only billing dedup and no 24h replay window; the source of truth flags the "24h replay" claim as unconfirmed.
-
-Specifically, **do not claim or rely on a 24-hour replay window.** No such window was found in the code. The only 24-hour constants in the system are unrelated (token TTLs and daily resets).
-
-## Fusion derives per-subcall keys
-
-[Chat fusion](/features/multi-model-routing) makes several model calls from one request, each of which bills separately. To keep those subcalls deduplicated correctly, fusion derives a **deterministic per-subcall key from the base idempotency key**. So if you retry a fusion request with the same base key, each underlying model call lands on the same derived key as before, and none of them is double-charged. You do not manage this; you just send one `Idempotency-Key` on the fusion request and the derivation happens underneath.
-
-## Safe-retry patterns
-
-The whole point of an idempotency key is to let you retry confidently. The pattern:
-
-1. **Generate one UUID per logical operation, before the first attempt.** Not per network attempt, per operation. The retries of that operation all reuse the same UUID.
-2. **Send it on every attempt** of that operation as the `Idempotency-Key` header.
-3. **Retry on the failures that are actually retryable**, timeouts, dropped connections, `429`, `503`, with backoff. Because the key is constant across attempts, the billing layer recognizes the retry and will not charge you twice.
-4. **Do not reuse a key for a different operation.** A key identifies one logical request. A new operation gets a new UUID.
-
-Keep in mind the honest limitation above: the key protects your bill on retry, but it does not promise you the original response body back. Treat a successful retry as "the work was paid for once," and read the response you actually receive.
-
-## Example
-
-> **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
-
-```bash
-curl https://nito.dev.zprotocol.org/v1/chat/completions \
-  -H "Authorization: Bearer $NITO_API_KEY" \
-  -H "Content-Type: application/json" \
-  -H "Idempotency-Key: 3f9a1c2e-7b04-4d6a-9e21-6c8b5a0f1d23" \
-  -d '{
-    "model": "x-ai/grok-4.5",
-    "messages": [
-      {"role": "user", "content": "Summarize the request lifecycle in one sentence."}
-    ]
-  }'
+def call_with_retry(url, payload, headers, attempts=4):
+    for i in range(attempts):
+        try:
+            r = httpx.post(url, json=payload, headers=headers, timeout=60)
+            if r.status_code in (429, 500, 502, 503, 504):
+                raise httpx.HTTPStatusError("retryable", request=r.request, response=r)
+            r.raise_for_status()
+            return r.json()
+        except (httpx.TransportError, httpx.HTTPStatusError):
+            if i == attempts - 1:
+                raise
+            time.sleep(2 ** i)  # exponential backoff
 ```
 
-Generate the UUID once for this operation. If the call times out, resend the exact same request, including the same `Idempotency-Key`, and the billing layer will not authorize a second charge for it. A malformed key (anything that is not a UUID) returns `400 Idempotency-Key must be a UUID`.
+Each failed attempt releases its billing hold, so only the attempt that actually completes is charged.
 
 ## Related
 
-- [Chat Completions](/features/chat-completions)
-- [Multi-model routing (fusion)](/features/multi-model-routing)
-- [Prompt caching](/features/prompt-caching)
 - [How Nito Works](/get-started/how-nito-works)
+- [Chat Completions](/features/chat-completions)
 - [Error reference](/api-reference/errors-and-rate-limits/error-codes)
+- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)

@@ -11,7 +11,7 @@ Nito bills in credits, tracked internally in nanos (billionths of a unit) for pr
 
 ## Where to read per-model cost
 
-Pricing and context window are not on the model card by default. When pricing is configured for a model, its `GET /v1/models` entry carries a separate `pricing` object, joined from the billing system at response time. Its per-token rates are expressed in nanos and cover input and output tokens, cache read and write, the reasoning output rate, web search and fetch, and an image output rate, plus `context_limit_tokens` for the model's context limit. The object also carries `currency_code` (defaults to `USD`), `unit` (`nanos`), and a price `version`; and each per-token rate is mirrored as a `*_million_token_nanos` field (the rate per million tokens) for convenience. Read pricing from the entry so your estimates track the live configuration.
+Each model's `GET /v1/models` entry carries a `pricing` object (joined from the billing system at response time) alongside its `context_window`. Its per-token rates are expressed in nanos and cover input and output tokens, cache read and write, the reasoning output rate, web search and fetch, and an image output rate, plus `context_limit_tokens` for the model's context limit. The object also carries `currency_code` (defaults to `USD`), `unit` (`nanos`), and a price `version`; and each per-token rate is mirrored as a `*_million_token_nanos` field (the rate per million tokens) for convenience. Read pricing from the entry so your estimates track the live configuration.
 
 ```bash
 curl "https://nito.dev.zprotocol.org/v1/models" \
@@ -19,7 +19,7 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 # each entry includes a "pricing" object in nanos when configured
 ```
 
-> **TODO (needs SME):** confirm — there is no static price table to publish here; rates are configured live and read from each model's `pricing` object. All amounts are in `nanos` (billionths of the currency in `currency_code`, default `USD`), so divide by `1e9` for the value in dollars.
+Rates are configured live and read from each model's `pricing` object, so there is no canonical static price table — but the [Model list](/models/all-models) page publishes a **snapshot** with each model's input/output price per 1M tokens for a quick overview. All amounts are in `nanos` (billionths of the currency in `currency_code`, default `USD`): divide by `1e9` for the value in dollars, so a `*_million_token_nanos` rate ÷ `1e9` gives the price per 1M tokens (e.g. `170000000` → `$0.17`).
 
 ## Server-side tool pricing
 
@@ -38,6 +38,7 @@ A rough estimate for a text call is `input_tokens * input_rate + output_tokens *
 
 ## Related
 
+- [Model list](/models/all-models) — snapshot of every model with per-1M prices
 - [Check usage and credits](/get-started/check-usage-and-credits)
 - [Resources: Pricing](/resources/pricing)
 - [Tool pricing](/api-reference/server-tools/tool-pricing)

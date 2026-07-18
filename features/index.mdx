@@ -18,7 +18,7 @@ These are live on the gateway and documented in depth.
 - [**Reasoning**](/features/reasoning) ask a capable model to think first, with controls over effort and summary. Output arrives as `reasoning_details` plus a `reasoning_tokens` usage count.
 - [**Multimodal**](/features/multimodal) image input and PDF/document input alongside text, plus text-to-image generation as a separate endpoint.
 - [**Prompt caching**](/features/prompt-caching) pass provider cache directives (`prompt_cache_key`, `cache_control`) through to cut the cost of long, repeated prompt prefixes. Cache hits show up in `usage`.
-- [**Idempotency**](/features/idempotency) send an `Idempotency-Key` header (a UUID) so a retried request is not double-charged. Scoped to billing dedup.
+- [**Safe retries**](/features/idempotency) how to retry safely — failed calls are not billed, and how to guarantee exactly-once at your layer.
 
 Nito also now serves an **Anthropic Messages-compatible** endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`) and an **OpenAI Responses-compatible** endpoint at `POST /v1/responses` (and `/v1/responses/compact`). Each validates its native request shape and maps it into the gateway's canonical chat contracts. You can try them in the [API Playground](/api-playground). Full drop-in guidance is documented in a later pass.
 

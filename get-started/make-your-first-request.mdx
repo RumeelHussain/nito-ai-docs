@@ -16,7 +16,7 @@ curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [
       { "role": "system", "content": "You are a concise assistant." },
       { "role": "user", "content": "Name three benefits of private AI inference." }
@@ -32,7 +32,7 @@ from openai import OpenAI
 client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
 
 resp = client.chat.completions.create(
-    model="grok-4.3",
+    model="x-ai/grok-4.5",
     messages=[
         {"role": "system", "content": "You are a concise assistant."},
         {"role": "user", "content": "Name three benefits of private AI inference."},
@@ -50,7 +50,7 @@ import OpenAI from "openai";
 const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://nito.dev.zprotocol.org/v1" });
 
 const resp = await client.chat.completions.create({
-  model: "grok-4.3",
+  model: "x-ai/grok-4.5",
   messages: [
     { role: "system", content: "You are a concise assistant." },
     { role: "user", content: "Name three benefits of private AI inference." },
@@ -97,7 +97,7 @@ A few things worth understanding rather than memorizing:
   "id": "...",
   "object": "chat.completion",
   "created": 1751299200,
-  "model": "grok-4.3",
+  "model": "x-ai/grok-4.5",
   "choices": [
     {
       "index": 0,
@@ -129,7 +129,7 @@ Reading it field by field:
 To run the same request inside a Trusted Execution Environment (a TEE: a hardware-isolated, sealed compute box the host cannot inspect), add the `:confidential` suffix to the model, provided that model supports it:
 
 ```json
-{ "model": "grok-4.3:confidential", "messages": [ ... ] }
+{ "model": "openai/gpt-oss-120b:confidential", "messages": [ ... ] }
 ```
 
 Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:confidential` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation/get-attestation).

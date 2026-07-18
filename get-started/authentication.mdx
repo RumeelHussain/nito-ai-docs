@@ -23,7 +23,7 @@ Send the key as a bearer token in the `Authorization` header on every request:
 curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer z_sk_your_key_here" \
   -H "Content-Type: application/json" \
-  -d '{ "model": "grok-4.3", "messages": [{ "role": "user", "content": "Hi" }] }'
+  -d '{ "model": "x-ai/grok-4.5", "messages": [{ "role": "user", "content": "Hi" }] }'
 ```
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
@@ -46,7 +46,7 @@ Nito uses a small set of token types, each with a distinct prefix so you can tel
 For the HTTP API you almost always want a `z_sk_` organization API key. The CLI and MCP token types are issued by their own OAuth flows and are documented with those tools. Note what is not on this list: there is no `sk-` prefix and no bare `z_` token. If a credential does not start with one of the prefixes above, it is not a Nito token.
 
 <Note>
-  Tokens are stored as keyed hashes, never in plaintext. Specifically, the gateway stores `HMAC-SHA256(token, SESSION_SECRET)`, a keyed fingerprint, and never the raw token. It can verify a token you send but cannot retrieve the original. If you lose a key, you cannot recover it: revoke it and create a new one.
+  Tokens are stored as a one-way keyed hash, never in plaintext. The gateway can verify a token you send but cannot recover the original. If you lose a key, you cannot recover it: revoke it and create a new one.
 </Note>
 
 ## Accounts, organizations, and the wallet option

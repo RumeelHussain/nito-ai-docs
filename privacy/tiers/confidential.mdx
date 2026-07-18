@@ -5,11 +5,11 @@ description: "Sealed, hardware-isolated execution with an attestation you can fe
 
 Confidential is the third rung of the [privacy ladder](/privacy/tiers) and the first one backed by hardware you can check. It is the `confidential` tier, selected with the `:confidential` suffix on the model ID. It keeps the guarantees of the tiers below it and adds the one thing none of them can: your call runs inside a sealed environment, and you can obtain a signed statement that proves it did.
 
-## What a TEE is
+## Runs inside a TEE
 
-Confidential runs inside a **Trusted Execution Environment (TEE)** — a hardware-isolated, sealed compute environment. Code and data inside it are protected from the host machine: the operator running the hardware cannot peer into the computation. Crucially, the environment can produce an **attestation**, a signed statement about what is running inside it, which you can verify. Think of a TEE as a tamper-evident safe that runs your computation: the contents are shielded, and the safe can hand you a sealed receipt proving it was the thing that did the work.
+Confidential runs your call inside a **Trusted Execution Environment (TEE)** — a hardware-sealed environment the host cannot read into, which produces a signed **attestation** you can verify. New to the concept? Start with the [TEE primer](/privacy/tee-attestation/what-a-tee-is).
 
-That receipt is what separates Confidential from [Private](/privacy/tiers/private). Private holds the provider to zero-data-retention, but you take that on the provider's word. Confidential gives you an artifact you can independently check. What Confidential provides is attested and verifiable, and the gateway's verification is a baseline rather than full hardware verification (see below).
+That attestation is what separates Confidential from [Private](/privacy/tiers/private). Private holds the provider to zero-data-retention, but you take that on the provider's word. Confidential gives you an artifact you can independently check. What Confidential provides is attested and verifiable, and the gateway's verification is a baseline rather than full hardware verification (see below).
 
 ## What it requires
 
@@ -31,12 +31,12 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "MODEL-ID:confidential",
+    "model": "openai/gpt-oss-120b:confidential",
     "messages": [{"role": "user", "content": "Analyze this sensitive document."}]
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real model whose catalog entry shows `attestation_available: true`, and replace `https://nito.dev.zprotocol.org` with the canonical production base URL (code default is a local address).
+> **TODO (needs SME):** `https://nito.dev.zprotocol.org` is the devnet URL; confirm the canonical production base URL before public launch.
 
 `:confidential` is one of only two attested suffixes (the other is `:encrypted`). If the model does not support it, the call fails rather than quietly downgrading to a weaker tier.
 
@@ -49,11 +49,11 @@ A key reason to choose Confidential over [Encrypted](/privacy/tiers/encrypted): 
 The attestation is what makes Confidential verifiable. You fetch it from a dedicated endpoint:
 
 ```bash
-curl "https://nito.dev.zprotocol.org/api/v1/attestation?model=MODEL-ID&nonce=YOUR-NONCE" \
+curl "https://nito.dev.zprotocol.org/api/v1/attestation?model=openai/gpt-oss-120b:confidential&nonce=YOUR-NONCE" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real attestation-capable model, `YOUR-NONCE` with a fresh random nonce, and the base URL with the production value.
+> **TODO (needs SME):** `https://nito.dev.zprotocol.org` is the devnet URL; confirm the canonical production base URL before public launch. (`YOUR-NONCE` is a fresh random nonce you generate per request.)
 
 The gateway resolves the model to a physical attestation-capable backend, asks the provider for its attestation, and runs a **baseline verification** before returning. The baseline checks that the provider evidence is present and parseable, that the proof format and signing material are present, that your nonce matches the one observed from the provider, and that the report-data binding holds. It then returns the result, including the raw `evidence`, so you can perform **full client-side verification yourself**.
 

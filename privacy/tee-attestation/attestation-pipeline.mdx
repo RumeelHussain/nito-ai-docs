@@ -3,7 +3,7 @@ title: "The Attestation Pipeline"
 description: "The end-to-end flow of GET /api/v1/attestation, from query keys to every field in the response, with the baseline scope stated plainly."
 ---
 
-This page traces exactly what happens when you call `GET /api/v1/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [freshness binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
+This page traces exactly what happens when you call `GET /api/v1/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [the report-data binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
 
 ## The endpoint
 
@@ -21,7 +21,7 @@ The endpoint takes an allow-listed set of query keys. Only these keys are read; 
 | `signing_algo` | No | The signing algorithm you expect. If given, it must match what the evidence declares. |
 | `trust_tier` | No | Selects the tier: `""` or `confidential`, or `encrypted`. |
 
-Although the nonce is optional to the endpoint, supplying a fresh random nonce on every call is what gives you replay protection. Anti-replay is caller-driven and there is no server-side nonce store, so an omitted nonce is permitted but produces an empty-binding report. See [freshness binding](/privacy/tee-attestation/freshness-binding).
+Although the nonce is optional to the endpoint, supplying a fresh random nonce on every call is what gives you replay protection. Anti-replay is caller-driven and there is no server-side nonce store, so an omitted nonce is permitted but produces an empty-binding report. See [the report-data binding](/privacy/tee-attestation/freshness-binding).
 
 ## What the gateway does with the request
 
@@ -29,7 +29,7 @@ The flow is three stages.
 
 1. **Resolve the model.** The gateway takes the public `model` you sent and resolves it to a physical, attestation-capable model: a concrete provider plus provider-side model ID that actually supports attestation. If the model does not support attestation, there is nothing to attest.
 2. **Call the provider attestation client.** The gateway calls the resolved provider's attestation client to fetch the raw evidence. The provider (NEAR or Phala) returns its attestation report. How each provider frames the request differs, which is covered in [per-provider attestation](/privacy/tee-attestation/per-provider-attestation).
-3. **Run the baseline verifier.** The gateway runs `verifyTEEAttestationBaseline` over the evidence: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline). The outcome of that contract sets the `verified` flag in the response.
+3. **Run the baseline verifier.** The gateway runs `verifyAttestationBaseline` over the evidence: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline). The outcome of that contract sets the `verified` flag in the response.
 
 ## The response
 
@@ -39,11 +39,8 @@ A successful call returns a JSON object. Every field below is part of the docume
 | --- | --- |
 | `object` | Always the string `"attestation"`. |
 | `model` | The public model you asked to attest. |
-| `routed_model` | Optional. The physical model the request resolved to, when it differs from `model`. |
-| `provider` | The provider that produced the evidence. |
 | `provider_model_id` | The provider-side model identifier. |
 | `privacy_tier` | The stored tier for this model. |
-| `tee_provider` | The TEE provider backing the model. |
 | `attestation_available` | Whether attestation is available for this model. |
 | `attestation_subject` | Optional. The subject sent to the provider (a `domain` for NEAR, an `appid` for Phala). |
 | `verified` | The baseline result: did the seven-gate contract pass. |
@@ -73,6 +70,6 @@ This pipeline produces a **baseline-verified** result, not a fully verified one.
 
 - [TEE attestation overview](/privacy/tee-attestation)
 - [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
-- [Freshness and binding](/privacy/tee-attestation/freshness-binding)
+- [The report-data binding](/privacy/tee-attestation/freshness-binding)
 - [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)
 - [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)

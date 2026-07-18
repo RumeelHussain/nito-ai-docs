@@ -12,7 +12,7 @@ A lot of agent work needs nothing beyond the Nito gateway. Before reaching for a
 - **Tool calling**, so a model can request function calls your code executes. Note the gateway routes tool declarations, calls, and results but does not execute caller-defined functions for you. See [Tool calling](/features/tool-calling).
 - **Server-side tools** like web search and web fetch, invoked inline. See [Server-side tools](/features/server-side-tools).
 - **Selectable privacy per call** and **attested execution**, so agent workloads can run at the assurance level they need. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
-- **Idempotency** for safe retries on billing-sensitive calls. See [Idempotency](/features/idempotency).
+- **Safe retries** — failed calls are not billed. See [Safe retries](/features/idempotency).
 
 For many agents, that surface plus a good loop is enough.
 

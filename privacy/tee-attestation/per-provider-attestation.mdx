@@ -5,7 +5,7 @@ description: "How NEAR (domain-based) and Phala (appid-based) attestation differ
 
 Two providers back Nito's TEE modes, NEAR and Phala, and both produce attestation evidence through the same gateway pipeline. They differ in one structural way: how they identify the attestation **subject**. This page lays out the difference and the shared machinery, so you know what to expect in the [response](/privacy/tee-attestation/attestation-pipeline) for each.
 
-## First, what a "subject" is
+## The attestation subject
 
 When a TEE produces an attestation, the signed statement has to say _what_ it is vouching for. The **attestation subject** is that identity anchor: the name the proof is bound to, so you can confirm the evidence belongs to the workload you meant to run and not some other environment. Think of it as the name on a notarized document. The notary's stamp (the hardware signature) proves the document is genuine; the name on it tells you whose document it is. NEAR and Phala both stamp the document, but they write the name in different fields.
 
@@ -51,11 +51,11 @@ The subject for Phala is an **appid**, and it is **required**. A Phala attestati
 
 ## How this surfaces in the response
 
-In the [attestation response](/privacy/tee-attestation/attestation-pipeline), the `tee_provider` field tells you which provider produced the evidence, and the `attestation_subject` field (when present) carries the subject that was sent: a `domain` for NEAR, an `appid` for Phala. The `proof_format` field reflects the format declared in the evidence, which will default to the provider's format above unless the evidence specifies otherwise.
+In the [attestation response](/privacy/tee-attestation/attestation-pipeline), the `proof_format` field is what tells you which provider produced the evidence: it defaults to `near-attestation-report-v1` for NEAR and `redpill-attestation-report-v1` for Phala, unless the evidence specifies otherwise. The `attestation_subject` field (when present) carries the subject that was sent — a `domain` for NEAR, an `appid` for Phala.
 
 This per-provider distinction does not change the verification contract you run as a client. Whichever provider served the call, the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline) and the [verify-yourself path](/privacy/tee-attestation/verify-yourself-recipe) apply the same way. The subject naming is something to be aware of when you read the response, not a separate verification flow.
 
-> **TODO (needs SME):** confirmation of which public models map to NEAR versus Phala backends, and whether any model exposes both. The mapping is runtime-discovered, so there is no static list to publish here.
+Which provider backs a given model is reported per model as `attestation_provider` on its `GET /v1/models` entry (`near` or `phala`). Because that mapping is discovered from the providers at runtime, read the field rather than a static list. Each model carries exactly one `attestation_provider`, so no model is backed by both NEAR and Phala.
 
 ## Related
 

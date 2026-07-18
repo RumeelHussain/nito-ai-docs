@@ -3,7 +3,7 @@ title: "Introduction"
 description: "Nito is a private multi-LLM inference gateway. One key reaches many models, and you choose how private every single call is."
 ---
 
-Nito lets you use modern AI models the way you already do, with one important addition: privacy you can select per request. It is a single gateway that sits in front of many language and embedding models from several providers. You authenticate once, send a familiar request, and get back a familiar response. What changes is that you decide, on each call, how much protection that request gets, from lightweight routing up to execution inside a sealed, attested environment.
+Nito lets you use modern AI models the way you already do, with one important addition: privacy you can select per request. It is a single gateway that sits in front of many language models from several providers. You authenticate once, send a familiar request, and get back a familiar response. What changes is that you decide, on each call, how much protection that request gets, from lightweight routing up to execution inside a sealed, attested environment.
 
 If you are not an engineer, here is the short version. Most AI services see your prompts, keep some record of them, and ask you to trust that they will behave. Nito is built so that the most sensitive work can run in a way that is verifiable rather than merely promised, and so that by default the service keeps as little about your requests as possible. If you are an engineer, the short version is: it is an OpenAI- and Anthropic-compatible HTTP API with a privacy dial on every request and an attestation endpoint you can check yourself.
 
@@ -29,7 +29,7 @@ Three things define the product:
 
 ## The model ID carries two decisions
 
-Here is the single idea the rest of the docs hang on: **the model ID you send carries two decisions at once, which model and how private.** The base part of the ID selects the model. An optional suffix selects a stronger privacy mode. `grok-4.3` is ordinary mode. `grok-4.3:confidential` asks for execution inside a TEE. `grok-4.3:encrypted` asks for end-to-end encrypted TEE, the strongest mode. Only `:confidential` and `:encrypted` are valid suffixes, and there is no separate privacy field in the request body. If you want a different privacy mode, you change the model string and nothing else.
+Here is the single idea the rest of the docs hang on: **the model ID you send carries two decisions at once, which model and how private.** The base part of the ID selects the model. An optional suffix selects a stronger privacy mode. `x-ai/grok-4.5` is ordinary mode. On a TEE-capable model, a suffix selects a stronger mode: `openai/gpt-oss-120b:confidential` asks for execution inside a TEE, and `openai/gpt-oss-120b:encrypted` asks for end-to-end encrypted TEE, the strongest mode. Only `:confidential` and `:encrypted` are valid suffixes, and there is no separate privacy field in the request body. If you want a different privacy mode, you change the model string and nothing else.
 
 ## Principles
 
@@ -60,6 +60,6 @@ Knowing the boundaries prevents wrong assumptions:
 ## Where to go next
 
 - New to the model? Read [**How Nito Works**](/get-started/how-nito-works).
-- Want a response right now? Jump to the [**60-second quickstart**](/get-started/quickstart-60-seconds).
+- Want a response right now? Jump to the [**Quickstart**](/get-started/quickstart-60-seconds).
 - Care most about the privacy guarantees? Start with the [**Privacy overview**](/privacy/overview).
 - Have a specific question? Browse the [**FAQ**](/faq).

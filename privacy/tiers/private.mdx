@@ -21,7 +21,7 @@ What ZDR does **not** give you is a hardware-backed proof. Private is an enforce
 
 - **No upstream retention.** The provider is told not to keep the request, on top of the gateway's own metadata-only default.
 - **Inherits Anonymous.** Everything Anonymous gives you (metadata-only retention, `no-store` responses, client-side chat history) still holds.
-- **Privately served routing.** The call is placed on a backend configured for the private tier rather than ordinary anonymized routing.
+- **Privately served routing.** The call is placed on a backend configured for the private tier rather than ordinary anon-tier routing.
 
 ## How to select it
 
@@ -37,7 +37,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** replace `MODEL-ID` with a real `private`-tier model from `GET /v1/models`, and replace `https://nito.dev.zprotocol.org` with the canonical production base URL (code default is a local address).
+> **TODO (needs SME):** `https://nito.dev.zprotocol.org` is the devnet URL; confirm the canonical production base URL before public launch.
 
 To know whether a model is private, read its catalog entry and look at `privacy_tier`:
 
@@ -59,4 +59,4 @@ Choose Private for moderately sensitive work where the deciding factor is the pr
 - [Confidential](/privacy/tiers/confidential)
 - [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
 - [Privacy overview](/privacy/overview)
-- [Providers](/models/providers)
+- [Model providers](/models/providers)

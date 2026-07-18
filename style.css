@@ -1,0 +1,17 @@
+/* Content tables: visible borders and gridlines.
+   The aspen theme renders tables borderless by default; this restores
+   cell lines and an outer border. Neutral gray works in light + dark mode. */
+#content-area table {
+  border-collapse: collapse;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+}
+
+#content-area table th,
+#content-area table td {
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  padding: 0.5rem 0.75rem;
+}
+
+#content-area table thead th {
+  background-color: rgba(128, 128, 128, 0.08);
+}

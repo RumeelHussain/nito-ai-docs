@@ -1,13 +1,13 @@
 ---
 title: "Check usage and credits"
-description: "Read your balance and recent usage so you can confirm a call was billed and track spend."
+description: "Confirm what a call cost and track your balance. Per-call cost comes back in every response; balance and spend live in your dashboard."
 ---
 
-After your first successful call, the natural next question is: did that cost anything, and how much do I have left? This page shows how to read your credit balance and your recent usage, and explains how Nito bills a request so the numbers make sense. The short answer is that Nito prepays each call against your balance and then settles for what the call actually used, so understanding the hold-then-settle flow is the key to reading every number on this page.
+After your first successful call, the natural next question is: did that cost anything, and how much do I have left? Those are two questions with two sources. The **per-call cost** comes back in every API response, and your **balance and spend over time** live in your Nito dashboard.
 
 ## How billing works, briefly
 
-Nito bills in credits. Internally those credits are tracked in nanos, billionths of a credit, so that fractions of a cent's worth of tokens can be accounted for exactly without rounding error. You will see `nanos` in the API responses; it is just the precise unit underneath the human-facing credit.
+Nito bills in credits. Internally those credits are tracked in nanos, billionths of a credit, so that fractions of a cent's worth of tokens can be accounted for exactly without rounding error. You will see `nanos` in the numbers; it is just the precise unit underneath the human-facing credit.
 
 The flow around a single call has three steps:
 
@@ -15,49 +15,25 @@ The flow around a single call has three steps:
 2. **Settle.** When the call succeeds, the hold is captured for the actual usage, which may be less than the estimate. You are charged what the call really used.
 3. **Release.** If the request fails before producing any usage, the hold is released and you are not charged. This is exactly why a failed call does not cost you credits.
 
-Every successful response also includes a `usage` block (input tokens, output tokens, total). That is the per-call record. For account-level totals and balance, use the endpoints below.
+## What a call cost: the `usage` block
 
-## Why balance and usage are per organization
-
-Billing in Nito is owned by the organization, not the individual user or the individual key. (An organization is the account that owns billing and keys.) That single fact explains the shape of every endpoint here: balance and usage both take an org ID in the path, and there is no flat, account-wide balance or usage URL. If you keep "billing lives on the org" in mind, the endpoint design is predictable.
-
-You can find your org IDs from `GET /api/v1/orgs`.
-
-## Check your balance
-
-Read the balance from the org billing endpoint:
-
-```bash
-curl "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/billing/balance" \
-  -H "Authorization: Bearer $NITO_API_KEY"
-```
+Every successful chat response includes a `usage` block. This is your per-call record, available directly from the API with your `z_sk_` key — no extra request needed.
 
 ```json
-{ "available_nanos": "4250000000" }
+"usage": { "prompt_tokens": 28, "completion_tokens": 64, "total_tokens": 92 }
 ```
 
-`available_nanos` is your spendable balance in nanos, returned as a decimal string (not a number) to avoid precision loss in clients that would otherwise round large integers. To convert to whole credits, divide by 1,000,000,000. The example `"4250000000"` is 4.25 credits. An org that has no balance account yet returns `"0"`.
+`prompt_tokens` is input, `completion_tokens` is output, and `total_tokens` is the sum. Reasoning models also return `reasoning_tokens`, and when prompt caching applies you will see `cache_read_input_tokens` and `cache_write_input_tokens`. To turn tokens into a cost estimate, combine `usage` with the model's `pricing` object from `GET /v1/models`. See [Pricing](/models/pricing).
 
-> **TODO (needs SME):** the canonical production base URL (the code default is a local address), and the human-facing credit unit and conversion (what one credit is worth).
+## Balance and spend over time: your dashboard
 
-## Check recent usage
+Your credit balance and aggregated usage — totals, a daily breakdown, and a per-model breakdown — live in your **Nito dashboard**. These are organization-level views: billing in Nito is owned by the organization (the account that owns billing and keys), not the individual key.
 
-For a usage summary over a time window, use the org API overview:
+<Note>
+  Balance and usage-overview reads are authenticated with your **browser session**, not a `z_sk_` API key. Your API key is for inference; account billing views are read from the dashboard. There is no API-key-authenticated balance or usage-summary endpoint today.
+</Note>
 
-```bash
-curl "https://nito.dev.zprotocol.org/api/v1/orgs/$ORG_ID/api/overview?window_days=30" \
-  -H "Authorization: Bearer $NITO_API_KEY"
-```
-
-This returns aggregated totals plus a daily and a per-model breakdown, including requests, input and output tokens, cached tokens, reasoning tokens, web-search counts, and the customer charge in nanos. The `window_days` parameter sets how far back the window reaches: it defaults to 30 and accepts up to 365.
-
-Key fields:
-
-- **`all_time`** and **`current_window`** totals: `requests`, `input_tokens`, `output_tokens`, `reasoning_tokens`, `total_tokens`, `customer_charge_nanos`, and more. Use `current_window` for "spend in the last N days" and `all_time` for the lifetime figure.
-- **`daily[]`** per-day usage, including the top model that day.
-- **`models[]`** per-model usage, sorted by charge, so the most expensive model is easy to find.
-
-This overview is aggregated, not a transaction log. It is built for "how much did we use this month, and on what," not for listing individual requests.
+Balance is tracked in nanos (billionths of a credit); the dashboard converts it for display. If you ever handle a raw nanos value, divide by 1,000,000,000 (1e9) for whole credits — for example `4250000000` is 4.25 credits.
 
 ## Failed-request billing
 
@@ -70,11 +46,9 @@ See [Failed request billing behavior](/api-reference/usage-and-credits/failed-re
 
 ## Common mistakes
 
-- **Calling a flat balance URL.** Balance is per org: `GET /api/v1/orgs/{orgId}/billing/balance`. There is no account-wide variant.
-- **Treating nanos as whole credits.** `available_nanos` is in billionths. Divide by 1,000,000,000 (1e9) before showing it to a person.
-- **Parsing the balance as a number.** It is a decimal string. Keep it as a string or a big-decimal type so you do not lose precision.
-- **Expecting a real-time per-request ledger endpoint.** Use the response `usage` block for each call and the org overview for aggregates. There is no public per-transaction history endpoint.
-- **Expecting `X-RateLimit-*` headers.** Usage and balance reads have their own rate limits, and a `429` carries only `Retry-After`.
+- **Trying to read balance or usage with your API key.** The org balance and usage-overview endpoints are browser-session authenticated and reject a `z_sk_` key. Read them from the dashboard; read per-call cost from the response `usage` block.
+- **Treating nanos as whole credits.** Nanos are billionths. Divide by 1,000,000,000 (1e9) before showing a value to a person.
+- **Expecting a real-time per-request ledger.** Use the response `usage` block for each call and the dashboard for aggregates. There is no public per-transaction history endpoint.
 
 ## Notes
 
@@ -82,6 +56,6 @@ See [Failed request billing behavior](/api-reference/usage-and-credits/failed-re
 
 ## Related
 
-- [Get balance reference](/api-reference/usage-and-credits/get-balance)
-- [Get usage reference](/api-reference/usage-and-credits/get-usage)
+- [Pricing](/models/pricing)
+- [Safe retries](/features/idempotency) — why a failed call is not billed
 - [Funding and billing](/api-reference/funding-and-billing)

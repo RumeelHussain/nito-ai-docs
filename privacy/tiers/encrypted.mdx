@@ -42,7 +42,13 @@ Append `:encrypted` to the model ID **and** supply the `X-Z-ENCRYPTED-*` encrypt
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
-  -H "X-Z-ENCRYPTED-...: ..." \
+  -H "X-Z-ENCRYPTED: 1" \
+  -H "X-Z-ENCRYPTED-Client-Pub-Key: <client-public-key-hex>" \
+  -H "X-Z-ENCRYPTED-Model-Pub-Key: <model-public-key-hex>" \
+  -H "X-Z-ENCRYPTED-Signing-Algo: ed25519" \
+  -H "X-Z-ENCRYPTED-Encryption-Version: 2" \
+  -H "X-Z-ENCRYPTED-Nonce: <nonce>" \
+  -H "X-Z-ENCRYPTED-Timestamp: <unix-timestamp>" \
   -d '{
     "model": "MODEL-ID:encrypted",
     "stream": false,
@@ -50,7 +56,9 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   }'
 ```
 
-> **TODO (needs SME):** the exact `X-Z-ENCRYPTED-*` header names and the client-side encryption procedure (key exchange, payload format) are needed to make this a complete, runnable example. Replace `MODEL-ID` with a model whose entry shows `encrypted_supported: true`, and the base URL with the production value.
+The header names and their accepted values are code-verified (see [Per-call privacy modes](/privacy/per-call-privacy-modes) for the full table). What still needs documenting is the client-side encryption procedure — how you derive the client/model public keys and encrypt the payload for the enclave.
+
+> **TODO (needs SME):** the client-side encryption procedure (key exchange and payload format for the keys/nonce above) is needed for a fully runnable example. Replace `MODEL-ID` with a model whose entry shows `encrypted_supported: true`; `https://nito.dev.zprotocol.org` is the devnet URL — confirm the production base URL before launch.
 
 `:encrypted` is one of only two attested suffixes (the other is `:confidential`). If the model does not support end-to-end encryption, the call fails; a privacy mode never silently downgrades to a weaker tier.
 

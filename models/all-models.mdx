@@ -1,12 +1,12 @@
 ---
-title: "All models"
-description: "The full Nito model catalog at a glance — every model, grouped by privacy tier, with name, context window, and capabilities."
+title: "Model list"
+description: "The full Nito model list at a glance — every model, grouped by privacy tier, with context window, pricing, and capabilities."
 mode: "wide"
 ---
 
 Every model you can call on Nito, grouped by privacy tier. This is a **snapshot** — `GET /v1/models` is always the source of truth, since the catalog is discovered live and changes over time.
 
-<Note>Snapshot of **2026-07-16** · **41 models** (all chat). For the current list at any moment, call [`GET /v1/models`](/api-reference/models-catalog/list-models). Per-model **cost** is on each entry's `pricing` object, read live — see [Pricing](/models/pricing).</Note>
+<Note>Snapshot of **2026-07-18** · **41 models** (all chat). **Price /1M** is USD per 1M tokens, shown as **input · output**, read live from each model's `pricing` object. For the current list, call [`GET /v1/models`](/api-reference/models-catalog/list-models); see [Pricing](/models/pricing) for the full pricing object and cached-token rates.</Note>
 
 **Capabilities key:** `reasoning` step-by-step thinking · `vision` image input · `web` web search · `code` code interpreter · `attestable` supports a verifiable TEE attestation.
 
@@ -14,70 +14,70 @@ Every model you can call on Nito, grouped by privacy tier. This is a **snapshot*
 
 Standard routing, metadata-only retention. Call the model plain (no suffix).
 
-| Model ID | Name | Context | Capabilities |
-|---|---|--:|---|
-| `anthropic/claude-haiku-4-5` | Claude Haiku 4.5 | 200k | vision, web |
-| `anthropic/claude-haiku-4.5` | Anthropic: Claude Haiku 4.5 | 200k | reasoning, vision, web |
-| `anthropic/claude-opus-4.8` | Anthropic: Claude Opus 4.8 | 1000k | reasoning, vision, web |
-| `anthropic/claude-sonnet-5` | Anthropic: Claude Sonnet 5 | 1000k | reasoning, vision, web |
-| `google/gemini-3.1-flash-lite` | Google: Gemini 3.1 Flash Lite | 1048k | reasoning, vision, web |
-| `google/gemini-3.1-pro-preview` | Google: Gemini 3.1 Pro Preview | 1048k | reasoning, vision, web |
-| `google/gemini-3.5-flash` | Google: Gemini 3.5 Flash | 1048k | reasoning, vision, web |
-| `openai/gpt-5.3-codex` | OpenAI: GPT-5.3-Codex | 400k | reasoning, vision, web |
-| `openai/gpt-5.4-mini` | OpenAI: GPT-5.4 Mini | 400k | reasoning, vision, web |
-| `openai/gpt-5.5` | OpenAI: GPT-5.5 | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-luna` | OpenAI: GPT-5.6 Luna | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-luna-pro` | OpenAI: GPT-5.6 Luna Pro | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-sol` | OpenAI: GPT-5.6 Sol | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-sol-pro` | OpenAI: GPT-5.6 Sol Pro | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-terra` | OpenAI: GPT-5.6 Terra | 1050k | reasoning, vision, web |
-| `openai/gpt-5.6-terra-pro` | OpenAI: GPT-5.6 Terra Pro | 1050k | reasoning, vision, web |
-| `openai/o3` | OpenAI o3 | 200k | vision, web |
-| `phala/gemma-4-26b-a4b-uncensored` | Phala: Gemma-4 26B-A4B Uncensored (Heretic) | 65k | vision, web |
-| `phala/qwen3.6-35b-a3b-uncensored` | Phala: Qwen3.6 35B-A3B Uncensored (Aggressive) | 131k | vision, web |
-| `qwen/qwen3.7-max` | Qwen3.7 Max | 1000k | web |
+| No. | Model ID | Context | Price /1M | Capabilities |
+|--:|---|--:|--:|---|
+| 1 | `anthropic/claude-haiku-4-5` | 200k | \$1.00 · \$5.00 | reasoning, vision, web |
+| 2 | `anthropic/claude-haiku-4.5` | 200k | \$1.00 · \$5.00 | reasoning, vision, web |
+| 3 | `anthropic/claude-opus-4.8` | 1000k | \$5.00 · \$25.00 | reasoning, vision, web |
+| 4 | `anthropic/claude-sonnet-5` | 1000k | \$2.00 · \$10.00 | reasoning, vision, web |
+| 5 | `google/gemini-3.1-flash-lite` | 1048k | \$0.25 · \$1.50 | reasoning, vision, web |
+| 6 | `google/gemini-3.1-pro-preview` | 1048k | \$2.00 · \$12.00 | reasoning, vision, web |
+| 7 | `google/gemini-3.5-flash` | 1048k | \$1.50 · \$9.00 | reasoning, vision, web |
+| 8 | `openai/gpt-5.3-codex` | 400k | \$1.75 · \$14.00 | reasoning, vision, web |
+| 9 | `openai/gpt-5.4-mini` | 400k | \$0.75 · \$4.50 | reasoning, vision, web |
+| 10 | `openai/gpt-5.5` | 1050k | \$5.00 · \$30.00 | reasoning, vision, web |
+| 11 | `openai/gpt-5.6-luna` | 1050k | \$1.00 · \$6.00 | reasoning, vision, web |
+| 12 | `openai/gpt-5.6-luna-pro` | 1050k | \$1.00 · \$6.00 | reasoning, vision, web |
+| 13 | `openai/gpt-5.6-sol` | 1050k | \$5.00 · \$30.00 | reasoning, vision, web |
+| 14 | `openai/gpt-5.6-sol-pro` | 1050k | \$5.00 · \$30.00 | reasoning, vision, web |
+| 15 | `openai/gpt-5.6-terra` | 1050k | \$2.50 · \$15.00 | reasoning, vision, web |
+| 16 | `openai/gpt-5.6-terra-pro` | 1050k | \$2.50 · \$15.00 | reasoning, vision, web |
+| 17 | `openai/o3` | 200k | \$2.00 · \$8.00 | reasoning, vision, web |
+| 18 | `phala/gemma-4-26b-a4b-uncensored` | 65k | \$0.15 · \$0.70 | vision, web |
+| 19 | `phala/qwen3.6-35b-a3b-uncensored` | 131k | \$0.30 · \$1.50 | vision, web |
+| 20 | `qwen/qwen3.7-max` | 1000k | \$2.80 · \$7.50 | reasoning, web |
 
 ## Private (7)
 
 Zero-data-retention enforced upstream. Call the model plain (no suffix).
 
-| Model ID | Name | Context | Capabilities |
-|---|---|--:|---|
-| `minimax/minimax-m3` | MiniMax: MiniMax M3 | 1048k | reasoning, vision, web |
-| `nousresearch/hermes-4-405b` | Nous: Hermes 4 405B | 131k | reasoning, web |
-| `nvidia/nemotron-3-ultra-550b-a55b` | NVIDIA: Nemotron 3 Ultra | 1000k | reasoning, web |
-| `qwen/qwen3-235b-a22b-2507` | Qwen: Qwen3 235B A22B Instruct 2507 | 262k | reasoning, web |
-| `qwen/qwen3-coder` | Qwen: Qwen3 Coder 480B A35B | 1048k | reasoning, web |
-| `qwen/qwen3-vl-235b-a22b-instruct` | Qwen: Qwen3 VL 235B A22B Instruct | 131k | reasoning, vision, web |
-| `x-ai/grok-4.5` | xAI: Grok 4.5 | 500k | reasoning, vision, web |
+| No. | Model ID | Context | Price /1M | Capabilities |
+|--:|---|--:|--:|---|
+| 1 | `minimax/minimax-m3` | 1048k | \$0.30 · \$1.20 | reasoning, vision, web |
+| 2 | `nousresearch/hermes-4-405b` | 131k | \$1.00 · \$3.00 | reasoning, web |
+| 3 | `nvidia/nemotron-3-ultra-550b-a55b` | 1000k | \$0.00 · \$0.00 | reasoning, web |
+| 4 | `qwen/qwen3-235b-a22b-2507` | 262k | \$0.09 · \$0.55 | reasoning, web |
+| 5 | `qwen/qwen3-coder` | 1048k | \$0.30 · \$1.00 | reasoning, web |
+| 6 | `qwen/qwen3-vl-235b-a22b-instruct` | 131k | \$0.21 · \$1.90 | reasoning, vision, web |
+| 7 | `x-ai/grok-4.5` | 500k | \$2.00 · \$6.00 | reasoning, vision, web |
 
 ## Confidential (7)
 
 Runs in a sealed, attestable environment. Append `:confidential`.
 
-| Model ID | Name | Context | Capabilities |
-|---|---|--:|---|
-| `deepseek-ai/deepseek-v4-flash:confidential` | DeepSeek V4 Flash | 1048k | web, attestable |
-| `google/gemma-4-31b-it:confidential` | Gemma 4 31B Instruct | 262k | vision, web, attestable |
-| `moonshotai/kimi-k2.6:confidential` | Kimi K2.6 | 262k | vision, web, attestable |
-| `openai/gpt-oss-120b:confidential` | GPT OSS 120B | 131k | web, attestable |
-| `qwen/qwen3-vl-30b-a3b-instruct:confidential` | Qwen3-VL-30B-A3B-Instruct | 16k | vision, web, attestable |
-| `qwen/qwen3.5-397b-a17b:confidential` | qwen3.5-397b-a17b | 128k | web, attestable |
-| `z-ai/glm-5.2:confidential` | GLM 5.2 | 1048k | web, attestable |
+| No. | Model ID | Context | Price /1M | Capabilities |
+|--:|---|--:|--:|---|
+| 1 | `deepseek-ai/deepseek-v4-flash:confidential` | 1048k | \$0.17 · \$0.35 | reasoning, web, attestable |
+| 2 | `google/gemma-4-31b-it:confidential` | 262k | \$0.13 · \$0.40 | reasoning, vision, web, attestable |
+| 3 | `moonshotai/kimi-k2.6:confidential` | 262k | \$0.81 · \$3.85 | reasoning, vision, web, attestable |
+| 4 | `openai/gpt-oss-120b:confidential` | 131k | \$0.15 · \$0.55 | reasoning, web, attestable |
+| 5 | `qwen/qwen3-vl-30b-a3b-instruct:confidential` | 16k | \$0.15 · \$0.55 | reasoning, vision, web, attestable |
+| 6 | `qwen/qwen3.5-397b-a17b:confidential` | 128k | \$0.50 · \$3.30 | reasoning, web, attestable |
+| 7 | `z-ai/glm-5.2:confidential` | 1048k | \$1.40 · \$4.40 | reasoning, web, attestable |
 
 ## Encrypted (7)
 
 End-to-end encrypted to the sealed environment. Append `:encrypted`; non-streaming.
 
-| Model ID | Name | Context | Capabilities |
-|---|---|--:|---|
-| `deepseek-ai/deepseek-v4-flash:encrypted` | DeepSeek V4 Flash | 1048k | attestable |
-| `google/gemma-4-31b-it:encrypted` | Gemma 4 31B Instruct | 262k | attestable |
-| `moonshotai/kimi-k2.6:encrypted` | Kimi K2.6 | 262k | attestable |
-| `openai/gpt-oss-120b:encrypted` | GPT OSS 120B | 131k | attestable |
-| `qwen/qwen3-vl-30b-a3b-instruct:encrypted` | Qwen3-VL-30B-A3B-Instruct | 16k | attestable |
-| `qwen/qwen3.5-397b-a17b:encrypted` | qwen3.5-397b-a17b | 128k | attestable |
-| `z-ai/glm-5.2:encrypted` | GLM 5.2 | 1048k | attestable |
+| No. | Model ID | Context | Price /1M | Capabilities |
+|--:|---|--:|--:|---|
+| 1 | `deepseek-ai/deepseek-v4-flash:encrypted` | 1048k | \$0.17 · \$0.35 | reasoning, attestable |
+| 2 | `google/gemma-4-31b-it:encrypted` | 262k | \$0.13 · \$0.40 | reasoning, attestable |
+| 3 | `moonshotai/kimi-k2.6:encrypted` | 262k | \$0.81 · \$3.85 | reasoning, attestable |
+| 4 | `openai/gpt-oss-120b:encrypted` | 131k | \$0.15 · \$0.55 | reasoning, attestable |
+| 5 | `qwen/qwen3-vl-30b-a3b-instruct:encrypted` | 16k | \$0.15 · \$0.55 | reasoning, attestable |
+| 6 | `qwen/qwen3.5-397b-a17b:encrypted` | 128k | \$0.50 · \$3.30 | reasoning, attestable |
+| 7 | `z-ai/glm-5.2:encrypted` | 1048k | \$1.40 · \$4.40 | reasoning, attestable |
 
 ## Fetch the live catalog
 

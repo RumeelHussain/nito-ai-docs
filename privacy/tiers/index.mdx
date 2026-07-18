@@ -5,16 +5,16 @@ description: "The four privacy tiers as a ladder, how to select each one, and wh
 
 Nito lets you choose how private each call is, and you make that choice per request rather than once for your whole account. The brief version lives in [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance). This section is the authoritative reference: one page per tier, going deeper into what each one protects, how you select it, and the trade-offs you accept when you pick it.
 
-## A ladder, not a switch
+## Each tier builds on the last
 
 Read the four tiers as a ladder. Each rung adds a stronger guarantee and, in exchange, narrows the set of models and features available to you. You climb only as high as a given call needs.
 
-| Tier | `privacy_tier` value | How you select it | The core guarantee it adds |
-| --- | --- | --- | --- |
-| **Anonymous** | `anon` | the model ID, no suffix | Anonymized routing; metadata-only retention by default |
-| **Private** | `private` | the model ID, no suffix (the model's tier decides) | No upstream retention (zero-data-retention enforced at the provider) |
-| **Confidential** | `confidential` | `model:confidential` | Sealed, hardware-isolated execution with an attestation you can verify |
-| **Encrypted** | `encrypted` | `model:encrypted` plus encryption headers | Client-side encryption of your data to the sealed environment, on top of Confidential |
+| Tier | `privacy_tier` | Select with | Core guarantee it adds |
+| :--- | :---: | :--- | :--- |
+| **Anonymous** | `anon` | plain model ID | Metadata-only retention by default |
+| **Private** | `private` | plain model ID · private-tier | Zero-data-retention enforced upstream |
+| **Confidential** | `confidential` | `model:confidential` | Sealed TEE execution with a verifiable attestation |
+| **Encrypted** | `encrypted` | `model:encrypted` + headers | Client-side encryption to the sealed enclave |
 
 Each higher tier keeps the guarantees of the ones below it and adds its own. Confidential runs inside a Trusted Execution Environment that you can attest; Encrypted keeps that sealed execution and additionally encrypts your data to it.
 
@@ -28,7 +28,7 @@ The four tiers — Anonymous, Private, Confidential, Encrypted — are the canon
 
 `:confidential` and `:encrypted` are the canonical suffixes. There is no separate `tier` field in the request body; you change the privacy of a call by changing the model string, nothing else.
 
-## Support is per model, so read the catalog entry
+## Which tiers a model offers
 
 No model supports every tier. Which rungs of the ladder a given model offers is reported on its catalog entry from `GET /v1/models`, and the practical rule is always the same: read the model entry, then choose the tier the model supports.
 
@@ -38,7 +38,14 @@ No model supports every tier. Which rungs of the ladder a given model offers is 
 
 A privacy mode never silently downgrades. If you append `:confidential` to a model that has no TEE backend, the call is rejected rather than served at a weaker tier. A guarantee that quietly weakens is worse than no guarantee, so the gateway refuses instead.
 
-> **Diagram placeholder (privacy tier flow).** Show the four tiers as a ladder from Anonymous to Encrypted: for each rung, the `privacy_tier` value (`anon` / `private` / `confidential` / `encrypted`), the selector (no suffix, no suffix, `:confidential`, `:encrypted` \+ headers), the guarantee it adds, and the catalog field that gates it (`privacy_tier`, `attestation_available`, `encrypted_supported`). Mark each higher rung as inheriting the guarantees below it.
+```mermaid
+flowchart TD
+    A["1 · Anonymous<br/>privacy_tier: anon · no suffix<br/>metadata-only retention"] --> P["2 · Private<br/>privacy_tier: private · no suffix<br/>+ zero-data-retention upstream"]
+    P --> C["3 · Confidential<br/>attestation_available · :confidential<br/>+ sealed TEE execution you can attest"]
+    C --> E["4 · Encrypted<br/>encrypted_supported · :encrypted + headers<br/>+ client-side encryption to the enclave"]
+```
+
+_Each rung keeps the guarantees of the rungs below it and adds its own. Support is decided per model — read `privacy_tier`, `attestation_available`, and `encrypted_supported` on the catalog entry, then choose the tier the model offers._
 
 ## How to read the rest of this section
 

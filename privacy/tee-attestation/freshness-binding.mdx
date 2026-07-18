@@ -1,5 +1,5 @@
 ---
-title: "Freshness and Binding"
+title: "The Report-Data Binding"
 description: "How report_data = signing_address + nonce is recomputed and compared, why anti-replay is caller-driven, and why reports are never persisted."
 ---
 
@@ -26,7 +26,7 @@ The gateway does two separate things, and it is worth keeping them distinct.
 
 Both must hold. Together they establish that the report was produced for a request carrying your nonce and committed to the expected signing address.
 
-## Anti-replay is caller-driven
+## Send a fresh nonce every time
 
 Here is the part a security reviewer must not miss. **There is no server-side nonce store.** The gateway does not remember nonces it has seen, and it does not reject a nonce for having been used before. The freshness guarantee comes entirely from you choosing a fresh, unpredictable nonce on every request.
 

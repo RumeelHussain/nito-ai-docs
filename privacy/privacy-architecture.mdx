@@ -1,36 +1,57 @@
 ---
 title: "Privacy Architecture"
-description: "Where privacy is enforced at each hop, from request through inference to billing. Auth, mode resolution, routing, provider boundary, metadata-only logging."
+description: "Where privacy is enforced at each stage, from request through inference to billing. Auth, mode resolution, routing, provider boundary, metadata-only logging."
 ---
 
-The [Privacy overview](/privacy/overview) makes the promises. This page shows how they are kept. It follows a single request from the moment it arrives at the gateway to the moment it is billed, and it points at the exact hop where each privacy property is enforced. The theme throughout: privacy is not a single switch flipped in one place; it is a sequence of constraints applied at every hop, so that a request cannot reach a provider in a weaker mode than you asked for.
+The [Privacy overview](/privacy/overview) makes the promises. This page shows how they are kept. It follows a single request from the moment it arrives at the gateway to the moment it is billed, and it points at the exact stage where each privacy property is enforced. The theme throughout: privacy is not a single switch flipped in one place; it is a sequence of constraints applied at every stage, so that a request cannot reach a provider in a weaker mode than you asked for.
 
-> **Diagram placeholder (privacy architecture).** Show: client request entering the gateway; the auth hop resolving the API key to an organization; the model/mode resolution hop parsing the `model` string into a model and a privacy mode; the routing hop selecting an eligible backend under a privacy filter (rejecting, never downgrading); the provider call hop drawn inside the chosen privacy boundary, with provider-side enforcement labelled (xAI `Store:false`, OpenRouter ZDR data policy, NEAR/Phala TEE with attestation); a metadata-only logging hop drawn as a side channel that captures allowlisted telemetry but not prompts/completions; the billing hop placing and settling a hold from usage metadata only. Highlight that the privacy mode is fixed at resolution and enforced at routing and at the provider boundary. Marked TODO for design.
+<Steps>
+  <Step title="Stage 1 · Authentication">
+    Your API key is resolved to an organization to bill and rate-limit against. The request body — your prompt — isn't touched yet.
+  </Step>
+  <Step title="Stage 2 · Resolution">
+    The `model` string is parsed into a model and a privacy mode. **The privacy mode is fixed here** and nothing downstream can promote or demote it.
+  </Step>
+  <Step title="Stage 3 · Routing">
+    The router filters to backends that can honor the mode — a hard requirement. If none qualify, the call **fails**; it never downgrades. Only then does it order by availability and cost.
+  </Step>
+  <Step title="Stage 4 · Execution">
+    The provider runs the call inside the chosen privacy boundary, enforced concretely: xAI `Store: false`, OpenRouter ZDR data policy, NEAR/Phala TEE + attestation, FAL `X-Fal-Store-IO: 0`.
+  </Step>
+  <Step title="Stage 5 · Observability">
+    Alongside the request (not in its path), logging captures allowlisted telemetry only — never prompts or completions — and responses carry `Cache-Control: no-store`.
+  </Step>
+  <Step title="Stage 6 · Settlement">
+    Billing places a hold before the call and settles it against actual usage after — from token counts and request shape, never your content.
+  </Step>
+</Steps>
 
-## Hop 1: Authentication
+_The privacy mode is **fixed at resolution** (stage 2) and enforced as a hard filter at **routing** (stage 3) and at the **provider boundary** (stage 4). Logging and billing see usage metadata only, never prompts or completions._
 
-Every request begins with authentication. You send your API key as a bearer token in the `Authorization` header; the gateway resolves it to your organization (the account that owns billing and keys) or rejects the request. From a privacy standpoint the relevant fact is what this hop establishes: an identity to bill and rate-limit against. The credential itself is never stored in raw form (tokens are stored as HMAC-SHA256 hashes), and the request body, your prompt, is not touched yet. Nothing about the prompt's contents influences authentication.
+## Stage 1: Authentication
 
-## Hop 2: Model and privacy-mode resolution
+Every request begins with authentication. You send your API key as a bearer token in the `Authorization` header; the gateway resolves it to your organization (the account that owns billing and keys) or rejects the request. From a privacy standpoint the relevant fact is what this stage establishes: an identity to bill and rate-limit against. The credential itself is never stored in raw form (tokens are stored as HMAC-SHA256 hashes), and the request body, your prompt, is not touched yet. Nothing about the prompt's contents influences authentication.
+
+## Stage 2: Resolution
 
 This is where the privacy mode is decided, and it is decided **once**. The gateway parses the `model` string. The base part selects the model; an optional `:confidential` or `:encrypted` suffix selects a stronger mode. A model sent with no suffix resolves to ordinary or private according to that model's stored tier. Any suffix other than `:confidential` or `:encrypted` is rejected here, before routing.
 
-The output of this hop is a fixed privacy mode for the rest of the request's life. Nothing downstream can promote or demote it. If you asked for `:encrypted`, this is also where the gateway checks that the `X-Z-ENCRYPTED-*` encryption headers are present and that the request is non-streaming; if those constraints are not met, the request is rejected at this stage rather than served in a weaker form.
+The output of this stage is a fixed privacy mode for the rest of the request's life. Nothing downstream can promote or demote it. If you asked for `:encrypted`, this is also where the gateway checks that the `X-Z-ENCRYPTED-*` encryption headers are present and that the request is non-streaming; if those constraints are not met, the request is rejected at this stage rather than served in a weaker form.
 
-## Hop 3: Routing under the privacy filter
+## Stage 3: Routing
 
 A single logical model can be served by more than one physical backend (the same model at different providers or at different privacy tiers). The router gathers the eligible backends and chooses one, but it filters **first by hard requirements**, and the privacy mode is a hard requirement. A `:confidential` request is filtered down to TEE-capable backends only; a `private`-tier request sets `RequireZeroDataRetention`, which in turn drives provider-side ZDR.
 
 The load-bearing property here is the refusal to downgrade. If the privacy filter leaves zero eligible backends, the call **fails**. It does not fall back to a backend that cannot honor the mode. Only after the privacy filter is satisfied does the router order what remains by availability and cost. So routing optimizes for cost and health, but never at the expense of the privacy mode.
 
-## Hop 4: The provider call, inside the chosen boundary
+## Stage 4: Execution
 
 Once a backend is chosen, the gateway calls the provider inside the privacy boundary the mode requires, and each provider enforces privacy in its own way:
 
 | Provider | Privacy enforcement at the boundary |
 | --- | --- |
 | xAI (Grok) | `Store: false` is forced on every request, so the upstream is told not to retain the exchange. |
-| OpenRouter | A zero-data-retention data policy is applied when the route requires it. It is relaxed only when OpenRouter server-side web tools are used; embeddings and images force ZDR regardless. Models without a ZDR policy are never imported. |
+| OpenRouter | A zero-data-retention data policy is applied when the route requires it. It is relaxed only when OpenRouter server-side web tools are used; image routes force ZDR regardless. Models without a ZDR policy are never imported. |
 | NEAR | Runs in a TEE; produces a domain-based attestation. Supports the end-to-end encrypted path. |
 | Phala | Runs in a TEE; produces an appid-based attestation. Supports the end-to-end encrypted path. |
 | FAL (images) | `X-Fal-Store-IO: 0` is sent so the upstream does not store image inputs or outputs. |
@@ -49,25 +70,25 @@ For `:confidential` and `:encrypted` calls, the sealed environment produces a si
 6. The nested model-attestation binding holds (model ID, algorithm, model signing identity, public key, nonce).
 7. The nested JSON payload nonce for GPU envelopes is checked.
 
-What this hop deliberately does **not** do is verify the full hardware quote: no Intel TDX quote validation, no NVIDIA GPU evidence checks, no certificate chains, CRLs, or TCB policy. Those are delegated to the client. The gateway returns the raw `evidence`, the signing address, the model public key, the proof format, and your echoed nonce, so you can run the deeper hardware verification independently. Use the words **baseline-verified** and **attested** for what the gateway does; the full assurance is the verify-yourself path. A reference verifier exists for exactly this purpose.
+What this step deliberately does **not** do is verify the full hardware quote: no Intel TDX quote validation, no NVIDIA GPU evidence checks, no certificate chains, CRLs, or TCB policy. Those are delegated to the client. The gateway returns the raw `evidence`, the signing address, the model public key, the proof format, and your echoed nonce, so you can run the deeper hardware verification independently. Use the words **baseline-verified** and **attested** for what the gateway does; the full assurance is the verify-yourself path. A reference verifier exists for exactly this purpose.
 
 One nuance worth flagging for reviewers: anti-replay is **caller-driven**. The freshness binding relies on you supplying a fresh random nonce. If you omit the nonce, an empty-binding report is permitted, so the protection is only as strong as your nonce discipline.
 
-## Hop 5: Metadata-only logging
+## Stage 5: Observability
 
-Running alongside the request, not in its path, is logging and telemetry. The default posture is **metadata only**. Prompts, completions, reasoning, tool calls, and uploaded file contents are request-local and not persisted by the gateway. Telemetry is restricted to a safe allowlist of fields, and inference responses carry `Cache-Control: no-store`. This is the same floor described in [Zero data retention](/privacy/zero-data-retention); the architectural point is that the logging hop sees usage metadata, not content.
+Running alongside the request, not in its path, is logging and telemetry. The default posture is **metadata only**. Prompts, completions, reasoning, tool calls, and uploaded file contents are request-local and not persisted by the gateway. Telemetry is restricted to a safe allowlist of fields, and inference responses carry `Cache-Control: no-store`. This is the same floor described in [Zero data retention](/privacy/zero-data-retention); the architectural point is that the logging stage sees usage metadata, not content.
 
-## Hop 6: Billing
+## Stage 6: Settlement
 
 Billing brackets the provider call. Before the call, the gateway places a hold against your credit balance sized to the expected cost. After the call, the hold is settled against actual usage, or released if the request failed before producing usage. Billing operates on usage metadata (token counts, request shape), not on the content of your prompt or the reply. So the most privacy-sensitive part of the request never has to be retained to be billed.
 
 ## The shape of the guarantee
 
-Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no hop at which a request becomes _less_ private than you asked for. The only thing that can happen if the mode cannot be honored is that the call fails.
+Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no stage at which a request becomes _less_ private than you asked for. The only thing that can happen if the mode cannot be honored is that the call fails.
 
 ## Related
 
 - [Privacy overview](/privacy/overview) - the narrative entry and the promises this page keeps.
-- [Per-call privacy modes](/privacy/per-call-privacy-modes) - how the suffix selects the mode at hop 2.
-- [Zero data retention](/privacy/zero-data-retention) - the metadata-only contract behind hops 4 and 5.
+- [Per-call privacy modes](/privacy/per-call-privacy-modes) - how the suffix selects the mode at stage 2.
+- [Zero data retention](/privacy/zero-data-retention) - the metadata-only contract behind stages 4 and 5.
 - [How Nito works](/get-started/how-nito-works) - the full request lifecycle including billing.

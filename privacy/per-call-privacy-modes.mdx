@@ -32,7 +32,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3",
+    "model": "x-ai/grok-4.5",
     "messages": [{"role": "user", "content": "Summarize this release note."}]
   }'
 ```
@@ -64,7 +64,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-4.3:confidential",
+    "model": "openai/gpt-oss-120b:confidential",
     "messages": [{"role": "user", "content": "Analyze this contract clause."}]
   }'
 ```
@@ -77,13 +77,13 @@ TEE-capable backends are a subset of the catalog (NEAR and Phala). If you reques
 
 | Header | Role |
 | --- | --- |
-| `X-Z-ENCRYPTED-E2EE` | Marks the request as end-to-end encrypted. |
-| `X-Z-ENCRYPTED-Client-Pub-Key` | The client's public key. |
-| `X-Z-ENCRYPTED-Model-Pub-Key` | The model environment's public key. |
-| `X-Z-ENCRYPTED-Signing-Algo` | The signing algorithm in use. |
-| `X-Z-ENCRYPTED-Encryption-Version` | The encryption scheme version. |
-| `X-Z-ENCRYPTED-E2EE-Nonce` | A nonce for the encrypted exchange. |
-| `X-Z-ENCRYPTED-E2EE-Timestamp` | A timestamp for the encrypted exchange. |
+| `X-Z-ENCRYPTED` | Marks the request as Encrypted; set it to `1`. |
+| `X-Z-ENCRYPTED-Client-Pub-Key` | The client's public key (hex). |
+| `X-Z-ENCRYPTED-Model-Pub-Key` | The model environment's public key (hex). |
+| `X-Z-ENCRYPTED-Signing-Algo` | The signing algorithm: `ed25519` or `ecdsa`. |
+| `X-Z-ENCRYPTED-Encryption-Version` | The encryption scheme version; must be `2`. |
+| `X-Z-ENCRYPTED-Nonce` | A nonce for the encrypted exchange. |
+| `X-Z-ENCRYPTED-Timestamp` | A timestamp for the encrypted exchange. |
 
 Two hard constraints come with this mode:
 
@@ -94,13 +94,13 @@ Two hard constraints come with this mode:
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
-  -H "X-Z-ENCRYPTED-E2EE: true" \
-  -H "X-Z-ENCRYPTED-Client-Pub-Key: <client-public-key>" \
-  -H "X-Z-ENCRYPTED-Model-Pub-Key: <model-public-key>" \
-  -H "X-Z-ENCRYPTED-Signing-Algo: <signing-algo>" \
-  -H "X-Z-ENCRYPTED-Encryption-Version: <version>" \
-  -H "X-Z-ENCRYPTED-E2EE-Nonce: <nonce>" \
-  -H "X-Z-ENCRYPTED-E2EE-Timestamp: <timestamp>" \
+  -H "X-Z-ENCRYPTED: 1" \
+  -H "X-Z-ENCRYPTED-Client-Pub-Key: <client-public-key-hex>" \
+  -H "X-Z-ENCRYPTED-Model-Pub-Key: <model-public-key-hex>" \
+  -H "X-Z-ENCRYPTED-Signing-Algo: ed25519" \
+  -H "X-Z-ENCRYPTED-Encryption-Version: 2" \
+  -H "X-Z-ENCRYPTED-Nonce: <nonce>" \
+  -H "X-Z-ENCRYPTED-Timestamp: <unix-timestamp>" \
   -d '{
     "model": "a-near-or-phala-model:encrypted",
     "stream": false,
