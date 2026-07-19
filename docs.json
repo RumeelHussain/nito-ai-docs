@@ -63,7 +63,8 @@
               "models/deprecations-and-lifecycle"
             ]
           }
-        ]
+        ],
+        "icon": "cube"
       },
       {
         "tab": "Features",
@@ -109,7 +110,8 @@
               "features/safe-retries"
             ]
           }
-        ]
+        ],
+        "icon": "cubes-stacked"
       },
       {
         "tab": "Privacy",
@@ -167,7 +169,8 @@
               "privacy/known-limitations"
             ]
           }
-        ]
+        ],
+        "icon": "shield-check"
       },
       {
         "tab": "SDKs",
@@ -226,7 +229,8 @@
               "sdks/postman-bruno"
             ]
           }
-        ]
+        ],
+        "icon": "tools"
       },
       {
         "tab": "Cookbook",
@@ -284,7 +288,8 @@
               "cookbook/advanced/privacy-first-workflow"
             ]
           }
-        ]
+        ],
+        "icon": "connectdevelop"
       },
       {
         "tab": "API Reference",
@@ -395,7 +400,8 @@
               "api-reference/errors-and-rate-limits/debugging-requests"
             ]
           }
-        ]
+        ],
+        "icon": "list-alt"
       },
       {
         "tab": "Resources",
@@ -458,7 +464,8 @@
               "resources/powered-by-z/for-developers-building-agents"
             ]
           }
-        ]
+        ],
+        "icon": "book-copy"
       },
       {
         "tab": "FAQ",
@@ -474,7 +481,8 @@
               "faq/integrations"
             ]
           }
-        ]
+        ],
+        "icon": "seal-question"
       },
       {
         "tab": "API Playground",
