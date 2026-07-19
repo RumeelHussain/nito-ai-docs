@@ -672,7 +672,8 @@
   },
   "logo": {
     "light": "/images/nito-logo-black.png",
-    "dark": "/images/nito-logo-white.png"
+    "dark": "/images/nito-logo-white.png",
+    "href": "/get-started"
   },
   "favicon": {
     "light": "/images/favicon.ico",
