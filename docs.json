@@ -102,7 +102,7 @@
             "group": "Efficiency",
             "pages": [
               "features/prompt-caching",
-              "features/idempotency"
+              "features/safe-retries"
             ]
           }
         ]
@@ -697,6 +697,10 @@
     {
       "source": "/get-started/quickstart-curl",
       "destination": "/get-started/quickstart-60-seconds"
+    },
+    {
+      "source": "/features/idempotency",
+      "destination": "/features/safe-retries"
     }
   ]
 }

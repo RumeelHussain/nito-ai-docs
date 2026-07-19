@@ -154,12 +154,12 @@ Here `model-c` failed, but the call still returned `200` and the judge synthesiz
 
 ## When to reach for fusion
 
-Use fusion when the extra cost of running several models is worth it: high-stakes answers, questions where models are known to disagree, or cases where you want to surface and reconcile disagreement rather than trust one model. For everyday text, ordinary [Chat Completions](/features/chat-completions) is cheaper and supports streaming. Remember that fusion bills for every participant plus the synthesis pass, and the same [idempotency](/features/idempotency) rules apply, with each subcall keyed deterministically from your base key.
+Use fusion when the extra cost of running several models is worth it: high-stakes answers, questions where models are known to disagree, or cases where you want to surface and reconcile disagreement rather than trust one model. For everyday text, ordinary [Chat Completions](/features/chat-completions) is cheaper and supports streaming. Remember that fusion bills for every participant plus the synthesis pass, and the same [idempotency](/features/safe-retries) rules apply, with each subcall keyed deterministically from your base key.
 
 ## Related
 
 - [Chat Completions](/features/chat-completions)
-- [Safe retries](/features/idempotency)
+- [Safe retries](/features/safe-retries)
 - [Server-side tools](/features/server-side-tools)
 - [Per-call privacy modes](/privacy/per-call-privacy-modes)
 - [How Nito Works](/get-started/how-nito-works)
