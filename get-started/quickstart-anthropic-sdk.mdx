@@ -1,5 +1,5 @@
 ---
-title: "Anthropic SDK drop-in"
+title: "Anthropic SDK Drop-In"
 description: "Use Nito from Anthropic-shaped codebases. Note the current support boundary before you switch."
 ---
 
@@ -71,14 +71,24 @@ console.log(resp.choices[0].message.content);
 - **Keeping a top-level `system` field.** It will not be read on the Chat Completions surface. Convert it to a `system` message.
 - **Carrying over an Anthropic model name.** Replace it with a Nito ID.
 
-## Notes
+## Important Notes
 
-- Rate limits: per-key and per-org; 429 carries `Retry-After`. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
-- Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
-- Privacy-mode applicability: ordinary, private, and `:confidential`. `:encrypted` is non-streaming and needs extra headers.
+- **Rate limits:** per-key and per-org; 429 carries `Retry-After`. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
+- **Retention:** metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
+- **Privacy-mode applicability:** ordinary, private, and `:confidential`. `:encrypted` is non-streaming and needs extra headers.
 
-## Related
+## Related Resources
 
-- [OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [Chat completions feature](/features/chat-completions)
-- The Anthropic Messages-compatible surface is now served at `POST /v1/messages`; full drop-in guidance is documented in a later pass.
+<CardGroup cols={3}>
+  <Card title="OpenAI SDK Drop-in" icon="tools" href="/get-started/quickstart-openai-sdk">
+    Detailed explanation of OpenAI compatible user requests.
+  </Card>
+
+  <Card title="Chat Completion Feature" icon="rocketchat" href="/features/chat-completions">
+    Endpoint for chat and text generation
+  </Card>
+
+  <Card title="Anthropic Messages-Compatible Endpoint" icon="message-dots" href="/features/chat-completions">
+    Endpoint for chat and text generation
+  </Card>
+</CardGroup>

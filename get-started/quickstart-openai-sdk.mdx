@@ -49,11 +49,11 @@ console.log(resp.choices[0].message.content);
 
 The base URL must end in `/v1`, because the SDK appends paths like `/chat/completions` itself. Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`.
 
-## Reading the response
+## Reading the Response
 
 The SDK sends a POST to `/v1/chat/completions` and returns a standard `chat.completion` object. `resp.choices[0].message.content` is the assistant's text, and `resp.usage` reports tokens billed. Streaming works exactly as in the OpenAI SDK: pass `stream=True` (Python) or `stream: true` (TypeScript) and iterate the chunks.
 
-## Selecting privacy
+## Selecting Privacy
 
 Because privacy is chosen by the model ID, you opt into a stronger tier by adding a suffix to the model name, with no other code change:
 
@@ -64,21 +64,27 @@ model="openai/gpt-oss-120b:confidential"
 
 Only `:confidential` and `:encrypted` are valid suffixes, and a model must support that tier. Use `GET /v1/models` to find models that support attestation. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Common mistakes
+## Common Issues
 
 - **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with a Nito model ID from `GET /v1/models`. Model mapping is covered in [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping).
 - **Forgetting `/v1` on the base URL.** The OpenAI SDK appends paths like `/chat/completions`, so the base URL must end in `/v1`.
 - **Assuming the Responses API is unavailable.** Nito now serves an OpenAI Responses-compatible endpoint at `POST /v1/responses`. Chat Completions remains the primary, fully supported surface and is what this page uses.
 - **Streaming with Encrypted.** The `:encrypted` mode does not stream. Use `:confidential` if you need streaming with attestation.
 
-## Notes
+## Important Notes
 
-- Rate limits: standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
-- Retention: metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
-- Privacy-mode applicability: ordinary, private, and `:confidential` work with the OpenAI SDK. `:encrypted` requires extra headers and is best done via curl or the native SDK.
+- **Rate limits:** standard per-key and per-org limits apply. A 429 includes a `Retry-After` header. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
+- **Retention:** metadata-only by default. See [Zero Data Retention](/privacy/zero-data-retention).
+- **Privacy-mode applicability:** ordinary, private, and `:confidential` work with the OpenAI SDK. `:encrypted` requires extra headers and is best done via curl or the native SDK.
 
-## Related
+## Related Resources
 
-- [Make your first request](/get-started/make-your-first-request)
-- [Chat completions feature](/features/chat-completions)
-- [POST /v1/chat/completions reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={2}>
+  <Card title="Make Your First Request" icon="play" href="/get-started/make-your-first-request">
+    Detailed explanation of user requests.
+  </Card>
+
+  <Card title="Chat Completion Feature" icon="rocketchat" href="/features/chat-completions">
+    Endpoint for chat and text generation
+  </Card>
+</CardGroup>

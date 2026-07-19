@@ -1,11 +1,11 @@
 ---
-title: "Check usage and credits"
+title: "Check Usage and Credits"
 description: "Confirm what a call cost and track your balance. Per-call cost comes back in every response; balance and spend live in your dashboard."
 ---
 
 After your first successful call, the natural next question is: did that cost anything, and how much do I have left? Those are two questions with two sources. The **per-call cost** comes back in every API response, and your **balance and spend over time** live in your Nito dashboard.
 
-## How billing works, briefly
+## How Billing Works
 
 Nito bills in credits. Internally those credits are tracked in nanos, billionths of a credit, so that fractions of a cent's worth of tokens can be accounted for exactly without rounding error. You will see `nanos` in the numbers; it is just the precise unit underneath the human-facing credit.
 
@@ -15,7 +15,7 @@ The flow around a single call has three steps:
 2. **Settle.** When the call succeeds, the hold is captured for the actual usage, which may be less than the estimate. You are charged what the call really used.
 3. **Release.** If the request fails before producing any usage, the hold is released and you are not charged. This is exactly why a failed call does not cost you credits.
 
-## What a call cost: the `usage` block
+## What a Call Costs: The `usage`Block
 
 Every successful chat response includes a `usage` block. This is your per-call record, available directly from the API with your `z_sk_` key — no extra request needed.
 
@@ -25,7 +25,7 @@ Every successful chat response includes a `usage` block. This is your per-call r
 
 `prompt_tokens` is input, `completion_tokens` is output, and `total_tokens` is the sum. Reasoning models also return `reasoning_tokens`, and when prompt caching applies you will see `cache_read_input_tokens` and `cache_write_input_tokens`. To turn tokens into a cost estimate, combine `usage` with the model's `pricing` object from `GET /v1/models`. See [Pricing](/models/pricing).
 
-## Balance and spend over time: your dashboard
+## Balance and Spend Over Time: Your Dashboard
 
 Your credit balance and aggregated usage — totals, a daily breakdown, and a per-model breakdown — live in your **Nito dashboard**. These are organization-level views: billing in Nito is owned by the organization (the account that owns billing and keys), not the individual key.
 
@@ -44,18 +44,28 @@ The hold-then-settle design above is what makes failed-request billing intuitive
 
 See [Failed request billing behavior](/api-reference/usage-and-credits/failed-request-billing).
 
-## Common mistakes
+## Common Issues
 
 - **Trying to read balance or usage with your API key.** The org balance and usage-overview endpoints are browser-session authenticated and reject a `z_sk_` key. Read them from the dashboard; read per-call cost from the response `usage` block.
 - **Treating nanos as whole credits.** Nanos are billionths. Divide by 1,000,000,000 (1e9) before showing a value to a person.
 - **Expecting a real-time per-request ledger.** Use the response `usage` block for each call and the dashboard for aggregates. There is no public per-transaction history endpoint.
 
-## Notes
+## Important Notes
 
 - Retention: usage aggregates are derived from billing records, not from your prompt contents. Reading usage does not expose what was in any prompt.
 
 ## Related
 
-- [Pricing](/models/pricing)
-- [Safe retries](/features/safe-retries) — why a failed call is not billed
-- [Funding and billing](/api-reference/funding-and-billing)
+<CardGroup cols={3}>
+  <Card title="Pricing" icon="money-bills" href="/models/pricing">
+    How model pricing works on Nito and reading per-model cost.
+  </Card>
+
+  <Card title="Safe Retries" icon="retweet" href="/features/safe-retries">
+    How to retry a request safely on Nito: failed calls are not billed
+  </Card>
+
+  <Card title="Funding and Billing" icon="money-bill-trend-up" href="/api-reference/funding-and-billing">
+    Add credits, manage billing, and configure auto top-up.
+  </Card>
+</CardGroup>

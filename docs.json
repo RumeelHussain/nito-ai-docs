@@ -18,15 +18,17 @@
               "get-started/index",
               "get-started/introduction",
               "get-started/how-nito-works"
-            ]
+            ],
+            "icon": "book"
           },
           {
-            "group": "Quickstarts",
+            "group": "Quickstart Guides",
             "pages": [
               "get-started/quickstart-60-seconds",
               "get-started/quickstart-openai-sdk",
               "get-started/quickstart-anthropic-sdk"
-            ]
+            ],
+            "icon": "books"
           },
           {
             "group": "End to end",
@@ -35,9 +37,11 @@
               "get-started/make-your-first-request",
               "get-started/stream-your-first-response",
               "get-started/check-usage-and-credits"
-            ]
+            ],
+            "icon": "send-back"
           }
-        ]
+        ],
+        "icon": "rocket-launch"
       },
       {
         "tab": "Models",
@@ -702,5 +706,20 @@
       "source": "/features/idempotency",
       "destination": "/features/safe-retries"
     }
-  ]
+  ],
+  "styling": {
+    "codeblocks": {
+      "theme": {
+        "light": "github-light",
+        "dark": "github-dark"
+      },
+      "languages": {
+        "custom": [
+          "typescript",
+          "python",
+          "curl"
+        ]
+      }
+    }
+  }
 }

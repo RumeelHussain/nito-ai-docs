@@ -7,7 +7,7 @@ This page takes the single most common call, a non-streaming chat completion, an
 
 If you are new to chat APIs, the mental model is a transcript. You send a list of messages (the conversation so far, including a system instruction and the user's question), and the model appends one more message: its reply. That is the whole interaction. Everything else on this page is detail around that core.
 
-## The call
+## The Call Format
 
 <CodeGroup>
 
@@ -68,11 +68,11 @@ console.log(resp.usage);
 
 Notice that the Python and TypeScript examples use the official OpenAI SDK pointed at Nito's base URL. That is the whole integration: Nito speaks the OpenAI chat shape, so for most apps the change is the `base_url` and the key, nothing more.
 
-## What happens to this request
+## What Happens to This Request
 
-Before reading the fields, it helps to know the path the call takes, because it explains the response and the billing. When this request arrives, Nito authenticates the key and checks rate limits, reads the `model` field to resolve which model and privacy mode you want, routes to a healthy backend that can serve it, places a billing hold sized to the expected cost, runs the inference, and then settles the hold for the actual usage. You only write the request; the gateway does the rest. The full walkthrough is in [How Nito Works](/get-started/how-nito-works).
+Before reading the fields, it helps to know the path the call takes, because it explains the response and the billing. When this request arrives, Nito authenticates the key and checks rate limits, reads the `model` field to resolve which model and privacy mode you want, routes to a healthy backend that can serve it, places a billing hold sized to the expected cost, runs the inference, and then settles the hold for the actual usage. You only write the request; the gateway does the rest. The full walkthrough is explained in [How Nito Works](/get-started/how-nito-works) section.
 
-## What you sent
+## What Does the Request Contain
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ A few things worth understanding rather than memorizing:
 - **Only `messages` is truly required.** `model` falls back to a default if you leave it out, though naming a model explicitly is recommended so your behavior does not change when defaults change.
 - **`temperature`, `top_p`, and `max_tokens` are passthrough.** Nito forwards them to the model rather than reinterpreting them, so they behave as they do on the underlying model.
 
-## What you got back
+## What Does the Response Contain
 
 ```json
 {
@@ -124,7 +124,7 @@ Reading it field by field:
 - **`usage`** is what you were billed: `prompt_tokens` (input), `completion_tokens` (output), and `total_tokens`. A token is a chunk of text, very roughly a few characters, and it is the unit models are metered in. If prompt caching applied, you also see `cache_read_input_tokens` and `cache_write_input_tokens`.
 - **`system_fingerprint`** is always present and currently always serialized as `null`. Do not rely on it.
 
-## Add privacy with one change
+## Add Privacy With One Change
 
 To run the same request inside a Trusted Execution Environment (a TEE: a hardware-isolated, sealed compute box the host cannot inspect), add the `:confidential` suffix to the model, provided that model supports it:
 
@@ -134,7 +134,7 @@ To run the same request inside a Trusted Execution Environment (a TEE: a hardwar
 
 Nothing else in the request changes. The privacy mode lives entirely in the model string, and if the chosen model cannot serve the mode you asked for, the call is rejected rather than quietly downgraded. After a `:confidential` call you can fetch an attestation (a signed statement about the sealed environment that ran your call) and verify it yourself. See [TEE attestation](/privacy/tee-attestation) and the [attestation endpoint](/api-reference/attestation/get-attestation).
 
-## Common mistakes
+## Common Issues
 
 - **Empty `messages`.** At least one message is required, or you get `400 messages is required`.
 - **An unknown field.** The decoder rejects unknown keys with `400`. Check for typos like `max_token` or `temprature`.
@@ -143,8 +143,18 @@ Nothing else in the request changes. The privacy mode lives entirely in the mode
 - **Reading a streamed response as one JSON object.** If you set `stream: true`, the reply is many Server-Sent Events, not one document. See the next page.
 - **Expecting `:confidential` to fall back silently.** A privacy mode never downgrades. If the model cannot serve it, the call fails instead.
 
-## Related
+## Related Resources
 
-- [Stream your first response](/get-started/stream-your-first-response)
-- [Check usage and credits](/get-started/check-usage-and-credits)
-- [Chat completions reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={3}>
+  <Card title="Stream Your First Response" icon="signal-stream" href="/get-started/stream-your-first-response">
+    Turn on streaming to read Nito’s token stream.
+  </Card>
+
+  <Card title="Check Usage and Credits" icon="monitor-heart-rate" href="/get-started/check-usage-and-credits">
+    Confirm per call cost, track balance, & spend live in your dashboard
+  </Card>
+
+  <Card title="Chat Completions Endpoint" icon="message-dots" href="/api-reference/chat-and-text/chat-completions">
+    Detailed reference to chat completions endpoint.
+  </Card>
+</CardGroup>

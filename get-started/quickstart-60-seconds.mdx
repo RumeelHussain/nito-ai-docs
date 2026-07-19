@@ -1,154 +1,142 @@
 ---
 title: "Quickstart"
-description: "Get from zero to a working — and private — response from Nito in minutes. One key, one request, then raise privacy with a suffix."
+description: "Get from zero to a working and private response from Nito in minutes. One key, one request, then raise privacy with a suffix."
 ---
 
 Get up and running with Nito in minutes. Generate an API key, make your first request, and then turn on stronger privacy with a single change to the model ID.
 
 <Steps>
+  <Step title="Set Your Key" icon="1" iconType="solid" stepNumber={1} titleSize="h2">
+    Add your key and the gateway URL to your environment. Export them in your shell:
 
-<Step title="Get your API key">
-  Generate a key from your Nito dashboard. It looks like `z_sk_...`. Keep it secret — it authenticates every request and carries your billing. For the key types and how auth works, see [Authentication](/get-started/authentication).
-</Step>
+    ```bash
+    export NITO_API_KEY="z_sk_your_key_here"
+    export NITO_BASE_URL="https://nito.dev.zprotocol.org"
+    ```
 
-<Step title="Set your key">
-  Add your key and the gateway URL to your environment. Export them in your shell:
+    Or add them to a `.env` file in your project:
 
-  ```bash
-  export NITO_API_KEY="z_sk_your_key_here"
-  export NITO_BASE_URL="https://nito.dev.zprotocol.org"
-  ```
+    ```bash
+    NITO_API_KEY=z_sk_your_key_here
+    NITO_BASE_URL=https://nito.dev.zprotocol.org
+    ```
+  </Step>
+  <Step title="Install an SDK (optional)" icon="2" iconType="solid" stepNumber={2} titleSize="h2">
+    Nito is OpenAI-compatible, so you can use the OpenAI SDK unchanged — you only point it at Nito. If you prefer cURL or raw HTTP, skip this step.
 
-  Or add them to a `.env` file in your project:
+    <CodeGroup>
 
-  ```bash
-  NITO_API_KEY=z_sk_your_key_here
-  NITO_BASE_URL=https://nito.dev.zprotocol.org
-  ```
+    ```bash Python
+    pip install openai
+    ```
 
-  > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
-</Step>
+    ```bash TypeScript
+    npm install openai
+    ```
 
-<Step title="Install an SDK (optional)">
-  Nito is OpenAI-compatible, so you can use the OpenAI SDK unchanged — you only point it at Nito. If you prefer cURL or raw HTTP, skip this step.
+    </CodeGroup>
+  </Step>
+  <Step title="Send Your First Request" icon="3" iconType="solid" titleSize="h2">
+    The base URL ends in `/v1`; the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not a provider name like `gpt-4o`.
 
-  <CodeGroup>
+    <CodeGroup>
 
-  ```bash Python
-  pip install openai
-  ```
+    ```python Python
+    import os
+    from openai import OpenAI
+    
+    client = OpenAI(
+        api_key=os.environ["NITO_API_KEY"],
+        base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
+    )
+    
+    resp = client.chat.completions.create(
+        model="x-ai/grok-4.5",  # a Nito catalog ID from GET /v1/models
+        messages=[
+            {"role": "system", "content": "You are a concise assistant."},
+            {"role": "user", "content": "Say hello in one short sentence."},
+        ],
+    )
+    
+    print(resp.choices[0].message.content)
+    ```
 
-  ```bash TypeScript
-  npm install openai
-  ```
-
-  </CodeGroup>
-</Step>
-
-<Step title="Send your first request">
-  The base URL ends in `/v1`; the SDK appends `/chat/completions` itself. Use a Nito catalog ID for `model`, not a provider name like `gpt-4o`.
-
-  <CodeGroup>
-
-  ```python Python
-  import os
-  from openai import OpenAI
-
-  client = OpenAI(
-      api_key=os.environ["NITO_API_KEY"],
-      base_url="https://nito.dev.zprotocol.org/v1",  # Nito's OpenAI-compatible base URL
-  )
-
-  resp = client.chat.completions.create(
-      model="x-ai/grok-4.5",  # a Nito catalog ID from GET /v1/models
-      messages=[
-          {"role": "system", "content": "You are a concise assistant."},
-          {"role": "user", "content": "Say hello in one short sentence."},
+    ```typescript TypeScript
+    import OpenAI from "openai";
+    
+    const client = new OpenAI({
+      apiKey: process.env.NITO_API_KEY,
+      baseURL: "https://nito.dev.zprotocol.org/v1",
+    });
+    
+    const resp = await client.chat.completions.create({
+      model: "x-ai/grok-4.5",
+      messages: [
+        { role: "system", content: "You are a concise assistant." },
+        { role: "user", content: "Say hello in one short sentence." },
       ],
-  )
+    });
+    
+    console.log(resp.choices[0].message.content);
+    ```
 
-  print(resp.choices[0].message.content)
-  ```
+    ```bash cURL
+    curl "$NITO_BASE_URL/v1/chat/completions" \
+      -H "Authorization: Bearer $NITO_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "x-ai/grok-4.5",
+        "messages": [
+          { "role": "user", "content": "Say hello in one short sentence." }
+        ]
+      }'
+    ```
 
-  ```typescript TypeScript
-  import OpenAI from "openai";
+    </CodeGroup>
 
-  const client = new OpenAI({
-    apiKey: process.env.NITO_API_KEY,
-    baseURL: "https://nito.dev.zprotocol.org/v1",
-  });
+    You get back a standard `chat.completion` object; the reply is at `choices[0].message.content`, and `usage` reports the tokens billed. The `messages` roles are:
 
-  const resp = await client.chat.completions.create({
-    model: "x-ai/grok-4.5",
-    messages: [
-      { role: "system", content: "You are a concise assistant." },
-      { role: "user", content: "Say hello in one short sentence." },
-    ],
-  });
+    - `system` — instructions for how the model should behave.
+    - `user` — your prompts or questions.
+    - `assistant` — previous model responses, for multi-turn conversations.
+    - `tool` — results you return when the model calls one of your functions.
+  </Step>
+  <Step title="Switch models by changing the model ID" icon="4" iconType="solid" stepNumber={4} titleSize="h2">
+    Every request names a model by its ID. To use a different one, change the `model` value — nothing else. A few popular choices:
 
-  console.log(resp.choices[0].message.content);
-  ```
+    - `x-ai/grok-4.5` — strong general-purpose default.
+    - `google/gemini-3.5-flash` — fast and low-cost.
+    - `anthropic/claude-opus-4.8` — high-intelligence for complex work.
+    - `openai/gpt-oss-120b:confidential` — runs in a TEE with a verifiable attestation.
 
-  ```bash cURL
-  curl "$NITO_BASE_URL/v1/chat/completions" \
-    -H "Authorization: Bearer $NITO_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d '{
-      "model": "x-ai/grok-4.5",
-      "messages": [
-        { "role": "user", "content": "Say hello in one short sentence." }
-      ]
-    }'
-  ```
+    The catalog is discovered live, so `GET /v1/models` is always the source of truth.
 
-  </CodeGroup>
+    <Card title="Model list" icon="list" href="/models/all-models">
+      Browse every model with its context window, pricing, and capabilities.
+    </Card>
+  </Step>
+  <Step title="Raise privacy on any call" icon="5" iconType="solid" stepNumber={5} titleSize="h2">
+    This is what makes Nito different: privacy is chosen by the model ID. Append a suffix to opt a single call into a stronger tier — no other code change, same key.
 
-  You get back a standard `chat.completion` object; the reply is at `choices[0].message.content`, and `usage` reports the tokens billed. The `messages` roles are:
+    ```python
+    # Same request, stronger privacy — only the model ID changes
+    model="openai/gpt-oss-120b:confidential"
+    ```
 
-  - `system` — instructions for how the model should behave.
-  - `user` — your prompts or questions.
-  - `assistant` — previous model responses, for multi-turn conversations.
-  - `tool` — results you return when the model calls one of your functions.
-</Step>
+    - `:confidential` — runs inside a Trusted Execution Environment (a sealed, hardware-isolated box the host cannot read into). You can fetch an attestation and verify the call really ran there.
+    - `:encrypted` — end-to-end encrypted to that sealed environment, the strongest mode.
 
-<Step title="Switch models by changing the model ID">
-  Every request names a model by its ID. To use a different one, change the `model` value — nothing else. A few popular choices:
-
-  - `x-ai/grok-4.5` — strong general-purpose default.
-  - `google/gemini-3.5-flash` — fast and low-cost.
-  - `anthropic/claude-opus-4.8` — high-intelligence for complex work.
-  - `openai/gpt-oss-120b:confidential` — runs in a TEE with a verifiable attestation.
-
-  The catalog is discovered live, so `GET /v1/models` is always the source of truth.
-
-  <Card title="Model list" icon="list" href="/models/all-models">
-    Browse every model with its context window, pricing, and capabilities.
-  </Card>
-</Step>
-
-<Step title="Raise privacy on any call">
-  This is what makes Nito different: privacy is chosen by the model ID. Append a suffix to opt a single call into a stronger tier — no other code change, same key.
-
-  ```python
-  # Same request, stronger privacy — only the model ID changes
-  model="openai/gpt-oss-120b:confidential"
-  ```
-
-  - `:confidential` — runs inside a Trusted Execution Environment (a sealed, hardware-isolated box the host cannot read into). You can fetch an attestation and verify the call really ran there.
-  - `:encrypted` — end-to-end encrypted to that sealed environment, the strongest mode.
-
-  Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier or the call is rejected rather than quietly downgraded. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
-</Step>
-
+    Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier or the call is rejected rather than quietly downgraded. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+  </Step>
 </Steps>
 
-## Common mistakes
+## Common Issues
 
-- **401 Unauthorized.** The key is missing, mistyped, or not sent as `Authorization: Bearer <key>`. Nito keys start with `z_sk_`.
-- **400 about the model.** The `model` ID is not in your catalog. Call `GET /v1/models` and copy an exact ID.
-- **402 Payment Required.** No funded balance and the model is not free-tier eligible. Add credits or use a free-tier model. See [Check usage and credits](/get-started/check-usage-and-credits).
-- **Wrong base URL.** The OpenAI-compatible path is `/v1/chat/completions`; the first-party path is `/api/v1/chat/completions`. Both work and behave the same.
-- **A typo or unknown field in the JSON.** The request body is decoded strictly, so an unrecognized field name returns `400` with a message naming the problem.
+- **401 Unauthorized:** The key is missing, mistyped, or not sent as `Authorization: Bearer <key>`. Nito keys start with `z_sk_`.
+- **400 about the model:** The `model` ID is not in your catalog. Call `GET /v1/models` and copy an exact ID.
+- **402 Payment Required:** No funded balance and the model is not free-tier eligible. Add credits or use a free-tier model. See [Check usage and credits](/get-started/check-usage-and-credits).
+- **Wrong base URL:** The OpenAI-compatible path is `/v1/chat/completions`; the first-party path is `/api/v1/chat/completions`. Both work and behave the same.
+- **A typo or unknown field in the JSON:** The request body is decoded strictly, so an unrecognized field name returns `400` with a message naming the problem.
 
 ## Next steps
 
@@ -156,12 +144,15 @@ Get up and running with Nito in minutes. Generate an API key, make your first re
   <Card title="Make your first request" icon="play" href="/get-started/make-your-first-request">
     The same call, walked through field by field.
   </Card>
+
   <Card title="Stream your first response" icon="bolt" href="/get-started/stream-your-first-response">
     Read tokens as they arrive.
   </Card>
+
   <Card title="OpenAI SDK drop-in" icon="plug" href="/get-started/quickstart-openai-sdk">
     Point existing OpenAI code at Nito.
   </Card>
+
   <Card title="Privacy overview" icon="shield-halved" href="/privacy/overview">
     How the privacy tiers and attestation work.
   </Card>
