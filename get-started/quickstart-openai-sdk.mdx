@@ -7,7 +7,7 @@ If your code already uses the OpenAI SDK, you do not need to rewrite it. Nito ex
 
 <CodeGroup>
 
-```python Python
+```python Python wrap
 from openai import OpenAI
 
 client = OpenAI(
@@ -25,7 +25,7 @@ resp = client.chat.completions.create(
 print(resp.choices[0].message.content)
 ```
 
-```typescript TypeScript
+```typescript TypeScript wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({

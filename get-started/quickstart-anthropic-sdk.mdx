@@ -9,13 +9,13 @@ If your codebase is built around the Anthropic SDK, this page shows how to reach
   Nito now serves an Anthropic Messages-compatible endpoint at `POST /v1/messages` (and `POST /v1/messages/count_tokens`): the gateway validates the Anthropic Messages request shape and maps it into its canonical chat contracts. You can try it in the [API Playground](/api-playground). The OpenAI-compatible Chat Completions route described below also remains fully supported.
 </Note>
 
-## The recommended path today
+## The Recommended Path
 
 Point your client at Nito's OpenAI-compatible endpoint and use the Chat Completions shape. Most Anthropic-based applications keep a thin abstraction over the model call, so the change is usually confined to one client setup file.
 
 <CodeGroup>
 
-```python Python
+```python Python wrap
 from openai import OpenAI
 
 # Route Anthropic-style code through Nito's OpenAI-compatible surface.
@@ -35,7 +35,7 @@ resp = client.chat.completions.create(
 print(resp.choices[0].message.content)
 ```
 
-```typescript TypeScript
+```typescript TypeScript wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -58,14 +58,14 @@ console.log(resp.choices[0].message.content);
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Mapping notes
+## Mapping Notes
 
 - **System prompts.** Anthropic takes a top-level `system` string; the Chat Completions shape uses a message with `role: "system"`. Move the system text into the messages array as shown above.
 - **Roles.** Nito accepts `system`, `user`, `assistant`, `tool`, and `developer` roles on the inference layer.
 - **Model names.** Anthropic model names are not Nito IDs. Use a Nito catalog ID from `GET /v1/models`.
 - **Privacy.** As everywhere on Nito, add `:confidential` or `:encrypted` to the model ID to raise the privacy tier.
 
-## Common mistakes
+## Common Issues
 
 - **Assuming `/v1/messages` is unavailable.** It is now served as an Anthropic Messages-compatible endpoint. This page routes through `/v1/chat/completions`, which also works.
 - **Keeping a top-level `system` field.** It will not be read on the Chat Completions surface. Convert it to a `system` message.

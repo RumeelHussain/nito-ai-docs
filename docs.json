@@ -72,24 +72,19 @@
         "tab": "Features",
         "groups": [
           {
-            "group": "Overview",
-            "pages": [
-              "features/index"
-            ]
-          },
-          {
-            "group": "Core",
+            "group": "Core Features",
             "pages": [
               "features/chat-completions",
               "features/streaming",
               "features/tool-calling",
               "features/reasoning"
-            ]
+            ],
+            "root": "features/index"
           },
           {
-            "group": "Server-side tools",
+            "group": "Server-Side Tools",
+            "root": "features/server-side-tools",
             "pages": [
-              "features/server-side-tools",
               "features/server-side-tools/web-search",
               "features/server-side-tools/web-fetch",
               "features/server-side-tools/file-parser",
@@ -99,11 +94,11 @@
           {
             "group": "Multimodal",
             "pages": [
-              "features/multimodal",
               "features/multimodal/image-input",
               "features/multimodal/pdf-input",
               "features/multimodal/image-generation"
-            ]
+            ],
+            "root": "features/multimodal"
           },
           {
             "group": "Efficiency",
@@ -121,26 +116,25 @@
           {
             "group": "Overview",
             "pages": [
-              "privacy/overview",
               "privacy/privacy-architecture",
               "privacy/zero-data-retention",
               "privacy/per-call-privacy-modes"
-            ]
+            ],
+            "root": "privacy/overview"
           },
           {
             "group": "Privacy tiers",
             "pages": [
-              "privacy/tiers/index",
               "privacy/tiers/anonymous",
               "privacy/tiers/private",
               "privacy/tiers/confidential",
               "privacy/tiers/encrypted"
-            ]
+            ],
+            "root": "privacy/tiers/index"
           },
           {
             "group": "TEE attestation",
             "pages": [
-              "privacy/tee-attestation/index",
               "privacy/tee-attestation/what-a-tee-is",
               "privacy/tee-attestation/attestation-pipeline",
               "privacy/tee-attestation/seven-gate-baseline",
@@ -148,7 +142,8 @@
               "privacy/tee-attestation/address-only-model-binding",
               "privacy/tee-attestation/per-provider-attestation",
               "privacy/tee-attestation/verify-yourself-recipe"
-            ]
+            ],
+            "root": "privacy/tee-attestation/index"
           },
           {
             "group": "Data handling",
