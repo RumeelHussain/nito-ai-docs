@@ -1,25 +1,25 @@
 ---
-title: "API Playground"
-description: "Try every Nito endpoint interactively — send real requests and see live responses from the browser."
+title: "Interactive API Playground"
+description: "Try every Nito endpoint interactively, send real requests and see live responses from the browser."
 ---
 
 The **API Playground** is an interactive, always-in-sync reference for every Nito endpoint. It is generated directly from the OpenAPI spec, so it always matches what the gateway actually serves.
 
-## How to use it
+## How to Use It
 
 Pick an endpoint from the sidebar, fill in the parameters and body, add your credentials, and press **Send** to make a real request and see the live response.
 
 - **Authentication:** most inference endpoints take a `Bearer z_sk_...` API key. First-party account/billing/org routes use a browser session (`ig_session`) plus a CSRF token — see [Authentication](/api-reference/overview/authentication).
 - **Base URL:** the playground targets the configured server; pick the environment from the server dropdown.
 
-## Popular endpoints to try
+## Most Common Endpoints to Try
 
-- **Chat Completions** — `POST /v1/chat/completions` (OpenAI-compatible)
-- **Responses** — `POST /v1/responses`, `POST /v1/responses/compact` (OpenAI Responses-compatible)
-- **Messages** — `POST /v1/messages`, `POST /v1/messages/count_tokens` (Anthropic Messages-compatible)
-- **Embeddings** — `POST /v1/embeddings`
-- **Images** — `POST /v1/images/generations`
-- **Attestation** — `GET /api/v1/attestation`
-- **Models** — `GET /v1/models`
+- **Chat Completions**: `POST /v1/chat/completions` (OpenAI-compatible)
+- **Responses**: `POST /v1/responses`, `POST /v1/responses/compact` (OpenAI Responses-compatible)
+- **Messages**: `POST /v1/messages`, `POST /v1/messages/count_tokens` (Anthropic Messages-compatible)
+- **Embeddings**: `POST /v1/embeddings`
+- **Images**: `POST /v1/images/generations`
+- **Attestation**: `GET /api/v1/attestation`
+- **Models**: `GET /v1/models`
 
-Prefer narrative docs with worked examples and gotchas? See the [API Reference](/api-reference).
+Prefer narrative docs with worked examples and gotchas? See the [API Reference](/api-reference) section.
