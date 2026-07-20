@@ -494,7 +494,6 @@
           {
             "group": "Nito API Endpoints",
             "pages": [
-              "api-playground",
               {
                 "group": "Chat & Text",
                 "pages": [
@@ -673,7 +672,8 @@
               }
             ],
             "icon": "gear-api",
-            "expanded": true
+            "expanded": true,
+            "root": "api-playground"
           }
         ],
         "icon": "gear-code"
