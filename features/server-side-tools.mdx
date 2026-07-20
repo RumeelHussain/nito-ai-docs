@@ -7,22 +7,22 @@ A server-side tool is a capability the model can reach for while it is generatin
 
 This is the line that matters most on this page, so it is worth stating plainly.
 
-## Server-side tools vs. your own function tools
+## Server-side Tools vs. Your Own Function Tools
 
 Nito supports two different things that both get called "tools," and they behave oppositely. Keeping them straight saves a lot of confusion.
 
 |  | Server-side tools | Your own function tools |
 | --- | --- | --- |
-| Who runs the tool | Nito or the provider | Your code |
-| How you enable it | A request field (for example `web_search`) or a hosted entry in `tools` | A `function` entry in `tools` |
-| The loop | The gateway runs the tool mid-generation and continues | The model asks, you run it, you send the result back |
-| Round trips | One request | Multiple requests (the classic tool-calling loop) |
+| **Who runs the tool** | Nito or the provider | Your code |
+| **How you enable it** | A request field (for example `web_search`) or a hosted entry in `tools` | A `function` entry in `tools` |
+| **The loop** | The gateway runs the tool mid-generation and continues | The model asks, you run it, you send the result back |
+| **Round trips** | One request | Multiple requests (the classic tool-calling loop) |
 
 With your own function tools, the model can ask to call a function, but **the gateway never executes it for you**. Your application runs the function and sends the result back in a follow-up message, exactly like the OpenAI tool-calling loop. Server-side tools are the opposite: the execution happens inside the gateway boundary, so a single request can search the web, read a page, or run code without you orchestrating anything.
 
-For the mechanics of the function-tool loop, see [How Nito works](/get-started/how-nito-works#what-nito-does-not-do-for-you).
+For the mechanics of the function-tool loop, see [How Nito works](/get-started/how-nito-works#what-nito-does-not-do-for-you) section.
 
-## Which server-side tools exist
+## Which Server-Side Tools Exist
 
 These are the server-side tools implemented today. Each links to its own page.
 
@@ -32,13 +32,13 @@ These are the server-side tools implemented today. Each links to its own page.
 - [**Code interpreter**](/features/server-side-tools/code-interpreter) runs code in a sandbox. Available on **xAI models only**, as a passthrough to xAI; there is no gateway-native sandbox.
 - **x\_search** searches X (formerly Twitter). Available on **xAI models only**, as `tools:[{type:x_search}]`.
 
-## How you turn them on
+## How to Turn Server-Side Tools
 
 There are two shapes, and which you use depends on the tool.
 
 The first shape is a dedicated top-level field on the chat request. Web search and web fetch both support this:
 
-```json
+```json wrap
 {
   "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "What changed in the latest release?" }],
@@ -48,7 +48,7 @@ The first shape is a dedicated top-level field on the chat request. Web search a
 
 The second shape is a hosted entry in the `tools` array, using a `type` instead of a `function`. The recognized hosted tool types are `web_search`, `web_fetch`, `x_search`, and `code_interpreter`:
 
-```json
+```json wrap
 {
   "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "Plot the last quarter's data." }],
@@ -58,7 +58,7 @@ The second shape is a hosted entry in the `tools` array, using a `type` instead 
 
 Because the chat request is decoded strictly, unknown fields are rejected, and sending the same feature in two conflicting places returns `request body contains duplicate feature fields`. Pick one shape per feature.
 
-## What you get back
+## What is Included in the Response
 
 When a server-side tool runs, the gateway reports it in two places on the response:
 
@@ -67,14 +67,30 @@ When a server-side tool runs, the gateway reports it in two places on the respon
 
 Server-side tools are billed in addition to the model's own token usage. The specifics live on each tool's page.
 
-## Provider routing
+## Provider Routing
 
 Server-side tools are not available on every model, because they depend on what the underlying provider supports. The eligible providers differ per tool (web search is the broadest; code interpreter and x\_search are xAI-only). If you enable a tool on a model whose provider cannot serve it, the request is rejected rather than silently ignored. Each sub-page lists its own provider requirements.
 
-## Related
+## Related Resources
 
-- [How Nito works](/get-started/how-nito-works) for the request lifecycle and the function-tool boundary.
-- [Web search](/features/server-side-tools/web-search)
-- [Web fetch](/features/server-side-tools/web-fetch)
-- [File parser](/features/server-side-tools/file-parser)
-- [Code interpreter](/features/server-side-tools/code-interpreter)
+<CardGroup cols={3}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    Understand the request lifecycle and the function-tool boundary.
+  </Card>
+
+  <Card title="Web search" icon="searchengin" href="/api-reference/server-tools/web-search">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Web Fetch" icon="arrow-down-to-bracket" href="/features/server-side-tools/web-fetch">
+    Have the model retrieve and read a specific URL during generation.
+  </Card>
+
+  <Card title="File Parser" icon="book-open-lines" href="/features/server-side-tools/file-parser">
+    Extract text from uploaded documents.<br />
+  </Card>
+
+  <Card title="Code Interpreter" icon="file-code" href="/features/server-side-tools/code-interpreter">
+    Let a model run code mid-generation for real computation.
+  </Card>
+</CardGroup>

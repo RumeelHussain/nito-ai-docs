@@ -3,9 +3,9 @@ title: "Streaming"
 description: "What streaming is on Nito and when to use it. Server-Sent Events, incremental chunks, usage, and mid-stream errors at a glance."
 ---
 
-Streaming changes when you receive a reply, not what the reply is. Without it, you wait for the whole completion and get it in one response. With it, Nito sends the answer as it is generated, a few tokens at a time, over a single long-lived connection. For anything a person watches happen (a chat UI, a writing assistant), streaming is the difference between a blank screen for several seconds and words appearing as the model produces them. This page is the short version: what streaming is, when to use it, and the shape of what arrives. The exact wire format lives in the [streaming format reference](/api-reference/streaming-format/server-sent-events).
+Streaming changes when you receive a reply, not what the reply is. Without it, you wait for the whole completion and get it in one response. With it, Nito sends the answer as it is generated, a few tokens at a time, over a single long-lived connection. For anything a person watches happen (a chat UI, a writing assistant), streaming is the difference between a blank screen for several seconds and words appearing as the model produces them. This page is the short version: what streaming is, when to use it, and the shape of what arrives. The exact wire format is described in the [streaming format reference](/api-reference/streaming-format/server-sent-events).
 
-## When to use it
+## When Use the Streaming Feature
 
 Reach for streaming when:
 
@@ -17,13 +17,13 @@ Skip streaming when:
 - You only need the final text and are going to wait for it anyway (a backend job, a batch transform). A non-streaming call is simpler to handle.
 - You need a privacy mode that does not support it. The Encrypted mode (`:encrypted`) **does not stream**; those calls are non-streaming only. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Turning it on
+## Turning On the Streaming Feature
 
 Set `stream: true` on a chat-completions request. Nito responds with a stream of Server-Sent Events (SSE) instead of a single JSON body.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `x-ai/grok-4.5` is an example; fetch `GET /v1/models` for the live catalog.
 
-```bash
+```shellscript wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -38,33 +38,53 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 Most OpenAI SDKs expose this as a `stream=True` flag and hand you an async iterator of chunks, so you rarely parse the raw events yourself. The shape below is what those chunks represent.
 
-## What arrives
+## What is Included in a Stream
 
 The stream is a sequence of events. The pieces you care about:
 
-- **Content chunks.** Each chunk is an object with `object` set to `chat.completion.chunk`. The new text is in `choices[].delta.content`. The assistant `role` is sent once, on the first chunk. You build the full reply by concatenating the `content` deltas in order.
-- **Heartbeats.** Roughly every 15 seconds the stream may send a `: keep-alive` comment line. It carries no data; it keeps the connection from idling out. Ignore it.
-- **A usage chunk (optional).** If you set `stream_options.include_usage: true`, a final chunk with an empty `choices` array and a populated `usage` object arrives just before the stream ends. This is how you get token counts when streaming.
-- **The terminator.** The stream ends with a literal `data: [DONE]` line. Stop reading when you see it.
+- **Content chunks:** Each chunk is an object with `object` set to `chat.completion.chunk`. The new text is in `choices[].delta.content`. The assistant `role` is sent once, on the first chunk. You build the full reply by concatenating the `content` deltas in order.
+- **Heartbeats:** Roughly every 15 seconds the stream may send a `: keep-alive` comment line. It carries no data; it keeps the connection from idling out. Ignore it.
+- **A usage chunk (optional):** If you set `stream_options.include_usage: true`, a final chunk with an empty `choices` array and a populated `usage` object arrives just before the stream ends. This is how you get token counts when streaming.
+- **The terminator:** The stream ends with a literal `data: [DONE]` line. Stop reading when you see it.
 
 Tool calls and reasoning also arrive as deltas in this stream. Tool calls come as `tool_calls` fragments you assemble by `index` (see [Tool Calling](/features/tool-calling)); reasoning comes as `reasoning_details` deltas (see [Reasoning](/features/reasoning)).
 
-## Errors mid-stream
+## Common Errors Mid-Stream
 
 An error can happen after streaming has already started. When it does, you do not get an HTTP error status, because the `200` and the first bytes already went out. Instead the failure arrives **as a chunk**: it carries a top-level `error` object and a choice whose `finish_reason` is `error`. Your stream handler must check for this, not just assume every chunk is content. If the call fails before any byte is written, you get an ordinary HTTP error response instead, exactly like a non-streaming failure.
 
 This is the one place streaming error handling differs from normal request handling, so it is worth a guard in your code: on each chunk, look for a top-level `error` before reading `delta.content`.
 
-## A note on privacy and streaming
+## Important Note on Privacy and Streaming
 
 Streaming is available in ordinary, private, and `:confidential` modes. It is the strongest mode, `:encrypted`, that cannot stream, because the response is encrypted to the sealed environment as a whole. If a streaming UX is essential, choose a privacy mode that supports it.
 
 The full SSE wire format, every field on a chunk, and exact framing are documented in the [streaming format reference](/api-reference/streaming-format/server-sent-events). This page is the overview; that page is the contract.
 
-## Related
+## Related Resources
 
-- [Chat Completions](/features/chat-completions)
-- [Tool Calling](/features/tool-calling)
-- [Reasoning](/features/reasoning)
-- [Streaming format reference](/api-reference/streaming-format/server-sent-events)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Chat Completions Endpoint" icon="message-captions" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Tool Calling" icon="tools" href="/features/tool-calling">
+    Dive into how a model can call functions.<br /><br />
+  </Card>
+
+  <Card title="Reasoning" icon="brain-circuit" href="/features/reasoning">
+    Ask a capable model to think before it answers.<br /><br />
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Per Call Privacy Modes" icon="file-lock" href="/privacy/per-call-privacy-modes">
+    One key, many models, selectable privacy per call.
+  </Card>
+</CardGroup>

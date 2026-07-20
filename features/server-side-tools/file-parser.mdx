@@ -10,11 +10,11 @@ There are two ways to reach it, and which one applies to you depends on how you 
 - **Inline in a chat request** the path you use from the API. Attach a file to a chat message and the gateway parses it and injects the text before the model runs. This works with your API key.
 - **The standalone parse endpoint** (`POST /api/v1/attachments/parse`) a **browser-session** surface used by the console UI. It is **not callable with an API key** and returns `403` if you try. From the API, use the inline path below.
 
-## Parsing inline in a chat request
+## Parsing Inline in a Chat Request
 
 Send the file as a content part alongside your text. The gateway runs the parser on it and continues the completion with the extracted text in context, so there is no separate call and no second round trip.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -40,7 +40,7 @@ A few rules the gateway enforces:
 - The model must support file attachments. On a model that does not, the request is rejected with `model does not support file attachments`.
 - Images are not parsed here. Send an image to an image-capable model as [image input](/features/multimodal/image-input) instead.
 
-## What the parser accepts
+## What the Parser Accepts
 
 The parser handles text and common office documents: **text, pdf, docx, pptx, xlsx, xls**. Anything else returns `file type is not supported for server-side parsing`, and an image returns `image files should be sent directly to an image-capable model`.
 
@@ -57,11 +57,11 @@ The parser bounds its work so responses stay predictable:
 
 A parse is billed as **`z-protocol/document-parse`**, metered as **1 unit** per parse, separate from any model token usage.
 
-## The standalone parse endpoint (browser session only)
+## The Standalone Parse Endpoint (Browser Session Only)
 
 The console UI parses uploads through `POST /api/v1/attachments/parse` (multipart form data). This endpoint requires a **browser session** and is **not** part of the API-key surface: calling it with a bearer token returns `403`. It returns a JSON envelope with the extracted `text`, the detected `mime_type` and `file_kind`, input `bytes`, and — for paginated formats — `page_count`, `parsed_pages`, a `truncated` flag, and any `warnings`. If you are building against the API, use the inline-chat path above instead; it runs the same parser.
 
-## Related
+## Related Resources
 
 - [Server-side tools](/features/server-side-tools) for the family overview.
 - [PDF and document input](/features/multimodal/pdf-input) for the multimodal view of sending files inline.

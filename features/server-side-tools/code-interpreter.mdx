@@ -62,8 +62,22 @@ Because this is a passthrough, the exact shape of the interpreter's output as re
 - **Using it for non-computational tasks.** It adds cost and latency without benefit when the task is pure language.
 - **Sending sensitive data without considering where it runs.** The code executes at xAI, which is not the same as a sealed TEE call.
 
-## Related
+## Related Resources
 
-- [Server-side tools](/features/server-side-tools) for the family overview and the hosted-tool shape.
-- [Web search](/features/server-side-tools/web-search) and [web fetch](/features/server-side-tools/web-fetch) for the gateway-native tools.
-- [Tool calling](/features/tool-calling) for your own (non-hosted) function tools.
+<CardGroup cols={3}>
+  <Card title="Server-Side Tools" icon="tools" href="/features/server-side-tools">
+    For the family overview and the hosted-tool shape.
+  </Card>
+
+  <Card title="Web search" icon="searchengin" href="/api-reference/server-tools/web-search">
+    For query-driven retrieval.<br />
+  </Card>
+
+  <Card title="Web Fetch" icon="arrow-down-to-bracket" href="/features/server-side-tools/web-fetch">
+    For reading a specific URL instead of searching.
+  </Card>
+
+  <Card title="Tool Calling" icon="gears" href="/features/tool-calling">
+    For your own (non-hosted) function tools.
+  </Card>
+</CardGroup>

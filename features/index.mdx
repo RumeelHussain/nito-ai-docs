@@ -20,7 +20,7 @@ These are live on the gateway and documented in depth.
 - [**Prompt caching**](/features/prompt-caching) pass provider cache directives (`prompt_cache_key`, `cache_control`) through to cut the cost of long, repeated prompt prefixes. Cache hits show up in `usage`.
 - [**Safe retries**](/features/safe-retries) how to retry safely — failed calls are not billed, and how to guarantee exactly-once at your layer.
 
-Nito also now serves an **Anthropic Messages-compatible** endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`) and an **OpenAI Responses-compatible** endpoint at `POST /v1/responses` (and `/v1/responses/compact`). Each validates its native request shape and maps it into the gateway's canonical chat contracts. You can try them in the [API Playground](/api-playground). Full drop-in guidance is documented in a later pass.
+Nito also now serves an **Anthropic Messages-Compatible** endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`) and an **OpenAI Responses-Compatible** endpoint at `POST /v1/responses` (and `/v1/responses/compact`). Each validates its native request shape and maps it into the gateway's canonical chat contracts. You can try them in the [API Playground](/api-playground). Full drop-in guidance is documented in a later pass.
 
 ## Related Resources
 

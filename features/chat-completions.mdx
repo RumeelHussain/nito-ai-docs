@@ -7,7 +7,7 @@ Chat completions is the main way you talk to a model on Nito. You send a list of
 
 If you have not yet read [How Nito Works](/get-started/how-nito-works), skim it first. This page assumes you know that the `model` string carries two decisions at once: which model, and how private.
 
-## The endpoint
+## The Chat Completion Endpoint
 
 Chat lives at two paths that share the exact same handler:
 
@@ -18,12 +18,12 @@ Pick whichever fits your stack. An OpenAI SDK pointed at the `/v1` base will wor
 
 The body is decoded as **strict JSON**: unknown fields are rejected with a `400`, not silently ignored. This is deliberate. If you misspell `max_tokens` or paste a field from another provider's API, you find out immediately instead of having it quietly dropped. In particular, several common OpenAI fields are **not** accepted and return a `400` (`unsupported field "..."`): `stop`, `seed`, `n`, `frequency_penalty`, `presence_penalty`, `logit_bias`, `logprobs`, and `response_format`. Send only the fields documented below.
 
-## The request
+## The Request Format
 
 Only `messages` is required. Everything else is optional and passed through when present.
 
 | Field | Type | Notes |
-| --- | --- | --- |
+| --- | :-- | --- |
 | `messages` | array | **Required.** The conversation so far. Empty array is rejected. |
 | `model` | string | Optional; falls back to a default. Add a `:confidential` or `:encrypted` suffix to select a privacy mode. |
 | `temperature` | number | Sampling temperature, passed through. |
@@ -44,19 +44,21 @@ Only `messages` is required. Everything else is optional and passed through when
 
 Duplicate feature keys (for example sending `web_search` twice) are rejected.
 
-### Messages and roles
+### Messages and Roles
 
 Each message has a `role` and `content`. The accepted roles are `system`, `user`, `assistant`, `tool`, and `developer`. The `developer` role is accepted and passed through with no special handling, so use it only if your model expects it. A `tool` message carries the result of a tool call and pairs with a `tool_call_id` (see [Tool Calling](/features/tool-calling)).
 
 `content` is either a plain string or an array of content parts for multimodal input. The text case is the common one and is all you need for ordinary chat.
 
-## A first call
+## Example: Making First Call
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
 `x-ai/grok-4.5` below is a realistic example. Do not hard-code it. Fetch `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
-```bash
+<CodeGroup>
+
+```shellscript curl wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -69,7 +71,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   }'
 ```
 
-```python
+```python Python lines wrap
 from openai import OpenAI
 
 client = OpenAI(
@@ -88,7 +90,7 @@ resp = client.chat.completions.create(
 print(resp.choices[0].message.content)
 ```
 
-```typescript
+```typescript TypeScript lines wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -107,13 +109,15 @@ const resp = await client.chat.completions.create({
 console.log(resp.choices[0].message.content);
 ```
 
-To run the same kind of call inside an attested environment, use a model that offers a confidential variant, for example `"model": "openai/gpt-oss-120b:confidential"`. The privacy mode rides on the model string and nothing else. Not every model has a confidential variant (for instance `x-ai/grok-4.5` does not), so fetch `GET /v1/models` and filter for attestation support. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
+</CodeGroup>
 
-## The response
+To run the same kind of call inside an attested environment, use a model that offers a confidential variant, for example `"model": "openai/gpt-oss-120b:confidential"`. The privacy mode rides on the model string and nothing else. Not every model has a confidential variant (for instance `x-ai/grok-4.5` does not), so fetch `GET /v1/models` and filter for attestation support. See [Per-call privacy modes](/privacy/per-call-privacy-modes) section for more details.
+
+## The Response Format
 
 A successful non-streaming call returns an object with `object` set to `chat.completion`:
 
-```json
+```json lines wrap
 {
   "id": "...",
   "object": "chat.completion",
@@ -147,18 +151,37 @@ A few details worth internalizing:
 
 Validation and decoding problems return `400` with an error envelope of the shape `{"error": {"message", "code", "param"}}`. Note there is no `type` field; the error family lives in `code`. A non-POST request returns `405` with an `Allow` header. Authentication, quota, and provider failures map to their own status codes. All responses carry `Cache-Control: no-store`. The full status mapping is in the [error reference](/api-reference/errors-and-rate-limits/error-codes).
 
-## When to reach for something else
+## When to Opt for Other Endpoints
 
-Chat completions is the right default for almost everything text. Reach elsewhere when:
+Chat completions endpoint is the right default for almost everything text. Use other endpoint when:
 
 - You want several models to answer and a judge to merge them: that is [chat fusion](/api-reference/chat-and-text/chat-fusion), a separate non-streaming endpoint.
 - You want text-to-image: use [image generation](/api-reference/multimodal/image-generation).
 
-## Related
+## Related Resources
 
-- [Tool Calling](/features/tool-calling)
-- [Reasoning](/features/reasoning)
-- [Streaming](/features/streaming)
-- [How Nito Works](/get-started/how-nito-works)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
-- [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={3}>
+  <Card title="Tool Calling" icon="tools" href="/features/tool-calling">
+    Dive into how a model can call functions.
+  </Card>
+
+  <Card title="Reasoning" icon="brain-circuit" href="/features/reasoning">
+    Ask a capable model to think before it answers.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Per Call Privacy Modes" icon="file-lock" href="/privacy/per-call-privacy-modes">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Chat Completions Endpoint" icon="message-captions" href="/api-reference/chat-and-text/chat-completions">
+    Schema reference chat completions on Nito.
+  </Card>
+</CardGroup>

@@ -5,11 +5,11 @@ description: "Let the model search the web mid-generation with a gateway-native 
 
 Web search lets a model pull fresh information from the web into its answer without you running anything. You set one field on your chat request, and the gateway decides whether a search is actually warranted, runs it through a native pipeline, folds the results into the model's context, and tells you in the response what it did. This page covers how to turn it on, every option you can pass, how the gateway decides whether to search, where it runs, and how it is billed.
 
-## Turning it on
+## Turning On Web Search Feature
 
 The simplest form is a boolean on the top-level `web_search` field:
 
-```json
+```json wrap
 {
   "model": "x-ai/grok-4.5",
   "messages": [{ "role": "user", "content": "What are the headline features of the latest release?" }],
@@ -19,7 +19,7 @@ The simplest form is a boolean on the top-level `web_search` field:
 
 `web_search` accepts either a boolean or an object. The object form unlocks the controls below. You can also enable search as a hosted tool entry, which is equivalent for turning the capability on:
 
-```json
+```json wrap
 {
   "tools": [{ "type": "web_search" }]
 }
@@ -32,7 +32,7 @@ The chat request is decoded strictly: unknown fields inside the `web_search` obj
 When `web_search` is an object, these fields are available.
 
 | Field | Type | Default | Notes |
-| --- | --- | --- | --- |
+| --- | :-: | :-: | --- |
 | `mode` | string |  | `on`, `off`, or `auto`. `auto` lets the rules engine and router decide. |
 | `retrieval_mode` | string | `llm_context` | One of `llm_context` (default), `web_search`, or `web_fetch`. |
 | `max_sources` | int | `10` | Maximum sources to retrieve. Capped at `50`. |
@@ -45,7 +45,7 @@ When `web_search` is an object, these fields are available.
 
 The `location` object accepts `city`, `state`, `country`, `timezone`, `postal_code`, `latitude`, and `longitude`. Use it to localize results when the query is location-sensitive.
 
-```json
+```json wrap
 {
   "web_search": {
     "mode": "auto",
@@ -67,7 +67,7 @@ The `location` object accepts `city`, `state`, `country`, `timezone`, `postal_co
 
 > **TODO (needs SME):** the exact accepted value sets and formats for `freshness`, `country`, `search_lang`, and `safesearch` (for example whether `freshness` uses Brave-style codes like `pd`/`pw`/`pm`/`py` or date ranges). Confirm against `internal/websearch/` before publishing literal values.
 
-## How the gateway decides whether to search
+## How the Gateway Decides Whether to Search
 
 Enabling `web_search` does not guarantee a search runs. The gateway uses a native pipeline with a rules engine that decides, per request, whether searching would actually help. This avoids spending a search (and its cost) on prompts that do not need one.
 
@@ -79,19 +79,19 @@ The rules engine, at a high level:
 
 So `mode: on` leans toward searching, `mode: off` disables it, and `mode: auto` hands the decision to the rules engine plus the router. If a search is skipped, you are not charged for one, and the response metadata reflects that nothing was retrieved.
 
-## Provider routing
+## Provider Routing
 
 Web search requires a model whose provider can serve it — today an **OpenRouter, xAI, NEAR, or Phala** model. Enabling it on a model outside that set is rejected with `web_search requires an OpenRouter, xAI, NEAR, or Phala model`, not silently dropped. You can confirm per model with the web-search capability in `GET /v1/models`.
 
-## What the pipeline is
+## What the Pipeline is
 
 The pipeline is **gateway-native**, backed by **Brave** as the search backend. "Gateway-native" means Nito owns the search-and-retrieve step rather than blindly forwarding a provider's hosted search: it runs the rules engine, queries the backend, retrieves and trims sources to your `max_sources` and `max_context_tokens` budgets, and injects the result into the model's context. Outbound queries are redacted to strip secrets and PII before they leave the gateway.
 
-## Worked example
+## Worked Example
 
 A request that asks for fresh information and localizes results:
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -116,7 +116,7 @@ The response is an ordinary chat completion with two additions:
 - A top-level **`web_search`** metadata object describing the search the gateway performed and the sources it used.
 - Search counters under **`usage.server_tool_use`**: `web_search_requests` and `web_search_results`.
 
-```json
+```json wrap
 {
   "id": "...",
   "object": "chat.completion",
@@ -138,8 +138,18 @@ The response is an ordinary chat completion with two additions:
 
 Web search is billed in addition to the model's own token usage. The search step is metered as pseudo-models: **`brave/llm_context`** and **`brave/web_search`**. These appear alongside your model charges. The `usage.server_tool_use` counters on the response are your handle for reconciling search activity against the bill.
 
-## Related
+## Related Resources
 
-- [Server-side tools](/features/server-side-tools) for how hosted tools work in general.
-- [Web fetch](/features/server-side-tools/web-fetch) for reading a specific URL instead of searching.
-- [How Nito works](/get-started/how-nito-works) for routing and billing fundamentals.
+<CardGroup cols={3}>
+  <Card title="Server-Side Tools" icon="tools" href="/features/server-side-tools">
+    For how hosted tools work in general.<br />
+  </Card>
+
+  <Card title="Web Fetch" icon="arrow-down-to-bracket" href="/features/server-side-tools/web-fetch">
+    For reading a specific URL instead of searching.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    Understand the routing and billing fundamentals.
+  </Card>
+</CardGroup>

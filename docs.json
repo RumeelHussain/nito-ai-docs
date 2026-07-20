@@ -80,7 +80,8 @@
               "features/reasoning"
             ],
             "root": "features/index",
-            "expanded": true
+            "expanded": true,
+            "icon": "lightbulb-gear"
           },
           {
             "group": "Server-Side Tools",
@@ -91,7 +92,8 @@
               "features/server-side-tools/file-parser",
               "features/server-side-tools/code-interpreter"
             ],
-            "expanded": true
+            "expanded": true,
+            "icon": "server"
           },
           {
             "group": "Multimodal",
@@ -101,7 +103,8 @@
               "features/multimodal/image-generation"
             ],
             "root": "features/multimodal",
-            "expanded": true
+            "expanded": true,
+            "icon": "cubes"
           },
           {
             "group": "Efficiency",
@@ -109,7 +112,8 @@
               "features/prompt-caching",
               "features/safe-retries"
             ],
-            "expanded": true
+            "expanded": true,
+            "icon": "arrow-up-short-wide"
           }
         ],
         "icon": "cubes-stacked"

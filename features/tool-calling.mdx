@@ -5,26 +5,24 @@ description: "Let a model call functions. How Nito routes tool declarations and 
 
 Tool calling lets a model reach beyond text. Instead of guessing today's weather or your order status, the model can say "call this function with these arguments," you run the function, hand back the result, and the model continues with real data. Nito speaks the OpenAI tool-calling protocol, so the request and response shapes will be familiar. The one thing to internalize up front: **Nito routes the conversation but does not execute your custom function tools.** When the model asks for a function call, your code runs it. That division of labor is the whole mental model for this page.
 
-## Two kinds of tools
+## Types of Tool Families
 
 There are two families of tools, and they behave very differently.
 
-**Function tools (custom tools)** are functions you define. The model can request them, but it cannot run them, and neither can Nito. You run them in your own code and feed the results back. This is the loop described below.
-
-**Hosted tools (server tools)** are executed by the provider or the gateway, not you. You opt in by listing the tool type, and the work happens upstream without a round trip back to your code. The hosted tool types that exist are:
-
-- `web_search` search the web mid-generation.
-- `web_fetch` fetch a specific URL.
-- `x_search` search X/Twitter (xAI-served models only).
-- `code_interpreter` run code in a provider sandbox (xAI-served models only).
+1. **Function tools (custom tools)** are functions you define. The model can request them, but it cannot run them, and neither can Nito. You run them in your own code and feed the results back. This is the loop described below.
+2. **Hosted tools (server tools)** are executed by the provider or the gateway, not you. You opt in by listing the tool type, and the work happens upstream without a round trip back to your code. The hosted tool types that exist are:
+   - `web_search` search the web mid-generation.
+   - `web_fetch` fetch a specific URL.
+   - `x_search` search X/Twitter (xAI-served models only).
+   - `code_interpreter` run code in a provider sandbox (xAI-served models only).
 
 Each hosted tool has its own page; this one is about the custom-function loop. The rest of this page says "tool" to mean a function tool unless stated otherwise.
 
-## Declaring a tool
+## Declaring a Tool
 
 You declare tools in the `tools` array on a chat-completions request. A function tool has a `type` of `function` and a `function` object:
 
-```json
+```json wrap
 {
   "type": "function",
   "function": {
@@ -43,7 +41,7 @@ You declare tools in the `tools` array on a chat-completions request. A function
 
 Two rules the gateway enforces: each `function.name` must be unique within the request, and `parameters` must be a JSON object (a JSON Schema describing the arguments). A clear `description` matters more than it looks, because that text is how the model decides when to call the tool.
 
-### Steering tool use with `tool_choice`
+### Steering Tool Use with `tool_choice`
 
 `tool_choice` controls whether and which tool the model may call:
 
@@ -52,123 +50,124 @@ Two rules the gateway enforces: each `function.name` must be unique within the r
 - `"required"` the model must call some tool.
 - `{"type": "function", "function": {"name": "get_weather"}}` force this specific tool.
 
-## The tool loop
+## The Tool Loop
 
 Here is the part people get wrong the first time. A tool call is not one request; it is at least two. The model pauses to ask for a tool, you run it, and you call again with the answer appended. Walk through both rounds.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `x-ai/grok-4.5` is an example; fetch `GET /v1/models` for the live catalog.
 
-### Round one: the model asks for a tool
+<Steps>
+  <Step title="Round One: the model asks for a tool" icon="1" iconType="solid" stepNumber={1} titleSize="h3">
+    You send the conversation plus the tool declaration.
 
-You send the conversation plus the tool declaration.
-
-```bash
-curl https://nito.dev.zprotocol.org/v1/chat/completions \
-  -H "Authorization: Bearer $NITO_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "x-ai/grok-4.5",
-    "messages": [
-      {"role": "user", "content": "What is the weather in Austin?"}
-    ],
-    "tools": [
-      {
-        "type": "function",
-        "function": {
-          "name": "get_weather",
-          "description": "Get the current weather for a city.",
-          "parameters": {
-            "type": "object",
-            "properties": {"city": {"type": "string"}},
-            "required": ["city"]
-          }
-        }
-      }
-    ]
-  }'
-```
-
-The model does not answer in prose. Instead it returns a `tool_calls` request and a `finish_reason` of `tool_calls`:
-
-```json
-{
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
+    ```bash
+    curl https://nito.dev.zprotocol.org/v1/chat/completions \
+      -H "Authorization: Bearer $NITO_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "x-ai/grok-4.5",
+        "messages": [
+          {"role": "user", "content": "What is the weather in Austin?"}
+        ],
+        "tools": [
           {
-            "id": "call_abc123",
             "type": "function",
-            "function": { "name": "get_weather", "arguments": "{\"city\": \"Austin\"}" }
+            "function": {
+              "name": "get_weather",
+              "description": "Get the current weather for a city.",
+              "parameters": {
+                "type": "object",
+                "properties": {"city": {"type": "string"}},
+                "required": ["city"]
+              }
+            }
           }
         ]
-      },
-      "finish_reason": "tool_calls"
-    }
-  ]
-}
-```
+      }'
+    ```
 
-Note that `arguments` is a JSON **string**, not a parsed object. Parse it yourself. The `id` (`call_abc123`) is the handle that ties this request to the result you will send back.
+    The model does not answer in prose. Instead it returns a `tool_calls` request and a `finish_reason` of `tool_calls`:
 
-### You run the function
-
-This step happens entirely in your code. Nito has already done its job for this round. You parse the arguments, call your real `get_weather("Austin")`, and get something like `{"tempF": 96, "sky": "clear"}`.
-
-### Round two: you send the result back
-
-Append two messages to the conversation: the assistant's tool-call message (echoed back so the model sees its own request) and a new `tool` message carrying the result. The `tool` message must include the `tool_call_id` that matches the `id` from round one.
-
-```bash
-curl https://nito.dev.zprotocol.org/v1/chat/completions \
-  -H "Authorization: Bearer $NITO_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "x-ai/grok-4.5",
-    "messages": [
-      {"role": "user", "content": "What is the weather in Austin?"},
-      {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
-          {"id": "call_abc123", "type": "function",
-           "function": {"name": "get_weather", "arguments": "{\"city\": \"Austin\"}"}}
-        ]
-      },
-      {
-        "role": "tool",
-        "tool_call_id": "call_abc123",
-        "content": "{\"tempF\": 96, \"sky\": \"clear\"}"
-      }
-    ],
-    "tools": [ ... same tools ... ]
-  }'
-```
-
-Now the model has real data and answers in prose with `finish_reason: "stop"`:
-
-```json
-{
-  "choices": [
+    ```json
     {
-      "index": 0,
-      "message": { "role": "assistant", "content": "It is 96 degrees and clear in Austin right now." },
-      "finish_reason": "stop"
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_abc123",
+                "type": "function",
+                "function": { "name": "get_weather", "arguments": "{\"city\": \"Austin\"}" }
+              }
+            ]
+          },
+          "finish_reason": "tool_calls"
+        }
+      ]
     }
-  ]
-}
-```
+    ```
 
-A model may request several tools in one turn, or request more tools after seeing your results. The loop is the same: run what it asked for, append a `tool` message per `tool_call_id`, and call again until `finish_reason` is `stop`.
+    Note that `arguments` is a JSON **string**, not a parsed object. Parse it yourself. The `id` (`call_abc123`) is the handle that ties this request to the result you will send back.
 
-## Streaming tool calls
+    ### You run the function
+
+    This step happens entirely in your code. Nito has already done its job for this round. You parse the arguments, call your real `get_weather("Austin")`, and get something like `{"tempF": 96, "sky": "clear"}`.
+  </Step>
+  <Step title="Round two: you send the result back" icon="2" iconType="solid" stepNumber={2} titleSize="h3">
+    Append two messages to the conversation: the assistant's tool-call message (echoed back so the model sees its own request) and a new `tool` message carrying the result. The `tool` message must include the `tool_call_id` that matches the `id` from round one.
+
+    ```bash
+    curl https://nito.dev.zprotocol.org/v1/chat/completions \
+      -H "Authorization: Bearer $NITO_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "x-ai/grok-4.5",
+        "messages": [
+          {"role": "user", "content": "What is the weather in Austin?"},
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {"id": "call_abc123", "type": "function",
+               "function": {"name": "get_weather", "arguments": "{\"city\": \"Austin\"}"}}
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "call_abc123",
+            "content": "{\"tempF\": 96, \"sky\": \"clear\"}"
+          }
+        ],
+        "tools": [ ... same tools ... ]
+      }'
+    ```
+
+    Now the model has real data and answers in prose with `finish_reason: "stop"`:
+
+    ```json
+    {
+      "choices": [
+        {
+          "index": 0,
+          "message": { "role": "assistant", "content": "It is 96 degrees and clear in Austin right now." },
+          "finish_reason": "stop"
+        }
+      ]
+    }
+    ```
+
+    A model may request several tools in one turn, or request more tools after seeing your results. The loop is the same: run what it asked for, append a `tool` message per `tool_call_id`, and call again until `finish_reason` is `stop`.
+  </Step>
+</Steps>
+
+## Streaming Tool Calls
 
 When you stream a response (`stream: true`), tool calls arrive in fragments across chunks rather than all at once. The first chunk for a call carries the structure: `tool_calls` with an `index`, an `id`, `type: "function"`, and the `function.name`. Subsequent chunks carry `function.arguments` fragments under the same `index`. You assemble the full arguments string by concatenating those fragments per index, then run the tool exactly as in the non-streaming loop. The wire details are in [Streaming](/features/streaming) and the [streaming format reference](/api-reference/streaming-format/server-sent-events).
 
-## What Nito does and does not do
+## What Nito Does and Does Not Do
 
 To be unambiguous:
 
@@ -176,14 +175,30 @@ To be unambiguous:
 - Nito **does not run your function tools.** Your code does. If you never send the `tool` message back, the conversation simply stalls; the model is waiting on you.
 - Hosted tools (`web_search`, `web_fetch`, `x_search`, `code_interpreter`) are the exception: those are executed upstream, and you receive the model's final answer without a manual round trip.
 
-## Privacy note
+## Privacy Note
 
 The Encrypted mode (`:encrypted`) rejects tool use, along with streaming, reasoning, and prompt caching. If you need custom tools, use ordinary, private, or `:confidential` modes. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Related
+## Related Resources
 
-- [Chat Completions](/features/chat-completions)
-- [Streaming](/features/streaming)
-- [Web search](/api-reference/server-tools/web-search)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
-- [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={3}>
+  <Card title="Chat Completions" icon="message-captions" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="Web Search" icon="searchengin" href="/api-reference/server-tools/web-search">
+    Let the model search the web during a chat completion.
+  </Card>
+
+  <Card title="Per Call Privacy Modes" icon="file-lock" href="/privacy/per-call-privacy-modes">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Chat Completions Endpoint" icon="message-captions" href="/api-reference/chat-and-text/chat-completions">
+    Schema reference chat completions on Nito.
+  </Card>
+</CardGroup>

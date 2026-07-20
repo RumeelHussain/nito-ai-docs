@@ -7,11 +7,11 @@ Some models can think before they answer: they work through a problem internally
 
 Reasoning is a **per-model** capability. Not every model supports it. Check the model's `supports_reasoning` capability in `GET /v1/models` before relying on it, and select by capability at runtime rather than assuming.
 
-## Turning it on
+## Turning On Reasoning
 
 Add a `reasoning` object to your chat request:
 
-```json
+```json wrap
 {
   "model": "x-ai/grok-4.5",
   "messages": [
@@ -33,15 +33,15 @@ The fields on `reasoning`:
 
 Two defaults are worth remembering. If you enable reasoning without specifying `effort` or a token budget, effort defaults to **`low`**. If you do not specify `summary`, it defaults to **`auto`**, which lets the model choose an appropriate level of detail.
 
-### Setting effort with a model-ID suffix
+### Setting Effort With a `model-ID` suffix
 
 Reasoning can also be requested through a feature suffix on the model ID, the same mechanism that selects privacy modes. This is handy when you cannot easily set a request body field but can change the model string. The `reasoning` object and the suffix express the same capability; prefer the explicit object when you have it.
 
-## A full call
+## Sample Full Call with Reasoning
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed. `x-ai/grok-4.5` is an example; fetch `GET /v1/models` for the live catalog and confirm `supports_reasoning`.
 
-```bash
+```shellscript wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -54,7 +54,7 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
   }'
 ```
 
-## Reading the output
+## Reading the Output
 
 When reasoning runs, the response carries two extra signals.
 
@@ -62,7 +62,7 @@ When reasoning runs, the response carries two extra signals.
 
 **`usage.reasoning_tokens`** reports how many tokens were spent thinking. This is separate from `completion_tokens`, and it is what makes reasoning cost more.
 
-```json
+```json wrap
 {
   "choices": [
     {
@@ -90,18 +90,34 @@ If you set `exclude: true`, the model still reasons (and you still pay for the r
 
 When you stream, reasoning arrives incrementally: chunks carry `reasoning_details` deltas with a non-empty `summary` as the thinking unfolds, ahead of the final content. See [Streaming](/features/streaming).
 
-## Cost and latency
+## Cost and Latency
 
 Reasoning is not free. Reasoning tokens are billed, and `usage.reasoning_tokens` is the count you pay for on top of your prompt and completion tokens. Higher `effort` produces more reasoning tokens, so `high` costs more and takes longer than `low`. Treat effort as a dial: spend it on genuinely hard problems (math, multi-step logic, careful analysis) and leave it off for routine generation where it adds cost without improving the answer. Use `max_tokens` on the `reasoning` object to put a ceiling on how much the model can spend thinking.
 
-## Privacy interaction
+## Privacy Interaction
 
 Reasoning works in ordinary, private, and `:confidential` modes. The Encrypted mode (`:encrypted`) **rejects reasoning**, along with streaming, tools, and prompt caching. If your call needs to think and needs the strongest privacy mode, those two requirements conflict today; pick the privacy tier that fits and use a reasoning-capable model within it. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Related
+## Related Resources
 
-- [Chat Completions](/features/chat-completions)
-- [Streaming](/features/streaming)
-- [Tool Calling](/features/tool-calling)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
-- [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={3}>
+  <Card title="Chat Completions" icon="message-captions" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="Tool Calling" icon="tools" href="/features/tool-calling">
+    Dive into how a model can call functions.<br />
+  </Card>
+
+  <Card title="Per Call Privacy Modes" icon="file-lock" href="/privacy/per-call-privacy-modes">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Chat Completions Endpoint" icon="message-captions" href="/api-reference/chat-and-text/chat-completions">
+    Schema reference chat completions on Nito.
+  </Card>
+</CardGroup>
