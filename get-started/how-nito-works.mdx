@@ -34,12 +34,26 @@ flowchart LR
 
 Here is what actually happens step-by-step behind the scenes when a user makes a call. The user usually only ever performs the steps 1 and 2 directly; the rest is the gateway doing its job, however, knowing them helps you reason about errors, cost, and latency.
 
-1. **Authentication.** You send your API key as a bearer token in the `Authorization` header. Nito looks it up, resolves it to your organization (the account that owns billing and keys), and rejects the request with `401` if the key is missing, malformed, revoked, or expired. This is also where rate limits are checked: if you are over a limit, you get `429` with a `Retry-After` header telling you how long to wait.
-2. **Model and privacy resolution.** Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. For example, `x-ai/grok-4.5` is ordinary mode; on a TEE-capable model, a suffix asks for a stronger mode, so `openai/gpt-oss-120b:confidential` asks for execution inside a Trusted Execution Environment and `openai/gpt-oss-120b:encrypted` asks for end-to-end encrypted TEE. Only `:confidential` and `:encrypted` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
-3. **Routing.** A single logical model can be served by more than one physical backend (the same model at different providers, or at different privacy tiers). Nito gathers the eligible backends and chooses one, filtering first by hard requirements (your privacy mode, the features you asked for, the inputs you sent) and then ordering what remains by availability and cost. The result is that you name one model and Nito quietly picks a healthy, eligible, cost-effective backend to run it.
-4. **Billing hold.** Before spending real money on a provider call, Nito places a hold against your credit balance, sized to the expected cost of the request. A hold is like the pre-authorization a hotel puts on a card at check-in: it reserves the funds without charging them yet. This guarantees user can pay for the work before it starts.
-5. **Inference.** Nito calls the chosen provider inside the privacy boundary you selected, and returns the result either as one complete response or as a stream of tokens (small incremental pieces) over a long-lived connection.
-6. **Settlement.** When the call succeeds, the hold is captured for the actual usage (which may be less than the estimate). If the request fails before producing any usage, the hold is released and you are not charged. This is why a failed call does not cost you credits, and it is a direct consequence of the hold-then-settle design in step 4.
+<Steps>
+  <Step title="Authentication" icon="1" iconType="solid" stepNumber={1} titleSize="h4">
+    You send your API key as a bearer token in the `Authorization` header. Nito looks it up, resolves it to your organization (the account that owns billing and keys), and rejects the request with `401` if the key is missing, malformed, revoked, or expired. This is also where rate limits are checked: if you are over a limit, you get `429` with a `Retry-After` header telling you how long to wait.
+  </Step>
+  <Step title="Model and privacy resolution" iconType="solid" stepNumber={2} titleSize="h4">
+    Nito reads the `model` field. The base part selects the model; an optional suffix selects a stronger privacy mode. For example, `x-ai/grok-4.5` is ordinary mode; on a TEE-capable model, a suffix asks for a stronger mode, so `openai/gpt-oss-120b:confidential` asks for execution inside a Trusted Execution Environment and `openai/gpt-oss-120b:encrypted` asks for end-to-end encrypted TEE. Only `:confidential` and `:encrypted` are valid suffixes, and the chosen model must actually support the mode you ask for, or the call is rejected rather than quietly downgraded. This refusal-to-downgrade is deliberate: a privacy guarantee that silently weakens is worse than no guarantee.
+  </Step>
+  <Step title="Routing" icon="3" iconType="solid" stepNumber={3} titleSize="h4">
+    A single logical model can be served by more than one physical backend (the same model at different providers, or at different privacy tiers). Nito gathers the eligible backends and chooses one, filtering first by hard requirements (your privacy mode, the features you asked for, the inputs you sent) and then ordering what remains by availability and cost. The result is that you name one model and Nito quietly picks a healthy, eligible, cost-effective backend to run it.
+  </Step>
+  <Step title="Billing Hold" icon="4" iconType="solid" stepNumber={4} titleSize="h4">
+    Before spending real money on a provider call, Nito places a hold against your credit balance, sized to the expected cost of the request. A hold is like the pre-authorization a hotel puts on a card at check-in: it reserves the funds without charging them yet. This guarantees user can pay for the work before it starts.
+  </Step>
+  <Step title="Inference" icon="5" iconType="solid" stepNumber={5} titleSize="h4">
+    Nito calls the chosen provider inside the privacy boundary you selected, and returns the result either as one complete response or as a stream of tokens (small incremental pieces) over a long-lived connection.
+  </Step>
+  <Step title="Settlement" iconType="solid" stepNumber={6} titleSize="h4">
+    When the call succeeds, the hold is captured for the actual usage (which may be less than the estimate). If the request fails before producing any usage, the hold is released and you are not charged. This is why a failed call does not cost you credits, and it is a direct consequence of the hold-then-settle design in step 4.
+  </Step>
+</Steps>
 
 A useful way to remember the lifecycle: **authenticate, resolve, route, hold, run, settle.** Two of those (resolve and run) are shaped by the single `model` string you send.
 
@@ -94,7 +108,7 @@ Knowing the boundaries prevents wrong assumptions:
 - **Nito does not keep your conversation history by default.** Where a chat history exists (for example in a browser app), it is stored on the client side. The gateway's default posture is metadata only. See the [Privacy overview](/privacy/overview) section for the precise contract.
 - **Nito is not a single model.** There is no "Nito model." You always name a model from the catalog.
 
-## Common Misconceptions
+## Common Issues
 
 - **"I set privacy once for my account."** No. Privacy is per request, via the model ID. Two calls with the same key can use different modes.
 - **"`:confidential` will fall back to a normal backend if no TEE is free."** No. A privacy mode never silently downgrades. If it cannot be served as asked, the call fails.
