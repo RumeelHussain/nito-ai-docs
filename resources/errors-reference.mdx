@@ -1,11 +1,11 @@
 ---
-title: "Errors reference"
+title: "Errors Catalog Reference"
 description: "The full Nito error catalog in one place. The response envelope, every error kind, and the HTTP status each maps to."
 ---
 
 This is the consolidated error catalog for Nito: the response envelope, every error kind the gateway emits, and the HTTP status each kind maps to. The [API reference error pages](/api-reference/errors-and-rate-limits/error-envelope) cover the same facts split by topic; this page is the single catalog you can scan end to end.
 
-## The error envelope
+## The Error Envelope
 
 Every gateway error response has this shape:
 
@@ -27,7 +27,7 @@ There is **no `type` field.** The error family is carried entirely in `code`. If
 
 A few non-inference surfaces use different envelopes: OAuth endpoints follow RFC 6749 (`{"error","error_description"}`), and some browser/SPA endpoints use `{"error","code"}`. The `{"error":{"message","code","param?}}` shape above is the inference and general API envelope.
 
-## Error kinds
+## Types of Errors
 
 These are the only families the gateway emits, with `internal_error` as the fallback for anything unclassified.
 
@@ -44,12 +44,12 @@ These are the only families the gateway emits, with `internal_error` as the fall
 | `unavailable` | The service or an upstream is temporarily unavailable. |
 | `internal_error` | Fallback for an unexpected or unclassified error. |
 
-## HTTP status mapping
+## HTTP Status Mapping
 
 Each error kind maps to a fixed HTTP status. Note that two distinct kinds (`invalid_request` and `model_unavailable`) both map to `400`, and two (`insufficient_quota` and `rate_limited`) both map to `429`, so you must read `code` to tell them apart.
 
 | Code | HTTP status |
-| --- | --- |
+| :-: | :-: |
 | `invalid_request` | 400 |
 | `model_unavailable` | 400 (`param` is `model`) |
 | `unauthorized` | 401 |
@@ -63,10 +63,10 @@ Each error kind maps to a fixed HTTP status. Note that two distinct kinds (`inva
 
 The unclassified fallback maps to `500` and surfaces as `internal_error` in the envelope.
 
-## How to respond
+## How to Respond
 
 | Code | Recommended action |
-| --- | --- |
+| :-: | :-: |
 | `invalid_request` | Fix the request. Do not retry unchanged. Read `message` and `param`. |
 | `model_unavailable` | Pick another model. See [List models](/api-reference/models-catalog/list-models). |
 | `unauthorized` | Check the `z_sk_` key and `Authorization` header. Do not retry unchanged. |
@@ -78,15 +78,15 @@ The unclassified fallback maps to `500` and surfaces as `internal_error` in the 
 | `unavailable` | Transient. Retry with backoff. |
 | `internal_error` | Retry with backoff; if it persists, contact support with the `X-Request-ID`. |
 
-## Errors mid-stream
+## Errors Mid-Stream
 
 In a streaming (SSE) response, an error that occurs after the stream has opened arrives as a chunk with a top-level `error` object (`{message, code, param}`) and a choice whose `finish_reason` is `"error"`, rather than as an HTTP status. If the stream fails to open before any bytes are written, a normal HTTP error response is sent instead. See [Error events](/api-reference/streaming-format/error-events).
 
-## Debugging with request IDs
+## Debugging with Request IDs
 
 Every response carries an `X-Request-ID` (echoed from your request if you sent one, otherwise generated). Capture it and include it when reporting a problem, especially for `internal_error` and `provider_error`, so the issue can be traced. See [Request IDs](/api-reference/overview/request-ids).
 
-## Related
+## Related Resources
 
 - [Error envelope (API reference)](/api-reference/errors-and-rate-limits/error-envelope)
 - [Error codes (API reference)](/api-reference/errors-and-rate-limits/error-codes)

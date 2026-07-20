@@ -9,7 +9,7 @@ There is no verified native Langfuse integration in the Nito gateway. The gatewa
   Nito does not push data to Langfuse. Any Langfuse tracing described here runs entirely in your application code, using values you already hold.
 </Warning>
 
-## What to log per call
+## What to Log Per Call
 
 Every gateway response gives you the primitives Langfuse traces are built from:
 
@@ -17,13 +17,13 @@ Every gateway response gives you the primitives Langfuse traces are built from:
 - **The `usage` block** - `prompt_tokens`, `completion_tokens`, `total_tokens`, and optional detail such as `reasoning_tokens` and cached-token counts. Map these onto Langfuse's usage fields for cost and volume tracking.
 - **The `model` field** and `finish_reason` - useful as Langfuse metadata.
 
-## Prompts stay on your side
+## Prompts Stay on Your Side
 
 Nito's default is metadata-only retention: prompts and completions are not persisted server-side. That means the only place a full prompt or completion exists for logging is your own client. If you want prompts and outputs in Langfuse, you capture them in your application before and after the call and send them yourself. This keeps you in control of exactly what leaves your environment.
 
-## A minimal shape
+## A Minimal Shape
 
-```text
+```shellscript wrap
 1. Start a Langfuse trace / generation in your app.
 2. Send the request to https://nito.dev.zprotocol.org/api/v1/chat/completions
    (send your own X-Request-ID so the value is known up front).
@@ -36,8 +36,8 @@ Nito's default is metadata-only retention: prompts and completions are not persi
 
 > **TODO (needs SME):** confirm Langfuse integration path. Determine whether a first-party Langfuse export is planned, and if so what it would send.
 
-## Related
+## Related Resources
 
-- [Observability overview](/resources/observability) - the request ID and usage primitives.
-- [Datadog](/resources/observability/datadog) - server-side OTLP export.
-- [Zero data retention](/privacy/zero-data-retention) - why prompts live client-side.
+- [Observability overview](/resources/observability): the request ID and usage primitives.
+- [Datadog](/resources/observability/datadog): server-side OTLP export.
+- [Zero data retention](/privacy/zero-data-retention): why prompts live client-side.

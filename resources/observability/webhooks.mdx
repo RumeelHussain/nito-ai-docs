@@ -9,12 +9,12 @@ Outbound consumer webhooks are **not available today**. The Nito gateway does no
   There is no outbound webhook feature. Do not build against one. The only webhooks the gateway handles are **inbound Stripe webhooks** it receives for billing, which are internal plumbing and not a customer-facing event stream.
 </Warning>
 
-## What exists and what does not
+## What Exists and What Does Not
 
 - **Inbound Stripe webhooks** - the gateway receives Stripe events at an inbound endpoint for billing. This is Nito consuming Stripe's webhooks, not Nito emitting webhooks to you.
 - **Outbound consumer webhooks** - not implemented. There is no per-customer event delivery, no webhook registration, no signing secret, and no event catalog.
 
-## How to observe events today
+## How to Observe Events Today
 
 Because there is no push mechanism, observability is pull- and log-based:
 
@@ -23,14 +23,14 @@ Because there is no push mechanism, observability is pull- and log-based:
 
 For durable event history, keep your own client-side logs, optionally exported to storage you control as described under [S3](/resources/observability/s3).
 
-## Roadmap status
+## Roadmap Status
 
 An outbound webhook system is on the deferred list, not the shipped surface.
 
 > **TODO (needs SME):** confirm whether outbound consumer webhooks are planned, and if so the event catalog, signing scheme, and delivery guarantees. Until then, this page must not describe an outbound webhook feature as available.
 
-## Related
+## Related Resources
 
-- [Observability overview](/resources/observability) - the request ID and usage primitives.
-- [S3](/resources/observability/s3) - client-side log export.
-- Status page (coming soon) - planned uptime surface.
+- [Observability overview](/resources/observability): the request ID and usage primitives.
+- [S3](/resources/observability/s3): client-side log export.
+- **Status page** (coming soon): planned uptime surface.

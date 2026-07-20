@@ -9,7 +9,7 @@ The Nito gateway uses S3-compatible object storage internally, configured with `
   Nito does not write your telemetry to S3 for you. The `BLOB_STORAGE_*` configuration is internal to the gateway deployment. Any S3 export of Nito activity is something you build on your side.
 </Warning>
 
-## Client-side export
+## Client-Side Export
 
 Because Nito's default is metadata-only retention, the authoritative record of your traffic is whatever you capture in your own application. To keep a durable log in S3:
 
@@ -32,8 +32,8 @@ POST https://nito.dev.zprotocol.org/api/v1/chat/completions
 
 > **TODO (needs SME):** confirm whether a first-party "export telemetry to S3" feature is planned. The internal `BLOB_STORAGE_*` storage is not a customer-facing export today.
 
-## Related
+## Related Resources
 
-- [Observability overview](/resources/observability) - the request ID and usage primitives.
-- [Langfuse](/resources/observability/langfuse) - client-side LLM observability.
-- [Zero data retention](/privacy/zero-data-retention) - why the authoritative log is client-side.
+- [Observability overview](/resources/observability): the request ID and usage primitives.
+- [Langfuse](/resources/observability/langfuse): client-side LLM observability.
+- [Zero data retention](/privacy/zero-data-retention): why the authoritative log is client-side.

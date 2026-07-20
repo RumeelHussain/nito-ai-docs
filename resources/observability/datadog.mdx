@@ -9,7 +9,7 @@ The Nito gateway does not have a native Datadog integration. What it does have i
   The gateway speaks OTLP. Datadog is one of several backends that can sit behind that OTLP stream. Nothing in the gateway is Datadog-specific.
 </Info>
 
-## The OTLP export
+## The OTLP Export
 
 When observability is enabled, the gateway exports OpenTelemetry using these settings:
 
@@ -22,7 +22,7 @@ When observability is enabled, the gateway exports OpenTelemetry using these set
 
 These are deployment-side settings for whoever operates the gateway. Point `OTEL_EXPORTER_OTLP_ENDPOINT` at a collector that forwards to Datadog.
 
-## The routing shape
+## The Routing Shape
 
 ```text
 Nito gateway  --OTLP-->  OTLP-compatible collector / Datadog Agent  -->  Datadog
@@ -32,7 +32,7 @@ The gateway's job ends at the OTLP endpoint. The collector or agent is responsib
 
 > **TODO (needs SME):** Datadog OTLP ingestion setup. Confirm the exact collector or Datadog Agent configuration, the Datadog API key handling, and any attribute mapping required for spans and metrics to land correctly in Datadog.
 
-## Client-side correlation
+## Client-Side Correlation
 
 Independent of the server-side OTLP stream, you can correlate calls in Datadog from the client by logging the `X-Request-ID` header and the `usage` block returned on every response. Ship those as Datadog logs or custom metrics from your own application so a client-side event lines up with a server-side trace.
 
@@ -44,8 +44,8 @@ POST https://nito.dev.zprotocol.org/api/v1/chat/completions
 
 > **TODO (needs SME):** replace `https://nito.dev.zprotocol.org` with the canonical production base URL.
 
-## Related
+## Related Resources
 
-- [Observability overview](/resources/observability) - the request ID and usage primitives.
-- [Sentry](/resources/observability/sentry) - server-side error tracking.
-- Status page (coming soon) - planned uptime surface.
+- [Observability overview](/resources/observability): the request ID and usage primitives.
+- [Sentry](/resources/observability/sentry): server-side error tracking.
+- **Status page** (coming soon): planned uptime surface.

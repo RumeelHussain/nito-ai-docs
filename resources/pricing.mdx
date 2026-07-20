@@ -7,7 +7,7 @@ This is the authoritative reference for how Nito prices inference. It covers the
 
 For the narrative version (holds, settlement, estimating a single call), see [Pricing under Models](/models/pricing). This page is the flat reference.
 
-## The billing unit
+## The Billing Unit
 
 Nito bills in **credits**, tracked internally in **nanos** (billionths of a unit) for precision. Every rate and every charge is expressed in nanos. To convert a nanos figure to whole credits, divide by 1,000,000,000 (1e9).
 
@@ -15,12 +15,12 @@ Prices are configured live in the billing system and surfaced on each model's ca
 
 > **TODO (needs SME):** master per-model price table and credit unit.
 
-## What gets billed
+## What Gets Billed
 
 A single call can accrue charges across several rate categories. Each is priced separately.
 
 | Category | Priced by | Notes |
-| --- | --- | --- |
+| :-: | :-: | :-: |
 | Input tokens | Per token | Separate rate from output. |
 | Output tokens | Per token | Separate rate from input. |
 | Cached input tokens | Per token | Cache read and cache write are metered separately from ordinary input. |
@@ -30,13 +30,13 @@ A single call can accrue charges across several rate categories. Each is priced 
 
 Input and output are always separate rates. Cache, reasoning, and server-tool charges are additive on top of the base token cost. Nothing here is free by default; absence of a rate on a model entry means the rate is not yet configured, not that the item is unpriced.
 
-## Where to read per-model cost
+## Where to Read Per-Model Cost
 
 Pricing and context window are **not** on the model card by default. When pricing is configured for a model, its `GET /v1/models` entry carries a separate `pricing` object, joined from the billing system at response time. Its fields are expressed in nanos and cover the input and output token rates, cache read and write rates, the reasoning output rate, server-tool rates, an image output rate, and the model's context limit.
 
 Read pricing from the entry so your estimates track the live configuration:
 
-```bash
+```shellscript
 curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 # each entry includes a "pricing" object in nanos when configured
@@ -46,7 +46,7 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 
 The `pricing` object appears only when configured for that model. If it is absent, pricing is not yet set for that model, which is not the same as the model being free.
 
-## How a call is charged
+## How a Call is Charged
 
 Before a call, Nito places a hold sized to the expected cost. After the call completes, the hold is settled against actual usage. Failed requests are not billed. The actual charge for a completed call is reported in the response `usage` block (token counts, cache detail, reasoning tokens, and server-tool use) and aggregated in the org usage overview. See [Check usage and credits](/get-started/check-usage-and-credits).
 
@@ -61,19 +61,19 @@ input_tokens * input_rate
 
 all in nanos, with rates pulled from the model's `pricing` object rather than hard-coded.
 
-## Server-side tool pricing
+## Server-Side Tool Pricing
 
 Server-side tools such as web search and web fetch are billed in addition to the model tokens, at per-use rates that are part of the same live pricing configuration. See [Tool pricing](/api-reference/server-tools/tool-pricing) for the reference.
 
 > **TODO (needs SME):** server-side tool unit prices (owner: Finance).
 
-## Image generation pricing
+## Image Generation Pricing
 
 Image generation is priced by output rather than by token. The image output rate is carried in the same `pricing` object as the token rates.
 
 > **TODO (needs SME):** image output pricing basis and per-model rates.
 
-## Common mistakes
+## Common Issues
 
 - **Hard-coding prices.** Rates are configured live and can change. Read them from the model entry.
 - **Expecting `pricing` on every entry.** It appears only when configured; absence means unset, not free.
@@ -81,7 +81,7 @@ Image generation is priced by output rather than by token. The image output rate
 - **Forgetting additive costs.** Cache, reasoning tokens, and server tools bill on top of base input and output.
 - **Estimating images by token.** Images are priced by output.
 
-## Related
+## Related Resources
 
 - [Pricing (Models)](/models/pricing)
 - [Check usage and credits](/get-started/check-usage-and-credits)

@@ -14,13 +14,13 @@ The Nito gateway has real, built-in Sentry support for server-side error trackin
 Two environment variables control it:
 
 | Variable | Purpose |
-| --- | --- |
+| :-: | :-: |
 | `SENTRY_ENABLED` | Turns Sentry error reporting on. |
 | `SENTRY_DSN` | The Sentry DSN the gateway reports to. |
 
 When `SENTRY_ENABLED` is set and a valid `SENTRY_DSN` is provided, the gateway sends server-side errors to that Sentry project. These live alongside the other observability settings (`OTEL_*`, `OPENOBSERVE_*`) in the gateway configuration.
 
-## What it captures
+## What is Captured
 
 Sentry captures errors that occur inside the gateway. This is distinct from the structured error envelope your client receives on a failed request, which carries a `message` and a `code` (there is no `type` field). The client-facing error and the Sentry-side error report are two different views of the same failure.
 
@@ -28,12 +28,12 @@ To line up a client-observed failure with a Sentry event, log the `X-Request-ID`
 
 > **TODO (needs SME):** confirm whether `X-Request-ID` is attached to Sentry events as a tag or context field. If it is not automatic, correlation may require matching on timestamp and route.
 
-## What it is not
+## What is Not Captured
 
 Sentry is for errors and exceptions, not for request tracing or usage metering. For distributed tracing and metrics, use the OpenTelemetry export documented under [Datadog](/resources/observability/datadog). For per-call cost and volume, log the `usage` block from each response.
 
-## Related
+## Related Resources
 
-- [Observability overview](/resources/observability) - the request ID and usage primitives.
-- [Datadog](/resources/observability/datadog) - OTLP traces and metrics.
-- [Errors and status codes](/api-reference/errors-and-rate-limits/error-codes) - the client-facing error envelope.
+- [Observability overview](/resources/observability): the request ID and usage primitives.
+- [Datadog](/resources/observability/datadog): OTLP traces and metrics.
+- [Errors and status codes](/api-reference/errors-and-rate-limits/error-codes): the client-facing error envelope.

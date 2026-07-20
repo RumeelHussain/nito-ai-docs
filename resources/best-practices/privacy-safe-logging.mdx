@@ -5,13 +5,13 @@ description: "Log request IDs for correlation, not prompt or response bodies. Ke
 
 Good logging and good privacy are not at odds, but the default habits of most logging setups quietly work against both. It is tempting to log the full request and response so you can debug later, but for an AI gateway that means writing prompts, completions, and possibly sensitive user content into your log store, where it lives far longer and is seen by far more people than the model call itself. This page describes a logging posture that keeps you able to debug while keeping content out of your logs, and it mirrors Nito's own metadata-only stance.
 
-## Log the request ID, not the bodies
+## Log the Request ID, not the Bodies
 
 Every response from Nito carries an `X-Request-ID` header. The gateway echoes the one you send or generates a fresh one (16 random bytes, hex), and it is the single most useful thing to log. It lets you correlate a user report, your application log, and a gateway-side lookup without storing any of the actual content.
 
 So the rule is simple: log the request ID and the metadata around a call, not the prompt or the response. When a user reports a bad answer, you look up the request ID rather than reading back what they typed.
 
-```text
+```shellscript wrap
 # Good: correlation-friendly, content-free
 level=info event=inference.done request_id=<X-Request-ID> model=MODEL_ID \
   status=200 latency_ms=812 prompt_tokens=... completion_tokens=...
@@ -21,7 +21,7 @@ level=info event=inference.done request_id=<X-Request-ID> model=MODEL_ID \
 
 To make correlation reliable end to end, set your own `X-Request-ID` on the way in (it accepts up to 128 characters, sanitized) and log that same value, so the ID in your logs matches the ID the gateway used.
 
-## Prefer metadata over content
+## Prefer Metadata Over Content
 
 Content is the risky part of a log line; metadata is the useful part. You can debug the overwhelming majority of production issues from metadata alone:
 
@@ -33,19 +33,19 @@ Content is the risky part of a log line; metadata is the useful part. You can de
 
 None of that requires storing what the user asked or what the model said. Reach for content logging only under a deliberate, access-controlled, time-bounded debugging process, never as the default.
 
-## Never log the Authorization header or the key
+## Never Log the Authorization Header or the Key
 
 The one thing that must never reach your logs is the credential. Do not log the `Authorization` header, and do not log the API key anywhere. Many HTTP client libraries will dump full request headers on error; scrub or redact the `Authorization` header before anything is written. A `z_sk_` key is full org-scoped access, so a key in a log line is a credential leak with the same severity as committing it to source. See [Secure API key handling](/resources/best-practices/secure-api-key-handling).
 
 Redact defensively: allowlist the fields you log rather than blocklisting the ones you do not. An allowlist fails safe when someone adds a new header or field; a blocklist fails open.
 
-## This matches Nito's own posture
+## This Matches Nito's Own Posture
 
 Logging content-free is not just your good habit; it is consistent with how the gateway itself behaves. By default Nito keeps metadata only. Prompts, completions, reasoning, tool payloads, and attachment content are not persisted, telemetry is restricted to a safe-attribute allowlist, and inference responses are returned with `Cache-Control: no-store`. Where a chat history exists in a browser app, it lives on the client side, not in the gateway.
 
 If your own logs capture full content while the gateway deliberately does not, your logs become the weakest link in the chain, the one place the sensitive data actually sits at rest. Keeping your logging metadata-only closes that gap and lets you make a consistent privacy claim to your users. The precise gateway contract is in the [Privacy overview](/privacy/overview) and [Metadata-only default](/privacy/data-retention/metadata-only-default).
 
-## A quick checklist
+## A Quick Checklist
 
 - Log `X-Request-ID` on every call; set your own on the way in for end-to-end correlation.
 - Log metadata (model, status, finish reason, token counts, error code), not bodies.
@@ -53,7 +53,7 @@ If your own logs capture full content while the gateway deliberately does not, y
 - Treat content logging as an exception, access-controlled and time-bounded.
 - Keep your posture aligned with the gateway's metadata-only default.
 
-## Related
+## Related Resources
 
 - [Request IDs](/api-reference/overview/request-ids)
 - [Privacy overview](/privacy/overview)

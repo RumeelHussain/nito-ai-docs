@@ -5,14 +5,14 @@ description: "A concrete pre-launch checklist for Nito, covering secrets, spend 
 
 Before you put a Nito integration in front of real users, it is worth walking a short, concrete list. Most production incidents with a gateway come from a handful of predictable gaps: a key in the wrong place, an error path that was never handled, a stream parsed naively, or a model ID that quietly went away. This page is that list. Each item links to the deeper page where it is explained, so you can use this as an index as well as a checklist. Work top to bottom; nothing here is optional for a serious launch.
 
-## Credentials and spend
+## Credentials and Spend
 
 - **Keys live in secrets, not code.** Every `z_sk_` key is loaded from an environment variable or secrets manager, and no key appears in source control or any client-side bundle. Remember a key is full org-scoped access with no per-key scopes. See [Secure API key handling](/resources/best-practices/secure-api-key-handling).
 - **One key per workload.** Each service or environment has its own key so you can revoke and attribute independently.
 - **Spend caps are set.** Every key carries a `daily`, `monthly`, or `overall` spend cap sized to its workload, so a breach force-expires the key rather than draining the balance. See [Cost control](/resources/best-practices/cost-control).
 - **Key management is role-limited.** Only `owner` and `admin` can mint or revoke keys, and that membership has been reviewed.
 
-## Error handling
+## Error Handling
 
 Handle the full status set explicitly; do not treat every non-200 the same way. The mapping comes from the gateway's error kinds.
 
@@ -52,7 +52,7 @@ If you use `stream: true`, parse the stream correctly. Naive parsing is a common
 
 > **TODO (needs SME):** confirm the canonical production base URL before launch; the code default is a local address.
 
-## Related
+## Related Resources
 
 - [Secure API key handling](/resources/best-practices/secure-api-key-handling)
 - [Cost control](/resources/best-practices/cost-control)

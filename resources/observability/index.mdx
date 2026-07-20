@@ -5,7 +5,7 @@ description: "How to observe Nito traffic, using the request ID and usage block 
 
 Observability for Nito (publicly Z Inference) has two halves: what the gateway emits server-side, and what you capture client-side from every response. This section documents both honestly, and marks any third-party integration that is not verified in the gateway as a TODO owned by DevRel or Infra.
 
-## What the gateway emits server-side
+## What the Gateway Emits Server-Side
 
 The gateway supports OpenTelemetry and Sentry through configuration:
 
@@ -15,7 +15,7 @@ The gateway supports OpenTelemetry and Sentry through configuration:
 
 These are deployment-side settings. If you self-host or operate a Nito deployment, they control what the gateway ships to your telemetry backend. They are not per-request options a caller sets.
 
-## What every response gives you
+## What Every Response Gives You
 
 Regardless of server-side configuration, every gateway response returns two things you can log from the client:
 
@@ -24,16 +24,16 @@ Regardless of server-side configuration, every gateway response returns two thin
 
 This client-side pair is the most portable observability primitive Nito offers. It works no matter which backend you route to.
 
-## Pages in this section
+## Pages in this Section
 
-- [**Datadog**](/resources/observability/datadog) - route the gateway's OTLP export into Datadog through a collector or agent.
-- [**Langfuse**](/resources/observability/langfuse) - client-side LLM observability using request IDs and usage.
-- [**Sentry**](/resources/observability/sentry) - server-side error tracking with `SENTRY_*` configuration.
-- [**S3**](/resources/observability/s3) - exporting your own client-side logs to S3-compatible storage.
-- [**Webhooks**](/resources/observability/webhooks) - the honest status of outbound event delivery (not available today).
+- [**Datadog**](/resources/observability/datadog): route the gateway's OTLP export into Datadog through a collector or agent.
+- [**Langfuse**](/resources/observability/langfuse): client-side LLM observability using request IDs and usage.
+- [**Sentry**](/resources/observability/sentry): server-side error tracking with `SENTRY_*` configuration.
+- [**S3**](/resources/observability/s3): exporting your own client-side logs to S3-compatible storage.
+- [**Webhooks**](/resources/observability/webhooks): the honest status of outbound event delivery (not available today).
 
-## Related
+## Related Resources
 
-- Status page (coming soon) - planned uptime and incident surface.
-- [Latency and performance](/resources/best-practices/latency-and-performance) - client-side timing and retries.
-- [Privacy overview](/privacy/overview) - the metadata-only default retention model.
+- **Status page** (coming soon): planned uptime and incident surface.
+- [Latency and performance](/resources/best-practices/latency-and-performance): client-side timing and retries.
+- [Privacy overview](/privacy/overview): the metadata-only default retention model.
