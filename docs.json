@@ -31,7 +31,7 @@
             "icon": "books"
           },
           {
-            "group": "End to end",
+            "group": "End to End",
             "pages": [
               "get-started/authentication",
               "get-started/make-your-first-request",
@@ -79,7 +79,8 @@
               "features/tool-calling",
               "features/reasoning"
             ],
-            "root": "features/index"
+            "root": "features/index",
+            "expanded": true
           },
           {
             "group": "Server-Side Tools",
@@ -89,7 +90,8 @@
               "features/server-side-tools/web-fetch",
               "features/server-side-tools/file-parser",
               "features/server-side-tools/code-interpreter"
-            ]
+            ],
+            "expanded": true
           },
           {
             "group": "Multimodal",
@@ -98,14 +100,16 @@
               "features/multimodal/pdf-input",
               "features/multimodal/image-generation"
             ],
-            "root": "features/multimodal"
+            "root": "features/multimodal",
+            "expanded": true
           },
           {
             "group": "Efficiency",
             "pages": [
               "features/prompt-caching",
               "features/safe-retries"
-            ]
+            ],
+            "expanded": true
           }
         ],
         "icon": "cubes-stacked"

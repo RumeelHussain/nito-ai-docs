@@ -7,7 +7,7 @@ Every feature here rides on the same frame: one key reaches the whole catalog, t
 
 This is a map, not a tutorial. Each capability below links to its own deep page, covering what the gateway implements at this commit.
 
-## What the gateway does today
+## Features Nito Offers
 
 These are live on the gateway and documented in depth.
 
@@ -22,9 +22,22 @@ These are live on the gateway and documented in depth.
 
 Nito also now serves an **Anthropic Messages-compatible** endpoint at `POST /v1/messages` (and `/v1/messages/count_tokens`) and an **OpenAI Responses-compatible** endpoint at `POST /v1/responses` (and `/v1/responses/compact`). Each validates its native request shape and maps it into the gateway's canonical chat contracts. You can try them in the [API Playground](/api-playground). Full drop-in guidance is documented in a later pass.
 
-## Related
+## Related Resources
 
-- [How Nito Works](/get-started/how-nito-works)
-- [Chat Completions](/features/chat-completions)
-- [Privacy overview](/privacy/overview)
-- [API reference](/api-reference)
+<CardGroup cols={2}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One-key, many-models, selectable-privacy model.
+  </Card>
+
+  <Card title="Chat Completions" icon="message-dots" href="/features/chat-completions">
+    Detailed explanation of the chat completions feature.
+  </Card>
+
+  <Card title="Privacy Overview" icon="lock-hashtag" href="/privacy/overview">
+    Understand what “private” means on Nito.
+  </Card>
+
+  <Card title="Nito API Reference" icon="book-open-lines" href="/api-reference">
+    Detailed reference of Nito API endpoints.<br />
+  </Card>
+</CardGroup>

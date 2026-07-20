@@ -11,7 +11,7 @@ If you are new to chat APIs, the mental model is a transcript. You send a list o
 
 <CodeGroup>
 
-```bash curl
+```bash curl wrap
 curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -26,7 +26,7 @@ curl "https://nito.dev.zprotocol.org/v1/chat/completions" \
   }'
 ```
 
-```python Python
+```python Python wrap
 from openai import OpenAI
 
 client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
@@ -44,7 +44,7 @@ print(resp.choices[0].message.content)
 print(resp.usage)
 ```
 
-```typescript TypeScript
+```typescript TypeScript wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({ apiKey: "z_sk_your_key_here", baseURL: "https://nito.dev.zprotocol.org/v1" });
@@ -92,7 +92,7 @@ A few things worth understanding rather than memorizing:
 
 ## What Does the Response Contain
 
-```json
+```json wrap
 {
   "id": "...",
   "object": "chat.completion",
