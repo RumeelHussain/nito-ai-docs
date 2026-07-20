@@ -1,5 +1,5 @@
 ---
-title: "Model groups"
+title: "Model Groups"
 description: "How Nito groups equivalent models, resolves aliases, and falls back across backends."
 ---
 
@@ -7,7 +7,7 @@ A single model can often be served in more than one place: the same model offere
 
 If that sounds abstract, here is the everyday version. Think of a model group like a phone number that rings several desks. You dial one number; whoever is free and qualified picks up. You never have to know who answered, only that your call connected.
 
-## What a group is
+## What is a Model Group
 
 A group gathers several physical models that share one canonical identity. A physical model is a specific model on a specific provider, identified internally as `provider/providerModelID`. A canonical identity is the single public name they all answer to. Grouping them gives you three properties:
 
@@ -17,9 +17,11 @@ A group gathers several physical models that share one canonical identity. A phy
 
 The grouping is computed per surface, so the chat catalog and the image catalog each group independently.
 
-## Listing groups
+## Listing Model Groups
 
-```bash
+Use the `/v1/model-groups`  API endpoint to fetch the latest live model groups.
+
+```shellscript wrap
 curl "https://nito.dev.zprotocol.org/api/v1/model-groups?capability=chat" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
@@ -30,32 +32,42 @@ This endpoint is a convenience for **building a model picker** — a labeled, gr
 
 > **TODO (needs SME):** the canonical production base URL. The code default is a local address; replace `https://nito.dev.zprotocol.org` with the real gateway URL once confirmed.
 
-## How aliasing actually works
+## How Aliasing Actually Works
 
-People often expect an "alias" to be a manual mapping someone maintains, like a spreadsheet that says "this nickname means that model." Grouping is what aliasing is in practice, and it is automatic. Many provider-scoped rows that share a canonical model ID are presented as one option, keyed by the logical ID for each supported privacy mode. You do not register or manage aliases yourself. You benefit from them by naming the logical model and letting the group resolve to a concrete backend.
+People often expect an "**alias**" to be a manual mapping someone maintains, like a spreadsheet that says "this nickname means that model." Grouping is what aliasing is in practice, and it is automatic. Many provider-scoped rows that share a canonical model ID are presented as one option, keyed by the logical ID for each supported privacy mode. You do not register or manage aliases yourself. You benefit from them by naming the logical model and letting the group resolve to a concrete backend.
 
 A worked example makes the collapse concrete. Suppose a popular chat model is available from two providers, and one of those providers also offers it inside a TEE. That is three physical rows. The group collapses them into a small set of logical options: an ordinary-mode option that either provider can serve, and a `:confidential` option that only the attestation-capable provider can serve. You see clean choices; Nito keeps the messy provider list behind them.
 
-## Fallbacks, and the one place they stop
+## Fallbacks and Their Handling
 
-When you call a logical model, Nito gathers the candidate backends in the group and chooses one. If the preferred backend is unavailable, the next eligible candidate is used. There is also a second kind of fallback, the provider-default fallback: if the catalog has no exact match for a bare logical ID, Nito can route to a provider's configured default model.
+When you call a logical model, Nito gathers the candidate backends in the group and chooses one. If the preferred backend is unavailable, the next eligible candidate is used. There is also a second kind of fallback, the `provider-default fallback`: if the catalog has no exact match for a bare logical ID, Nito can route to a provider's configured default model.
 
 The provider-default fallback applies to the ordinary, anon, and private modes only. It does not apply to `:confidential` and `:encrypted`. The reason follows directly from what attestation means. An attestation is a signed statement that your call ran inside a specific sealed environment. If Nito quietly substituted a default backend for a `:confidential` request, any attestation you later fetched would describe a different environment than the one you asked for, which defeats the purpose. So for `:confidential` and `:encrypted` there is no silent substitute: either an attestation-capable backend in the group can serve the call, or the call fails.
 
-The exact ordering Nito uses to choose among the eligible candidates is described in [Backend selection](/models/backend-selection).
+The exact ordering Nito uses to choose among the eligible candidates is described in [Backend selection](/models/backend-selection) section.
 
-## Why this matters
+## Why This Matters
 
 Model groups are what let you write `model: "<logical-id>"` once and stop worrying about which provider is healthy, which backend is cheapest, or which one satisfies your privacy requirement. The gateway turns one name into a resilient routing decision, made fresh on every call. The cost of that convenience is that a logical ID is not a fixed machine, which is exactly the point of the next two common mistakes.
 
-## Common mistakes
+## Common Issues
 
 - **Expecting a `:confidential` call to fall back to an ordinary backend.** It will not. A `:confidential` call that can't be served in a sealed (attested) environment **fails** rather than quietly downgrading — the provider-default fallback is deliberately excluded from `:confidential` and `:encrypted`, so an attestation always describes the environment you actually asked for.
 - **Treating a logical ID as a single fixed backend.** It can resolve to different backends across calls based on availability and cost. For attested calls, the attestation tells you which backend actually ran.
 - **Listing the wrong surface.** The `model-groups` endpoint is per capability; pass `?capability=images` to see image groups rather than the `chat` default.
 
-## Related
+## Related Resources
 
-- [Backend selection](/models/backend-selection)
-- [Model providers](/models/providers)
-- [GET /api/v1/model-groups reference](/api-reference/models-catalog/model-groups)
+<CardGroup cols={3}>
+  <Card title="Backend Selection" icon="abacus" href="/models/backend-selection">
+    How Nito picks a backend, and how to influence it.<br />
+  </Card>
+
+  <Card title="Model Providers" icon="diagram-project" href="/models/providers">
+    Who actually serves a Nito call, and how each provider enforces privacy.
+  </Card>
+
+  <Card title="/model-groups Endpoint" icon="object-ungroup" href="/api-reference/models-catalog/model-groups">
+    List models collapsed into logical groups and options by capability
+  </Card>
+</CardGroup>

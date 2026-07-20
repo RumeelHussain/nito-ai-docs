@@ -5,35 +5,39 @@ description: "How model access works on Nito through one key, and how to read a 
 
 On Nito, a single API key reaches every model in the catalog. You do not hold accounts with the underlying providers, you do not manage their keys, and you do not learn each one's request format. To use a model, you name it in the `model` field of your request. To change how private the call is, you add a suffix to that same name. This page builds the mental model for the catalog: what a "model" is on Nito, why the list is discovered rather than fixed, and how to read everything a single model entry tells you.
 
-## Why model access works this way
+## Why Model Access Works This Way
 
 Reaching AI models the normal way means signing up with each vendor, holding a separate key per vendor, learning each vendor's slightly different request shape, and paying several bills. Switching from one model to another for cost or quality often means rewriting code. Nito removes that friction by sitting in front of the providers as a single entry point, called a gateway. A gateway takes one kind of request, decides which backend should serve it, applies your rules, handles payment, and hands back one consistent response shape.
 
-The practical consequence for you is simple: you integrate once and reach many models. The model you name is a logical model, meaning a stable public name that Nito maps to whichever physical backend can actually run it. You name `x-ai/grok-4.5`; Nito finds a healthy, eligible, cost-effective backend that serves it. That indirection is what lets one key reach the whole catalog.
+The practical consequence for a user is simple: witch just one integration the user can reach several models. The model you name is a logical model, meaning a stable public name that Nito maps to whichever physical backend can actually run it. You name `x-ai/grok-4.5`; Nito finds a healthy, eligible, cost-effective backend that serves it. That indirection is what lets one key reach the whole catalog.
 
-## One key, the whole catalog
+## One Key, The Whole Catalog
 
-Models on Nito are served by several providers behind the scenes (for example xAI, OpenRouter, NEAR, Phala, and an image provider). You never see that plumbing as separate accounts. You authenticate once with your Nito key, send a request naming a model, and Nito routes it to a backend that can serve it. Which provider runs a given call depends on the model and your privacy choice; see [Model providers](/models/providers) and [Backend selection](/models/backend-selection).
+Models on Nito are served by several providers behind the scenes (for example, xAI, OpenRouter, NEAR, Phala, an image provider, etc.). A user will never see that plumbing as separate accounts. Users can authenticate once with their Nito key, send a request naming a model, and Nito routes it to a backend that can serve it. Which provider runs a given call depends on the model and your privacy choice; see [Model Providers](/models/providers) and [Backend Selection](/models/backend-selection) for more details.
 
-The catalog is not a fixed list baked into the product. Nito discovers models from its providers and keeps the catalog current, adding new models and retiring old ones over time. Think of it like an airport's live departures board rather than a printed timetable: the board reflects what is actually flying right now. Because of that, the authoritative list of what you can call is always the live models endpoint, not a hard-coded table in your code.
+The model catalog is not a fixed list baked into the product. Nito discovers models from its providers and keeps the catalog current, adding new models and retiring old ones over time. Think of it like an airport's live departures board rather than a printed timetable: the board reflects what is actually flying right now. Because of that, the authoritative list of what you can call is always the live models endpoint, not a hard-coded table in your code.
 
 ## Listing models
 
-```bash
+<CodeGroup dropdown>
+
+```bash curl
 curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
+
+</CodeGroup>
 
 This returns a list of model entries. By default it returns chat models; pass a `type` filter (for example `image`, or `type=all`) to see the other kinds the catalog carries. The first-party path `GET /api/v1/models` returns the same data. A good pattern is to call this endpoint at startup, filter for the capability you need, and select an ID from the result, rather than pasting a name into your source and hoping it still exists next quarter.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## How to read a model entry
+## How to Read a Model Entry
 
-Each entry describes one model you can call. The important fields:
+Each entry describes one model you can call. The important fields are described below:
 
 | Field | What it tells you |
-| --- | --- |
+| :-- | :-- |
 | `id` | The model ID you pass back in a request. |
 | `type` | The model's kind: `chat` or `image`. |
 | `display_name`, `description` | Human-friendly name and summary. |
@@ -49,38 +53,79 @@ Each entry describes one model you can call. The important fields:
 
 The `capabilities` object reports what a model can do, including: `supports_image_inputs`, `supports_image_generation`, `supports_web_search`, `supports_web_fetch`, `supports_x_search`, `supports_code_interpreter`, `supports_reasoning`, `supports_tee_attestation`, and `supports_encrypted`. Read these before sending a feature: a request that uses a capability the model lacks is rejected rather than silently ignored.
 
-### Where pricing and context window come from
+### Where Pricing and Context Window Come From
 
 Two fields deserve a note, because they behave differently from the rest. `pricing` and `context_window` are not stored on the model card itself. They are joined in at response time from Nito's billing data, then shown on the entry when they are configured. The takeaway: do not assume these fields are always populated, and do not treat an absent field as zero. When pricing or a context window is present, use it; when it is absent, treat it as unknown and fall back to a model you have priced.
 
-## Privacy is part of the model choice
+## Privacy is Part of The Model Choice
 
-A model entry's `privacy_tier` and TEE fields tell you which privacy modes that model supports. You select a mode by adding `:confidential` or `:encrypted` to the model ID at request time (those two are the only valid suffixes). A model that reports `attestation_available: true` can be called with `:confidential`; one with `encrypted_supported: true` can be called with `:encrypted`. TEE stands for Trusted Execution Environment, a hardware-isolated compute box the host cannot read into; attestation is a signed statement proving your call ran inside one. See [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) and [Model ID convention](/models/model-id-convention).
+A model entry's `privacy_tier` and TEE fields tell you which privacy modes that model supports. You select a mode by adding `:confidential` or `:encrypted` to the model ID at request time (those two are the only valid suffixes). A model that reports `attestation_available: true` can be called with `:confidential`; one with `encrypted_supported: true` can be called with `:encrypted`. TEE stands for Trusted Execution Environment, a hardware-isolated compute box the host cannot read into; attestation is a signed statement proving your call ran inside one. See [Privacy Tiers at a Glance](/models/privacy-tiers-at-a-glance) and [Model ID Convention](/models/model-id-convention) sections for more details.
 
-## Common mistakes
+## Common Issues
 
 - **Hard-coding model names.** The catalog is discovered and changes over time. Pull IDs from `GET /v1/models` rather than pasting a name from a blog post.
 - **Assuming every model supports every feature.** Check `capabilities` first. Reasoning, image inputs, web tools, and attestation are per-model, not catalog-wide.
 - **Expecting pricing or context length to always be present.** Both are joined from billing and only appear when configured. When a field is absent, treat it as unknown rather than zero.
 - **Reading `privacy_tier` as something you set in the request body.** The tier is a property of the model; you choose a mode at call time with the model-ID suffix, not a separate field.
 
-## Explore this section
+## Explore the Model Catalog
 
-**Naming and discovery**
-- [Model ID convention](/models/model-id-convention) — the grammar for naming a model and selecting privacy.
-- [Model catalog](/models/model-catalog) — how to list and filter every available model in code.
-- [Model list](/models/all-models) — a snapshot of every model, grouped by privacy tier, with context, price, and capabilities.
+**Naming and Discovery**
 
-**Choosing**
-- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance) — the privacy modes, in brief.
-- [Model families](/models/model-families) — text, reasoning, and vision, and what each is for.
-- [Choosing the right model](/models/choosing-a-model) — a decision guide from use case to model.
+<CardGroup cols={3}>
+  <Card title="Model ID Covention" icon="ad" href="/models/model-id-convention">
+    The grammar for naming a model and selecting privacy.<br />
+  </Card>
 
-**How routing works**
-- [Model providers](/models/providers) — who actually serves a call, and how each enforces privacy.
-- [Model groups](/models/model-groups) — grouping, aliases, and fallbacks.
-- [Backend selection](/models/backend-selection) — how Nito picks a backend, and how to influence it.
+  <Card title="Model Catalog" icon="book-circle" href="/models/all-models">
+    Understand how to list and filter every available model in code.<br />
+  </Card>
+
+  <Card title="Model List" icon="list" href="/models/all-models">
+    Every model, grouped by privacy tier, with context, price, and capabilities.
+  </Card>
+</CardGroup>
+
+**Choosing Models and Privacy**
+
+<CardGroup cols={3}>
+  <Card title="Privacy Tiers at a Glance" icon="lock-alt" href="/models/privacy-tiers-at-a-glances">
+    The privacy modes, in brief.
+  </Card>
+
+  <Card title="Model Families" icon="object-ungroup" href="/models/model-families">
+    Explore Model Grouping, aliases, and fallbacks.
+  </Card>
+
+  <Card title="Choosing the Right Model" icon="magnifying-glass-waveform" href="/models/choosing-a-model">
+    A decision guide from use case to model.
+  </Card>
+</CardGroup>
+
+**How Routing Works**
+
+<CardGroup cols={3}>
+  <Card title="Model Providers" icon="diagram-project" href="/models/providers">
+    Who actually serves a call, and how each enforces privacy.
+  </Card>
+
+  <Card title="Model Groups" icon="object-ungroup" href="/models/model-groups">
+    Explore Model Grouping, aliases, and fallbacks.
+  </Card>
+
+  <Card title="Backend Selection" icon="abacus" href="/models/backend-selection">
+    How Nito picks a backend, and how to influence it.
+  </Card>
+</CardGroup>
 
 **Reference**
-- [Pricing](/models/pricing) — how cost is structured and where to read per-model rates.
-- [Deprecations and lifecycle](/models/deprecations-and-lifecycle) — how models are added and retired.
+
+<CardGroup cols={2}>
+  <Card title="Pricing" icon="money-bills" href="/models/pricing">
+    How cost is structured and where to read per-model rates.
+  </Card>
+
+  <Card title="Deprecations and Lifecycle" icon="retweet" href="/models/deprecations-and-lifecycle">
+    How models are added and retired from the catalog.
+  </Card>
+</CardGroup>

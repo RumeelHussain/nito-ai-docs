@@ -1,5 +1,5 @@
 ---
-title: "Backend selection"
+title: "Backend Selection"
 description: "How Nito chooses which backend serves a request, and how cost, privacy, and availability shape that choice."
 ---
 
@@ -7,37 +7,38 @@ When you name a logical model, more than one backend may be able to serve it. A 
 
 The mental model is a hiring decision made in two stages. First Nito throws out every candidate that cannot do the job: the wrong privacy mode, a missing feature, an input it cannot accept. Only the qualified candidates remain. Then, among those, it ranks by a fixed list of tiebreakers and hires the top one. Filter first, then order.
 
-## Stage one: filtering by capability and privacy
+<Steps>
+  <Step title="Stage One: Filtering by Capability and Privacy" icon="1" iconType="solid" stepNumber={1} titleSize="h2">
+    Before a backend is even eligible, it has to be compatible with your specific request. A candidate is filtered out if it does not support:
 
-Before a backend is even eligible, it has to be compatible with your specific request. A candidate is filtered out if it does not support:
+    - The **inputs you sent**, for example image inputs or file attachments.
+    - The **features you asked for**, such as reasoning, a prompt cache key, or cache control.
+    - Any **server-side tools you requested**, such as web search or web fetch.
 
-- The **inputs you sent**, for example image inputs or file attachments.
-- The **features you asked for**, such as reasoning, a prompt cache key, or cache control.
-- Any **server-side tools you requested**, such as web search or web fetch.
+    Your privacy choice is part of this same filtering stage, and it is a hard filter, not a gentle preference:
 
-Your privacy choice is part of this same filtering stage, and it is a hard filter, not a gentle preference:
+    - A `:confidential `**call** only considers attestation-capable backends (those that run in a sealed environment). It will not fall back to an ordinary backend.
+    - A `:encrypted `**call** only considers backends that support end-to-end encryption.
+    - On a **private route**, Nito sets a zero-data-retention requirement, which constrains which backends and provider settings are allowed.
 
-- A **`:confidential` call** only considers attestation-capable backends (those that run in a sealed environment). It will not fall back to an ordinary backend.
-- A **`:encrypted` call** only considers backends that support end-to-end encryption.
-- On a **private route**, Nito sets a zero-data-retention requirement, which constrains which backends and provider settings are allowed.
+    The order matters: privacy and capability narrow the candidate set first. Cost and availability only get to choose among whatever survives. This is why a cheaper backend can lose to a more expensive one. If the cheap one cannot satisfy your privacy mode or a feature you requested, it was never in the running.
+  </Step>
+  <Step title="Stage two: ordering the survivors" icon="2" iconType="solid" stepNumber={2} titleSize="h2">
+    For a given logical model and privacy mode, Nito sorts the eligible candidates by a fixed priority. In order, it prefers a candidate that is:
 
-The order matters: privacy and capability narrow the candidate set first. Cost and availability only get to choose among whatever survives. This is why a cheaper backend can lose to a more expensive one. If the cheap one cannot satisfy your privacy mode or a feature you requested, it was never in the running.
+    1. **Available** over unavailable.
+    2. **On the free-tier route**, when free-tier applies.
+    3. **Higher-privacy when you did not specify.** In ordinary mode, a private-tier backend is preferred over an anonymized one.
+    4. **Price-known** over a backend whose price is unknown.
+    5. **Cheaper** by estimated cost.
+    6. **Higher provider priority**, by the configured provider order.
+    7. Then by **provider name and model ID**, as a stable final tiebreak.
 
-## Stage two: ordering the survivors
+    Read top to bottom, the list tells a story: never route to something that is down; honor free-tier and the safer default first; then, among healthy and equal-privacy options, prefer the one whose price you actually know and that costs less; and only fall back to provider order and name when everything above ties. The last rule exists so that ties resolve deterministically rather than flickering between equal choices.
+  </Step>
+</Steps>
 
-For a given logical model and privacy mode, Nito sorts the eligible candidates by a fixed priority. In order, it prefers a candidate that is:
-
-1. **Available** over unavailable.
-2. **On the free-tier route**, when free-tier applies.
-3. **Higher-privacy when you did not specify.** In ordinary mode, a private-tier backend is preferred over an anonymized one.
-4. **Price-known** over a backend whose price is unknown.
-5. **Cheaper** by estimated cost.
-6. **Higher provider priority**, by the configured provider order.
-7. Then by **provider name and model ID**, as a stable final tiebreak.
-
-Read top to bottom, the list tells a story: never route to something that is down; honor free-tier and the safer default first; then, among healthy and equal-privacy options, prefer the one whose price you actually know and that costs less; and only fall back to provider order and name when everything above ties. The last rule exists so that ties resolve deterministically rather than flickering between equal choices.
-
-## A worked example
+## A Worked Example
 
 Suppose you send a request for a popular chat model with `:confidential`, and you attach an image. Walk it through both stages:
 
@@ -47,7 +48,7 @@ Suppose you send a request for a popular chat model with `:confidential`, and yo
 
 If only one attestation-capable backend can take an image, that one is chosen regardless of price, because filtering happened before ordering. If two qualify, the cheaper available one wins.
 
-## Influencing the choice
+## Influencing the Choice
 
 You shape backend selection mostly through the model ID:
 
@@ -57,18 +58,28 @@ You shape backend selection mostly through the model ID:
 
 You influence backend selection through the model ID and privacy mode; there is no public way to pin one specific physical backend — Nito always selects among the eligible candidates.
 
-## Why a call went where it did
+## Why a Call Went Where It Did
 
 For attested calls, the attestation response names the provider and physical model that served the request, so you can confirm the backend after the fact. For ordinary calls, the response `model` field reflects what served it. If a call landed somewhere unexpected, the ordering above is usually the explanation: check availability and price, because a cheaper, available backend wins among equally qualified candidates.
 
-## Common mistakes
+## Common Issues
 
 - **Expecting cost preference to override privacy.** Privacy filters first; cost only orders the survivors. A cheaper ordinary backend can never win a `:confidential` request.
 - **Assuming the same logical ID always hits the same backend.** It can change with availability and price between calls.
 - **Requesting a feature the cheapest backend lacks.** Because the candidate set is filtered by capability first, a single feature requirement can change which backend is chosen.
 
-## Related
+## Related Resources
 
-- [Model groups](/models/model-groups)
-- [Model providers](/models/providers)
-- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+<CardGroup cols={3}>
+  <Card title="Model Groups" icon="object-ungroup" href="/models/model-groups">
+    Explore Model Grouping, aliases, and fallbacks.
+  </Card>
+
+  <Card title="Model Providers" icon="diagram-project" href="/models/providers">
+    Who actually serves a call, and how each enforces privacy.
+  </Card>
+
+  <Card title="Privacy Tiers at a Glance" icon="lock-alt" href="/models/privacy-tiers-at-a-glances">
+    Nito's four privacy triers, in brief.
+  </Card>
+</CardGroup>

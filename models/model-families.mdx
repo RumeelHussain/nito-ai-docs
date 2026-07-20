@@ -1,5 +1,5 @@
 ---
-title: "Model families"
+title: "Model Families"
 description: "The kinds of models Nito serves, what each is for, and which modalities are available today."
 ---
 
@@ -19,27 +19,37 @@ Reasoning is not a separate family of model so much as a capability some text mo
 
 On Nito you request this with the `reasoning` parameter (`enabled`, `effort` of `low`/`medium`/`high`, `summary`, `max_tokens`). The reasoning is returned as `reasoning_details`, and the tokens spent reasoning are counted separately in `usage` as `reasoning_tokens`, so you can see what the thinking cost. Reasoning is a per-model capability: check `supports_reasoning` on the model entry before relying on it. See [Reasoning](/features/reasoning).
 
-## Vision (image input)
+## Vision (Image Input)
 
 Vision-capable text models accept images as part of a chat message, alongside text, for tasks like describing a photo or reading a chart. Vision here means image input, not image output: the model reads the picture and replies in text. You attach an image as a content part (a data URL, an https URL, or base64 with a media type). Support is per model: check `supports_image_inputs`. Accepted image formats for direct upload are PNG, JPEG, and WebP. See [Image input](/features/multimodal/image-input).
 
 Nito also parses documents (PDF, DOCX, PPTX, XLSX, XLS, and text) server-side so their text can be fed into a prompt. That is the [file parser](/features/server-side-tools/file-parser) at work, not a vision capability: the document is turned into text first, then sent as text. Use vision for pictures and charts; use the file parser for documents.
 
-## Image generation
+## Image Generation
 
 Image-generation models run the other direction from vision: text in, image out. On Nito this is served through the [image generations endpoint](/api-reference/multimodal/image-generation), backed by an image provider. You send a prompt and options like size and count, and receive image URLs or base64 data. The default image model is a Z-Image generation model. Note that the chat surface and the image-generation surface are separate endpoints; a vision-capable chat model that reads images does not generate them.
 
 <Note>
-**Audio and video are not served on Nito today** — no transcription, speech, or video in/out, and no endpoints for them. Plan around text, vision input, and image generation.
+  **Audio and video are not served on Nito today** — no transcription, speech, or video in/out, and no endpoints for them. Plan around text, vision input, and image generation.
 </Note>
 
-## Common mistakes
+## Common Issues
 
 - **Confusing vision input with image generation.** Reading an image and creating one are different families on different endpoints.
 - **Assuming every text model can see images or reason.** Image input and reasoning are per-model capabilities; read `supports_image_inputs` and `supports_reasoning` on the entry.
 
-## Related
+## Related Resources
 
-- [Choosing the right model](/models/choosing-a-model)
-- [Chat completions](/features/chat-completions)
-- [Image generation](/api-reference/multimodal/image-generation)
+<CardGroup cols={3}>
+  <Card title="Choosing the Right Model" icon="magnifying-glass-waveform" href="/models/choosing-a-model">
+    A decision guide from use case to model.<br />
+  </Card>
+
+  <Card title="Chat Completions Feature" icon="message-dots" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Image Generation" icon="image-stack" href="/api-reference/multimodal/image-generation">
+    Generate images from a text prompt with the Nito images endpoint.<br />
+  </Card>
+</CardGroup>

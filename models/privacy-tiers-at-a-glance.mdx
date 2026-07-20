@@ -1,22 +1,22 @@
 ---
-title: "Privacy tiers at a glance"
+title: "Privacy Tiers at a Glance"
 description: "The privacy modes you can select per call, in brief, with links to the full Privacy section."
 ---
 
-Nito lets you choose how private each call is, and you make that choice per request rather than once for your whole account. This page is the short version: enough to pick a mode and keep building. The full treatment, including how attestation is verified and exactly what is retained, is in the [Privacy section](/privacy/overview).
+Nito lets you choose how private each call is, and you make that choice per request rather than once for your whole account. This page is the short version: enough to pick a mode and keep building. The full treatment, including how attestation is verified and exactly what is retained, is in the [Privacy ](/privacy/overview)section.
 
-## Why a dial instead of one setting
+## Why a Dial Instead of One Setting
 
 On most AI platforms, privacy is a property of your account or plan: you pick a tier when you sign up and every request inherits it. Nito treats privacy as a property of each request instead. The same key, in the same app, can send a throwaway request in the lightest mode and a highly sensitive request inside a sealed, verifiable environment, with the only difference being a suffix on the model name.
 
 The reason to offer a dial rather than simply maxing out privacy is that the strongest modes have real costs. They route to fewer backends, the very strongest one cannot stream results token by token, and it supports fewer features. Forcing every call through the strongest mode would make routine work slower and more fragile for no benefit. Letting you match protection to the sensitivity of each call is the point: pay the cost of strong privacy only where the request needs it.
 
-## The tiers
+## The Privacy Tiers
 
 You select a tier by the model ID suffix. From lightest to strongest:
 
 | Tier | How you select it | What it gives you |
-| --- | --- | --- |
+| :-: | :-: | :-: |
 | **Anonymous** | `model` (no suffix), `anon`-tier model | Standard routing. Metadata-only retention by default, meaning the gateway keeps operational metadata, not your prompt or the reply. |
 | **Private** | `model` (no suffix), `private`-tier model | Served by a privately configured backend with zero-data-retention enforced upstream. |
 | **Confidential** | `model:confidential` | Runs inside a Trusted Execution Environment. You can fetch an attestation and verify it. |
@@ -24,7 +24,7 @@ You select a tier by the model ID suffix. From lightest to strongest:
 
 Two terms are worth defining up front. **Zero-data-retention (ZDR)** means the upstream provider is told, contractually and technically, not to keep the request after serving it. A **Trusted Execution Environment (TEE)** is a hardware-isolated, sealed compute environment: code and data inside it are protected from the host machine, and the environment can produce an **attestation**, a signed statement about what is running inside, which you can check. Think of a TEE as a tamper-evident safe that runs your computation: not only is the contents shielded, the safe can hand you a sealed receipt proving it was the thing that did the work.
 
-## How the tiers map to model fields
+## How the Tiers Map to Model Fields
 
 Whether a given model supports a tier is reported on its catalog entry, so the practical rule is: read the model entry, then choose the suffix the model supports.
 
@@ -34,26 +34,39 @@ Whether a given model supports a tier is reported on its catalog entry, so the p
 
 A worked example. Suppose `GET /v1/models` shows a model with `attestation_available: true`, `encrypted_supported: true`, and `privacy_tier: "confidential"`. You have three valid ways to call it: name it plain for standard routing, append `:confidential` to run it in a sealed environment you can attest, or append `:encrypted` to additionally encrypt your data to that environment. If you instead pick a model whose entry shows `privacy_tier: "anon"` and append `:confidential`, the call is rejected, because that model has no TEE backend to honor the request. A privacy mode never silently downgrades to a weaker one.
 
-## A note on naming
+## Important Note on Privacy Tiers Naming
 
-The four tiers — **Anonymous, Private, Confidential, Encrypted** — correspond to the `privacy_tier` values `anon`, `private`, `confidential`, and `encrypted` in the catalog and the API. The full treatment is in the [Privacy tiers in depth](/privacy/tiers) pages.
+The four tiers, **Anonymous, Private, Confidential, Encrypted**, correspond to the `privacy_tier` values `anon`, `private`, `confidential`, and `encrypted` in the catalog and the API. The full treatment is in the [Privacy tiers in depth](/privacy/tiers) pages.
 
-## Trade-offs to know
+## Known Trade-offs
 
 - **Confidential and Encrypted are offered by specific providers only.** Not every model can run in a TEE. Filter the catalog for attestation support before you rely on it.
 - **Encrypted does not stream**, and does not support some features (reasoning, tools, prompt caching, multi-part messages). Use `:confidential` when you need streaming together with attestation.
 - **Stronger tiers can route to fewer backends**, which can affect latency and availability. Match the tier to the sensitivity of the call.
 
-## Common mistakes
+## Common Issues
 
 - **Treating privacy as an account setting.** It is per call, chosen by the model ID. Two calls with the same key can use different tiers.
 - **Selecting `:encrypted` and then trying to stream.** It is non-streaming by design; the call is rejected rather than quietly served without encryption.
 - **Using a suffix other than `:confidential` or `:encrypted`.** Those are the suffixes to use; `:standard`, `:zdr`, `:private`, and the like return a `400`. There is no separate `tier` field in the request body.
 - **Assuming "Private" and "Confidential" are the same.** Private means zero-data-retention upstream; Confidential means sealed execution with an attestation you can verify. They are different guarantees, and only Confidential gives you a proof to check.
 
-## Related
+## Related Resources
 
-- [Privacy overview](/privacy/overview)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
-- [Privacy tiers in depth](/privacy/tiers)
-- [Model ID convention](/models/model-id-convention)
+<CardGroup cols={3}>
+  <Card title="Privacy Overview" icon="book-open-lines" href="/privacy/overview">
+    Read what “private” means on Nito.
+  </Card>
+
+  <Card title="Per-call Privacy Modes" icon="lock-alt" href="/privacy/per-call-privacy-modes">
+    How to select a privacy mode per request.
+  </Card>
+
+  <Card title="Privacy Tiers in Depth" icon="lock-alt" href="/privacy/tiers">
+    In depth explanation of Nito's four privacy tiers.
+  </Card>
+
+  <Card title="Model ID Covention" icon="ad" href="/models/model-id-convention">
+    The grammar for naming a model and selecting privacy.
+  </Card>
+</CardGroup>

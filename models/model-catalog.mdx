@@ -1,20 +1,20 @@
 ---
-title: "Model catalog"
-description: "List and filter every model available on Nito. The catalog is discovered live, so the models endpoint is the source of truth."
+title: "Model Catalog"
+description: "List and filter every model available on Nito. The model catalog can be fetched live using the /models endpoint and the response should be treated as the source of truth."
 ---
 
 The catalog is the list of everything you can call. Nito discovers models from its providers and keeps the list current, so the catalog is something you query at runtime, not a static page you bookmark. This page shows how to list it, how to filter it, and how to use the result in code.
 
-## Listing the catalog
+## Listing the Catalog
 
-```bash
+```shellscript
 curl "https://nito.dev.zprotocol.org/v1/models" \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 The response is a list of model entries:
 
-```json
+```json wrap
 {
   "object": "list",
   "data": [
@@ -41,7 +41,7 @@ Note that pricing and context window are not on the entry by default; pricing ap
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Filtering
+## Filtering the Catalog
 
 By default the endpoint returns only chat models. Pass a `type` filter such as `image` to see another kind, or `type=all` to list every kind the catalog carries. Additional query parameters narrow the list further; the full set is in the [models endpoint reference](/api-reference/models-catalog/list-models). In practice you filter on:
 
@@ -49,11 +49,11 @@ By default the endpoint returns only chat models. Pass a `type` filter such as `
 - **privacy** to find models that support `:confidential`, by reading `privacy_tier: "confidential"` or `attestation_available: true`.
 - **capabilities** such as `supports_image_inputs` or `supports_reasoning`, to match a model to a feature you need.
 
-## Using the catalog in code
+## Using the Catalog in Code
 
 Fetch the catalog at startup, cache it briefly, and pick a model by capability rather than by a hard-coded name:
 
-```python
+```python wrap
 from openai import OpenAI
 
 client = OpenAI(api_key="z_sk_your_key_here", base_url="https://nito.dev.zprotocol.org/v1")
@@ -67,15 +67,25 @@ This keeps your integration resilient: when a model is added or retired, your co
 
 Query `GET /v1/models` directly for the list of available models.
 
-## Common mistakes
+## Common Issues
 
 - **Expecting image models in the default list.** The endpoint returns chat models unless you pass a `type` filter (or `type=all`).
 - **Caching the catalog forever.** The list changes as models are added and retired; refresh it periodically.
 - **Inferring privacy support from the model name.** Read `privacy_tier` and `attestation_available` from the entry instead.
 - **Assuming a model name from another provider exists here.** Always confirm against `GET /v1/models`.
 
-## Related
+## Related Resources
 
-- [Models overview](/models)
-- [Model ID convention](/models/model-id-convention)
-- [GET /v1/models reference](/api-reference/models-catalog/list-models)
+<CardGroup cols={3}>
+  <Card title="Models Overview" icon="book-open-lines" href="/models">
+    Learn how to list and filter supported models in code<br />
+  </Card>
+
+  <Card title="Model ID Covention" icon="ad" href="/models/model-id-convention">
+    The grammar for naming a model and selecting privacy.<br />
+  </Card>
+
+  <Card title="GET /v1/models reference" icon="lock-alt" href="/api-reference/models-catalog/list-models">
+    Use the /models API endpoint to fetch the list catalog.
+  </Card>
+</CardGroup>

@@ -61,7 +61,9 @@
               "models/choosing-a-model",
               "models/pricing",
               "models/deprecations-and-lifecycle"
-            ]
+            ],
+            "icon": "cube",
+            "expanded": true
           }
         ],
         "icon": "cube"
@@ -488,7 +490,7 @@
         "tab": "API Playground",
         "groups": [
           {
-            "group": "Nito API",
+            "group": "Nito API Endpoints",
             "pages": [
               "api-playground",
               {
@@ -655,9 +657,11 @@
                   "api-reference/endpoints/system/gethealth"
                 ]
               }
-            ]
+            ],
+            "icon": "gear-api"
           }
-        ]
+        ],
+        "icon": "gear-code"
       }
     ]
   },

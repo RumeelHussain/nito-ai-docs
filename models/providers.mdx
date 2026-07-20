@@ -1,17 +1,17 @@
 ---
-title: "Model providers"
+title: "Model Providers"
 description: "Who actually serves a Nito call, and how each provider enforces privacy."
 ---
 
 Behind one Nito key sit several model providers. You rarely choose a provider directly; you choose a model and a privacy mode, and Nito routes to a provider that can serve it. Still, it helps to know who runs a call and what each provider does to protect it, especially when you are reasoning about where sensitive data goes. This page profiles each serving provider and the privacy enforcement it applies. If you only remember one thing: the provider is an implementation detail of the model you name, and for attested calls you can confirm after the fact exactly which one ran your request.
 
-## How providers fit in
+## How Model Providers Fit In
 
 Nito normalizes your request into one internal shape, picks a backend that can serve the named model at the privacy mode you asked for, and forwards the call to that provider's API. Provider keys are held by the gateway, not by you, so you never sign up with or pay these providers directly. The provider that serves a call is reflected in the model's physical ID, written `provider/model`, and, for attested calls, in the attestation response. How Nito chooses among eligible providers is covered in [Backend selection](/models/backend-selection).
 
 A couple of terms recur below. **Zero-data-retention (ZDR)** means the upstream provider is instructed, contractually and technically, not to keep your request after serving it. **Attestation** is a signed statement a Trusted Execution Environment (TEE) produces about what ran inside it, which you can verify; the **attestation subject** is the identity that statement is bound to (a domain or an application ID, depending on the provider).
 
-## The providers
+## List of Current Model Providers
 
 ### xAI
 
@@ -38,16 +38,16 @@ Serves text-to-image generation only. Image requests are forwarded with storage 
 ## Privacy enforcement at a glance
 
 | Provider | Serves | Privacy enforcement |
-| --- | --- | --- |
+| :-: | :-: | :-: |
 | xAI | Grok chat, xAI tools | Storage disabled at provider (`Store: false`) |
 | OpenRouter | Aggregated chat, images | ZDR-only import and ZDR data policy (relaxed when OpenRouter server web tools are used; image requests always force ZDR) |
 | NEAR | TEE-capable chat | Domain-based attestation, ed25519 end-to-end encryption; subject optional |
 | Phala | TEE-capable chat | Appid-based attestation, end-to-end encryption; subject required |
 | Image provider (fal) | Image generation | Storage disabled at provider (`X-Fal-Store-IO: 0`); image only |
 
-## Why this matters for sensitive calls
+## Why Providers Matters for Sensitive Calls
 
-The reason to care who serves a call is that different providers give you different kinds of assurance, and the strongest kind is one you can check yourself. Walk it up by sensitivity:
+The reason to care who serves a call is that different providers give you different kinds of assurance, and the strongest kind is one you can check yourself.
 
 - For routine, low-sensitivity calls, ordinary routing is fine; any eligible provider may serve it.
 - If you want the upstream to keep nothing but do not need a proof, a private-tier model (often routed through OpenRouter ZDR endpoints) is enough.
@@ -55,15 +55,25 @@ The reason to care who serves a call is that different providers give you differ
 
 This is why the language across these docs is "attested" and "verifiable" rather than absolute claims: TEE gives you evidence to check, not a request to take on faith.
 
-## Common mistakes
+## Common Issues
 
 - **Assuming you pick the provider directly.** You pick a model and a privacy mode; Nito picks the provider. To influence which backend runs, see [Backend selection](/models/backend-selection).
 - **Expecting ZDR on an OpenRouter call that uses OpenRouter web tools.** That specific combination relaxes the ZDR flag by necessity. Use a Confidential mode if you need a guarantee on a tool-using call.
 - **Looking for TEE on xAI or the image provider.** Confidential and Encrypted come from NEAR and Phala only.
 - **Treating "storage disabled" and "TEE" as the same protection.** Storage disabled (xAI, fal) tells the provider not to keep the request; TEE seals execution and gives you an attestation. The second is a stronger, checkable guarantee.
 
-## Related
+## Related Resources
 
-- [Backend selection](/models/backend-selection)
-- [Provider-side privacy enforcement](/privacy/provider-side-enforcement)
-- [TEE attestation](/privacy/tee-attestation)
+<CardGroup cols={2}>
+  <Card title="Backend Selection" icon="abacus" href="/models/backend-selection">
+    How Nito picks a backend, and how to influence it.<br />
+  </Card>
+
+  <Card title="Provider-Side Privacy Enforcement" icon="diagram-project" href="/privacy/provider-side-enforcement">
+    Constraining upstream providers to uphold privacy beyond gateway boundary.
+  </Card>
+
+  <Card title="TEE Attestation" icon="object-ungroup" href="/privacy/tee-attestation">
+    How Nito turns a privacy promise into something you can check.
+  </Card>
+</CardGroup>

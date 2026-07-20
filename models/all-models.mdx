@@ -1,21 +1,29 @@
 ---
-title: "Model list"
-description: "The full Nito model list at a glance — every model, grouped by privacy tier, with context window, pricing, and capabilities."
+title: "Model List"
+description: "The full Nito model list at a glance, every model, grouped by privacy tier, with context window, pricing, and capabilities."
 mode: "wide"
 ---
 
-Every model you can call on Nito, grouped by privacy tier. This is a **snapshot** — `GET /v1/models` is always the source of truth, since the catalog is discovered live and changes over time.
+This page lists every model a user can call on Nito, grouped by privacy tier. This is a **snapshot**,  `GET /v1/models` is always the source of truth, since the catalog is discovered live and changes over time.
 
-<Note>Snapshot of **2026-07-18** · **41 models** (all chat). **Price /1M** is USD per 1M tokens, shown as **input · output**, read live from each model's `pricing` object. For the current list, call [`GET /v1/models`](/api-reference/models-catalog/list-models); see [Pricing](/models/pricing) for the full pricing object and cached-token rates.</Note>
+<Note>
+  Snapshot of **2026-07-18** · **41 models** (all chat). **Price /1M** is USD per 1M tokens, shown as **input · output**, read live from each model's `pricing` object. For the current list, call [`GET /v1/models`](/api-reference/models-catalog/list-models); see [Pricing](/models/pricing) for the full pricing object and cached-token rates.
+</Note>
 
-**Capabilities key:** `reasoning` step-by-step thinking · `vision` image input · `web` web search · `code` code interpreter · `attestable` supports a verifiable TEE attestation.
+The `capabilities` object returned as a response reports what a model can do, for instance:
 
-## Anonymous (20)
+- `reasoning` step-by-step thinking
+- `vision` image input
+- `web` web search
+- `code` code interpreter
+- `attestable` supports a verifiable TEE attestation.
+
+## Anonymous Privacy Tier (20 Supported Models)
 
 Standard routing, metadata-only retention. Call the model plain (no suffix).
 
 | No. | Model ID | Context | Price /1M | Capabilities |
-|--:|---|--:|--:|---|
+| :-: | :-: | :-: | :-: | :-: |
 | 1 | `anthropic/claude-haiku-4-5` | 200k | \$1.00 · \$5.00 | reasoning, vision, web |
 | 2 | `anthropic/claude-haiku-4.5` | 200k | \$1.00 · \$5.00 | reasoning, vision, web |
 | 3 | `anthropic/claude-opus-4.8` | 1000k | \$5.00 · \$25.00 | reasoning, vision, web |
@@ -37,12 +45,12 @@ Standard routing, metadata-only retention. Call the model plain (no suffix).
 | 19 | `phala/qwen3.6-35b-a3b-uncensored` | 131k | \$0.30 · \$1.50 | vision, web |
 | 20 | `qwen/qwen3.7-max` | 1000k | \$2.80 · \$7.50 | reasoning, web |
 
-## Private (7)
+## Private Privacy Tier (7 Supported Models)
 
 Zero-data-retention enforced upstream. Call the model plain (no suffix).
 
 | No. | Model ID | Context | Price /1M | Capabilities |
-|--:|---|--:|--:|---|
+| :-: | :-: | --: | :-: | :-: |
 | 1 | `minimax/minimax-m3` | 1048k | \$0.30 · \$1.20 | reasoning, vision, web |
 | 2 | `nousresearch/hermes-4-405b` | 131k | \$1.00 · \$3.00 | reasoning, web |
 | 3 | `nvidia/nemotron-3-ultra-550b-a55b` | 1000k | \$0.00 · \$0.00 | reasoning, web |
@@ -51,12 +59,12 @@ Zero-data-retention enforced upstream. Call the model plain (no suffix).
 | 6 | `qwen/qwen3-vl-235b-a22b-instruct` | 131k | \$0.21 · \$1.90 | reasoning, vision, web |
 | 7 | `x-ai/grok-4.5` | 500k | \$2.00 · \$6.00 | reasoning, vision, web |
 
-## Confidential (7)
+## Confidential Privacy Tier (7 Supported Models)
 
 Runs in a sealed, attestable environment. Append `:confidential`.
 
 | No. | Model ID | Context | Price /1M | Capabilities |
-|--:|---|--:|--:|---|
+| :-: | :-: | :-: | :-: | :-: |
 | 1 | `deepseek-ai/deepseek-v4-flash:confidential` | 1048k | \$0.17 · \$0.35 | reasoning, web, attestable |
 | 2 | `google/gemma-4-31b-it:confidential` | 262k | \$0.13 · \$0.40 | reasoning, vision, web, attestable |
 | 3 | `moonshotai/kimi-k2.6:confidential` | 262k | \$0.81 · \$3.85 | reasoning, vision, web, attestable |
@@ -65,12 +73,12 @@ Runs in a sealed, attestable environment. Append `:confidential`.
 | 6 | `qwen/qwen3.5-397b-a17b:confidential` | 128k | \$0.50 · \$3.30 | reasoning, web, attestable |
 | 7 | `z-ai/glm-5.2:confidential` | 1048k | \$1.40 · \$4.40 | reasoning, web, attestable |
 
-## Encrypted (7)
+## Encrypted Privacy Tier (7 Supported Models)
 
 End-to-end encrypted to the sealed environment. Append `:encrypted`; non-streaming.
 
 | No. | Model ID | Context | Price /1M | Capabilities |
-|--:|---|--:|--:|---|
+| :-: | :-: | :-: | :-: | :-: |
 | 1 | `deepseek-ai/deepseek-v4-flash:encrypted` | 1048k | \$0.17 · \$0.35 | reasoning, attestable |
 | 2 | `google/gemma-4-31b-it:encrypted` | 262k | \$0.13 · \$0.40 | reasoning, attestable |
 | 3 | `moonshotai/kimi-k2.6:encrypted` | 262k | \$0.81 · \$3.85 | reasoning, attestable |
@@ -79,7 +87,9 @@ End-to-end encrypted to the sealed environment. Append `:encrypted`; non-streami
 | 6 | `qwen/qwen3.5-397b-a17b:encrypted` | 128k | \$0.50 · \$3.30 | reasoning, attestable |
 | 7 | `z-ai/glm-5.2:encrypted` | 1048k | \$1.40 · \$4.40 | reasoning, attestable |
 
-## Fetch the live catalog
+## Fetching The Live Model Catalog
+
+Nito provides the `GET /v1/models `API endpoint to fetch the latest list of live model catalog.
 
 ```bash
 curl "https://nito.dev.zprotocol.org/v1/models" \
@@ -87,9 +97,22 @@ curl "https://nito.dev.zprotocol.org/v1/models" \
 # add ?type=all to include non-chat kinds
 ```
 
-## Related
+## Related Resources
 
-- [Model catalog](/models/model-catalog) — how to list and filter in code
-- [Choosing the right model](/models/choosing-a-model)
-- [Pricing](/models/pricing)
-- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
+<CardGroup cols={2}>
+  <Card title="Model Catalog" icon="book-open-lines" href="/models/model-catalog">
+    Learn how to list and filter supported models in code
+  </Card>
+
+  <Card title="Choosing the Right Model" icon="magnifying-glass-waveform" href="/models/choosing-a-model">
+    A decision guide from use case to model.<br />
+  </Card>
+
+  <Card title="Privacy Tiers at a Glance" icon="lock-alt" href="/models/privacy-tiers-at-a-glances">
+    The privacy modes, in brief.<br />
+  </Card>
+
+  <Card title="Pricing" icon="money-bills" href="/models/pricing">
+    How cost is structured and where to read per-model rates.
+  </Card>
+</CardGroup>
