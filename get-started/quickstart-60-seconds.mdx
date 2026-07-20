@@ -26,7 +26,7 @@ Get up and running with Nito in minutes. Generate an API key, make your first re
 
     <CodeGroup>
 
-    ```bash Python
+    ```bash Python wrap
     pip install openai
     ```
 
@@ -41,7 +41,7 @@ Get up and running with Nito in minutes. Generate an API key, make your first re
 
     <CodeGroup>
 
-    ```python Python
+    ```python Python wrap
     import os
     from openai import OpenAI
     
@@ -61,7 +61,7 @@ Get up and running with Nito in minutes. Generate an API key, make your first re
     print(resp.choices[0].message.content)
     ```
 
-    ```typescript TypeScript
+    ```typescript TypeScript wrap
     import OpenAI from "openai";
     
     const client = new OpenAI({
@@ -80,7 +80,7 @@ Get up and running with Nito in minutes. Generate an API key, make your first re
     console.log(resp.choices[0].message.content);
     ```
 
-    ```bash cURL
+    ```bash cURL wrap
     curl "$NITO_BASE_URL/v1/chat/completions" \
       -H "Authorization: Bearer $NITO_API_KEY" \
       -H "Content-Type: application/json" \
