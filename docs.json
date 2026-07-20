@@ -443,23 +443,6 @@
               "resources/trust-center/security-advisories",
               "resources/trust-center/responsible-disclosure"
             ]
-          },
-          {
-            "group": "Policies and legal",
-            "pages": [
-              "resources/policies/terms-of-service",
-              "resources/policies/acceptable-use-policy",
-              "resources/policies/privacy-policy",
-              "resources/policies/cookies"
-            ]
-          },
-          {
-            "group": "More",
-            "pages": [
-              "resources/community",
-              "resources/powered-by-z/index",
-              "resources/powered-by-z/for-developers-building-agents"
-            ]
           }
         ],
         "icon": "book-copy"
