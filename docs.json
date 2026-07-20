@@ -481,7 +481,9 @@
               "faq/billing-and-usage",
               "faq/errors-and-limits",
               "faq/integrations"
-            ]
+            ],
+            "icon": "comments-question-check",
+            "expanded": true
           }
         ],
         "icon": "seal-question"
