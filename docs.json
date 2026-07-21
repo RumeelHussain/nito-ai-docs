@@ -427,28 +427,6 @@
               "resources/best-practices/uptime-and-fallbacks",
               "resources/best-practices/production-readiness-checklist"
             ]
-          },
-          {
-            "group": "Observability",
-            "pages": [
-              "resources/observability/index",
-              "resources/observability/datadog",
-              "resources/observability/langfuse",
-              "resources/observability/sentry",
-              "resources/observability/s3",
-              "resources/observability/webhooks"
-            ]
-          },
-          {
-            "group": "Trust Center",
-            "pages": [
-              "resources/trust-center/index",
-              "resources/trust-center/dpa",
-              "resources/trust-center/subprocessors",
-              "resources/trust-center/sla",
-              "resources/trust-center/security-advisories",
-              "resources/trust-center/responsible-disclosure"
-            ]
           }
         ],
         "icon": "book-copy"
