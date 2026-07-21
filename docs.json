@@ -414,8 +414,7 @@
           {
             "group": "Reference",
             "pages": [
-              "resources/index",
-              "resources/errors-reference"
+              "resources/index"
             ]
           },
           {
@@ -722,6 +721,10 @@
     {
       "source": "/resources/pricing",
       "destination": "/models/pricing"
+    },
+    {
+      "source": "/resources/errors-reference",
+      "destination": "/api-reference/errors-and-rate-limits/error-codes"
     }
   ],
   "styling": {
