@@ -74,7 +74,8 @@
               "models/best-practices/privacy-safe-logging",
               "models/best-practices/uptime-and-fallbacks"
             ],
-            "expanded": true
+            "expanded": true,
+            "icon": "box-check"
           }
         ],
         "icon": "cube"
