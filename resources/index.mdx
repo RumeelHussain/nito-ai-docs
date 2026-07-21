@@ -1,31 +1,21 @@
 ---
 title: "Resources"
-description: "Reference tables you reach for while building on Nito. Pricing, rate limits, and the full error catalog in one place."
+description: "Practical guides, integrations, and trust & compliance material for building on Nito."
 ---
 
-This tab collects the flat reference material you keep open in a second tab while you build: how billing works and where the numbers live, what the rate limiter does and the defaults it applies, and the complete catalog of error kinds with their HTTP mappings. Nothing here is a tutorial. Each page is a lookup surface, deliberately dense, cross-linked back to the deeper explanations in [Features](/features), [API Reference](/api-reference), and [Privacy](/privacy/overview).
+The Resources tab collects the material you reach for once you are past the basics: guides for building well, integrations for shipping telemetry, and the trust and compliance references your team may need. It is not tutorial material — for that, start with [How Nito Works](/get-started/how-nito-works).
 
-If you are new to Nito, read [How Nito Works](/get-started/how-nito-works) first. The frame it establishes (one key, one base URL, the `model` string selecting both the model and the privacy mode) is assumed on every page below.
+Core reference tables live with the topics they belong to: **[Pricing](/models/pricing)** sits with Models, and **[errors & rate limits](/api-reference/errors-and-rate-limits/error-codes)** live in the API reference.
 
-## What is Here
+## What's Here
 
-- [**Pricing**](/models/pricing) how Nito meters and bills inference. Nito bills in credits tracked in nanos (billionths of a unit) for precision, with separate per-token rates for input and output plus rates for cache, reasoning, and server-side tools. The master per-model price table and the credit-to-currency value are not asserted in these docs; they are configured live and surfaced on each model entry. Read this page to learn where to pull the authoritative numbers from.
-- [**Errors reference**](/api-reference/errors-and-rate-limits/error-codes) the full error catalog in one place: the response envelope, every error kind the gateway emits, and the HTTP status each one maps to. This is the consolidated version of the per-topic error pages in the API reference.
+- [**Best practices**](/resources/best-practices/latency-and-performance) — guides for latency and performance, cost control, secure API-key handling, privacy-safe logging, uptime and fallbacks, and a production-readiness checklist.
+- [**Observability**](/resources/observability/index) — ship logs, traces, and metrics to Datadog, Langfuse, Sentry, or S3, or receive them over your own webhooks.
+- [**Trust Center**](/resources/trust-center/index) — DPA, subprocessors, SLA, security advisories, and responsible disclosure.
 
-Looking for **rate limits**? They live in the API reference: [Rate limits](/api-reference/errors-and-rate-limits/rate-limits) — the single canonical reference for the policy table, `inference_generate` defaults, the `Retry-After`-only `429` signal, and fail-open versus fail-closed behavior.
-
-## How These Pages Relate to the Rest of the Docs
-
-The [API Reference](/api-reference) has focused pages for each of these topics scoped to a single endpoint group. The Resources tab is the consolidated view: one pricing model and one error catalog, spanning the whole gateway. Rate limits are documented once, in the [API reference](/api-reference/errors-and-rate-limits/rate-limits). Where a concrete number is deployment-configurable or lives in a system these docs do not read from, it is marked as a TODO for the owning team rather than guessed. Treat any unmarked number as verifiable against the gateway and any TODO as not yet published.
-
-## Important Note on Numbers
-
-Two categories of figures are intentionally absent here: the master per-model prices (and what one credit is worth in currency), and the exact production rate limits for a given deployment. Both are configured live outside the code these docs are built from. Where an example needs a value, it uses a placeholder and points at the live source (`GET /v1/models` for pricing, `Retry-After` for rate limits) so your integration tracks the real configuration instead of a snapshot.
-
-## Related Resources
+## Related
 
 - [How Nito Works](/get-started/how-nito-works)
-- [Check usage and credits](/get-started/check-usage-and-credits)
-- [API Reference](/api-reference)
-- [Errors and rate limits (API reference)](/api-reference/errors-and-rate-limits/error-envelope)
+- [Pricing](/models/pricing)
+- [Errors & rate limits](/api-reference/errors-and-rate-limits/error-codes)
 - [Privacy overview](/privacy/overview)
