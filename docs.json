@@ -120,6 +120,7 @@
           },
           {
             "group": "Efficiency",
+            "root": "features/efficiency",
             "pages": [
               "features/prompt-caching",
               "features/safe-retries"
@@ -170,6 +171,7 @@
           },
           {
             "group": "Data handling",
+            "root": "privacy/data-handling",
             "pages": [
               "privacy/data-visibility",
               "privacy/data-retention/index",

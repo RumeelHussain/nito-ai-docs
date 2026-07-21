@@ -1,0 +1,17 @@
+---
+title: "Data Handling"
+description: "What Nito sees while serving a request and what it keeps afterward — visibility during the call, and metadata-only retention by default."
+---
+
+How Nito treats your data splits into two questions: what is visible while a request is being served, and what survives once it is done. The default is **metadata only** — request and response bodies are request-local and are not persisted.
+
+## In this section
+
+- [**Data visibility**](/privacy/data-visibility) — who and what sees a request while it is in flight.
+- [**Data retention**](/privacy/data-retention/index) — what survives a request and for how long, and the metadata-only default.
+- [**Metadata-only default**](/privacy/data-retention/metadata-only-default) — the baseline: bodies are request-local, responses are `Cache-Control: no-store`, and telemetry is restricted to a safe allowlist.
+
+## Related
+
+- [Privacy overview](/privacy/overview)
+- [Per-call privacy modes](/privacy/per-call-privacy-modes)
