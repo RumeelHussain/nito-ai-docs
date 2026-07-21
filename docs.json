@@ -415,7 +415,6 @@
             "group": "Reference",
             "pages": [
               "resources/index",
-              "resources/pricing",
               "resources/errors-reference"
             ]
           },
@@ -719,6 +718,10 @@
     {
       "source": "/features/idempotency",
       "destination": "/features/safe-retries"
+    },
+    {
+      "source": "/resources/pricing",
+      "destination": "/models/pricing"
     }
   ],
   "styling": {

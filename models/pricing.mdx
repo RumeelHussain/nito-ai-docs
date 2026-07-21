@@ -9,6 +9,21 @@ This page explains how Nito prices inference and where to read the numbers. The 
 
 Nito bills in credits, tracked internally in nanos (billionths of a unit) for precision. Inference is priced primarily per token, with separate rates for input and output, plus additional rates for cached input tokens, reasoning output tokens, and server-side tool usage. Image generation is priced by output. Before each call, Nito places a hold sized to the expected cost, then settles it against actual usage. Failed requests are not billed. See [Check usage and credits](/get-started/check-usage-and-credits).
 
+## What Gets Billed
+
+A single call can accrue charges across several rate categories, each priced separately:
+
+| Category | Priced by | Notes |
+|---|---|---|
+| Input tokens | Per token | Separate rate from output. |
+| Output tokens | Per token | Separate rate from input. |
+| Cached input tokens | Per token | Cache read and cache write are metered separately from ordinary input. |
+| Reasoning output | Per token | Reasoning tokens are billed on top of ordinary output. |
+| Server-side tools | Per use | Web search, web fetch, and similar hosted tools bill in addition to model tokens. |
+| Image generation | By output | Images are priced by output, not by input tokens. |
+
+Input and output are always separate rates; cache, reasoning, and server-tool charges are additive on top. Absence of a rate on a model entry means it is not yet configured, not that the item is free.
+
 ## Where to Read Per-Model Cost
 
 Each model's `GET /v1/models` entry carries a `pricing` object (joined from the billing system at response time) alongside its `context_window`. Its per-token rates are expressed in nanos and cover input and output tokens, cache read and write, the reasoning output rate, web search and fetch, and an image output rate, plus `context_limit_tokens` for the model's context limit. The object also carries `currency_code` (defaults to `USD`), `unit` (`nanos`), and a price `version`; and each per-token rate is mirrored as a `*_million_token_nanos` field (the rate per million tokens) for convenience. Read pricing from the entry so your estimates track the live configuration.
@@ -38,20 +53,16 @@ A rough estimate for a text call is `input_tokens * input_rate + output_tokens *
 
 ## Related Resources
 
-<CardGroup cols={4}>
-  <Card title="Models List" icon="list-timeline" href="/models/all-models">
-    Snapshot of every model with per-1M prices.<br />
+<CardGroup cols={3}>
+  <Card title="Model list" icon="list-timeline" href="/models/all-models">
+    Snapshot of every model with per-1M prices.
   </Card>
 
-  <Card title="Check Usage and Credits" icon="analytics" href="/get-started/check-usage-and-credits">
-    Check comsumption, credits and balance.
+  <Card title="Check usage and credits" icon="analytics" href="/get-started/check-usage-and-credits">
+    Check consumption, credits, and balance.
   </Card>
 
-  <Card title="Pricing" icon="money-bills" href="/resources/pricing">
-    How Nito meters and bills inference.<br /><br />
-  </Card>
-
-  <Card title="Tool Pricing" icon="toolbox" href="/models/pricing">
-    Server-side tools billing and usage of pseudo-models for metering.
+  <Card title="Tool pricing" icon="toolbox" href="/api-reference/server-tools/tool-pricing">
+    Server-side tool (web search / fetch) per-use rates.
   </Card>
 </CardGroup>
