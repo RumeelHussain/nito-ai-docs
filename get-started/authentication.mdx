@@ -38,10 +38,10 @@ Nito uses a small set of token types, each with a distinct prefix so you can tel
 
 | Prefix | Type | Used for |
 | --- | --- | --- |
-|  | Organization API key | Server-to-server inference and account calls. This is the key you use for the HTTP API. |
-|  | CLI access token | Current token issued by the OAuth device flow for the `z` CLI. |
-|  | Legacy CLI token | Older CLI tokens, still accepted. |
-|  | MCP access token | Issued by OAuth for the MCP transport. |
+| `z_sk_` | Organization API key | Server-to-server inference and account calls. This is the key you use for the HTTP API. |
+| `nito_cli_` | CLI access token | Current token issued by the OAuth device flow for the `z` CLI. |
+| `z_cli_` | Legacy CLI token | Older CLI tokens, still accepted. |
+| `z_mcp_` | MCP access token | Issued by OAuth for the MCP transport. |
 
 For the HTTP API you almost always want a `z_sk_` organization API key. The CLI and MCP token types are issued by their own OAuth flows and are documented with those tools. Note what is not on this list: there is no `sk-` prefix and no bare `z_` token. If a credential does not start with one of the prefixes above, it is not a Nito token.
 
