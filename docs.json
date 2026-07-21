@@ -64,6 +64,16 @@
             ],
             "icon": "cube",
             "expanded": true
+          },
+          {
+            "group": "Best practices",
+            "pages": [
+              "models/best-practices/latency-and-performance",
+              "models/best-practices/cost-control",
+              "models/best-practices/secure-api-key-handling",
+              "models/best-practices/privacy-safe-logging",
+              "models/best-practices/uptime-and-fallbacks"
+            ]
           }
         ],
         "icon": "cube"
@@ -409,28 +419,6 @@
         "icon": "list-alt"
       },
       {
-        "tab": "Resources",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "resources/index"
-            ]
-          },
-          {
-            "group": "Best practices",
-            "pages": [
-              "resources/best-practices/latency-and-performance",
-              "resources/best-practices/cost-control",
-              "resources/best-practices/secure-api-key-handling",
-              "resources/best-practices/privacy-safe-logging",
-              "resources/best-practices/uptime-and-fallbacks"
-            ]
-          }
-        ],
-        "icon": "book-copy"
-      },
-      {
         "tab": "FAQ",
         "groups": [
           {
@@ -705,7 +693,31 @@
     },
     {
       "source": "/resources/best-practices/production-readiness-checklist",
-      "destination": "/resources"
+      "destination": "/models"
+    },
+    {
+      "source": "/resources/best-practices/latency-and-performance",
+      "destination": "/models/best-practices/latency-and-performance"
+    },
+    {
+      "source": "/resources/best-practices/cost-control",
+      "destination": "/models/best-practices/cost-control"
+    },
+    {
+      "source": "/resources/best-practices/secure-api-key-handling",
+      "destination": "/models/best-practices/secure-api-key-handling"
+    },
+    {
+      "source": "/resources/best-practices/privacy-safe-logging",
+      "destination": "/models/best-practices/privacy-safe-logging"
+    },
+    {
+      "source": "/resources/best-practices/uptime-and-fallbacks",
+      "destination": "/models/best-practices/uptime-and-fallbacks"
+    },
+    {
+      "source": "/resources",
+      "destination": "/models"
     }
   ],
   "styling": {

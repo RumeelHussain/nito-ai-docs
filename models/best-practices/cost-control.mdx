@@ -23,7 +23,7 @@ Output tokens are billed too, and generation length is easy to let run long. Set
 
 The strongest structural guardrail is a per-key spend cap. Each API key can carry a spend cap of type `daily`, `monthly`, or `overall`. When a key breaches its cap, the key is force-expired, so a single compromised or misbehaving workload cannot keep spending past the limit you set. This makes spend caps useful in two ways: as a budget on a workload, and as a containment boundary if a key leaks.
 
-A good pattern is one key per workload, each with a cap sized to that workload. A batch job that should never cost more than a set amount per day gets a daily cap; a long-lived service gets an overall or monthly cap. See [Secure API key handling](/resources/best-practices/secure-api-key-handling) for the key-hygiene side of this.
+A good pattern is one key per workload, each with a cap sized to that workload. A batch job that should never cost more than a set amount per day gets a daily cap; a long-lived service gets an overall or monthly cap. See [Secure API key handling](/models/best-practices/secure-api-key-handling) for the key-hygiene side of this.
 
 ## Monitor Spend Through the Org Usage Overview
 
@@ -55,5 +55,5 @@ Neither is bad; both are worth the money when the task needs them. The point is 
 - [Choosing a model](/models/choosing-a-model)
 - [Pricing](/models/pricing)
 - [Prompt caching](/features/prompt-caching)
-- [Secure API key handling](/resources/best-practices/secure-api-key-handling)
-- [Latency and performance](/resources/best-practices/latency-and-performance)
+- [Secure API key handling](/models/best-practices/secure-api-key-handling)
+- [Latency and performance](/models/best-practices/latency-and-performance)

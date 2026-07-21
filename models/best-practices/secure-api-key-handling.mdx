@@ -17,14 +17,14 @@ The most common way keys leak is committing them to source control or shipping t
 
 - **Use environment variables or a secrets manager.** Load the key from the environment at runtime (`NITO_API_KEY`) or from a dedicated secrets store. Keep it out of the repository entirely.
 - **Never put a key in client-side code.** Anything that runs in a browser or a mobile app is readable by the user. A key embedded there is a public key. Route model calls through your own backend, which holds the key server-side.
-- **Keep keys out of logs and error reports.** Never log the `Authorization` header. See [Privacy-safe logging](/resources/best-practices/privacy-safe-logging).
+- **Keep keys out of logs and error reports.** Never log the `Authorization` header. See [Privacy-safe logging](/models/best-practices/privacy-safe-logging).
 
 ## Isolate Workloads and Bound Blast Radius
 
 Because a key cannot be scoped, isolation and spend caps are your main tools for limiting damage if one leaks.
 
 - **One key per workload.** Give each service, job, or environment its own key. When something goes wrong, you can revoke that one key without taking down everything else, and you can tell from usage which workload a key belongs to.
-- **Set per-key spend caps.** Each key supports a spend cap of type `daily`, `monthly`, or `overall`, and breaching the cap force-expires the key. A tight cap turns a leaked key from an open-ended liability into a bounded one. Size the cap to what the workload should legitimately spend. See [Cost control](/resources/best-practices/cost-control).
+- **Set per-key spend caps.** Each key supports a spend cap of type `daily`, `monthly`, or `overall`, and breaching the cap force-expires the key. A tight cap turns a leaked key from an open-ended liability into a bounded one. Size the cap to what the workload should legitimately spend. See [Cost control](/models/best-practices/cost-control).
 
 ## Rotate by Revoking and Re-Creating
 
@@ -59,5 +59,5 @@ Key management is restricted to organization roles. Only `owner` and `admin` can
 ## Related Resources
 
 - [Authentication](/get-started/authentication)
-- [Cost control](/resources/best-practices/cost-control)
-- [Privacy-safe logging](/resources/best-practices/privacy-safe-logging)
+- [Cost control](/models/best-practices/cost-control)
+- [Privacy-safe logging](/models/best-practices/privacy-safe-logging)

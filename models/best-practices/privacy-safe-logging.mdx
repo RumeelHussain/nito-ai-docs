@@ -35,7 +35,7 @@ None of that requires storing what the user asked or what the model said. Reach 
 
 ## Never Log the Authorization Header or the Key
 
-The one thing that must never reach your logs is the credential. Do not log the `Authorization` header, and do not log the API key anywhere. Many HTTP client libraries will dump full request headers on error; scrub or redact the `Authorization` header before anything is written. A `z_sk_` key is full org-scoped access, so a key in a log line is a credential leak with the same severity as committing it to source. See [Secure API key handling](/resources/best-practices/secure-api-key-handling).
+The one thing that must never reach your logs is the credential. Do not log the `Authorization` header, and do not log the API key anywhere. Many HTTP client libraries will dump full request headers on error; scrub or redact the `Authorization` header before anything is written. A `z_sk_` key is full org-scoped access, so a key in a log line is a credential leak with the same severity as committing it to source. See [Secure API key handling](/models/best-practices/secure-api-key-handling).
 
 Redact defensively: allowlist the fields you log rather than blocklisting the ones you do not. An allowlist fails safe when someone adds a new header or field; a blocklist fails open.
 
@@ -58,4 +58,4 @@ If your own logs capture full content while the gateway deliberately does not, y
 - [Request IDs](/api-reference/overview/request-ids)
 - [Privacy overview](/privacy/overview)
 - [Metadata-only default](/privacy/data-retention/metadata-only-default)
-- [Secure API key handling](/resources/best-practices/secure-api-key-handling)
+- [Secure API key handling](/models/best-practices/secure-api-key-handling)
