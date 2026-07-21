@@ -13,7 +13,7 @@ In Nito, a key belongs to an organization, not to an individual person. An organ
 
 API keys are created inside an organization from your Nito dashboard. When you create a key you see the secret value once. Store it somewhere safe immediately, because the gateway keeps only a hash of the key and cannot show the original again. (A hash is a one-way fingerprint: the gateway can check a token you send against the stored fingerprint, but it cannot run the fingerprint backwards to recover the token.)
 
-To create or manage keys programmatically, see the [API Keys reference](/api-reference/api-keys). Creating a key requires an organization role of owner or admin.
+Keys are created, listed, and revoked from the dashboard, authenticated by your browser session rather than a `z_sk_` API key. Creating a key requires an organization role of owner or admin. For the endpoint details, see the [API Keys reference](/api-reference/api-keys).
 
 ## Authenticating a Request
 
