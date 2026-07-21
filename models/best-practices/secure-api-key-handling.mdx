@@ -9,7 +9,7 @@ A Nito API key is more powerful than it looks. A `z_sk_` key grants full, organi
 
 When you authenticate, you send the key as a bearer token in the `Authorization` header. Nito resolves it to your organization, the account that owns billing and keys, and runs the request under that org's privileges. The key does not carry a narrower scope; privilege is controlled entirely by organization roles, not by anything encoded in the key itself. So the only meaningful boundaries you can draw are which workloads hold which keys, and what spend caps those keys carry.
 
-One reassuring detail: keys are never stored in the clear on the server. Nito keeps only a hash of each token (an HMAC-SHA256 digest), so the raw key exists in exactly one place after creation, wherever you saved it. You see the raw token once, at creation time, and never again. If you lose it, you rotate rather than recover.
+One reassuring detail: keys are never stored in the clear on the server. Nito keeps only a one-way hash of each token, so the raw key exists in exactly one place after creation, wherever you saved it. You see the raw token once, at creation time, and never again. If you lose it, you rotate rather than recover.
 
 ## Store Keys in Secrets, Never in Code
 
@@ -30,19 +30,9 @@ Because a key cannot be scoped, isolation and spend caps are your main tools for
 
 There is no key update or edit operation. The key lifecycle is create, list, revoke, and revocation is a soft delete. So rotation is simply: create a new key, deploy it, then revoke the old one.
 
-```bash
-# Create a new key for an org (owner/admin only)
-curl -X POST https://nito.dev.zprotocol.org/api/v1/orgs/ORG_ID/api-keys \
-  -H "Authorization: Bearer $NITO_API_KEY"
+Key management — creating, listing, and revoking keys — is done from your Nito dashboard, authenticated by your browser session rather than a `z_sk_` API key. So rotation is a dashboard action, not an API call: mint a new key, deploy it into your secrets store, then revoke the old one.
 
-# Revoke the old key
-curl -X POST https://nito.dev.zprotocol.org/api/v1/orgs/ORG_ID/api-keys/KEY_ID/revoke \
-  -H "Authorization: Bearer $NITO_API_KEY"
-```
-
-> **TODO (needs SME):** confirm `ORG_ID` and `KEY_ID` retrieval flow and any UI equivalent for teams that do not script rotation
-
-Rotate on a schedule, and rotate immediately if you suspect exposure. Because you capture the raw token only once at creation, script the deploy step to read it straight into your secrets store rather than pasting it around.
+Rotate on a schedule, and rotate immediately if you suspect exposure. Because you capture the raw token only once at creation, read it straight into your secrets store rather than pasting it around.
 
 ## Control Who Can Manage Keys
 
