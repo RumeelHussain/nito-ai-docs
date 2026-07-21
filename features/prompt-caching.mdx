@@ -7,7 +7,7 @@ If you send the same long preamble on call after call, a system prompt, a big se
 
 If you have not read [Chat Completions](/features/chat-completions), skim it first. Prompt caching is a set of optional fields on that same request.
 
-## What "passthrough" means here
+## What "passthrough" Means
 
 The caching itself happens at the provider, not in Nito. The gateway does **not** store your prompt prefixes and does not maintain its own cache of prefixes. What it does is carry your cache directives through to a provider that supports them (an Anthropic-style ephemeral-breakpoint model), and then surface the provider's cache accounting back to you in the response `usage`.
 
@@ -15,18 +15,18 @@ So the mental model is: you mark which part of the request is the stable, reusab
 
 One consequence: caching only works on models whose backend supports it. If you set a cache field on a model that does not support caching, the request is rejected with a `400` rather than silently ignored.
 
-## The request fields
+## The Request Fields
 
 There are two top-level fields, plus per-part and per-tool variants for finer control.
 
-| Field | Type | Notes |
+| **Field** | **Type** | **Notes** |
 | --- | --- | --- |
 | `prompt_cache_key` | string | A key that identifies a reusable prompt prefix. Maximum **256 bytes**; longer is rejected with `400`. The model must support caching or the call is rejected. |
 | `cache_control` | object | A JSON object of provider cache directives (Anthropic-style ephemeral breakpoints), forwarded as-is. The model must support caching. |
 
 Both are optional. Send them only when you actually have a stable prefix worth caching.
 
-### Per-content-part and per-tool cache\_control
+### Per-Content-Part and Per-Tool `cache_control`
 
 Beyond the top-level fields, you can attach `cache_control` to finer-grained pieces of the request so the provider knows precisely where the cacheable boundary sits:
 
@@ -35,7 +35,7 @@ Beyond the top-level fields, you can attach `cache_control` to finer-grained pie
 
 These are passed straight through to the provider. Nito does not interpret the directive contents; it validates that the model supports caching and forwards the rest.
 
-## What it costs and saves
+## What it Costs and Saves
 
 Cache accounting comes back in the response `usage` object so you can see exactly what was cached and what was billed at full rate:
 
@@ -45,7 +45,7 @@ Cache accounting comes back in the response `usage` object so you can see exactl
 
 The economics are simple. The first call that establishes a prefix pays a small write cost. Every later call that hits the same prefix reads it back at a reduced rate instead of paying full input-token price for those tokens. The longer and more repeated the prefix, the bigger the win.
 
-## When caching actually helps
+## When Caching Actually Helps
 
 Caching pays off when a large, identical prefix repeats across many requests. Good fits:
 
@@ -55,7 +55,7 @@ Caching pays off when a large, identical prefix repeats across many requests. Go
 
 It does **not** help when each request is short, or when the prefix changes every time (a cache that is never hit only ever pays the write cost). Put the stable content first and the variable content (the user's actual question) last, so the cacheable boundary is as long as possible.
 
-## Response caching is a different thing, and Nito does not do it
+## Response Caching is a Different Thing, and Nito Does Not Do It
 
 It is easy to confuse prompt caching with **response caching**, returning a previously stored full response when an identical request comes in again. Nito does **not** implement response caching. There is no stored-response lookup; every request runs the model. The only caching Nito participates in is the prompt-prefix passthrough described above. If you need to avoid re-running an identical request, that is a concern for your own application layer, not the gateway.
 
@@ -65,7 +65,7 @@ It is easy to confuse prompt caching with **response caching**, returning a prev
 
 The model below is illustrative. Fetch `GET /v1/models` for the live catalog and select a caching-capable model by capability at runtime, because models are added and retired over time.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -90,10 +90,30 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 On the first call the stable system block is written to the provider's cache (`cache_write_input_tokens`). On later calls that reuse the same `prompt_cache_key` and the same prefix, that block is read back cheaply (`cache_read_input_tokens`), and only the new user question is billed at full input rate.
 
-## Related
+## Related Resources
 
-- [Chat Completions](/features/chat-completions)
-- [Safe retries](/features/safe-retries)
-- [Reasoning](/features/reasoning)
-- [How Nito Works](/get-started/how-nito-works)
-- [Chat Completions API reference](/api-reference/chat-and-text/chat-completions)
+<CardGroup cols={3}>
+  <Card title="Chat Completions" icon="message-captions" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Safe Retries" icon="tools" href="/features/safe-retries">
+    How to retry a request safely on Nito.<br />
+  </Card>
+
+  <Card title="Reasoning" icon="brain-circuit" href="/features/reasoning">
+    Ask a capable model to think before it answers.<br />
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Chat Completions Endpoint" icon="message-captions" href="/api-reference/chat-and-text/chat-completions">
+    Schema reference chat completions on Nito.
+  </Card>
+</CardGroup>

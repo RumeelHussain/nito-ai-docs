@@ -90,7 +90,7 @@ curl https://nito.dev.zprotocol.org/v1/images/generations \
 
 Because `model` is omitted, this routes to the default Z-Image model. To receive the bytes inline instead of a URL, set `"response_format": "b64_json"` and read `data[0].b64_json` from the response.
 
-> **TODO (needs SME):** confirm the production base URL that replaces `https://nito.dev.zprotocol.org`, the canonical default model ID to show in examples, and the set of valid `size` values the fal provider accepts.
+> **TODO (needs SME):** confirm the production base URL that replaces `https://nito.dev.zprotocol.org`, the canonical default model ID to show in examples, and the set of valid `size` values the FAL provider accepts.
 
 ## What This is Not
 
@@ -100,7 +100,20 @@ Because `model` is omitted, this routes to the default Z-Image model. To receive
 
 ## Related Resources
 
-- [Multimodal overview](/features/multimodal)
-- [Image input](/features/multimodal/image-input)
-- [How Nito works](/get-started/how-nito-works)
-- [Models](/models)
+<CardGroup cols={2}>
+  <Card title="Multimodal Overview" icon="cubes" href="/features/multimodal">
+    What Nito accepts beyond text and what it can generate.
+  </Card>
+
+  <Card title="Image Input" icon="image-circle-arrow-down" href="/features/multimodal/image-input">
+    Send PNG, JPEG, or WebP images into a vision-capable chat model.
+  </Card>
+
+  <Card title="Models" icon="cubes-stacked" href="/api-reference/server-tools/file-parser">
+    How model access works on Nito.<br />
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    Understand the request lifecycle and chat request surface.
+  </Card>
+</CardGroup>

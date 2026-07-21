@@ -6,22 +6,22 @@ description: "Where privacy is enforced at each stage, from request through infe
 The [Privacy overview](/privacy/overview) makes the promises. This page shows how they are kept. It follows a single request from the moment it arrives at the gateway to the moment it is billed, and it points at the exact stage where each privacy property is enforced. The theme throughout: privacy is not a single switch flipped in one place; it is a sequence of constraints applied at every stage, so that a request cannot reach a provider in a weaker mode than you asked for.
 
 <Steps>
-  <Step title="Stage 1 · Authentication">
+  <Step title="Stage 1 · Authentication" icon="1" iconType="solid" titleSize="h3">
     Your API key is resolved to an organization to bill and rate-limit against. The request body — your prompt — isn't touched yet.
   </Step>
-  <Step title="Stage 2 · Resolution">
+  <Step title="Stage 2 · Resolution" icon="2" iconType="solid" stepNumber={2} titleSize="h3">
     The `model` string is parsed into a model and a privacy mode. **The privacy mode is fixed here** and nothing downstream can promote or demote it.
   </Step>
-  <Step title="Stage 3 · Routing">
+  <Step title="Stage 3 · Routing" icon="3" iconType="solid" stepNumber={3} titleSize="h3">
     The router filters to backends that can honor the mode — a hard requirement. If none qualify, the call **fails**; it never downgrades. Only then does it order by availability and cost.
   </Step>
-  <Step title="Stage 4 · Execution">
-    The provider runs the call inside the chosen privacy boundary, enforced concretely: xAI `Store: false`, OpenRouter ZDR data policy, NEAR/Phala TEE + attestation, FAL `X-Fal-Store-IO: 0`.
+  <Step title="Stage 4 · Execution" icon="4" iconType="solid" stepNumber={4} titleSize="h3">
+    The provider runs the call inside the chosen privacy boundary, enforced concretely: xAI `Store: false`, OpenRouter ZDR data policy, NEAR/Phala TEE \+ attestation, FAL `X-Fal-Store-IO: 0`.
   </Step>
-  <Step title="Stage 5 · Observability">
+  <Step title="Stage 5 · Observability" icon="5" iconType="solid" stepNumber={5} titleSize="h3">
     Alongside the request (not in its path), logging captures allowlisted telemetry only — never prompts or completions — and responses carry `Cache-Control: no-store`.
   </Step>
-  <Step title="Stage 6 · Settlement">
+  <Step title="Stage 6 · Settlement" icon="6" iconType="solid" stepNumber={6} titleSize="h3">
     Billing places a hold before the call and settles it against actual usage after — from token counts and request shape, never your content.
   </Step>
 </Steps>
@@ -48,17 +48,17 @@ The load-bearing property here is the refusal to downgrade. If the privacy filte
 
 Once a backend is chosen, the gateway calls the provider inside the privacy boundary the mode requires, and each provider enforces privacy in its own way:
 
-| Provider | Privacy enforcement at the boundary |
+| **Provider** | **Privacy enforcement at the boundary** |
 | --- | --- |
-| xAI (Grok) | `Store: false` is forced on every request, so the upstream is told not to retain the exchange. |
-| OpenRouter | A zero-data-retention data policy is applied when the route requires it. It is relaxed only when OpenRouter server-side web tools are used; image routes force ZDR regardless. Models without a ZDR policy are never imported. |
-| NEAR | Runs in a TEE; produces a domain-based attestation. Supports the end-to-end encrypted path. |
-| Phala | Runs in a TEE; produces an appid-based attestation. Supports the end-to-end encrypted path. |
-| FAL (images) | `X-Fal-Store-IO: 0` is sent so the upstream does not store image inputs or outputs. |
+| **xAI (Grok)** | `Store: false` is forced on every request, so the upstream is told not to retain the exchange. |
+| **OpenRouter** | A zero-data-retention data policy is applied when the route requires it. It is relaxed only when OpenRouter server-side web tools are used; image routes force ZDR regardless. Models without a ZDR policy are never imported. |
+| **NEAR** | Runs in a TEE; produces a domain-based attestation. Supports the end-to-end encrypted path. |
+| **Phala** | Runs in a TEE; produces an appid-based attestation. Supports the end-to-end encrypted path. |
+| **FAL (images)** | `X-Fal-Store-IO: 0` is sent so the upstream does not store image inputs or outputs. |
 
 The point of the table is that the boundary is enforced **at the provider**, by a concrete mechanism, not merely asserted by the gateway. For TEE modes the boundary is hardware-isolated, and the provider emits an attestation that you can later verify.
 
-## Where attestation fits
+## Where Attestation Fits
 
 For `:confidential` and `:encrypted` calls, the sealed environment produces a signed attestation. You retrieve it through `GET /api/v1/attestation`, supplying at minimum the `model` and ideally a fresh random `nonce`. The gateway runs **baseline** verification on the evidence before returning it:
 
@@ -82,13 +82,26 @@ Running alongside the request, not in its path, is logging and telemetry. The de
 
 Billing brackets the provider call. Before the call, the gateway places a hold against your credit balance sized to the expected cost. After the call, the hold is settled against actual usage, or released if the request failed before producing usage. Billing operates on usage metadata (token counts, request shape), not on the content of your prompt or the reply. So the most privacy-sensitive part of the request never has to be retained to be billed.
 
-## The shape of the guarantee
+## The Shape of the Guarantee
 
-Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no stage at which a request becomes _less_ private than you asked for. The only thing that can happen if the mode cannot be honored is that the call fails.
+Read top to bottom, the architecture is a funnel that only ever narrows: the mode is fixed at resolution, enforced as a hard filter at routing, realized by a concrete mechanism at the provider boundary, and kept out of logging and billing by the metadata-only posture. There is no stage at which a request becomes _less_ private than you asked for. The only thing that can happen if the mode cannot be honoured is that the call fails.
 
-## Related
+## Related Resources
 
-- [Privacy overview](/privacy/overview) - the narrative entry and the promises this page keeps.
-- [Per-call privacy modes](/privacy/per-call-privacy-modes) - how the suffix selects the mode at stage 2.
-- [Zero data retention](/privacy/zero-data-retention) - the metadata-only contract behind stages 4 and 5.
-- [How Nito works](/get-started/how-nito-works) - the full request lifecycle including billing.
+<CardGroup cols={3}>
+  <Card title="Privacy Overview" icon="gears" href="/privacy/overview">
+    What “private” means on Nito.
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    How to select a privacy mode per request.
+  </Card>
+
+  <Card title="Zero Data Retention" icon="arrow-left-rotate" href="/privacy/zero-data-retention">
+    What Nito retains and what it does not.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+</CardGroup>

@@ -1,6 +1,5 @@
 ---
 title: "Latency and Performance"
-description: "Practical ways to make Nito calls feel fast and stay within limits, from streaming and prompt caching to model choice and the body-size cap."
 ---
 
 Latency is two different things, and it helps to keep them apart. There is the total time a request takes, and there is the time until the user sees something happen. You optimize them with different tools. This page walks through the levers Nito gives you, from the ones that change perceived speed to the ones that change real work, and it flags the privacy modes that trade latency for stronger guarantees.
@@ -11,7 +10,7 @@ If you have not read [How Nito Works](/get-started/how-nito-works), skim the req
 
 The single biggest win for a chat-style UI is streaming. Set `stream: true` and Nito returns tokens as they are produced over a long-lived connection instead of making the user wait for the whole response. The total generation time is unchanged, but the time to first visible token drops dramatically, which is what users actually feel.
 
-```shellscript
+```shellscript wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -55,9 +54,28 @@ The right move is to match the privacy mode to the sensitivity of each call, pay
 
 ## Related Resources
 
-- [How Nito Works](/get-started/how-nito-works)
-- [Streaming](/features/streaming)
-- [Prompt caching](/features/prompt-caching)
-- [Choosing a model](/models/choosing-a-model)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
-- [Cost control](/models/best-practices/cost-control)
+<CardGroup cols={3}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="Prompt Caching" icon="file-contract" href="/features/prompt-caching">
+    Pass provider prompt-cache directives.<br />
+  </Card>
+
+  <Card title="Choosing a Model" icon="cubes-stacked" href="/models/choosing-a-model">
+    A practical guide from use case to model and privacy mode on Nito.
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    How to select a privacy mode per request.<br />
+  </Card>
+
+  <Card title="Cost Control" icon="money-bill-wave" href="/models/best-practices/cost-control">
+    Keep spend predictable on Nito.<br />
+  </Card>
+</CardGroup>

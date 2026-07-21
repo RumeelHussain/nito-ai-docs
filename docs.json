@@ -49,7 +49,6 @@
           {
             "group": "Models",
             "pages": [
-              "models/index",
               "models/all-models",
               "models/model-catalog",
               "models/pricing",
@@ -63,10 +62,11 @@
               "models/deprecations-and-lifecycle"
             ],
             "icon": "cube",
-            "expanded": true
+            "expanded": true,
+            "root": "models/index"
           },
           {
-            "group": "Best practices",
+            "group": "Best Practices",
             "pages": [
               "models/best-practices/latency-and-performance",
               "models/best-practices/cost-control",
@@ -75,7 +75,7 @@
               "models/best-practices/uptime-and-fallbacks"
             ],
             "expanded": true,
-            "icon": "box-check"
+            "icon": "shield-check"
           }
         ],
         "icon": "cube"

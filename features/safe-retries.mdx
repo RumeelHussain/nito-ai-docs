@@ -1,23 +1,23 @@
 ---
-title: "Safe retries"
+title: "Safe Retries"
 description: "How to retry a request safely on Nito: failed calls are not billed, and how to guarantee exactly-once at your layer."
 ---
 
 Networks fail in the worst possible way: your request reaches the gateway, runs, and then the connection drops before you see the response. You do not know whether it worked, so you retry. This page explains how to retry safely on Nito.
 
-## Failed requests are not billed
+## Failed Requests are Not Billed
 
 Nito places a billing hold before each call and captures it only when the call succeeds and produces usage. If a request fails before producing usage — a timeout, a dropped connection, a `5xx` — the hold is released and you are not charged. So retrying a failed request never costs you for the failed attempt. See [How Nito Works](/get-started/how-nito-works) for the hold-and-settle lifecycle.
 
-## Retrying safely
+## Retrying Safely
 
 1. **Retry the failures that are actually retryable** — timeouts, dropped connections, `429`, `503` — with backoff. A failed attempt is not billed, so you only pay for the attempt that completes.
 2. **Be careful with a call that may have succeeded.** If a request completed on the server but the response was lost in transit, a blind retry will run and bill again. When you cannot tell, check state before retrying.
 3. **Guarantee exactly-once at your layer.** For an operation that must not run twice, track completion on your side — for example, a client-generated operation ID you record once the call succeeds and check before retrying.
 
-## Example: retry with backoff
+## Example: Retry with Backoff
 
-```python
+```python wrap
 import time, httpx
 
 def call_with_retry(url, payload, headers, attempts=4):
@@ -36,9 +36,22 @@ def call_with_retry(url, payload, headers, attempts=4):
 
 Each failed attempt releases its billing hold, so only the attempt that actually completes is charged.
 
-## Related
+## Related Resources
 
-- [How Nito Works](/get-started/how-nito-works)
-- [Chat Completions](/features/chat-completions)
-- [Error reference](/api-reference/errors-and-rate-limits/error-codes)
-- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+<CardGroup cols={2}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Chat Completions" icon="message-captions" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Error Reference" icon="tools" href="/api-reference/errors-and-rate-limits/error-codes">
+    The error families Nito returns in the code field.
+  </Card>
+
+  <Card title="Rate Limits" icon="brain-circuit" href="/api-reference/errors-and-rate-limits/rate-limits">
+    The canonical Nito rate-limit reference.<br />
+  </Card>
+</CardGroup>

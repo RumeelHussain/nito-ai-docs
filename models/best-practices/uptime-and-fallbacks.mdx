@@ -63,9 +63,22 @@ Never let any of these steps quietly relax a privacy mode, and never retry the n
 - Never retry `400`/`401`/`402`, and never downgrade privacy to recover.
 - Surface a clean, request-ID-keyed error when all else fails.
 
-## Related Resources 
+## Related Resources
 
-- [How Nito Works](/get-started/how-nito-works)
-- [Error format](/api-reference/overview/error-format)
-- [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
-- [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
+<CardGroup cols={3}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+
+  <Card title="Error Format" icon="diamond-exclamation" href="/api-reference/overview/error-format">
+    The canonical Nito error envelope.<br />
+  </Card>
+
+  <Card title="Retry Behaviour" icon="arrow-left-rotate" href="/api-reference/errors-and-rate-limits/retry-behavior">
+    Which Nito errors are safe to retry, which are not.
+  </Card>
+
+  <Card title="Rate Limits" icon="list-radio" href="/api-reference/errors-and-rate-limits/rate-limits">
+    The canonical Nito rate-limit reference.
+  </Card>
+</CardGroup>
