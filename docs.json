@@ -52,6 +52,7 @@
               "models/index",
               "models/all-models",
               "models/model-catalog",
+              "models/pricing",
               "models/model-id-convention",
               "models/privacy-tiers-at-a-glance",
               "models/model-families",
@@ -59,7 +60,6 @@
               "models/model-groups",
               "models/backend-selection",
               "models/choosing-a-model",
-              "models/pricing",
               "models/deprecations-and-lifecycle"
             ],
             "icon": "cube",
@@ -73,7 +73,8 @@
               "models/best-practices/secure-api-key-handling",
               "models/best-practices/privacy-safe-logging",
               "models/best-practices/uptime-and-fallbacks"
-            ]
+            ],
+            "expanded": true
           }
         ],
         "icon": "cube"
@@ -138,7 +139,8 @@
               "privacy/zero-data-retention",
               "privacy/per-call-privacy-modes"
             ],
-            "root": "privacy/overview"
+            "root": "privacy/overview",
+            "expanded": true
           },
           {
             "group": "Privacy tiers",
@@ -148,7 +150,8 @@
               "privacy/tiers/confidential",
               "privacy/tiers/encrypted"
             ],
-            "root": "privacy/tiers/index"
+            "root": "privacy/tiers/index",
+            "expanded": true
           },
           {
             "group": "TEE attestation",
@@ -161,7 +164,8 @@
               "privacy/tee-attestation/per-provider-attestation",
               "privacy/tee-attestation/verify-yourself-recipe"
             ],
-            "root": "privacy/tee-attestation/index"
+            "root": "privacy/tee-attestation/index",
+            "expanded": true
           },
           {
             "group": "Data handling",
@@ -169,7 +173,8 @@
               "privacy/data-visibility",
               "privacy/data-retention/index",
               "privacy/data-retention/metadata-only-default"
-            ]
+            ],
+            "expanded": true
           }
         ],
         "icon": "shield-check"
@@ -753,5 +758,11 @@
         ]
       }
     }
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "navbar": {
+    "links": []
   }
 }

@@ -1,15 +1,15 @@
 ---
-title: PDF and document input
-description: Pass PDFs and office documents into a model for analysis, inline in a chat message or through the standalone parser endpoint.
+title: "PDF and document input"
+description: "Pass PDFs and office documents into a model for analysis, inline in a chat message or through the standalone parser endpoint."
 ---
 
 When you need a model to reason over a contract, a slide deck, or a spreadsheet, you do not paste the text by hand. You attach the document and let Nito parse it into text server-side, then the model works from that text. This page covers which document kinds are supported, the two ways to get a document into a request, and the caps that apply to PDF parsing.
 
 The supported document kinds are **PDF, DOCX, PPTX, XLSX, XLS, and plain text**. All of them are parsed into text on the server before any model sees them. Images are not in this list: a picture is not parsed this way, it is sent to a vision model. See [Image input](/features/multimodal/image-input) for that path.
 
-## Two ways to send a document
+## Two Ways to Send a Document
 
-### 1. Inline in a chat message
+### 1. Inline in a Chat Message
 
 The first way places the document directly inside a chat message as a `file` content part, next to your text. The gateway parses the file server-side and the model reasons over the extracted text in the same request.
 
@@ -40,7 +40,7 @@ The file part accepts:
 The part type may appear as `file` or `input_file`; both are accepted.
 
 <Warning>
-There is no `file_id` for documents. You cannot upload a file once and reference it later by ID in a chat message; that field is rejected. Supply the document as a URL or as inline data on each request. (This mirrors image input, which also has no `file_id` path.)
+  There is no `file_id` for documents. You cannot upload a file once and reference it later by ID in a chat message; that field is rejected. Supply the document as a URL or as inline data on each request. (This mirrors image input, which also has no `file_id` path.)
 </Warning>
 
 A full chat request using this looks like:
@@ -65,11 +65,11 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 > **TODO (needs SME):** supply a real `CHAT_MODEL_ID` and confirm the production base URL replacing `https://nito.dev.zprotocol.org`. Owner: Product/Infra.
 
-### 2. The standalone parser endpoint
+### 2. The Standalone Parser Endpoint
 
 The second way is to parse the document first, on its own, and then do whatever you want with the resulting text, including placing it into a prompt yourself. This is a multipart upload to a dedicated endpoint:
 
-```
+```text
 POST /api/v1/attachments/parse
 ```
 
@@ -77,36 +77,47 @@ You send the file as a multipart form and it returns the extracted text plus met
 
 The parser endpoint has its own dedicated page with the complete behavior. See [File parser](/features/server-side-tools/file-parser) for the full treatment; this page only points at it.
 
-## PDF parsing caps
+## PDF Parsing Caps
 
 PDF parsing is bounded so a single document cannot consume unlimited time or output. The caps are:
 
 | Cap | Value |
-|---|---|
+| --- | --- |
 | Maximum pages parsed | 2,000 |
 | Parse timeout | 10 seconds |
 | Extracted-text safety limit | 50 MiB |
 
 A document past these limits is parsed up to the cap and the result is marked as truncated rather than silently returning partial text with no signal. If you are working with very large PDFs, expect truncation past 2,000 pages and design for it. Both paths use the same server-side parser, so these caps apply whether you parse inline or through the endpoint.
 
-## Which path should you use
+## Which Path Should You Use
 
 - Use the **inline `file` part** when you want one request to both supply the document and get the model's answer. It is the simplest path for "here is a document, answer a question about it."
 - Use the **parser endpoint** (browser/console session only, not API-key callable) when the console needs the extracted text as a standalone result. From the API, parse inline and reuse the model's output yourself.
 
 Both use the same server-side parser, so the supported kinds and the parsing behavior are the same. They differ only in whether the model call is bundled in.
 
-## What this is not
+## What This is Not
 
 - **Not for images.** Images are rejected by the document parser. Send a picture to a vision model via [Image input](/features/multimodal/image-input).
 - **Not a file store.** There is no persistent file API and no `file_id` to reuse. Documents travel with the request.
 - **Not generation.** This is input only. The only generation modality is [Image generation](/features/multimodal/image-generation).
 
-## Related
+## Related Resources
 
-- [Multimodal overview](/features/multimodal)
-- [File parser](/api-reference/server-tools/file-parser)
-- [Image input](/features/multimodal/image-input)
-- [How Nito works](/get-started/how-nito-works)
+<CardGroup cols={2}>
+  <Card title="Multimodal Overview" icon="cubes" href="/features/multimodal">
+    What Nito accepts beyond text and what it can generate.
+  </Card>
 
-{/* source: internal/server/api_chat.go (apiChatContentPartToInference, file/input_file -> file_url/file_data/filename, file_id rejected), internal/server/api_attachments_parse.go (apiAttachmentParseHandler, browser-session only, 2000 PDF pages, 10s timeout, 50 MiB extracted-text limit), internal/inference/contracts.go (ContentPartKind file) */}
+  <Card title="File Parser" icon="square-code" href="/api-reference/server-tools/file-parser">
+    Extract text from documents server-side.<br />
+  </Card>
+
+  <Card title="Image Input" icon="image-circle-arrow-down" href="/features/multimodal/image-input">
+    Send PNG, JPEG, or WebP images into a vision-capable chat model.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    Understand the request lifecycle and chat request surface.
+  </Card>
+</CardGroup>

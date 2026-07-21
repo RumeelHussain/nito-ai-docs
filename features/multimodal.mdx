@@ -5,7 +5,7 @@ description: "What Nito accepts beyond text and what it can generate. An honest 
 
 Most of what you send Nito is text, but the gateway is not limited to text. You can put images into a chat request and let a vision-capable model read them, you can attach documents (including PDFs) and have them parsed into text the model can reason over, and you can ask a model to generate an image from a prompt. This page is the map of what is and is not multimodal on Nito, so you know the edges before you build against them.
 
-## The three things that work
+## The Three Things that Work
 
 There are exactly three multimodal capabilities, two on the way in and one on the way out.
 
@@ -15,7 +15,7 @@ There are exactly three multimodal capabilities, two on the way in and one on th
 
 That is the whole surface. One model call can mix text with image inputs and document inputs; image generation is a separate endpoint with its own request shape.
 
-## Input versus generation
+## Input Versus Generation
 
 It helps to keep two ideas apart, because they use different endpoints and different model types.
 
@@ -25,22 +25,32 @@ It helps to keep two ideas apart, because they use different endpoints and diffe
 
 So "multimodal" on Nito means: rich inputs into chat (images, documents), plus one rich output (images) from a separate endpoint.
 
-## How the inputs travel
+## How the Inputs Travel
 
 Image input and document input both ride inside a normal chat request, as entries in a message's `content` array. Instead of a plain string, `content` becomes a list of typed parts: a `text` part for your words, an `image_url` part for a picture, a `file` part for a document. The model reads them together. The two sub-pages below show the exact shapes.
 
 Document input has a second path worth knowing about: a standalone parser endpoint that turns a file into text you can then place into any prompt yourself. That is covered on the document page and in the [file parser](/api-reference/server-tools/file-parser) feature.
 
-## Where to go next
+## Related Resources
 
-- [**Image input**](/features/multimodal/image-input) send PNG, JPEG, or WebP into a vision model, with limits and a worked `image_url` example.
-- [**PDF and document input**](/features/multimodal/pdf-input) attach PDFs and office documents for server-side parsing, inline or via the parser endpoint.
-- [**Image generation**](/features/multimodal/image-generation) prompt-to-PNG with the request and response shapes and a worked curl call.
+<CardGroup cols={3}>
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    Understand the request lifecycle and chat request surface.<br />
+  </Card>
 
-## Related
+  <Card title="Image Input" icon="image-circle-arrow-down" href="/features/multimodal/image-input">
+    Send PNG, JPEG, or WebP images into a vision-capable chat model.
+  </Card>
 
-- [How Nito works](/get-started/how-nito-works)
-- [Image input](/features/multimodal/image-input)
-- [PDF and document input](/features/multimodal/pdf-input)
-- [Image generation](/features/multimodal/image-generation)
-- [File parser](/api-reference/server-tools/file-parser)
+  <Card title="PDF and Document Input" icon="file-pdf" href="/features/multimodal/pdf-input">
+    For the multimodal view of sending files inline.<br />
+  </Card>
+
+  <Card title="Image Generation" icon="images-user" href="/features/multimodal/image-generation">
+    Turn a text prompt into a PNG image with the Nito image endpoint.
+  </Card>
+
+  <Card title="File Parser" icon="square-code" href="/api-reference/server-tools/file-parser">
+    Extract text from documents server-side.<br />
+  </Card>
+</CardGroup>
