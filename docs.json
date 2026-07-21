@@ -142,10 +142,11 @@
               "privacy/per-call-privacy-modes"
             ],
             "root": "privacy/overview",
-            "expanded": true
+            "expanded": true,
+            "icon": "books"
           },
           {
-            "group": "Privacy tiers",
+            "group": "Privacy Tiers",
             "pages": [
               "privacy/tiers/anonymous",
               "privacy/tiers/private",
@@ -153,10 +154,11 @@
               "privacy/tiers/encrypted"
             ],
             "root": "privacy/tiers/index",
-            "expanded": true
+            "expanded": true,
+            "icon": "layer-group"
           },
           {
-            "group": "TEE attestation",
+            "group": "TEE Attestation",
             "pages": [
               "privacy/tee-attestation/what-a-tee-is",
               "privacy/tee-attestation/attestation-pipeline",
@@ -167,17 +169,19 @@
               "privacy/tee-attestation/verify-yourself-recipe"
             ],
             "root": "privacy/tee-attestation/index",
-            "expanded": true
+            "expanded": true,
+            "icon": "stamp"
           },
           {
-            "group": "Data handling",
+            "group": "Data Handling",
             "root": "privacy/data-handling",
             "pages": [
               "privacy/data-visibility",
               "privacy/data-retention/index",
               "privacy/data-retention/metadata-only-default"
             ],
-            "expanded": true
+            "expanded": true,
+            "icon": "database"
           }
         ],
         "icon": "shield-check"
