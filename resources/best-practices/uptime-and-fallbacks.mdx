@@ -53,7 +53,7 @@ The layered strategy looks like this, from innermost to outermost:
 3. If retries are exhausted, fall back to an alternate model at the same privacy tier.
 4. If that fails too, surface a clean error to the user, keyed by the request ID so it can be investigated.
 
-Never let any of these steps quietly relax a privacy mode, and never retry the non-retryable `4xx` errors. Correct handling of the full status set is covered in [Error format](/api-reference/overview/error-format) and the [Production readiness checklist](/resources/best-practices/production-readiness-checklist).
+Never let any of these steps quietly relax a privacy mode, and never retry the non-retryable `4xx` errors. Correct handling of the full status set is covered in [Error format](/api-reference/overview/error-format).
 
 ## A Quick Checklist
 
@@ -69,4 +69,3 @@ Never let any of these steps quietly relax a privacy mode, and never retry the n
 - [Error format](/api-reference/overview/error-format)
 - [Retry behavior](/api-reference/errors-and-rate-limits/retry-behavior)
 - [Rate limits](/api-reference/errors-and-rate-limits/rate-limits)
-- [Production readiness checklist](/resources/best-practices/production-readiness-checklist)

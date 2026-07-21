@@ -424,8 +424,7 @@
               "resources/best-practices/cost-control",
               "resources/best-practices/secure-api-key-handling",
               "resources/best-practices/privacy-safe-logging",
-              "resources/best-practices/uptime-and-fallbacks",
-              "resources/best-practices/production-readiness-checklist"
+              "resources/best-practices/uptime-and-fallbacks"
             ]
           }
         ],
@@ -703,6 +702,10 @@
     {
       "source": "/resources/errors-reference",
       "destination": "/api-reference/errors-and-rate-limits/error-codes"
+    },
+    {
+      "source": "/resources/best-practices/production-readiness-checklist",
+      "destination": "/resources"
     }
   ],
   "styling": {
