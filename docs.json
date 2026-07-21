@@ -170,19 +170,6 @@
               "privacy/data-retention/index",
               "privacy/data-retention/metadata-only-default"
             ]
-          },
-          {
-            "group": "Trust and limits",
-            "pages": [
-              "privacy/provider-side-enforcement",
-              "privacy/payment-privacy",
-              "privacy/threat-model/index",
-              "privacy/threat-model/what-nito-defends-against",
-              "privacy/threat-model/what-nito-does-not-defend-against",
-              "privacy/compliance-posture",
-              "privacy/dpa",
-              "privacy/known-limitations"
-            ]
           }
         ],
         "icon": "shield-check"
@@ -718,6 +705,38 @@
     {
       "source": "/resources",
       "destination": "/models"
+    },
+    {
+      "source": "/privacy/provider-side-enforcement",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/payment-privacy",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/threat-model/index",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/threat-model/what-nito-defends-against",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/threat-model/what-nito-does-not-defend-against",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/compliance-posture",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/dpa",
+      "destination": "/privacy/overview"
+    },
+    {
+      "source": "/privacy/known-limitations",
+      "destination": "/privacy/overview"
     }
   ],
   "styling": {
