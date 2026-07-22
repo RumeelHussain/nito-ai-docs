@@ -67,6 +67,7 @@
           },
           {
             "group": "Best Practices",
+            "root": "models/best-practices/index",
             "pages": [
               "models/best-practices/latency-and-performance",
               "models/best-practices/cost-control",
