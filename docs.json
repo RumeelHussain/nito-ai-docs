@@ -191,13 +191,9 @@
         "tab": "SDKs",
         "groups": [
           {
-            "group": "Overview",
-            "pages": [],
-            "root": "sdks/sdks-overview"
-          },
-          {
             "group": "OpenAI drop-in",
             "pages": [
+              "sdks/sdks-overview",
               "sdks/openai-drop-in/base-url-swap",
               "sdks/openai-drop-in/model-mapping",
               "sdks/openai-drop-in/compatibility-notes"
