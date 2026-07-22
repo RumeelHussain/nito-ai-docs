@@ -5,39 +5,52 @@ description: "Why the binding uses the signing address only, why an entry withou
 
 The [report-data binding](/privacy/tee-attestation/freshness-binding) commits a report to `signing_address + nonce`. This page covers two precise invariants about how that address-based binding is validated in the nested model attestation (gate 6 of the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)). They are narrow, but getting them right is the difference between a binding that means something and one that does not.
 
-## What "binding" means here, in plain terms
+## What "Binding" Means
 
 A binding is the link that says "this attestation belongs to this specific thing." An attestation that is signed correctly but not bound to anything is like a notarized signature on a blank page: genuine, but it proves nothing about a particular document. Binding is what staples the proof to a concrete identity, so an attacker cannot take a valid-looking proof and pass it off as covering something it never covered.
 
 This page is about two ways that staple could be weaker than it looks, and the rules the verifier uses to keep it strong. You do not need to implement these checks yourself (the gateway runs them), but understanding them tells you exactly what a baseline-verified result does and does not prove, which is the kind of thing a security reviewer will want to pin down.
 
-## Binding uses the signing address only
+## Binding Uses the Signing Address Only
 
 The binding is keyed on the **signing address**, not on the model public key. The address is the identity the report commits to. This is a deliberate choice: the address is the stable, comparable handle that the gateway recomputes and matches against the report data.
 
 But there is a trap in keying on the address alone, and the verifier closes it with the second invariant.
 
-## An entry without a model public key is not a binding
+### An Entry Without a Model Public Key is NOT a Binding
 
 When the gateway walks the model attestation looking for a binding, an **evidence entry that lacks a model public key does not count as a binding.** The verifier will not accept an address match alone; it requires the model public key to be present for the entry to qualify.
 
 This means the verifier **always validates the model public key** as part of accepting a binding. You never reach a state where the gateway has confirmed an address binding while the model public key was missing. If the public key is absent from an entry, that entry simply is not a binding, and the gateway keeps looking or fails the gate.
 
-### Why this invariant matters
+### Why this Invariant Matters
 
 Without it, the address-only binding would be weaker than it looks. An attacker who could present an evidence entry that matched the expected signing address but carried no model public key could try to pass it off as a valid binding without ever committing to a model identity. By refusing to count keyless entries as bindings, the verifier guarantees that every accepted binding ties together both the signing address _and_ a concrete model public key. The two travel together or not at all. (Recall from the [pipeline page](/privacy/tee-attestation/attestation-pipeline) that the response's `signing_key` and `model_public_key` are aliases for this same model public key, so there is exactly one key value in play here.)
 
-## Gateway and model signing addresses are kept separate
+## Gateway and Model Signing Addresses are Kept Separate
 
 There are two signing addresses in the system: the gateway's and the model's. Nito keeps them **separate**, and the baseline verification does **not** require them to be equal. A reader might assume that a valid attestation means the gateway and the model share one signing identity. That is not the invariant. The baseline checks each binding on its own terms; it does not collapse the two addresses into one or demand that they coincide.
 
-### Why this separation matters
+### Why This Separation Matters
 
 Keeping the addresses distinct means the gateway-level report-data binding and the nested model-attestation binding are evaluated independently. A correct result does not depend on, and does not assert, that the gateway and the model are the same signer. If you are reasoning about what a baseline-verified result proves, do not over-read it: it confirms that each binding held against its own address, not that there is a single shared signing identity behind both.
 
-## Related
+## Related Resources
 
-- [TEE attestation overview](/privacy/tee-attestation)
-- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
-- [The report-data binding](/privacy/tee-attestation/freshness-binding)
-- [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
+<CardGroup cols={3}>
+  <Card title="TEE Attestation" icon="stamp" href="/privacy/tee-attestation">
+    How Nito turns a privacy promise into something you can check.<br />
+  </Card>
+
+  <Card title="The Seven-Gate Baseline" icon="door-open" href="/privacy/tee-attestation/verify-yourself-recipe">
+    The exact pass-or-fail checks the Nito gateway runs over attestation.
+  </Card>
+
+  <Card title="Report-Data Binding" icon="connectdevelop" href="/privacy/tee-attestation/freshness-binding">
+    How report\_data binding is recomputed and compared.<br />
+  </Card>
+
+  <Card title="Attestation Pipeline" icon="arrows-left-right-to-line" href="/privacy/tee-attestation/attestation-pipeline">
+    The end-to-end flow of Nito's Attestation Endpoint.
+  </Card>
+</CardGroup>

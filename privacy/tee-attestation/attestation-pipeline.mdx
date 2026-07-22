@@ -5,15 +5,15 @@ description: "The end-to-end flow of GET /api/v1/attestation, from query keys to
 
 This page traces exactly what happens when you call `GET /api/v1/attestation`. It is the connective tissue for the rest of this section: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline), [the report-data binding](/privacy/tee-attestation/freshness-binding), and [per-provider behavior](/privacy/tee-attestation/per-provider-attestation) all describe steps that happen inside this one request.
 
-## The endpoint
+## The Attestation Endpoint
 
-```text
+```shellscript wrap
 GET /api/v1/attestation
 ```
 
 The endpoint takes an allow-listed set of query keys. Only these keys are read; the allow-list is explicit.
 
-| Query key | Required | Purpose |
+| **Query key** | **Required** | **Purpose** |
 | --- | --- | --- |
 | `model` | Yes | The public model ID to attest. Must resolve to an attestation-capable physical model. |
 | `nonce` | No | A fresh random value you generate. Binds the report to this request. Omitting it permits an empty binding. |
@@ -23,7 +23,7 @@ The endpoint takes an allow-listed set of query keys. Only these keys are read; 
 
 Although the nonce is optional to the endpoint, supplying a fresh random nonce on every call is what gives you replay protection. Anti-replay is caller-driven and there is no server-side nonce store, so an omitted nonce is permitted but produces an empty-binding report. See [the report-data binding](/privacy/tee-attestation/freshness-binding).
 
-## What the gateway does with the request
+## What the Gateway Does with the Request
 
 The flow is three stages.
 
@@ -31,7 +31,7 @@ The flow is three stages.
 2. **Call the provider attestation client.** The gateway calls the resolved provider's attestation client to fetch the raw evidence. The provider (NEAR or Phala) returns its attestation report. How each provider frames the request differs, which is covered in [per-provider attestation](/privacy/tee-attestation/per-provider-attestation).
 3. **Run the baseline verifier.** The gateway runs `verifyAttestationBaseline` over the evidence: the [seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline). The outcome of that contract sets the `verified` flag in the response.
 
-## The response
+## The Response Format
 
 A successful call returns a JSON object. Every field below is part of the documented response shape.
 
@@ -60,16 +60,32 @@ This is easy to misread, so it is stated directly: `signing_key` and `model_publ
 
 The response is served with `Cache-Control: no-store`. Attestation results are request-local and are not cached. Each call produces a fresh report bound to the nonce you sent on that request.
 
-## The scope limit, restated
+## The Scope Limit
 
 This pipeline produces a **baseline-verified** result, not a fully verified one. The `verified` flag means the evidence passed the gateway's baseline contract. It does **not** mean the gateway validated the Intel TDX quote, the NVIDIA GPU evidence, the certificate chains, the CRLs, or the TCB policy. Those checks are deliberately out of scope for the gateway and are your responsibility on the client side. The `evidence` field is returned in full precisely so you can run them. See [verify it yourself](/privacy/tee-attestation/verify-yourself-recipe).
 
 > **TODO (needs SME):** a full worked request and response example against the production endpoint, including the canonical base URL. Until confirmed, use `https://nito.dev.zprotocol.org` as the placeholder.
 
-## Related
+## Related Resources
 
-- [TEE attestation overview](/privacy/tee-attestation)
-- [The seven-gate baseline](/privacy/tee-attestation/seven-gate-baseline)
-- [The report-data binding](/privacy/tee-attestation/freshness-binding)
-- [Per-provider attestation](/privacy/tee-attestation/per-provider-attestation)
-- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+<CardGroup cols={3}>
+  <Card title="TEE Attestation" icon="stamp" href="/privacy/tee-attestation">
+    How Nito turns a privacy promise into something you can check.<br />
+  </Card>
+
+  <Card title="The Seven-Gate Baseline" icon="7" href="/privacy/tee-attestation/verify-yourself-recipe">
+    The exact pass-or-fail checks the Nito gateway runs over attestation.
+  </Card>
+
+  <Card title="Report-Data Binding" icon="connectdevelop" href="/privacy/tee-attestation/freshness-binding">
+    How report\_data = signing\_address \+ nonce is recomputed and compared.
+  </Card>
+
+  <Card title="Per-Provider Attestation" icon="plug-circle-check" href="/privacy/tee-attestation/per-provider-attestation">
+    How per-provider attestation differ on Nito.
+  </Card>
+
+  <Card title="Verify It Yourself" icon="memo-circle-check" href="/privacy/tee-attestation/verify-yourself-recipe">
+    A runnable recipe for fetching and checking a Nito attestation.
+  </Card>
+</CardGroup>

@@ -1,28 +1,28 @@
 ---
-title: "Encrypted"
+title: "Encrypted Privacy Tier"
 description: "The top tier. Client-side encryption to the sealed environment on top of Confidential, with the most constraints."
 ---
 
 Encrypted is the top rung of the [privacy ladder](/privacy/tiers) and the strongest privacy Nito offers. It is the `encrypted` tier, selected with the `:encrypted` suffix plus a set of encryption headers. It keeps everything [Confidential](/privacy/tiers/confidential) gives you — the sealed and attestable execution of a Trusted Execution Environment — and adds end-to-end encryption: your data is encrypted client-side to the sealed environment itself. In exchange, Encrypted carries the most constraints of any tier. It is the choice for maximum assurance, used only where the call genuinely needs it.
 
-## What it adds over Confidential
+## What Encrypted Tier Adds Over Confidential Tier
 
 Confidential runs your call inside a TEE and lets you verify it ran there. Encrypted keeps that and adds **client-side encryption to the sealed environment**. Rather than relying on transport security up to the gateway, your data is encrypted so that it can be decrypted only inside the sealed TEE that runs the computation. That is what end-to-end encryption to the enclave means: the protection extends from your client all the way to the attested environment, not just to the gateway's edge.
 
 This is the maximum-assurance posture. It is also the most constrained, because encrypting end-to-end to a sealed box rules out the gateway features that would need to read or transform your request in flight.
 
-## What it requires
+## What does the Encrypted Tier Require
 
 Encrypted is available on TEE providers only — **NEAR and Phala** — and only for models whose catalog entry reports `encrypted_supported: true`. The gateway's invariants require end-to-end encryption to sit on a `confidential`-tier model that has attestation and an encryption subject, so a model must already qualify for Confidential before it can offer Encrypted. Confirm support on the catalog entry:
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer $NITO_API_KEY"
 ```
 
 Look for `encrypted_supported: true`. If it is absent, the model cannot serve Encrypted and the call will be rejected rather than served without encryption.
 
-## The constraints (read before you build)
+## The Constraints on Encrypted Tier
 
 Encrypted is non-streaming and supports a deliberately narrow feature set. When the encryption headers are present, the gateway rejects:
 
@@ -34,11 +34,11 @@ Encrypted is non-streaming and supports a deliberately narrow feature set. When 
 
 It is also restricted to the **NEAR and Phala** providers. If you need any of the features above, or you need streaming, use [Confidential](/privacy/tiers/confidential) instead, which keeps attested execution while supporting streaming and the normal feature set. Encrypted trades those away for the strongest protection.
 
-## How to select it
+## How to Select the Encrypted Tier
 
 Append `:encrypted` to the model ID **and** supply the `X-Z-ENCRYPTED-*` encryption headers. Both are required: the suffix alone is not enough, and the headers without a supporting model are rejected.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -62,19 +62,38 @@ The header names and their accepted values are code-verified (see [Per-call priv
 
 `:encrypted` is one of only two attested suffixes (the other is `:confidential`). If the model does not support end-to-end encryption, the call fails; a privacy mode never silently downgrades to a weaker tier.
 
-## Verifying the environment
+## Verifying the Environment
 
 Because Encrypted sits on top of the TEE, the same attestation story applies: the sealed environment can produce a signed statement you can verify, the gateway performs a baseline verification, and the raw evidence is returned for full client-side verification. The attestation endpoint accepts the `encrypted` trust tier as well (`GET /api/v1/attestation?trust_tier=encrypted`). The mechanics, the response fields, and a reference verifier are in [TEE attestation](/privacy/tee-attestation), and the verification trade-offs described for [Confidential](/privacy/tiers/confidential) apply unchanged here.
 
-## When to choose it
+## When to Choose the Encrypted Tier
 
 Choose Encrypted only when the call needs the maximum assurance that nobody between your client and the sealed environment can read the data, and when you can live without streaming, reasoning, tools, prompt caching, and multi-part messages. That is a narrow set of cases: the most sensitive single-shot requests where end-to-end confidentiality outweighs every convenience. For everything else, including most interactive and feature-rich work, [Confidential](/privacy/tiers/confidential) is the stronger practical choice.
 
-## Related
+## Related Resources
 
-- [Privacy tiers in depth](/privacy/tiers)
-- [Confidential](/privacy/tiers/confidential)
-- [TEE attestation](/privacy/tee-attestation)
-- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
-- [Privacy overview](/privacy/overview)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Privacy Overview" icon="shield-check" href="/privacy/overview">
+    What “private” means on Nito.<br />
+  </Card>
+
+  <Card title="Privacy Tiers at a Glance" icon="cubes-stacked" href="/models/privacy-tiers-at-a-glance">
+    Explore Nito's four privacy tiers at a glance.
+  </Card>
+
+  <Card title="Privacy Tiers in Depth" icon="square-list" href="/privacy/tiers">
+    The four privacy tiers in depth, how to select each one.
+  </Card>
+
+  <Card title="Confidential Tier" icon="file-award" href="/privacy/tiers/confidential">
+    Sealed, hardware-isolated execution with an attestation you can fetch and verify.
+  </Card>
+
+  <Card title="TEE Attestation" icon="stamp" href="/privacy/tee-attestation">
+    How Nito turns a privacy promise into something you can check.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="phone-circle" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.<br /><br />
+  </Card>
+</CardGroup>

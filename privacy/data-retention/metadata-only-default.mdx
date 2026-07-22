@@ -7,7 +7,7 @@ Nito's default posture is **metadata only**: the gateway keeps operational metad
 
 If you read only one sentence: **prompts, completions, reasoning, tool calls, and uploaded file contents are request-local and are not written to durable storage by default; what the gateway keeps is metadata.**
 
-## What "metadata" means here
+## What "Metadata" Means
 
 It is worth being precise, because "metadata" is a word that can quietly expand to mean anything. On Nito, in the retention context, **metadata** is the operational record of _that a request happened and how it was handled_, not _what the request said_. It is the difference between knowing a call was made (when, which model, how many tokens, whether it succeeded, what it cost) and knowing the words in the prompt.
 
@@ -28,32 +28,46 @@ And it means the gateway does **not** persist the contents:
 
 Those content categories are **request-local**: they exist for the lifetime of the request and are not saved to a durable store you could read back later. The full who-sees-what breakdown is on [Data visibility](/privacy/data-visibility).
 
-## Three enforcement points
+## Three Enforcement Points
 
 The metadata-only default is not just a policy statement; it shows up in code at concrete points.
 
 <Steps>
-  <Step title="Bodies are request-local">
+  <Step title="Bodies are request-local" icon="1" iconType="solid" titleSize="h4">
     The request and response payloads are handled in memory to serve the call and are not committed to durable storage on the default path. There is no server-side prompt or completion store the gateway writes to on every request.
   </Step>
-  <Step title="Responses carry no-store">
+  <Step title="Responses carry no-store" icon="2" iconType="solid" stepNumber={2} titleSize="h4">
     Every inference response carries `Cache-Control: no-store` — an explicit instruction not to cache the body, by the gateway or any intermediary. Streaming responses additionally carry `no-cache` and disable proxy buffering.
   </Step>
-  <Step title="Telemetry uses an allowlist">
+  <Step title="Telemetry uses an allowlist" icon="3" iconType="solid" stepNumber={3} titleSize="h4">
     Observability is deliberately narrow: traces and telemetry attributes are restricted to a `SafeAttrs` allowlist, so only operational fields are recorded. Prompt and completion contents are not allowlisted, so they never leak into traces — the answer to the common worry that "logging" quietly captures everything.
   </Step>
 </Steps>
 
-## Does Nito keep my prompts?
+## Does Nito Keep User Prompts?
 
 Not by default. The metadata-only posture is grounded in observable code behavior — request-local bodies, the `no-store` header, and the telemetry allowlist — not a policy you have to take on faith. So when someone asks that blunt question, the answer is plain: your prompts and completions are not persisted by the gateway.
 
-## What this does and does not cover
+## What This Does and Does Not Cover
 
 The metadata-only default is the **gateway's** posture. It is not a statement about what an upstream provider does with the call; that is governed separately by provider-side enforcement (`Store: false`, ZDR, or TEE) and is covered in [Data visibility](/privacy/data-visibility) and [Privacy overview](/privacy/overview). Nor does it cover client-side chat history, which lives in the browser (see [Data visibility](/privacy/data-visibility)).
 
-## Related
+## Related Resources
 
 - [Data retention](/privacy/data-retention): the retention contract this default anchors.
 - [Data visibility](/privacy/data-visibility): the three-column view of who sees what.
 - [Privacy overview](/privacy/overview): how privacy modes build on this floor.
+
+<CardGroup cols={3}>
+  <Card title="Data Retention" icon="database" href="/privacy/data-retention">
+    The full retention contract.<br /><br />
+  </Card>
+
+  <Card title="Data Visibility" icon="eyes" href="/privacy/data-visibility">
+    Who sees what while a request is being served.<br /><br />
+  </Card>
+
+  <Card title="Privacy Overview" icon="shield-check" href="/privacy/overview">
+    What “private” means on Nito. How privacy modes are selected and what each enforces.
+  </Card>
+</CardGroup>

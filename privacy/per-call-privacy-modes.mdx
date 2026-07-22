@@ -5,7 +5,7 @@ description: "How to select a privacy mode per request using the model-ID suffix
 
 This page is the how-to for the idea introduced in the [Privacy overview](/privacy/overview): on Nito you choose privacy per request, and you choose it through the `model` string. There is no privacy field in the request body and no account-level privacy switch. The model ID carries two decisions at once, which model and how private, and this page shows exactly how to spell each mode and what each spelling requires.
 
-## The suffix mechanism
+## The Suffix Mechanism
 
 The `model` value is parsed into a base model ID and an optional suffix:
 
@@ -19,15 +19,15 @@ The **only** valid suffixes are `:confidential` and `:encrypted`. Anything else,
   There is no separate `tier` parameter in the request body. Privacy is selected only by the model-ID suffix, and only `:confidential` and `:encrypted` are valid. Sending any other suffix, or trying to pass privacy as a body field, is an error.
 </Warning>
 
-## Modes never silently downgrade
+## Modes Never Silently Downgrade
 
 Before the examples, internalize the one rule that makes these modes trustworthy: **a privacy mode never silently downgrades.** If you ask for `:confidential` and no TEE-capable backend can serve the call, the request fails. It does not quietly fall back to an ordinary backend. The same holds for `:encrypted`. A successful response to a suffixed request is therefore proof that the request was served at the mode you asked for, not a weaker one.
 
-## Worked example: ordinary mode
+## Worked Example: Ordinary Mode
 
 Send the plain model ID, no suffix, on an ordinary-tier model. You get standard routing with the metadata-only default.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -39,11 +39,11 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 > **TODO (needs SME):** confirm the canonical production base URL before publishing copy-pasteable examples. The code default is a local address.
 
-## Worked example: private mode
+## Worked Example: Private Mode
 
 Private mode is also selected with **no suffix**. The difference from ordinary is the model: send a model whose stored tier is private, and the route sets `RequireZeroDataRetention`, which drives provider-enforced ZDR. There is nothing extra to add to the request; the model's tier does the work.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -55,11 +55,11 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 To find out which models are private-tier, consult the catalog (`GET /v1/models`) and read each entry's `privacy_tier`. Tiers are a property of the model, discovered at runtime, not something you hard-code.
 
-## Worked example: Confidential mode
+## Worked example: Confidential Mode
 
 Add `:confidential` to a model that supports it. The call runs inside a sealed environment, and you can fetch an attestation afterward to verify it really did.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -71,11 +71,11 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 TEE-capable backends are a subset of the catalog (NEAR and Phala). If you request `:confidential` on a model that has no TEE-capable backend, the call fails rather than downgrading. To verify the attestation for a Confidential call, use `GET /api/v1/attestation` with the model and a fresh random nonce; see [Privacy architecture](/privacy/privacy-architecture) for what the baseline verification checks and how to run the full client-side verification yourself.
 
-## Worked example: Encrypted mode
+## Worked Example: Encrypted Mode
 
 `:encrypted` is the strongest mode and has the most constraints. It adds client-side encryption so your content is encrypted to the sealed environment itself. Selecting it requires **both** the suffix **and** a set of `X-Z-ENCRYPTED-*` encryption headers on the request:
 
-| Header | Role |
+| **Header** | **Role** |
 | --- | --- |
 | `X-Z-ENCRYPTED` | Marks the request as Encrypted; set it to `1`. |
 | `X-Z-ENCRYPTED-Client-Pub-Key` | The client's public key (hex). |
@@ -90,7 +90,7 @@ Two hard constraints come with this mode:
 - **It is non-streaming.** A request that sets the E2EE headers and also asks to stream is rejected (`streaming is not supported with Encrypted`). Reasoning, tools, prompt caching, and multi-part messages are likewise rejected in this mode.
 - **It is supported on NEAR and Phala only.** No other provider serves `:encrypted`.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -110,9 +110,9 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 > **TODO (needs SME):** confirm the exact construction of each `X-Z-ENCRYPTED-*` header value (key encodings, supported signing algorithms, encryption version string, nonce/timestamp format) and provide a complete, runnable end-to-end example with real values.
 
-## Choosing among the modes
+## Choosing Among the Modes
 
-| You send | Mode | Notable constraints |
+| **You send** | **Mode** | **Notable constraints** |
 | --- | --- | --- |
 | `model-id` (anon-tier model) | Anonymous | Metadata-only default. |
 | `model-id` (private-tier model) | Private | Provider-enforced ZDR. |
@@ -121,9 +121,22 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 Match the mode to the sensitivity of the call. Most work runs fine in ordinary or private mode; reach for `:confidential` when you want a verifiable sealed execution, and `:encrypted` when the content must be encrypted to the sealed environment and you can accept its constraints.
 
-## Related
+## Related Resources
 
-- [Privacy overview](/privacy/overview) - what each mode means and why privacy is per call.
-- [Privacy architecture](/privacy/privacy-architecture) - how the suffix is resolved and enforced across hops, and what attestation verifies.
-- [Zero data retention](/privacy/zero-data-retention) - the retention contract behind ordinary and private modes.
-- [How Nito works](/get-started/how-nito-works) - the request lifecycle and the model-ID-carries-two-decisions idea.
+<CardGroup cols={3}>
+  <Card title="Privacy Overview" icon="shield" href="/privacy/overview">
+    What each mode means and why privacy is per call.
+  </Card>
+
+  <Card title="Privacy Architecture" icon="newspaper" href="/privacy/privacy-architecture">
+    How the suffix is resolved and enforced across hops, and what attestation verifies.
+  </Card>
+
+  <Card title="Zero Data Retention" icon="database" href="/privacy/zero-data-retention">
+    What Nito retains and what it does not.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    One key, many models, selectable privacy per call.
+  </Card>
+</CardGroup>

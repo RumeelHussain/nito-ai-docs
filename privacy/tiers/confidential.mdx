@@ -1,5 +1,5 @@
 ---
-title: "Confidential"
+title: "Confidential Privacy Tier"
 description: "Sealed, hardware-isolated execution with an attestation you can fetch and verify. Supports streaming."
 ---
 
@@ -11,7 +11,7 @@ Confidential runs your call inside a **Trusted Execution Environment (TEE)** —
 
 That attestation is what separates Confidential from [Private](/privacy/tiers/private). Private holds the provider to zero-data-retention, but you take that on the provider's word. Confidential gives you an artifact you can independently check. What Confidential provides is attested and verifiable, and the gateway's verification is a baseline rather than full hardware verification (see below).
 
-## What it requires
+## What does the Confidential Tier Requires
 
 Confidential is offered by specific providers only, so not every model can run in a TEE. A model supports it when its catalog entry reports `attestation_available: true` (with `privacy_tier: "confidential"`). The TEE providers are **NEAR** and **Phala**; the gateway's invariants require a `confidential`-tier model to name one of them as its TEE provider, and require attestation to be present for the tier. Filter the catalog for attestation support before you rely on it:
 
@@ -22,11 +22,11 @@ curl https://nito.dev.zprotocol.org/v1/models \
 
 Look for `attestation_available: true` on the entry. If it is absent, the model has no TEE backend and appending `:confidential` will be rejected rather than served at a weaker tier.
 
-## How to select it
+## How to Select the Confidential Tier
 
 Append `:confidential` to the model ID. Nothing else in the request body changes.
 
-```bash
+```bash wrap
 curl https://nito.dev.zprotocol.org/v1/chat/completions \
   -H "Authorization: Bearer $NITO_API_KEY" \
   -H "Content-Type: application/json" \
@@ -40,11 +40,11 @@ curl https://nito.dev.zprotocol.org/v1/chat/completions \
 
 `:confidential` is one of only two attested suffixes (the other is `:encrypted`). If the model does not support it, the call fails rather than quietly downgrading to a weaker tier.
 
-## Streaming works at Confidential
+## Streaming Works at Confidential Tier
 
 A key reason to choose Confidential over [Encrypted](/privacy/tiers/encrypted): **streaming is supported in `:confidential`**. You can attest a call and still receive tokens incrementally over a long-lived connection, which a chat UI needs to show output as it arrives. Encrypted's end-to-end encryption, by contrast, is non-streaming by design. So when you need a verifiable execution boundary together with streaming, Confidential is the rung to use.
 
-## Fetching and verifying the attestation
+## Fetching and Verifying the Attestation
 
 The attestation is what makes Confidential verifiable. You fetch it from a dedicated endpoint:
 
@@ -59,21 +59,40 @@ The gateway resolves the model to a physical attestation-capable backend, asks t
 
 This split matters and is load-bearing: the gateway's baseline does **not** verify Intel TDX quotes, NVIDIA GPU evidence, certificate chains, CRLs, or TCB policies. Those are the client's responsibility, which is exactly why the raw evidence is handed back to you. Treat the gateway result as "baseline-verified" and do the hardware-level verification on your side for maximum assurance. The freshness guarantee is caller-driven: supply a fresh random nonce on each request so the attestation is bound to your call. The full procedure, the response fields, and a reference verifier are covered in [TEE attestation](/privacy/tee-attestation).
 
-## Trade-offs
+## Trade-offs of the Confidential Tier
 
 - **Fewer backends.** The TEE comes from NEAR and Phala only, so Confidential reaches fewer models than Anonymous or Private, which can affect latency and availability.
 - **A proof you must use.** The attestation is only worth as much as the verification you do with it. The gateway gives you a baseline and the raw evidence; full assurance comes from verifying the evidence client-side.
 - **Streaming kept, encryption not yet added.** Confidential is the strongest tier that still streams. If you also need your data encrypted to the sealed environment, climb to [Encrypted](/privacy/tiers/encrypted) and accept its non-streaming constraint.
 
-## When to choose it
+## When to Choose the Confidential Tier
 
 Choose Confidential for sensitive calls where you need to verify that a sealed environment ran the work, and where you still want streaming and the normal feature set. It is the sweet spot for high-sensitivity interactive use: attested execution without giving up token-by-token output.
 
-## Related
+## Related Resources
 
-- [Privacy tiers in depth](/privacy/tiers)
-- [Private](/privacy/tiers/private)
-- [Encrypted](/privacy/tiers/encrypted)
-- [TEE attestation](/privacy/tee-attestation)
-- [Privacy tiers at a glance](/models/privacy-tiers-at-a-glance)
-- [Streaming](/features/streaming)
+<CardGroup cols={3}>
+  <Card title="Privacy Tiers in Depth" icon="square-list" href="/privacy/tiers">
+    The four privacy tiers in depth, how to select each one.
+  </Card>
+
+  <Card title="Private Tier" icon="lock-a" href="/privacy/tiers/private">
+    Privately served models with zero-data-retention enforced upstream.
+  </Card>
+
+  <Card title="Encrypted Tier" icon="binary-lock" href="/privacy/tiers/encrypted">
+    The most top tier with client-side encryption to the sealed environment.
+  </Card>
+
+  <Card title="TEE Attestation" icon="stamp" href="/privacy/tee-attestation">
+    How Nito turns a privacy promise into something you can check.
+  </Card>
+
+  <Card title="Privacy Tiers at a Glance" icon="cubes-stacked" href="/models/privacy-tiers-at-a-glance">
+    Explore Nito's four privacy tiers at a glance.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+</CardGroup>

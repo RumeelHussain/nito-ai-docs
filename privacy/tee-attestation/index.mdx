@@ -7,7 +7,7 @@ Every other page in the privacy section makes a claim: that a call ran inside a 
 
 An **attestation** is a signed statement, produced by the hardware that ran your call, describing what was running inside the sealed environment. When you select Confidential or Encrypted (the `:confidential` or `:encrypted` suffix on a model ID), the provider can produce one of these statements, and Nito exposes it to you through a single endpoint: `GET /api/v1/attestation`. You hand the gateway a model and a fresh random nonce; it returns the raw evidence plus a structured summary, and it tells you whether the evidence passed its baseline checks.
 
-## The one boundary to understand first
+## The One boundary to Understand First
 
 The Nito gateway is a **baseline verifier**, not a full hardware-quote verifier. This distinction is load-bearing, and it is repeated on every page in this section because misreading it is the single most dangerous mistake a reader could make.
 
@@ -16,25 +16,25 @@ The gateway checks that the evidence is present and well-formed, that the proof 
 So the right words for a Nito attestation result are **baseline-verified**, **attested**, and **verifiable**. We never call it "trustless" or "fully verified," because the gateway alone does not establish full hardware trust. It gives you a fast baseline answer and hands you everything you need to do the rest yourself.
 
 <Steps>
-  <Step title="Generate a fresh nonce — you">
+  <Step title="Generate a fresh nonce — you" icon="1" iconType="solid" stepNumber={1} titleSize="h3">
     Create a fresh random nonce for this request. Anti-replay is caller-driven, so a new nonce each time is what binds the attestation to this call.
   </Step>
-  <Step title="Call the attestation endpoint — you">
+  <Step title="Call the attestation endpoint — you" icon="2" iconType="solid" stepNumber={2} titleSize="h3">
     Send `GET /api/v1/attestation?model=…&nonce=…`, passing at minimum the model and your nonce.
   </Step>
-  <Step title="Resolve the model — gateway">
+  <Step title="Resolve the model — gateway" icon="3" iconType="solid" stepNumber={3} titleSize="h3">
     The gateway resolves the public model ID to an attestation-capable physical backend.
   </Step>
-  <Step title="Call the provider attestation client — gateway">
+  <Step title="Call the provider attestation client — gateway" icon="4" iconType="solid" stepNumber={4} titleSize="h3">
     The gateway asks the model's TEE provider — NEAR or Phala — for its attestation evidence.
   </Step>
-  <Step title="Run the baseline checks — gateway">
+  <Step title="Run the baseline checks — gateway" icon="5" iconType="solid" stepNumber={5} titleSize="h3">
     The gateway verifies the evidence is present and parseable, the proof format and signing material are present, your nonce is echoed, and `report_data = signing_address + nonce`. It does **not** verify the underlying hardware quote.
   </Step>
-  <Step title="Return evidence + summary — gateway">
+  <Step title="Return evidence + summary — gateway" icon="6" iconType="solid" stepNumber={6} titleSize="h3">
     The gateway returns the raw `evidence`, a structured summary, and the `verified` flag.
   </Step>
-  <Step title="Verify the hardware quote — you">
+  <Step title="Verify the hardware quote — you" icon="7" iconType="solid" stepNumber={7} titleSize="h3">
     On the raw evidence, you perform the full hardware verification yourself: Intel TDX, NVIDIA GPU evidence, cert chains, CRLs, and TCB.
   </Step>
 </Steps>
@@ -43,13 +43,13 @@ So the right words for a Nito attestation result are **baseline-verified**, **at
   **You** own steps 1–2 and 7; the **gateway** owns 3–6. The gateway's baseline confirms only that your nonce is echoed and that `report_data = signing_address + nonce` — it does **not** verify Intel TDX, NVIDIA GPU evidence, cert chains, CRLs, or TCB. You do that in step 7, on the raw evidence it returns, which is why a Nito result is **baseline-verified**, never fully verified.
 </Note>
 
-## What anti-replay actually rests on
+## What Anti-Replay Actually Rests On
 
 Attestation freshness on Nito is **caller-driven**. You supply a fresh random nonce on each request, and the gateway requires that nonce to appear in the provider's evidence and in the report-data binding. There is no server-side nonce store. If you omit the nonce, an empty-binding report is permitted. That means replay protection is something you create by always sending a fresh nonce; it is not an unconditional guarantee the gateway makes on your behalf. The report-data binding page covers this in full, and the verify-yourself recipe makes generating a fresh nonce step one.
 
-## The seven pages
+## Understanding the TEE Attestation Section
 
-This section is deliberately split so each idea can be checked on its own.
+This section is deliberately split so each idea can be explored on its own.
 
 - [**What a TEE is**](/privacy/tee-attestation/what-a-tee-is) a short, plain-language primer on the hardware concept, for readers new to the term.
 - [**The attestation pipeline**](/privacy/tee-attestation/attestation-pipeline) the end-to-end flow of `GET /api/v1/attestation`: the allow-listed query keys, how the model is resolved, and every field in the response.
@@ -59,14 +59,30 @@ This section is deliberately split so each idea can be checked on its own.
 - [**Per-provider attestation**](/privacy/tee-attestation/per-provider-attestation) how NEAR (domain-based) and Phala (appid-based) differ, and what they share.
 - [**Verify it yourself**](/privacy/tee-attestation/verify-yourself-recipe) a runnable recipe, including a curl call and a verification sketch, plus a pointer to the reference verifier.
 
-## How to read this section
+## How to Read This Section
 
 If you only want the mental model, read the next two pages: [what a TEE is](/privacy/tee-attestation/what-a-tee-is) and the [attestation pipeline](/privacy/tee-attestation/attestation-pipeline). If you are evaluating Nito for a sensitive workload, read all seven, then run the [verify-yourself recipe](/privacy/tee-attestation/verify-yourself-recipe) against a live model and confirm the results match what these pages describe. Attestation is only worth anything if you check it, so the docs are built to make checking it the default.
 
-## Related
+## Related Resourcecs
 
-- [Privacy overview](/privacy/overview)
-- [Privacy tiers in depth](/privacy/tiers)
-- [How Nito works](/get-started/how-nito-works)
-- [The attestation pipeline](/privacy/tee-attestation/attestation-pipeline)
-- [Verify it yourself](/privacy/tee-attestation/verify-yourself-recipe)
+<CardGroup cols={3}>
+  <Card title="Privacy Overview" icon="shield-check" href="/privacy/overview">
+    What “private” means on Nito.<br />
+  </Card>
+
+  <Card title="Privacy Tiers in Depth" icon="cubes-stacked" href="/privacy/tiers">
+    The four privacy tiers in depth, how to select each one.
+  </Card>
+
+  <Card title="How Nito Works" icon="gears" href="/get-started/how-nito-works">
+    How model IDs are named on Nito, and how the optional suffix selects a privacy mode.
+  </Card>
+
+  <Card title="Attestation Pipeline" icon="arrows-left-right-to-line" href="/privacy/tee-attestation/attestation-pipeline">
+    The end-to-end flow of Nito's Attestation Endpoint.
+  </Card>
+
+  <Card title="Verify It Yourself" icon="memo-circle-check" href="/privacy/tee-attestation/verify-yourself-recipe">
+    A runnable recipe for fetching and checking a Nito attestation.
+  </Card>
+</CardGroup>
