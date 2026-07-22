@@ -116,7 +116,7 @@ Here is the part people get wrong the first time. A tool call is not one request
 
     This step happens entirely in your code. Nito has already done its job for this round. You parse the arguments, call your real `get_weather("Austin")`, and get something like `{"tempF": 96, "sky": "clear"}`.
   </Step>
-  <Step title="Round two: you send the result back" icon="2" iconType="solid" stepNumber={2} titleSize="h3">
+  <Step title="Round Two: you send the result back" icon="2" iconType="solid" stepNumber={2} titleSize="h3">
     Append two messages to the conversation: the assistant's tool-call message (echoed back so the model sees its own request) and a new `tool` message carrying the result. The `tool` message must include the `tool_call_id` that matches the `id` from round one.
 
     ```bash
