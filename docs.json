@@ -208,7 +208,6 @@
           {
             "group": "Framework integrations",
             "pages": [
-              "sdks/framework-integrations/index",
               "sdks/framework-integrations/langchain-langgraph",
               "sdks/framework-integrations/vercel-ai-sdk",
               "sdks/framework-integrations/crewai",
@@ -216,12 +215,12 @@
               "sdks/framework-integrations/pydantic-ai",
               "sdks/framework-integrations/litellm",
               "sdks/framework-integrations/llamaindex"
-            ]
+            ],
+            "root": "sdks/framework-integrations/index"
           },
           {
             "group": "Editor integrations",
             "pages": [
-              "sdks/editor-integrations/index",
               "sdks/editor-integrations/cursor",
               "sdks/editor-integrations/claude-code",
               "sdks/editor-integrations/codex",
@@ -230,7 +229,8 @@
               "sdks/editor-integrations/continue-dev",
               "sdks/editor-integrations/jan-ai",
               "sdks/editor-integrations/opencode"
-            ]
+            ],
+            "root": "sdks/editor-integrations/index"
           },
           {
             "group": "Tools",
