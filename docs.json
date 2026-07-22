@@ -191,12 +191,6 @@
         "tab": "SDKs",
         "groups": [
           {
-            "group": "Overview",
-            "pages": [
-              "sdks/index"
-            ]
-          },
-          {
             "group": "OpenAI drop-in",
             "pages": [
               "sdks/openai-drop-in/base-url-swap",
