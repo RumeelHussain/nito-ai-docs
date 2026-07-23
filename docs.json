@@ -189,58 +189,8 @@
       },
       {
         "tab": "SDKs",
-        "groups": [
-          {
-            "group": "OpenAI drop-in",
-            "pages": [
-              "sdks/sdks-overview",
-              "sdks/openai-drop-in/base-url-swap",
-              "sdks/openai-drop-in/model-mapping",
-              "sdks/openai-drop-in/compatibility-notes"
-            ]
-          },
-          {
-            "group": "Anthropic drop-in",
-            "pages": [
-              "sdks/anthropic-drop-in/base-url-swap",
-              "sdks/anthropic-drop-in/mapping-notes"
-            ]
-          },
-          {
-            "group": "Framework integrations",
-            "pages": [
-              "sdks/framework-integrations/langchain-langgraph",
-              "sdks/framework-integrations/vercel-ai-sdk",
-              "sdks/framework-integrations/crewai",
-              "sdks/framework-integrations/mastra",
-              "sdks/framework-integrations/pydantic-ai",
-              "sdks/framework-integrations/litellm",
-              "sdks/framework-integrations/llamaindex"
-            ],
-            "root": "sdks/framework-integrations/index"
-          },
-          {
-            "group": "Editor integrations",
-            "pages": [
-              "sdks/editor-integrations/cursor",
-              "sdks/editor-integrations/claude-code",
-              "sdks/editor-integrations/codex",
-              "sdks/editor-integrations/openclaw",
-              "sdks/editor-integrations/zed",
-              "sdks/editor-integrations/continue-dev",
-              "sdks/editor-integrations/jan-ai",
-              "sdks/editor-integrations/opencode"
-            ],
-            "root": "sdks/editor-integrations/index"
-          },
-          {
-            "group": "Tools",
-            "pages": [
-              "sdks/postman-bruno"
-            ]
-          }
-        ],
-        "icon": "tools"
+        "icon": "tools",
+        "href": "/sdks-overview"
       },
       {
         "tab": "Cookbook",
