@@ -1,19 +1,18 @@
 ---
-title: "Base URL swap"
-description: "Point the official OpenAI SDK at Nito by changing three things, the base URL, the API key, and the model ID."
+title: "Base URL Swap"
 ---
 
 If your code already uses the OpenAI SDK, you reach Nito by changing three things and nothing else: the base URL, the API key, and the model ID. The request shape, the response shape, streaming, and tool calls all stay the same, because Nito serves the OpenAI-compatible Chat Completions surface.
 
-## The three changes
+## The Required Three Changes
 
-1. **Base URL** point it at your Nito base plus `/v1`.
-2. **API key** use a Nito `z_sk_` key, not an OpenAI key.
-3. **Model ID** use a Nito catalog ID from `GET /v1/models`, not an OpenAI name like `gpt-4o`.
+1. **Base URL:** point it at your Nito base plus `/v1`.
+2. **API key:** use a Nito `z_sk_` key, not an OpenAI key.
+3. **Model ID:** use a Nito catalog ID from `GET /v1/models`, not an OpenAI name like `gpt-4o`.
 
 <CodeGroup>
 
-```python Python
+```python Python lines wrap
 from openai import OpenAI
 
 client = OpenAI(
@@ -31,7 +30,7 @@ resp = client.chat.completions.create(
 print(resp.choices[0].message.content)
 ```
 
-```typescript TypeScript
+```typescript TypeScript lines wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -55,15 +54,15 @@ console.log(resp.choices[0].message.content);
 
 The example model `x-ai/grok-4.5` is illustrative. Do not hard-code it. Call `GET /v1/models` for the live catalog and select by capability at runtime, because models are added and retired over time.
 
-## Why the base URL must end in `/v1`
+## Why the Base URL Must End in `/v1`
 
 The OpenAI SDK appends the operation path itself. When you call `client.chat.completions.create(...)`, the SDK sends a `POST` to `<base_url>/chat/completions`. So the base URL has to end at the version segment, `/v1`, and not include the operation. If you accidentally set the base URL to `.../v1/chat/completions`, the SDK will build a doubled path and the request will fail.
 
-## Which surfaces work this way
+## Which Surfaces Work This Way
 
 The same base URL swap covers every OpenAI-compatible surface Nito serves:
 
-| SDK call | HTTP surface |
+| **SDK call** | **HTTP surface** |
 | --- | --- |
 | `client.chat.completions.create(...)` | `POST /v1/chat/completions` |
 | `client.embeddings.create(...)` | `POST /v1/embeddings` |
@@ -74,35 +73,54 @@ Nito also serves the OpenAI **Responses API** (`client.responses.create(...)`, `
 
 > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
-## Reading the response
+## Reading the Response
 
 The SDK returns a standard `chat.completion` object. `resp.choices[0].message.content` is the assistant's text, and `resp.usage` reports the tokens billed. There is always exactly one choice. `system_fingerprint` is serialized but always `null`, so do not build logic on it.
 
 Streaming works exactly as in the OpenAI SDK: pass `stream=True` (Python) or `stream: true` (TypeScript) and iterate the chunks. Tool calling, prompt caching (`prompt_cache_key`), and reasoning are all supported on this surface.
 
-## Selecting privacy
+## Selecting Privacy
 
 Privacy is chosen by the model ID, so you opt into a stronger tier by adding a suffix, with no other code change:
 
-```python
+```python wrap
 # TEE-backed execution with an attestation you can verify
 model="openai/gpt-oss-120b:confidential"
 ```
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Use `GET /v1/models` to find models that support attestation. Note that `:encrypted` does not stream and needs extra headers, so it is best done by hand rather than through the SDK. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Common mistakes
+## Common Issues
 
 - **Leaving the OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. See [model mapping](/sdks/openai-drop-in/model-mapping).
 - **Forgetting `/v1` on the base URL.** The SDK appends the operation path, so the base URL must end in `/v1`.
 - **Using an OpenAI `sk-` key.** Nito keys are prefixed `z_sk_`.
 - **Assuming Chat Completions is the only text surface.** It is the primary documented path, but Nito also serves the OpenAI Responses-compatible `/v1/responses` endpoint.
 
-## Related
+## Related Resources
 
-- [SDKs overview](/sdks)
-- [OpenAI SDK quickstart](/get-started/quickstart-openai-sdk)
-- [Model mapping](/sdks/openai-drop-in/model-mapping)
-- [Compatibility notes](/sdks/openai-drop-in/compatibility-notes)
-- [Chat completions feature](/features/chat-completions)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="SDKs" icon="tools" href="/sdks">
+    Reach Nito from the SDKs you already use.
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="book" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.
+  </Card>
+
+  <Card title="Model Mapping" icon="chart-tree-map" href="/sdks/openai-drop-in/model-mapping">
+    Why OpenAI model names are not Nito IDs, and picking the right Nito catalog ID at runtime.
+  </Card>
+
+  <Card title="Chat completions feature" icon="message-dots" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.<br /><br /><br />
+  </Card>
+</CardGroup>

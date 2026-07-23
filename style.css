@@ -16,9 +16,11 @@
   background-color: rgba(128, 128, 128, 0.08);
 }
 
-nav-tabs {
-  margin: 0 auto;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.navbar {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-links {
+    margin: 0 auto;
 }

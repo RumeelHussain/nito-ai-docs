@@ -1,11 +1,11 @@
 ---
-title: "Compatibility notes"
+title: "OpenAI<>Nito Compatibility"
 description: "What carries over from the OpenAI SDK to Nito, what differs, and which surfaces return 404."
 ---
 
 The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatible Chat Completions shape. Most of your code is unaffected. A handful of things differ, and a few surfaces are not served at all. This page is the honest, complete list so you never wire up against something that returns `404` or quietly behaves differently.
 
-## What carries over unchanged
+## What Carries Over Unchanged
 
 - **The Chat Completions request shape.** `messages`, `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `stream`, `tools`, `tool_choice`, and `user` are all accepted.
 - **The response shape.** A standard `chat.completion` object with `choices`, `message`, `finish_reason`, and `usage`.
@@ -15,7 +15,7 @@ The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatib
 - **Reasoning.** Supported on capable models, with output in `reasoning_details` and a `reasoning_tokens` count in `usage`.
 - **Embeddings, image generation, and model listing** through the matching SDK methods.
 
-## What differs from OpenAI
+## What Differs from OpenAI
 
 - **`system_fingerprint` is always `null`.** It is serialized for compatibility but never populated. Do not branch on it.
 - **There is always exactly one choice.** Nito does not return `n > 1` alternatives. Read `choices[0]`.
@@ -26,14 +26,14 @@ The OpenAI SDK works against Nito because the gateway serves the OpenAI-compatib
 - **Rate-limit headers.** On a `429`, Nito sends `Retry-After`. It does not emit `X-RateLimit-*` headers. See [Rate limits](/api-reference/errors-and-rate-limits/rate-limits).
 - **Model names.** OpenAI names are not Nito IDs. See [model mapping](/sdks/openai-drop-in/model-mapping).
 
-## Additional surfaces
+## Additional Surfaces
 
 - **The Responses API** (`/v1/responses`) is served as an OpenAI Responses-compatible endpoint; `client.responses.create(...)` reaches Nito. Chat Completions remains the primary documented text surface. See the [API Playground](/api-playground).
 - **The Files API** (`/v1/files`). Not implemented; it returns `404`. For document input, send the file inline to a capable model or use the file-parser endpoint; see [Multimodal](/features/multimodal).
 
 > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
-## Inputs the chat surface rejects
+## Inputs the Chat Surface Rejects
 
 Even on Chat Completions, some content types are rejected rather than processed:
 
@@ -43,9 +43,9 @@ Even on Chat Completions, some content types are rejected rather than processed:
 
 Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported. See [Multimodal](/features/multimodal) for the limits.
 
-## A quick compatibility table
+## Compatibility Comparison
 
-| Capability | Status on Nito |
+| **Capability** | **Status on Nito** |
 | --- | --- |
 | Chat Completions | Supported |
 | Streaming | Supported (not with `:encrypted`) |
@@ -60,12 +60,34 @@ Image input and document input (PDF, docx, pptx, xlsx, xls, text) are supported.
 | Audio / video input | Rejected |
 | Structured outputs (schema enforced) | Not exposed |
 
-## Related
+## Related Resources
 
-- [SDKs overview](/sdks)
-- [Base URL swap](/sdks/openai-drop-in/base-url-swap)
-- [Model mapping](/sdks/openai-drop-in/model-mapping)
-- [Chat completions feature](/features/chat-completions)
-- [Streaming](/features/streaming)
-- [Error format](/api-reference/overview/error-format)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="SDKs" icon="tools" href="/sdks">
+    Reach Nito from the SDKs you already use.
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.
+  </Card>
+
+  <Card title="Model Mapping" icon="chart-tree-map" href="/sdks/openai-drop-in/model-mapping">
+    OpenAI model names vs Nito IDs.
+  </Card>
+
+  <Card title="Chat Completions" icon="message-dots" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Streaming" icon="signal-stream" href="/features/streaming">
+    What streaming is on Nito and when to use it.<br />
+  </Card>
+
+  <Card title="Error Reference" icon="book-open-lines" href="/api-reference/overview/error-format">
+    The canonical Nito error envelope.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

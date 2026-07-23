@@ -1,6 +1,5 @@
 ---
-title: "Base URL swap"
-description: "Reach Nito from Anthropic-shaped codebases. Target Nito's Anthropic Messages-compatible endpoint, or route through Chat Completions."
+title: "Base URL Swap"
 ---
 
 If your codebase is built around the Anthropic SDK, this page shows how to reach Nito with the least change.
@@ -11,19 +10,19 @@ If your codebase is built around the Anthropic SDK, this page shows how to reach
   > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 </Note>
 
-## What this means in practice
+## What This Means in Practice
 
 You have two working paths into Nito from an Anthropic codebase. You can point the Anthropic SDK at Nito's Anthropic Messages-compatible endpoint (`/v1/messages`), or you can point an OpenAI-style client at Nito's Chat Completions surface and adapt the small set of shape differences (covered in the [mapping notes](/sdks/anthropic-drop-in/mapping-notes)). The OpenAI path is an alternative for teams that already standardize on the OpenAI shape.
 
 Most Anthropic-based applications keep a thin abstraction over the model call, so either choice is usually confined to one client-setup file.
 
-## Routing through Chat Completions
+## Routing Through Chat Completions
 
 For teams that prefer the OpenAI shape, use the OpenAI SDK pointed at Nito, and use the Chat Completions message shape.
 
 <CodeGroup>
 
-```python Python
+```python Python lines wrap
 from openai import OpenAI
 
 # Route Anthropic-style code through Nito's OpenAI-compatible surface.
@@ -43,7 +42,7 @@ resp = client.chat.completions.create(
 print(resp.choices[0].message.content)
 ```
 
-```typescript TypeScript
+```typescript TypeScript lines wrap
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -76,16 +75,35 @@ Yes. The Anthropic SDK's primary call is `messages.create`, which targets `/v1/m
 
 As everywhere on Nito, privacy rides on the model ID. Add `:confidential` or `:encrypted` to the model string to raise the tier, with no other code change. Only those two suffixes are valid. `:encrypted` is non-streaming and needs extra headers. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Common mistakes
+## Common Issues
 
 - **Carrying over an Anthropic model name.** Replace it with a Nito catalog ID, whichever path you use.
 - **Keeping a top-level `system` string.** Move it into the messages array; see the [mapping notes](/sdks/anthropic-drop-in/mapping-notes).
 
-## Related
+## Related Resources
 
-- [SDKs overview](/sdks)
-- [Anthropic SDK quickstart](/get-started/quickstart-anthropic-sdk)
-- [Mapping notes](/sdks/anthropic-drop-in/mapping-notes)
-- [OpenAI drop-in: base URL swap](/sdks/openai-drop-in/base-url-swap)
-- [Chat completions feature](/features/chat-completions)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="SDKs" icon="tools" href="/sdks">
+    Reach Nito from the SDKs you already use.<br /><br />
+  </Card>
+
+  <Card title="Anthropic SDK Quickstart" icon="gear" href="/get-started/quickstart-anthropic-sdk">
+    Quickstart guide to using Anthropic with Nito.
+  </Card>
+
+  <Card title="Mapping Notes" icon="chart-tree-map" href="/sdks/anthropic-drop-in/mapping-notes">
+    Translate Anthropic Messages concepts to Nito’s OpenAI-compatible Chat Completions.
+  </Card>
+
+  <Card title="OpenAI: Base URL swap" icon="file-brackets-curly" href="/sdks/openai-drop-in/base-url-swap">
+    Point the official OpenAI SDK at Nito.
+  </Card>
+
+  <Card title="Chat Completions" icon="message-dots" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

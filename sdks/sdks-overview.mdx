@@ -1,12 +1,12 @@
 ---
-title: "sdks-overview"
+title: "Overview"
 ---
 
 You do not need a Nito-specific SDK to call Nito. The gateway is OpenAI-compatible on its main surfaces, so the official OpenAI SDK works as a drop-in: change the base URL, change the API key, and use a Nito catalog model ID. Codebases built around the Anthropic SDK can reach Nito too, with one honest caveat covered below.
 
 This section is the deep version of the two quickstarts. If you just want the fastest path, start with the [OpenAI SDK quickstart](/get-started/quickstart-openai-sdk) or the [Anthropic SDK quickstart](/get-started/quickstart-anthropic-sdk), then come back here when you need the compatibility details.
 
-## The compatible surface
+## The Compatible Surface
 
 Nito speaks the OpenAI shape on four surfaces:
 
@@ -26,11 +26,11 @@ Nito also serves compatible endpoints for the broader OpenAI and Anthropic world
 
 > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 
-## Language matrix
+## Language Matrix
 
 The supported path today is the official OpenAI SDK (and, with the caveat below, the Anthropic SDK) in Python and TypeScript. Both languages call the same gateway surfaces with the same request shapes.
 
-| Language | SDK | Status | Surface used |
+| **Language** | **SDK** | **Status** | **Surface used** |
 | --- | --- | --- | --- |
 | Python | `openai` | Supported drop-in | `/v1/chat/completions`, `/v1/embeddings`, `/v1/images/generations`, `/v1/models` |
 | TypeScript | `openai` | Supported drop-in | same as above |
@@ -39,32 +39,40 @@ The supported path today is the official OpenAI SDK (and, with the caveat below,
 
 For the Anthropic SDKs you can target Nito's Anthropic Messages-compatible `/v1/messages` endpoint directly, or route Anthropic-shaped code through the OpenAI-compatible Chat Completions surface. Both paths are covered on the Anthropic pages.
 
-## Documented separately (deferred this pass)
-
-Nito also has first-party tooling that lives in its own repositories. These are real, but their APIs are out of scope for this documentation pass and are intentionally not described here. Do not build against an interface inferred from this page.
-
-- **Native Nito SDK** deferred, documented separately.
-- **Agent SDK** deferred, documented separately.
-- **CLI (`z`)** deferred, documented separately.
-- **MCP server** deferred, documented separately. The gateway exposes an MCP transport at `/mcp` (Streamable HTTP) with OAuth `z_mcp_` tokens and the `mcp:inference` scope, but the MCP server and its protocol are documented in their own repo.
-
-When those pages exist, they will be linked from here. Until then, treat the OpenAI and Anthropic drop-in paths as the documented way to integrate.
-
-## Where to go next
+## Where to Go Next
 
 - **OpenAI drop-in:** start with the [base URL swap](/sdks/openai-drop-in/base-url-swap), then read [model mapping](/sdks/openai-drop-in/model-mapping) and the [compatibility notes](/sdks/openai-drop-in/compatibility-notes).
 - **Anthropic drop-in:** start with the [base URL swap](/sdks/anthropic-drop-in/base-url-swap) and the [mapping notes](/sdks/anthropic-drop-in/mapping-notes), reading the support-boundary warning first.
 - **No SDK at all:** call the API by hand from [Postman or Bruno](/sdks/postman-bruno).
 
-## Privacy, briefly
+## Privacy
 
 Across every SDK path, privacy is selected by the model ID, not by a separate parameter. Add `:confidential` or `:encrypted` to the model string to raise the tier; no other code changes. `system_fingerprint` is always `null`, and the error envelope carries the error family in `code` with no `type` field. Streaming, tool calling, prompt caching, and reasoning are supported on the Chat Completions surface. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Related
+## Related Resources
 
-- [OpenAI SDK quickstart](/get-started/quickstart-openai-sdk)
-- [Anthropic SDK quickstart](/get-started/quickstart-anthropic-sdk)
-- [OpenAI drop-in: base URL swap](/sdks/openai-drop-in/base-url-swap)
-- [Anthropic drop-in: base URL swap](/sdks/anthropic-drop-in/base-url-swap)
-- [Call from Postman or Bruno](/sdks/postman-bruno)
-- [Chat completions feature](/features/chat-completions)
+<CardGroup cols={3}>
+  <Card title="OpenAI SDK Quickstart" icon="play" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br />
+  </Card>
+
+  <Card title="Anthropic SDK Quickstart" icon="gear" href="/get-started/quickstart-anthropic-sdk">
+    Quickstart guide to using Anthropic with Nito.
+  </Card>
+
+  <Card title="OpenAI drop-in: base URL swap" icon="shield-halved" href="/sdks/openai-drop-in/base-url-swap">
+    Point the official OpenAI SDK at Nito.<br />
+  </Card>
+
+  <Card title="Anthropic drop-in: base URL swap" icon="shield-halved" href="/sdks/anthropic-drop-in/base-url-swap">
+    Reach Nito from Anthropic-shaped codebases.
+  </Card>
+
+  <Card title="Call from Postman or Bruno" icon="shield-halved" href="/sdks/postman-bruno">
+    Hit the Nito API by hand from Postman or Bruno.<br />
+  </Card>
+
+  <Card title="Chat completions feature" icon="shield-halved" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+</CardGroup>

@@ -1,6 +1,5 @@
 ---
-title: "Mapping notes"
-description: "Translate Anthropic Messages concepts to Nito's OpenAI-compatible Chat Completions shape, with the support boundary noted."
+title: "Anthropic<>Nito Mapping"
 ---
 
 Nito now serves an Anthropic Messages-compatible endpoint (`/v1/messages` and `/v1/messages/count_tokens`), so Anthropic-shaped code can target Nito directly. For teams that prefer the OpenAI shape, Anthropic-shaped code can also reach Nito through the OpenAI-compatible Chat Completions surface. This page maps the concepts you know from the Anthropic Messages API onto the Chat Completions shape, so that translation is mechanical when you choose it.
@@ -11,9 +10,9 @@ Nito now serves an Anthropic Messages-compatible endpoint (`/v1/messages` and `/
   > **TODO (needs SME):** confirm production availability and document the full request/response schema for the Anthropic Messages and OpenAI Responses endpoints (owner: Backend/Product).
 </Note>
 
-## Field-by-field mapping
+## Field-by-Field Mapping
 
-| Anthropic Messages concept | Chat Completions equivalent on Nito |
+| **Anthropic Messages concept** | **Chat Completions equivalent on Nito** |
 | --- | --- |
 | Top-level `system` string | A message with `role: "system"` at the start of `messages` |
 | `messages` with `user` / `assistant` roles | `messages` with the same `user` / `assistant` roles |
@@ -26,7 +25,7 @@ Nito now serves an Anthropic Messages-compatible endpoint (`/v1/messages` and `/
 | `stop_reason` | `finish_reason` (`stop`, `length`, `tool_calls`, `error`) |
 | `usage.input_tokens` / `output_tokens` | `usage.prompt_tokens` / `completion_tokens` |
 
-## System prompts
+## System Prompts
 
 Anthropic takes a top-level `system` string. The Chat Completions shape has no top-level `system` field; instead, put the system text in a message with `role: "system"` at the start of the array.
 
@@ -40,17 +39,17 @@ messages=[
 
 A leftover top-level `system` field is not read on the Chat Completions surface, so convert it rather than leaving it in place.
 
-## Roles
+## Accepted Roles
 
 Nito's inference layer accepts `system`, `user`, `assistant`, `tool`, and `developer` roles. The `developer` role is accepted and passed through with no special handling. For an Anthropic codebase, the common path is just `system`, `user`, and `assistant`, with `tool` messages carrying tool results.
 
-## Model names
+## Anthropic Model Names vs Nito IDs
 
 Anthropic model names are not Nito IDs. Replace them with a Nito catalog ID. There is no static translation table baked into the gateway; pick by capability from `GET /v1/models`.
 
 > **TODO (needs SME):** an explicit Anthropic-name to Nito-ID equivalence table for teams migrating from specific Anthropic models. This needs a curated mapping owned by an SME and must not be guessed.
 
-## Tool use
+## Using Anthropic Tool
 
 Anthropic tool use maps to Chat Completions tool calling. Declare function tools in `tools`, the model returns `tool_calls`, your code runs them, and you return the result in a `tool` message paired with the `tool_call_id`. The gateway routes the conversation but does not execute your function tools. See [Tool calling](/features/tool-calling).
 
@@ -58,18 +57,37 @@ Anthropic tool use maps to Chat Completions tool calling. Declare function tools
 
 Privacy is selected by the model ID, the same as everywhere on Nito. Add `:confidential` or `:encrypted` to raise the tier; only those two suffixes are valid. `:encrypted` is non-streaming and needs extra headers. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Things that differ
+## Things that Differ
 
 - **`system_fingerprint` is always `null`** on the response. Do not branch on it.
 - **The error envelope has no `type` field.** Errors are `{"error": {"message", "code", "param"}}`; the family is in `code`.
 - **There is always exactly one choice** in the response.
 - **Token counting** on the Chat Completions surface comes from `usage` on the response. If you need a dedicated count-tokens call, Nito serves the Anthropic Messages-compatible `/v1/messages/count_tokens` endpoint.
 
-## Related
+## Related Resources
 
-- [SDKs overview](/sdks)
-- [Anthropic drop-in: base URL swap](/sdks/anthropic-drop-in/base-url-swap)
-- [Anthropic SDK quickstart](/get-started/quickstart-anthropic-sdk)
-- [Tool calling](/features/tool-calling)
-- [Chat completions feature](/features/chat-completions)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="SDKs" icon="tools" href="/sdks">
+    Reach Nito from the SDKs you already use.<br /><br />
+  </Card>
+
+  <Card title="Anthropic SDK Quickstart" icon="gear" href="/get-started/quickstart-anthropic-sdk">
+    Quickstart guide to using Anthropic with Nito.
+  </Card>
+
+  <Card title="Anthropic: Base URL Swap" icon="gear" href="/sdks/anthropic-drop-in/base-url-swap">
+    Reach Nito from Anthropic-shaped codebases.
+  </Card>
+
+  <Card title="Tool Calling" icon="tools" href="/features/tool-calling">
+    Dive into how a model can call functions.<br />
+  </Card>
+
+  <Card title="Chat Completions" icon="message-dots" href="/features/chat-completions">
+    OpenAI-compatible endpoint for chat and text generation.
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.<br />
+  </Card>
+</CardGroup>
