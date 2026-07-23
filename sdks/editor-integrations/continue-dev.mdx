@@ -3,13 +3,13 @@ title: "Continue.dev"
 description: "Add Nito to Continue.dev as a custom OpenAI-compatible model with a Nito base URL, key, and catalog model ID."
 ---
 
-Continue.dev lets you add models from custom OpenAI-compatible providers. Because Nito exposes an OpenAI-compatible API, you can add a Nito model to Continue by configuring it as an OpenAI-compatible endpoint. You are not selecting a named "Nito" provider. You are using Continue's OpenAI-compatible model configuration and pointing it at Nito.
+[Continue.dev](http://Continue.dev) lets you add models from custom OpenAI-compatible providers. Because Nito exposes an OpenAI-compatible API, you can add a Nito model to Continue by configuring it as an OpenAI-compatible endpoint. You are not selecting a named "Nito" provider. You are using Continue's OpenAI-compatible model configuration and pointing it at Nito.
 
 ## Configuration
 
 Add a model entry to `~/.continue/config.yaml` (the current format; `config.json` is deprecated). Use the built-in `openai` provider with an `apiBase` override:
 
-```yaml
+```yaml wrap
 models:
   - name: Grok 4.5
     provider: openai
@@ -27,7 +27,7 @@ models:
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Finding a model ID
+## Finding a Model ID
 
 Continue.dev will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name in the configuration:
 
@@ -38,24 +38,34 @@ curl https://nito.dev.zprotocol.org/v1/models \
 
 Add the Nito ID as the model name so it appears in Continue's model dropdown. You can add several Nito IDs as separate model entries that share the same base URL and key.
 
-## Choosing a privacy tier
+## Choosing a Privacy Tier
 
 Privacy is selected by the model ID, so no separate Continue setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. You can register two entries, one plain and one with the `:confidential` suffix, to switch tiers from the model picker. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from Continue. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## What to expect
+## What to Expect
 
 - Continue.dev sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
 - Nito now also serves an OpenAI Responses-compatible endpoint (`/v1/responses`) and an Anthropic Messages-compatible endpoint (`/v1/messages`), but this guide keeps Continue on the Chat Completions path for the widest support.
 - If a model entry fails, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
 - **Dropping `/v1` from the base URL.** The Chat Completions route will not be reached without it.
 - **Assuming a built-in Nito provider.** There is none. Use Continue's OpenAI-compatible model configuration.
 
-## Related
+## Related Resources
 
-- [Editor and tool integrations](/sdks/editor-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [Zed](/sdks/editor-integrations/zed)
+<CardGroup cols={3}>
+  <Card title="Editor and Tool Integrations" icon="connectdevelop" href="/sdks/editor-integrations">
+    Point any AI editor that supports custom OpenAI-compatible provider at Nito.
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="book-open-lines" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br /><br />
+  </Card>
+
+  <Card title="Zed " icon="dev" href="/sdks/editor-integrations/continue-dev">
+    Use Nito in Zed by configuring a custom OpenAI-compatible provider.<br />
+  </Card>
+</CardGroup>

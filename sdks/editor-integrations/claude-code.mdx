@@ -5,7 +5,7 @@ description: "Route Claude Code through Nito's Anthropic Messages-compatible end
 
 Claude Code is an Anthropic client — it talks to the **Anthropic Messages API**, not an OpenAI-compatible one. Because Nito now serves an **Anthropic Messages-compatible** endpoint (`POST /v1/messages`), you can point Claude Code at Nito by overriding its Anthropic base URL and key. There is no OpenAI-style configuration for Claude Code.
 
-## Values to set
+## Configurations
 
 Claude Code reads its endpoint and credentials from environment variables:
 
@@ -13,18 +13,18 @@ Claude Code reads its endpoint and credentials from environment variables:
 - **`ANTHROPIC_AUTH_TOKEN`:** your Nito key (`z_sk_...`), sent as `Authorization: Bearer`. (Use `ANTHROPIC_AUTH_TOKEN`, not `ANTHROPIC_API_KEY`, since Nito issues bearer keys.)
 - **`ANTHROPIC_MODEL`:** a Nito catalog ID the Anthropic Messages facade serves, such as `anthropic/claude-sonnet-5`. Use the catalog ID, not a raw Anthropic name like `claude-3-5-sonnet`. Not every catalog model is reachable through this facade — `x-ai/grok-4.5`, for example, is rejected; Claude- and GPT-family catalog IDs work.
 
-### Option A — environment variables
+### Option A: Environment Variables
 
-```bash
+```bash wrap
 export ANTHROPIC_BASE_URL="https://nito.dev.zprotocol.org"
 export ANTHROPIC_AUTH_TOKEN="z_sk_your_key_here"
 export ANTHROPIC_MODEL="anthropic/claude-sonnet-5"
 claude
 ```
 
-### Option B — `~/.claude/settings.json`
+### Option B: `~/.claude/settings.json`
 
-```json
+```json wrap
 {
   "env": {
     "ANTHROPIC_BASE_URL": "https://nito.dev.zprotocol.org",
@@ -38,7 +38,7 @@ Use a project-level `.claude/settings.json` to scope it to one repo.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Finding a model ID
+## Finding a Model ID
 
 ```bash
 curl https://nito.dev.zprotocol.org/v1/models \
@@ -47,24 +47,34 @@ curl https://nito.dev.zprotocol.org/v1/models \
 
 Use one of the returned IDs as `ANTHROPIC_MODEL`.
 
-## Choosing a privacy tier
+## Choosing a Privacy Tier
 
 Privacy is selected by the model ID. Append `:confidential` for a TEE-backed run with a verifiable attestation (`openai/gpt-oss-120b:confidential`). Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier; `:encrypted` is non-streaming and generally not usable from an interactive CLI. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Notes and caveats
+## Notes and Caveats
 
 - Nito's Anthropic-compatible surface covers `POST /v1/messages` and `POST /v1/messages/count_tokens`. Features that depend on Anthropic-native infrastructure (e.g. some MCP tooling) may be disabled when pointed at a non-`api.anthropic.com` host.
 - `ANTHROPIC_BASE_URL` is the **host root** (no `/v1`); this differs from the OpenAI-compatible integrations, which use `.../v1`.
 
-## Common mistakes
+## Common Issues
 
 - **Using an OpenAI-style base URL.** Claude Code is not an OpenAI client; set `ANTHROPIC_BASE_URL` (host root), not an OpenAI `/v1` URL.
 - **Using a raw Anthropic model name.** Replace `claude-3-5-sonnet` with a Nito catalog ID like `anthropic/claude-sonnet-5` from `GET /v1/models`.
 - **Picking a model the facade doesn't serve.** `x-ai/grok-4.5` is rejected on `/v1/messages`; use a Claude- or GPT-family catalog ID.
 - **Adding `/v1` to `ANTHROPIC_BASE_URL`.** The client appends `/v1/messages` itself.
 
-## Related
+## Related Resources
 
-- [Editor and tool integrations](/sdks/editor-integrations)
-- [Anthropic drop-in](/sdks/anthropic-drop-in/base-url-swap)
-- [Codex](/sdks/editor-integrations/codex)
+<CardGroup cols={3}>
+  <Card title="Editor and Tool Integrations" icon="edit" href="/sdks/editor-integrations">
+    Point any AI editor supporting custom OpenAI-compatible provider at Nito.
+  </Card>
+
+  <Card title="Anthropic Drop-in: Base URL Swap" icon="swap" href="/sdks/anthropic-drop-in/base-url-swap">
+    Reach Nito from Anthropic-shaped codebases.<br />
+  </Card>
+
+  <Card title="Codex CLI" icon="laptop-code" href="/sdks/editor-integrations/codex">
+    Point Codex at Nito through the OpenAI-compatible endpoint.<br /><br />
+  </Card>
+</CardGroup>

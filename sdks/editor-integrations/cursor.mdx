@@ -1,6 +1,6 @@
 ---
-title: "Cursor"
-description: "Connect Cursor to Nito by setting a custom OpenAI-compatible base URL, a Nito API key, and a Nito catalog model ID."
+title: "Cursor IDE"
+description: "Connect Cursor IDE to Nito by setting a custom OpenAI-compatible base URL, a Nito API key, and a Nito catalog model ID."
 ---
 
 Cursor lets you configure a custom OpenAI-compatible API instead of its built-in models. Because Nito exposes an OpenAI-compatible API, you can route Cursor's chat and inline edits through Nito by filling in that custom-endpoint setting. You are not selecting a named "Nito" provider. You are using Cursor's OpenAI-compatible override and pointing it at Nito.
@@ -14,14 +14,15 @@ Cursor is configured through its UI, not a config file. In **Settings → Models
 3. Under **Models**, add a custom model whose name is a Nito catalog ID such as `x-ai/grok-4.5` (not an OpenAI name like `gpt-4o`), then select it.
 
 <Warning>
-Two limits to know before relying on this:
-- **The base-URL override only affects chat/edit models.** Cursor's Tab autocomplete stays on its built-in models and cannot be redirected to Nito.
-- **The "Override OpenAI Base URL" toggle is not covered by Cursor's official BYOK docs** (which document bringing your own *key* only). The flow above is community-verified and can change between Cursor releases.
+  Two limits to know before relying on this:
+
+  - **The base-URL override only affects chat/edit models.** Cursor's Tab autocomplete stays on its built-in models and cannot be redirected to Nito.
+  - **The "Override OpenAI Base URL" toggle is not covered by Cursor's official BYOK docs** (which document bringing your own _key_ only). The flow above is community-verified and can change between Cursor releases.
 </Warning>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Finding a model ID
+## Finding a Model ID
 
 Cursor will not auto-discover Nito's catalog. Pick a model ID from the live list:
 
@@ -32,24 +33,34 @@ curl https://nito.dev.zprotocol.org/v1/models \
 
 Enter one of the returned IDs as the Cursor model name. If Cursor lets you add a custom model name to its model list, add the Nito ID there so it appears in the model picker.
 
-## Choosing a privacy tier
+## Choosing a Privacy Tier
 
 Privacy is selected by the model ID, so you do not need a separate Cursor setting. To run a request in a TEE with a verifiable attestation, append `:confidential` to the model name, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. Note that `:encrypted` does not stream and needs extra headers, so it is generally not usable from Cursor's chat box. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## What to expect
+## What to Expect
 
 - Cursor sends standard Chat Completions requests, which Nito serves at `POST /v1/chat/completions`. Streaming and tool calls behave as they do with the OpenAI SDK.
 - The OpenAI Responses API (`/v1/responses`) is now served as an OpenAI Responses-compatible endpoint, but this guide targets Chat Completions, so leave any "use Responses API" option off if Cursor exposes one.
 - If a model or feature is rejected, confirm you used a Nito catalog ID and that the base URL ends in `/v1`.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with an ID from `GET /v1/models`.
 - **Dropping `/v1` from the base URL.** Without it, Cursor's requests will not reach the Chat Completions route.
 - **Expecting auto-discovery.** Add the Nito model ID manually if Cursor does not list it.
 
-## Related
+## Related Resources
 
-- [Editor and tool integrations](/sdks/editor-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Editor and Tool Integrations" icon="connectdevelop" href="/sdks/editor-integrations">
+    Point any AI editor that supports custom OpenAI-compatible provider at Nito.
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="book-open-lines" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br /><br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.<br /><br /><br />
+  </Card>
+</CardGroup>

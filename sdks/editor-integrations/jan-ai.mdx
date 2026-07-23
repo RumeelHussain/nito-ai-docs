@@ -3,26 +3,26 @@ title: "Jan.ai"
 description: "Use Nito in Jan by adding a custom OpenAI-compatible model provider with a Nito base URL, key, and catalog model ID."
 ---
 
-Jan is a desktop AI client that can talk to any OpenAI-compatible endpoint. Because Nito exposes an OpenAI-compatible API, you can route Jan through Nito by adding it as a custom model provider. You are not selecting a named "Nito" provider — you are using Jan's OpenAI-compatible custom endpoint and pointing it at Nito.
+[Jan](https://www.jan.ai/)is a desktop AI client that can talk to any OpenAI-compatible endpoint. Because Nito exposes an OpenAI-compatible API, you can route Jan through Nito by adding it as a custom model provider. You are not selecting a named "Nito" provider, you are using Jan's OpenAI-compatible custom endpoint and pointing it at Nito.
 
 ## Configuration
 
 Jan is configured in its UI, not a file. Go to **Settings → Model Providers → Add Provider**:
 
-1. **API format:** choose **OpenAI** (Jan v0.8.1+ asks for the format — pick OpenAI, not Anthropic).
+1. **API format:** choose **OpenAI** (Jan v0.8.1\+ asks for the format — pick OpenAI, not Anthropic).
 2. **Provider name:** any label, e.g. `Nito` (it appears in the model selector).
 3. **Base URL:** `https://nito.dev.zprotocol.org/v1` — must end in `/v1`. Jan appends `/chat/completions` and `/models` itself, so do not include them.
 4. **API key:** your Nito key (`z_sk_...`). This is **required** — since v0.8.1 Jan will not register a provider or list its models without a key.
 
-Then in the provider's **Models** section, click **+** and add the exact Nito catalog ID, e.g. `x-ai/grok-4.5`.
+Then in the provider's **Models** section, click **\+** and add the exact Nito catalog ID, e.g. `x-ai/grok-4.5`.
 
 <Note>
-Jan tries to auto-discover models by calling `{base_url}/models`, but if a model isn't returned you must add each ID by hand. Model IDs are passed through verbatim, so the string must match a catalog ID exactly — vendor prefix included (`x-ai/grok-4.5`, not `grok-4.5`).
+  Jan tries to auto-discover models by calling `{base_url}/models`, but if a model isn't returned you must add each ID by hand. Model IDs are passed through verbatim, so the string must match a catalog ID exactly — vendor prefix included (`x-ai/grok-4.5`, not `grok-4.5`).
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Finding a model ID
+## Finding a Model ID
 
 Fetch the live catalog and add one of the returned IDs as a model in Jan:
 
@@ -31,19 +31,29 @@ curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-## Choosing a privacy tier
+## Choosing a Privacy Tier
 
 Privacy is selected by the model ID, so no separate Jan setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier (for instance `x-ai/grok-4.5` has no confidential variant). `:encrypted` does not stream and needs extra headers, so it is generally not usable from Jan's chat. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Common mistakes
+## Common Issues
 
 - **Dropping `/v1` from the base URL.** Jan's own troubleshooting notes that a 404 on every request usually means the missing `/v1`.
 - **Leaving out the API key.** Since v0.8.1 Jan will not list models for a key-less provider.
 - **Expecting auto-discovery.** If the catalog isn't returned, add the exact vendor-prefixed ID manually.
 - **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
 
-## Related
+## Related Resources
 
-- [Editor and tool integrations](/sdks/editor-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [OpenCode](/sdks/editor-integrations/opencode)
+<CardGroup cols={3}>
+  <Card title="Editor and Tool Integrations" icon="connectdevelop" href="/sdks/editor-integrations">
+    Point any AI editor that supports custom OpenAI-compatible provider at Nito.
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="book-open-lines" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br /><br />
+  </Card>
+
+  <Card title="OpenCode" icon="dev" href="/sdks/editor-integrations/opencode">
+    Route OpenCode through Nito by defining a custom OpenAI-compatible provider.<br />
+  </Card>
+</CardGroup>

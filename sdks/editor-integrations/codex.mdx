@@ -1,5 +1,5 @@
 ---
-title: "Codex"
+title: "Codex CLI"
 description: "Point Codex at Nito through the OpenAI-compatible Chat Completions path using a Nito base URL, key, and catalog model ID."
 ---
 
@@ -9,7 +9,7 @@ Codex is an OpenAI-oriented coding tool. Since Nito exposes an OpenAI-compatible
 
 Codex is configured in `~/.codex/config.toml`. Define Nito as a custom provider and select it at the top level:
 
-```toml
+```toml lines wrap
 model = "x-ai/grok-4.5"          # a Nito catalog ID, fetch from GET /v1/models
 model_provider = "nito"
 
@@ -28,12 +28,12 @@ codex
 ```
 
 <Note>
-`wire_api` picks the protocol. Nito serves **both** OpenAI Chat Completions (`/v1/chat/completions`) and a Responses-compatible endpoint (`/v1/responses`), so either `wire_api = "chat"` or `wire_api = "responses"` works. Recent Codex builds default to `"responses"`; set `"chat"` explicitly for the widest compatibility.
+  `wire_api` picks the protocol. Nito serves **both** OpenAI Chat Completions (`/v1/chat/completions`) and a Responses-compatible endpoint (`/v1/responses`), so either `wire_api = "chat"` or `wire_api = "responses"` works. Recent Codex builds default to `"responses"`; set `"chat"` explicitly for the widest compatibility.
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Finding a model ID
+## Finding a Model ID
 
 Codex will not auto-discover Nito's catalog. Fetch the live list and use one of the returned IDs as the model name:
 
@@ -42,18 +42,28 @@ curl https://nito.dev.zprotocol.org/v1/models \
   -H "Authorization: Bearer z_sk_your_key_here"
 ```
 
-## Choosing a privacy tier
+## Choosing a Privacy Tier
 
 Privacy is selected by the model ID, so no separate Codex setting is required. Append `:confidential` for a TEE-backed run with a verifiable attestation, for example `openai/gpt-oss-120b:confidential`. Only `:confidential` and `:encrypted` are valid suffixes, and the model must support the tier. `:encrypted` does not stream and needs extra headers, so it is generally not usable from a coding tool's request loop. Use `GET /v1/models` to find attestation-capable models, and see [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Common mistakes
+## Common Issues
 
 - **Assuming only the Responses API works.** This guide targets Chat Completions; use it for the widest support.
 - **Leaving an OpenAI model name in.** Replace `gpt-4o` with a Nito catalog ID from `GET /v1/models`.
 - **Dropping `/v1` from the base URL.** The Chat Completions route will not be reached without it.
 
-## Related
+## Related Resources
 
-- [Editor and tool integrations](/sdks/editor-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [Claude Code](/sdks/editor-integrations/claude-code)
+<CardGroup cols={3}>
+  <Card title="Editor and Tool Integrations" icon="edit" href="/sdks/editor-integrations">
+    Point any AI editor supporting custom OpenAI-compatible provider at Nito.
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="book-open-lines" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br /><br />
+  </Card>
+
+  <Card title="Claude Code" icon="laptop-code" href="/sdks/editor-integrations/claude-code">
+    Route Claude Code through Nito’s Anthropic Messages-compatible endpoint.<br />
+  </Card>
+</CardGroup>
