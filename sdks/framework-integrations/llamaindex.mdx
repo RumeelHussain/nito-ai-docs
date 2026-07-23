@@ -5,7 +5,7 @@ description: "Use Nito in LlamaIndex via its OpenAI-compatible LLM, pointed at N
 
 LlamaIndex uses an LLM object across its query engines, agents, and pipelines. Nito has no LlamaIndex-specific package; you configure its OpenAI-compatible LLM for Nito and use it everywhere LlamaIndex expects a model, because Nito exposes an OpenAI-compatible API. Your indexes, retrievers, and query engines stay the same. Nito also serves an OpenAI-compatible `POST /v1/embeddings`, so the same redirect works for an embedding model.
 
-## The principle
+## The Principle
 
 Configure the OpenAI-compatible LLM with three values:
 
@@ -15,9 +15,9 @@ Configure the OpenAI-compatible LLM with three values:
 
 Set it as your LLM and the rest of the pipeline is unchanged.
 
-## Representative configuration
+## Representative Configuration
 
-```python
+```python lines wrap
 # pip install llama-index-llms-openai-like
 from llama_index.llms.openai_like import OpenAILike
 
@@ -34,14 +34,14 @@ print(llm.complete("Say hello in one short sentence."))
 ```
 
 <Warning>
-Use **`OpenAILike`**, not the plain `OpenAI` class. Plain `OpenAI` resolves the model name against its built-in list and raises `ValueError: Unknown model` for a custom ID like `x-ai/grok-4.5`. `OpenAILike` accepts any model ID via the explicit `context_window`/`is_chat_model` attributes.
+  Use **`OpenAILike`**, not the plain `OpenAI` class. Plain `OpenAI` resolves the model name against its built-in list and raises `ValueError: Unknown model` for a custom ID like `x-ai/grok-4.5`. `OpenAILike` accepts any model ID via the explicit `context_window`/`is_chat_model` attributes.
 </Warning>
 
 For embeddings, configure LlamaIndex's OpenAI-compatible embedding class against the same base URL and key, using a Nito embedding model ID from the catalog. Nito serves `POST /v1/embeddings` in OpenAI-compatible shape.
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Choosing a model and privacy
+## Choosing a Model and Privacy
 
 Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
@@ -51,19 +51,32 @@ model="openai/gpt-oss-120b:confidential"
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## If you reach for the Anthropic LLM
+## Reaching the Anthropic LLM
 
 LlamaIndex's Anthropic LLM targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible LLM shown above for the widest framework support.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
 - **Selecting the Anthropic LLM.** This guide targets Chat Completions for the widest support.
 
-## Related
+## Related Resources
 
-- [Framework integrations overview](/sdks/framework-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Framework Integrations" icon="connectdevelop" href="/sdks/framework-integrations">
+    Point any framework that speaks the OpenAI-compatible API at Nito.<br />
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="play" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br />
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

@@ -5,7 +5,7 @@ description: "Use Nito in the Vercel AI SDK via its OpenAI-compatible provider, 
 
 The Vercel AI SDK reaches Nito through its OpenAI-compatible provider. There is no Nito-specific provider package. Use the dedicated **`@ai-sdk/openai-compatible`** provider (`createOpenAICompatible`) — the official docs recommend it over `@ai-sdk/openai` for third-party endpoints, because the standard OpenAI provider defaults to the Responses API, which a Chat-Completions endpoint may not implement.
 
-## The principle
+## The Principle
 
 Configure the OpenAI-compatible provider with three values:
 
@@ -15,9 +15,9 @@ Configure the OpenAI-compatible provider with three values:
 
 Everything downstream of the provider — your messages, streaming, and tool definitions — follows the OpenAI Chat Completions shape the SDK already produces.
 
-## Representative configuration
+## Representative Configuration
 
-```typescript
+```typescript lines wrap
 // npm i ai @ai-sdk/openai-compatible
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
@@ -39,12 +39,12 @@ console.log(text);
 For streaming, use `streamText` with the same `nito(...)` model. Streaming and tool calling are supported (subject to the model supporting them). Structured outputs via `response_format` are **not** exposed by the gateway, so `generateObject`/`streamObject` in JSON-schema mode will fail — see the [OpenAI compatibility notes](/sdks/openai-drop-in/compatibility-notes). Note that `:encrypted` does not stream, so use `:confidential` if you need attestation with a streamed response.
 
 <Note>
-If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("x-ai/grok-4.5")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
+  If you prefer `@ai-sdk/openai` (`createOpenAI({ baseURL, apiKey })`), call the model with `openai.chat("x-ai/grok-4.5")` — the plain `openai("...")` factory targets the Responses API, which the Chat Completions endpoint won't serve.
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Choosing a model and privacy
+## Choosing a Model and Privacy
 
 Pass a Nito catalog ID to the provider factory, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
@@ -54,19 +54,32 @@ model: nito("openai/gpt-oss-120b:confidential"),
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## If you reach for the Anthropic provider
+## Reaching Anthropic Provider
 
 The SDK's Anthropic provider targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible provider shown above for the widest framework support.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The provider appends `/chat/completions` itself, so the base must end in `/v1`.
 - **Routing through the Anthropic provider.** This guide targets Chat Completions for the widest support.
 
-## Related
+## Related Resources
 
-- [Framework integrations overview](/sdks/framework-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Framework Integrations" icon="connectdevelop" href="/sdks/framework-integrations">
+    Point any framework that speaks the OpenAI-compatible API at Nito.
+  </Card>
+
+  <Card title="OpenAI: Base URL Swap" icon="swap" href="/sdks/openai-drop-in/base-url-swap">
+    Point the official OpenAI SDK at Nito.
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

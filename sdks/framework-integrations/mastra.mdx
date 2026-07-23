@@ -5,7 +5,7 @@ description: "Use Nito in Mastra via its OpenAI-compatible provider, pointed at 
 
 Mastra agents take a model from its built-in **model router**. Nito has no Mastra-specific package; you point the router at Nito's OpenAI-compatible endpoint, because Nito exposes an OpenAI-compatible API. Your agent definitions, tools, and workflows stay the same.
 
-## The principle
+## The Principle
 
 Give the agent's `model` the three values:
 
@@ -13,11 +13,11 @@ Give the agent's `model` the three values:
 - a Nito API key (it starts with `z_sk_`),
 - a Nito catalog model ID from `GET /v1/models`.
 
-## Representative configuration
+## Representative Configuration
 
 Current Mastra uses an **object** model config for a custom endpoint — no AI SDK package needed:
 
-```typescript
+```typescript lines wrap
 // @mastra/core
 import { Agent } from "@mastra/core/agent";
 
@@ -33,12 +33,12 @@ export const nitoAgent = new Agent({
 ```
 
 <Warning>
-Use the **object** form above. The bare string `model: "openai/x-ai/grok-4.5"` routes to the built-in OpenAI provider (hits `api.openai.com` with `OPENAI_API_KEY`) — it will **not** use your custom base URL.
+  Use the **object** form above. The bare string `model: "openai/x-ai/grok-4.5"` routes to the built-in OpenAI provider (hits `api.openai.com` with `OPENAI_API_KEY`) — it will **not** use your custom base URL.
 </Warning>
 
 Alternatively, pass an AI SDK v5 provider instance (`npm i ai @ai-sdk/openai`) and use `.chat()` since Nito serves Chat Completions:
 
-```typescript
+```typescript lines wrap
 import { createOpenAI } from "@ai-sdk/openai";
 const nito = createOpenAI({ baseURL: "https://nito.dev.zprotocol.org/v1", apiKey: process.env.NITO_API_KEY });
 // model: nito.chat("x-ai/grok-4.5")
@@ -56,19 +56,32 @@ id: "nito/openai/gpt-oss-120b:confidential",
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream, so prefer `:confidential` for streamed agent responses. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## Anthropic-shaped configuration
+## Anthropic-Shaped Configuration
 
 If you wire Mastra to an Anthropic provider, it targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible provider shown above for the widest framework support.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The provider appends `/chat/completions` itself, so the base must end in `/v1`.
 - **Routing through an Anthropic provider.** This guide targets Chat Completions for the widest support.
 
-## Related
+## Related Resources
 
-- [Framework integrations overview](/sdks/framework-integrations)
-- [Vercel AI SDK](/sdks/framework-integrations/vercel-ai-sdk)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Framework Integrations" icon="connectdevelop" href="/sdks/framework-integrations">
+    Point any framework that speaks the OpenAI-compatible API at Nito.
+  </Card>
+
+  <Card title="Vercel AI SDK" icon="toolbox" href="/sdks/framework-integrations/vercel-ai-sdk">
+    Use Nito in the Vercel AI SDK via its OpenAI-compatible provider.
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

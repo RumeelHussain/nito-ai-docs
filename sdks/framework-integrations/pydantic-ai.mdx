@@ -5,7 +5,7 @@ description: "Use Nito in Pydantic AI via its OpenAI-compatible model, pointed a
 
 Pydantic AI agents take a model object, and it supports OpenAI-compatible providers. Nito has no Pydantic AI-specific package; you configure its OpenAI-compatible model for Nito and pass it to your agent, because Nito exposes an OpenAI-compatible API. Your typed outputs, tools, and agent logic stay the same.
 
-## The principle
+## The Principle
 
 Configure the OpenAI-compatible model with three values:
 
@@ -15,9 +15,9 @@ Configure the OpenAI-compatible model with three values:
 
 Hand that model to your agent and the rest of the program is unchanged.
 
-## Representative configuration
+## Representative Configuration
 
-```python
+```python lines wrap
 # pip install pydantic-ai
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
@@ -37,12 +37,12 @@ print(result.output)
 ```
 
 <Note>
-Use **`OpenAIChatModel`** (Chat Completions), not `OpenAIResponsesModel`, for a third-party compatible endpoint. The older name `OpenAIModel` is now a deprecated alias of `OpenAIChatModel`.
+  Use **`OpenAIChatModel`** (Chat Completions), not `OpenAIResponsesModel`, for a third-party compatible endpoint. The older name `OpenAIModel` is now a deprecated alias of `OpenAIChatModel`.
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Choosing a model and privacy
+## Choosing a Model and Privacy
 
 Use a Nito catalog ID for the model name, not an OpenAI name like `gpt-4o`. Fetch the current list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID:
 
@@ -52,19 +52,32 @@ Use a Nito catalog ID for the model name, not an OpenAI name like `gpt-4o`. Fetc
 
 Only `:confidential` and `:encrypted` are valid suffixes, and the model must support that tier. Note `:encrypted` does not stream. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## If you reach for the Anthropic model
+## Reaching the Anthropic Model
 
 Pydantic AI's Anthropic model targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible model shown above for the widest framework support.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Use an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
 - **Selecting the Anthropic model.** This guide targets Chat Completions for the widest support.
 
-## Related
+## Related Resources
 
-- [Framework integrations overview](/sdks/framework-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Framework Integrations" icon="connectdevelop" href="/sdks/framework-integrations">
+    Point any framework that speaks the OpenAI-compatible API at Nito.<br />
+  </Card>
+
+  <Card title="OpenAI SDK Quickstart" icon="play" href="/get-started/quickstart-openai-sdk">
+    Quickstart guide to using OpenAI with Nito.<br /><br />
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>

@@ -5,7 +5,7 @@ description: "Use Nito in LangChain and LangGraph by pointing the OpenAI chat mo
 
 LangChain and LangGraph build on the same model interface, so wiring Nito in once gives you both chains and graphs. Nito has no LangChain-specific package. You use LangChain's OpenAI-compatible chat model and redirect it at Nito, because Nito exposes an OpenAI-compatible API. Your prompts, tools, and graph state stay the same.
 
-## The principle
+## The Principle
 
 Configure LangChain's OpenAI chat model with three values:
 
@@ -17,7 +17,7 @@ LangGraph nodes that call a model receive this configured model object, so there
 
 ## Representative configuration
 
-```python
+```python lines wrap
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
@@ -32,18 +32,18 @@ print(result.content)
 
 The same `llm` object is what you bind tools to (`llm.bind_tools([...])`) and pass into a LangGraph node, so the redirect carries through to graphs unchanged:
 
-```python
+```python wrap
 from langgraph.prebuilt import create_react_agent
 agent = create_react_agent(model=llm, tools=[...])
 ```
 
 <Note>
-For a non-OpenAI base URL, LangChain leaves streaming token-usage off by default. If you want usage on streamed responses, pass `stream_usage=True` to `ChatOpenAI(...)`.
+  For a non-OpenAI base URL, LangChain leaves streaming token-usage off by default. If you want usage on streamed responses, pass `stream_usage=True` to `ChatOpenAI(...)`.
 </Note>
 
 > **TODO (needs SME):** the canonical production base URL. Replace `https://nito.dev.zprotocol.org` with the real gateway URL.
 
-## Choosing a model and privacy
+## Choosing a Model and Privacy
 
 Use a Nito catalog ID for `model`, not an OpenAI name like `gpt-4o`. Fetch the list from `GET /v1/models`. To run a call inside a TEE with an attestation you can verify, add a suffix to the model ID and change nothing else:
 
@@ -53,19 +53,32 @@ model="openai/gpt-oss-120b:confidential"
 
 Only `:confidential` and `:encrypted` are valid suffixes. Note `:encrypted` does not stream, so avoid it for streaming chains. See [Per-call privacy modes](/privacy/per-call-privacy-modes).
 
-## If you reach for the Anthropic chat model
+## Reaching for the Anthropic Chat Model
 
 LangChain's Anthropic chat model targets the Anthropic Messages API (`/v1/messages`). Nito now serves an Anthropic Messages-compatible endpoint there, but this page uses the OpenAI-compatible chat model shown above for the widest framework support.
 
-## Common mistakes
+## Common Issues
 
 - **Leaving an OpenAI model name in.** `gpt-4o` is not a Nito catalog ID. Replace it with an ID from `GET /v1/models`.
 - **Forgetting `/v1` on the base URL.** The client appends `/chat/completions` itself, so the base must end in `/v1`.
 - **Pointing at an Anthropic-native class.** This guide targets Chat Completions for the widest support.
 
-## Related
+## Related Resources
 
-- [Framework integrations overview](/sdks/framework-integrations)
-- [Quickstart, OpenAI SDK drop-in](/get-started/quickstart-openai-sdk)
-- [OpenAI SDK drop-in compatibility](/sdks/openai-drop-in/model-mapping)
-- [Per-call privacy modes](/privacy/per-call-privacy-modes)
+<CardGroup cols={3}>
+  <Card title="Framework Integrations" icon="connectdevelop" href="/sdks/framework-integrations">
+    Point any framework that speaks the OpenAI-compatible API at Nito.<br />
+  </Card>
+
+  <Card title="OpenAI: Base URL Swap" icon="swap" href="/sdks/openai-drop-in/base-url-swap">
+    Point the official OpenAI SDK at Nito.<br />
+  </Card>
+
+  <Card title="OpenAI Compatibility" icon="arrows-alt-h" href="/sdks/openai-drop-in/compatibility-notes">
+    What carries over from the OpenAI SDK to Nito.<br />
+  </Card>
+
+  <Card title="Per-Call Privacy Modes" icon="file-shield" href="/privacy/per-call-privacy-modes">
+    Different privacy modes available per-call.
+  </Card>
+</CardGroup>
